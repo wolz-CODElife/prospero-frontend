@@ -58,7 +58,7 @@
 				<Wallet
 					wallet="Coinbase Wallet"
 					logo="https://i.postimg.cc/3xBrW7yD/image.png"
-					@connect=""
+					@connect="connectWalletConnect"
 				/>
 
 				<Wallet
@@ -96,11 +96,13 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount } from "vue";
+import { ref, onBeforeMount, onMounted } from "vue";
 import Hero from "@/components/landing/Hero.vue";
-import AppButton from "@/components/AppButton.vue";
 import Modal from "@/components/Modal.vue";
 import Wallet from "../components/landing/Wallet.vue";
+// import connectWalletConnect from "@/composables/connect/connectWalletConnect";
+
+// import connect from "../composables/connect/index";
 
 const walletConnectModal = ref(false);
 const loaded = ref(false);
@@ -129,7 +131,9 @@ async function connectMetaMaskWallet() {
 	}
 }
 
-async function connectWalletConnect() {}
+async function connectWalletConnect() {
+	alert("Wallet Connect!");
+}
 </script>
 
 <style>
