@@ -18,7 +18,7 @@
 					class="w-[200px] max-w-[70%] mx-auto pt-[30px] mb-[70px]"
 				/>
 
-				<WalletAddress address="0x0975...db75g9" />
+				<WalletAddress :address="address" />
 
 				<!-- Navs -->
 				<ul class="flex flex-col gap-y-[36px] mt-[48px]">
@@ -53,10 +53,13 @@
 <script>
 import { ref } from "vue";
 import WalletAddress from "@/components/dashboard/WalletAddress.vue";
+import connect from "../../composables/connect";
+
+const { state } = connect();
 export default {
 	name: "Sidebar",
 	setup() {
-		const address = ref("0x0975...db75g9");
+		const address = ref(state.address);
 		const mobileNavShowing = ref(false);
 		const navs = ref([
 			{

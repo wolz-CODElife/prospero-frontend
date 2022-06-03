@@ -1,7 +1,7 @@
 <template>
 	<div class="px-[24px] py-[12px] text-base text-white bg-[#2D3035]">
 		<div>
-			<span class=""> {{ address }} </span>
+			<span class=""> {{ address.splice(0, 4) }}...{{ address.splice(0, 4) }} </span>
 		</div>
 	</div>
 </template>
