@@ -1,6 +1,6 @@
 <template>
-	<div class="sidebar z-[9999] fixed lg:static">
-		<aside class="h-screen">
+	<aside class="z-[9999] fixed lg:static">
+		<div class="h-screen">
 			<div
 				class="fixed w-[inherit] h-[inherit] bg-black py-[80px] px-[40px]"
 			>
@@ -15,8 +15,10 @@
 				<img
 					src="@/assets/img/prospero.svg"
 					alt="Prospero Logo Text"
-					class="w-[200px] max-w-[70%] mx-auto pt-[30px]"
+					class="w-[200px] max-w-[70%] mx-auto pt-[30px] mb-[70px]"
 				/>
+
+				<WalletAddress address="0x0975...db75g9" />
 
 				<!-- Navs -->
 				<ul class="flex flex-col gap-y-[36px] mt-[48px]">
@@ -44,18 +46,18 @@
 					</li>
 				</ul>
 			</div>
-		</aside>
-	</div>
+		</div>
+	</aside>
 </template>
 
 <script>
 import { ref } from "vue";
+import WalletAddress from "@/components/dashboard/WalletAddress.vue";
 export default {
 	name: "Sidebar",
-
 	setup() {
+		const address = ref("0x0975...db75g9");
 		const mobileNavShowing = ref(false);
-
 		const navs = ref([
 			{
 				title: "Dashboard",
@@ -73,27 +75,19 @@ export default {
 				icon: "https://i.postimg.cc/VNcydzLS/image.png",
 			},
 		]);
-
 		function toggleMobileNav() {
 			mobileNavShowing.value = !mobileNavShowing.value;
 		}
-
 		function activePage(link, title) {
 			let path = link.split("/")[1];
 			// let name = title === "Contact us" ? "support" : title;
 			let re = new RegExp(path, "g");
 			if (title.toLowerCase() === path && re.test(link)) return true;
-
 			return false;
 		}
 
-		function activeScreen(pre, link) {
-			//  let route = this.$route.name;
-			let name = pre.split("-")[0];
-			return name === link.split("/")[1];
-		}
-
-		return { navs, mobileNavShowing, toggleMobileNav, activePage };
+		return { navs, mobileNavShowing, toggleMobileNav, activePage, address };
 	},
+	components: { WalletAddress },
 };
 </script>

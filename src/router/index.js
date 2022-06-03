@@ -6,7 +6,7 @@ const router = createRouter({
 		{
 			path: "/",
 			name: "home",
-			component: import("../views/LandingPage.vue"),
+			component: () => import("../views/LandingPage.vue"),
 			meta: {
 				layout: "landing",
 				title: "Prospero",
@@ -16,7 +16,7 @@ const router = createRouter({
 		{
 			path: "/dashboard",
 			name: "dashboard",
-			component: import("../views/Dashboard.vue"),
+			component: () => import("../views/Dashboard.vue"),
 			meta: {
 				layout: "dashboard",
 				title: "Prospero | Home",
@@ -27,7 +27,7 @@ const router = createRouter({
 		{
 			path: "/manage",
 			name: "manage",
-			components: import("../views/Manage.vue"),
+			component: () => import("../views/Manage.vue"),
 			meta: {
 				layout: "dashboard",
 			},
@@ -35,7 +35,7 @@ const router = createRouter({
 		{
 			path: "/history",
 			name: "history",
-			components: import("../views/History.vue"),
+			component: () => import("../views/History.vue"),
 			meta: {
 				layout: "dashboard",
 			},

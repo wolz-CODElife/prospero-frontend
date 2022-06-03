@@ -5,11 +5,12 @@
 			<RouterLink to="/history" class="btn text-white text-[16px] uppercase"
 				>Docs</RouterLink
 			>
-			<Button
+			<button
 				@click="connectWallet"
 				class="border-2 border-white text-white bg-transparent hover:bg-white hover:text-[#00FF00] uppercase py-[8px] px-[48px]"
-				>Launch App</Button
 			>
+				Launch App
+			</button>
 		</nav>
 
 		<!-- Logo background   -->
