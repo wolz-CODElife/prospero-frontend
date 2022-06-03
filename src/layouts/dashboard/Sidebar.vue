@@ -1,25 +1,43 @@
 <template>
 	<div class="sidebar z-[9999] fixed lg:static">
 		<aside class="h-screen">
-			<div class="fixed w-[inherit] h-[inherit] bg-black p-[32px]">
+			<div
+				class="fixed w-[inherit] h-[inherit] bg-black py-[80px] px-[40px]"
+			>
 				<!-- logo -->
+				<img
+					src="https://i.postimg.cc/tJMqnqDk/image.png"
+					alt=""
+					class="mx-auto w-[182px]"
+				/>
+
+				<!-- Prospero Text -->
+				<img
+					src="@/assets/img/prospero.svg"
+					alt="Prospero Logo Text"
+					class="w-[200px] max-w-[70%] mx-auto pt-[30px]"
+				/>
 
 				<!-- Navs -->
 				<ul class="flex flex-col gap-y-[36px] mt-[48px]">
 					<li
 						v-for="(nav, i) in navs"
 						:key="i"
-						class="px-[24px] py-[16px] text-base text-white rounded"
+						class="px-[24px] py-[12px] text-base text-white uppercase bg-[#2D3035]"
 						:class="{
-							'bg-blue': activePage($route.path, nav.title),
+							'bg-[#005A57]': activePage($route.path, nav.title),
 						}"
 					>
 						<RouterLink
 							:to="nav.link"
-							class="flex items-center gap-x-[16px]"
+							class="flex items-center gap-x-[16px] text-[16px] nav-title"
 						>
-							<!-- <img src="nav.icon" alt="" /> -->
-							<span class="">
+							<img :src="nav.icon" alt="" />
+
+							<span class="" v-if="nav.title === 'Dashboard'">
+								Home
+							</span>
+							<span class="" v-else>
 								{{ nav.title }}
 							</span>
 						</RouterLink>
@@ -40,19 +58,19 @@ export default {
 
 		const navs = ref([
 			{
-				title: "Home",
+				title: "Dashboard",
 				link: "/dashboard",
-				icon: "",
+				icon: "https://i.postimg.cc/pXqYmCWK/image.png",
 			},
 			{
 				title: "Manage",
 				link: "/manage",
-				icon: "service",
+				icon: "https://i.postimg.cc/J0S6vQsy/image.png",
 			},
 			{
-				title: "Settings",
-				link: "/settings",
-				icon: "settings",
+				title: "History",
+				link: "/history",
+				icon: "https://i.postimg.cc/VNcydzLS/image.png",
 			},
 		]);
 
@@ -62,21 +80,20 @@ export default {
 
 		function activePage(link, title) {
 			let path = link.split("/")[1];
-			// let name = title
-
+			// let name = title === "Contact us" ? "support" : title;
 			let re = new RegExp(path, "g");
 			if (title.toLowerCase() === path && re.test(link)) return true;
 
 			return false;
 		}
 
+		function activeScreen(pre, link) {
+			//  let route = this.$route.name;
+			let name = pre.split("-")[0];
+			return name === link.split("/")[1];
+		}
+
 		return { navs, mobileNavShowing, toggleMobileNav, activePage };
 	},
 };
 </script>
-
-<style lang="postcss" scoped>
-li:last-child {
-	@apply fixed bottom-40;
-}
-</style>
