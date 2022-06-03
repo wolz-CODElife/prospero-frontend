@@ -1,8 +1,3 @@
 <template>
-	Working on vibes
+	<h1 class="text-center text-black pt-[100px]">Welcome to Prospero</h1>
 </template>
-
-<script setup>
-// import Dashboard from "../layouts/Dashboard.vue";
-// export default {};
-</script>
