@@ -120,7 +120,7 @@ function connectWallet() {
 async function connectMetaMaskWallet() {
 	if (typeof window.ethereum !== "undefined") {
 		const accounts = await ethereum.request({
-			method: "eth_accounts",
+			method: "eth_requestAccounts",
 		});
 		const account = accounts[0];
 		if (account) {
@@ -133,7 +133,7 @@ async function connectMetaMaskWallet() {
 async function connectCoin98() {
 	if (window.coin98 || window.ethereum?.isCoin98) {
 		const accounts = await ethereum.request({
-			method: "eth_accounts",
+			method: "eth_requestAccounts",
 		});
 		const account = accounts[0];
 		if (account) {
