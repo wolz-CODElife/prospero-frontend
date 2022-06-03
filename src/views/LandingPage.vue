@@ -122,8 +122,12 @@ async function connectMetaMaskWallet() {
 		const accounts = await ethereum.request({
 			method: "eth_requestAccounts",
 		});
+		const chainId = await ethereum.request({ method: "eth_chainId"})
 		const account = accounts[0];
 		if (account) {
+			state.status = true;
+			state.address = account;
+			state.chainId = chainId
 			window.location.replace("dashboard");
 		}
 	} else {
@@ -135,8 +139,12 @@ async function connectCoin98() {
 		const accounts = await ethereum.request({
 			method: "eth_requestAccounts",
 		});
+		const chainId = await ethereum.request({ method: "eth_chainId"})
 		const account = accounts[0];
 		if (account) {
+			state.status = true;
+			state.address = account;
+			state.chainId = chainId
 			window.location.replace("dashboard");
 		}
 	} else {
@@ -144,10 +152,13 @@ async function connectCoin98() {
 	}
 }
 
+async function connectCoinbase() {
+
+}
+
 async function useWalletConnect() {
 	await connectWalletConnect();
-	console.log(state.address);
-	console.log(state.chainId);
+	window.location.replace("dashboard");
 }
 </script>
 
