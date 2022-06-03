@@ -64,13 +64,13 @@
 				<Wallet
 					wallet="Coin 98"
 					logo="https://i.postimg.cc/52V2mJ6n/image.png"
-					@connect=""
+					@connect="connectWalletConnect"
 				/>
 
 				<Wallet
 					wallet="Fortmatic"
 					logo="https://i.postimg.cc/nV45DtfH/image.png"
-					@connect=""
+					@connect="connectWalletConnect"
 				/>
 
 				<Wallet
