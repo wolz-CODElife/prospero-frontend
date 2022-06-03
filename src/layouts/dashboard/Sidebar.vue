@@ -68,9 +68,10 @@ import connect from "@/composables/connect/index";
 
 const { disconnectWallet, state } = connect();
 
-// name: "Sidebar",
 const address = ref(state.address);
+
 const mobileNavShowing = ref(false);
+
 const navs = ref([
 	{
 		title: "Dashboard",
@@ -89,17 +90,19 @@ const navs = ref([
 	},
 ]);
 
+// Route protection
 onBeforeMount(() => {
 	if (!JSON.parse(localStorage.getItem("userState")).status) {
 		window.location.replace("/");
 	}
 });
+
 function toggleMobileNav() {
 	mobileNavShowing.value = !mobileNavShowing.value;
 }
+
 function activePage(link, title) {
 	let path = link.split("/")[1];
-	// let name = title === "Contact us" ? "support" : title;
 	let re = new RegExp(path, "g");
 	if (title.toLowerCase() === path && re.test(link)) return true;
 	return false;
@@ -109,11 +112,4 @@ async function logoutWallet() {
 	await disconnectWallet();
 	window.location.replace("/");
 }
-
-// return { navs, mobileNavShowing, toggleMobileNav, activePage, address,  };
-// },
-components: {
-	WalletAddress;
-}
-// };
 </script>
