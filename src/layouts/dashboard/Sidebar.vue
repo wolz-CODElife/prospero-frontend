@@ -20,8 +20,10 @@
 
 				<WalletAddress address="0x0975...db75g9" />
 
+				<hr class="text-[#2D3035] my-[24px]" />
+
 				<!-- Navs -->
-				<ul class="flex flex-col gap-y-[36px] mt-[48px]">
+				<ul class="flex flex-col gap-y-[36px] mt-[40px]">
 					<li
 						v-for="(nav, i) in navs"
 						:key="i"
