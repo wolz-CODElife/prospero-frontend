@@ -1,5 +1,5 @@
 <template>
-	<h1 class="text-center text-black">Welcome to Prospero</h1>
+	Working on vibes
 </template>
 
 <script setup>

@@ -59,19 +59,19 @@
 				<Wallet
 					wallet="Coinbase Wallet"
 					logo="https://i.postimg.cc/3xBrW7yD/image.png"
-					@connect="connectWalletConnect"
+					@connect="useWalletConnect"
 				/>
 
 				<Wallet
 					wallet="Coin 98"
 					logo="https://i.postimg.cc/52V2mJ6n/image.png"
-					@connect="connectWalletConnect"
+					@connect="connectCoin98"
 				/>
 
 				<Wallet
 					wallet="Fortmatic"
 					logo="https://i.postimg.cc/nV45DtfH/image.png"
-					@connect="connectWalletConnect"
+					@connect="useWalletConnect"
 				/>
 
 				<Wallet
@@ -101,12 +101,11 @@ import { ref, onBeforeMount, onMounted } from "vue";
 import Hero from "@/components/landing/Hero.vue";
 import Modal from "@/components/Modal.vue";
 import Wallet from "../components/landing/Wallet.vue";
-// import connectWalletConnect from "@/composables/connect/connectWalletConnect";
-
-// import connect from "../composables/connect/index";
+import connect from "../composables/connect/index";
 
 const walletConnectModal = ref(false);
 const loaded = ref(false);
+const { connectWalletConnect, state } = connect();
 
 onBeforeMount(() => {
 	setTimeout(() => {
@@ -121,7 +120,7 @@ function connectWallet() {
 async function connectMetaMaskWallet() {
 	if (typeof window.ethereum !== "undefined") {
 		const accounts = await ethereum.request({
-			method: "eth_requestAccounts",
+			method: "eth_accounts",
 		});
 		const account = accounts[0];
 		if (account) {
@@ -131,9 +130,24 @@ async function connectMetaMaskWallet() {
 		console.log("Install Metamask");
 	}
 }
+async function connectCoin98() {
+	if (window.coin98 || window.ethereum?.isCoin98) {
+		const accounts = await ethereum.request({
+			method: "eth_accounts",
+		});
+		const account = accounts[0];
+		if (account) {
+			window.location.replace("dashboard");
+		}
+	} else {
+		console.log("Coin98 Extension is not installed!");
+	}
+}
 
-async function connectWalletConnect() {
-	alert("Wallet Connect!");
+async function useWalletConnect() {
+	await connectWalletConnect();
+	console.log(state.address);
+	console.log(state.chainId);
 }
 </script>
 
