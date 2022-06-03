@@ -62,7 +62,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref, onBeforeMount } from "vue";
 import WalletAddress from "@/components/dashboard/WalletAddress.vue";
 import connect from "@/composables/connect/index";
 
@@ -88,6 +88,12 @@ const navs = ref([
 		icon: "https://i.postimg.cc/VNcydzLS/image.png",
 	},
 ]);
+
+onBeforeMount(() => {
+	if (!JSON.parse(localStorage.getItem("userState")).status) {
+		window.location.replace("/");
+	}
+});
 function toggleMobileNav() {
 	mobileNavShowing.value = !mobileNavShowing.value;
 }

@@ -97,7 +97,7 @@
 </template>
 
 <script setup>
-import { ref, onBeforeMount, onMounted } from "vue";
+import { ref, onBeforeMount } from "vue";
 import Hero from "@/components/landing/Hero.vue";
 import Modal from "@/components/Modal.vue";
 import Wallet from "../components/landing/Wallet.vue";
