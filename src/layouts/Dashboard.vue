@@ -11,8 +11,4 @@
 
 <script setup>
 import Sidebar from "./dashboard/Sidebar.vue";
-// export default {
-// 	name: "Dashboard",
-
-// };
 </script>

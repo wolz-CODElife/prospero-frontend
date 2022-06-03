@@ -7,7 +7,7 @@
 </template>
 
 <script setup>
-import { computed } from 'vue'
+import { computed } from "vue";
 const props = defineProps({
 	address: {
 		type: String,
@@ -15,5 +15,8 @@ const props = defineProps({
 	},
 });
 
-const walletAddress = computed(() => [props.address.slice(0, 5), props.address.slice(-4)])
+const walletAddress = computed(() => [
+	props.address.slice(0, 6),
+	props.address.slice(-6),
+]);
 </script>

@@ -15,12 +15,12 @@
 				<img
 					src="@/assets/img/prospero.svg"
 					alt="Prospero Logo Text"
-					class="w-[200px] max-w-[70%] mx-auto pt-[30px] mb-[70px]"
+					class="w-[150px] max-w-[70%] mx-auto pt-[30px] mb-[70px]"
 				/>
 
 				<WalletAddress :address="address" />
 
-				<hr class="text-[#2D3035] my-[24px]" />
+				<hr class="text-black my-[40px]" />
 
 				<!-- Navs -->
 				<ul class="flex flex-col gap-y-[36px] mt-[40px]">
@@ -46,53 +46,68 @@
 							</span>
 						</RouterLink>
 					</li>
+
+					<li>
+						<button
+							@click="logoutWallet"
+							class="border-2 border-[#00FF00] text-[#00FF00] bg-transparent uppercase py-[8px] px-[48px]"
+						>
+							Disconnect Wallet
+						</button>
+					</li>
 				</ul>
 			</div>
 		</div>
 	</aside>
 </template>
 
-<script>
+<script setup>
 import { ref } from "vue";
 import WalletAddress from "@/components/dashboard/WalletAddress.vue";
-import connect from "../../composables/connect";
+import connect from "@/composables/connect/index";
 
-const { state } = connect();
-export default {
-	name: "Sidebar",
-	setup() {
-		const address = ref(state.address);
-		const mobileNavShowing = ref(false);
-		const navs = ref([
-			{
-				title: "Dashboard",
-				link: "/dashboard",
-				icon: "https://i.postimg.cc/pXqYmCWK/image.png",
-			},
-			{
-				title: "Manage",
-				link: "/manage",
-				icon: "https://i.postimg.cc/J0S6vQsy/image.png",
-			},
-			{
-				title: "History",
-				link: "/history",
-				icon: "https://i.postimg.cc/VNcydzLS/image.png",
-			},
-		]);
-		function toggleMobileNav() {
-			mobileNavShowing.value = !mobileNavShowing.value;
-		}
-		function activePage(link, title) {
-			let path = link.split("/")[1];
-			// let name = title === "Contact us" ? "support" : title;
-			let re = new RegExp(path, "g");
-			if (title.toLowerCase() === path && re.test(link)) return true;
-			return false;
-		}
+const { disconnectWallet, state } = connect();
 
-		return { navs, mobileNavShowing, toggleMobileNav, activePage, address };
+// name: "Sidebar",
+const address = ref(state.address);
+const mobileNavShowing = ref(false);
+const navs = ref([
+	{
+		title: "Dashboard",
+		link: "/dashboard",
+		icon: "https://i.postimg.cc/pXqYmCWK/image.png",
 	},
-	components: { WalletAddress },
-};
+	{
+		title: "Manage",
+		link: "/manage",
+		icon: "https://i.postimg.cc/J0S6vQsy/image.png",
+	},
+	{
+		title: "History",
+		link: "/history",
+		icon: "https://i.postimg.cc/VNcydzLS/image.png",
+	},
+]);
+function toggleMobileNav() {
+	mobileNavShowing.value = !mobileNavShowing.value;
+}
+function activePage(link, title) {
+	let path = link.split("/")[1];
+	// let name = title === "Contact us" ? "support" : title;
+	let re = new RegExp(path, "g");
+	if (title.toLowerCase() === path && re.test(link)) return true;
+	return false;
+}
+
+async function logoutWallet() {
+	await disconnectWallet();
+	window.location.replace("/");
+}
+
+// return { navs, mobileNavShowing, toggleMobileNav, activePage, address,  };
+// },
+components: {
+	WalletAddress;
+}
+// };
 </script>
