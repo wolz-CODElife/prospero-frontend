@@ -1,3 +1,3 @@
 <template>
-	<div></div>
+	<div class="alert">Alert</div>
 </template>
