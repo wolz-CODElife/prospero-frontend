@@ -10,27 +10,12 @@
 
       <img :src="error" alt="" class="mr-[18px]" v-if="props.type == 'error'" />
 
-      <img
-        :src="warning"
-        alt=""
-        class="mr-[18px]"
-        v-if="props.type == 'warning'"
-      />
+      <img :src="warning" alt="" class="mr-[18px]" v-if="props.type == 'warning'" />
 
-      <img
-        :src="success"
-        alt=""
-        class="mr-[18px]"
-        v-if="props.type == 'success'"
-      />
+      <img :src="success" alt="" class="mr-[18px]" v-if="props.type == 'success'" />
       <slot></slot>
 
-      <button
-        type="button"
-        class="float-right ml-[36px]"
-        aria-label="Close"
-        @click="dismiss"
-      >
+      <button type="button" class="float-right ml-[36px]" aria-label="Close" @click="dismiss" >
         <svg
           width="13"
           height="13"

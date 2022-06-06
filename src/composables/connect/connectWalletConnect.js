@@ -36,7 +36,7 @@ const connectWalletConnect = async () => {
       state.chainId = chainId
     });
   } catch (error) {
-    console.log(error);
+    return {error}
   }
 };
 

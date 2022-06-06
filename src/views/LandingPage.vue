@@ -1,4 +1,6 @@
 <template>
+
+  <AppAlert :type="err.type" v-if="err.msg"><p class="slot">{{ err.msg }}</p></AppAlert>
   <div class="bg-landing w-full text-white pb-[60px] fixed" v-if="loaded">
     <!-- Nav  -->
     <nav class="flex items-center justify-end gap-16 pt-[24px] pr-28">
@@ -6,7 +8,7 @@
         >Docs</RouterLink
       >
       <button
-        @click="connectWallet"
+        @click="toggleWallet"
         class="border-2 border-white text-white bg-transparent hover:bg-white hover:text-[#00FF00] uppercase py-[8px] px-[48px]"
       >
         Launch App
@@ -22,7 +24,7 @@
 
     <main class="relative">
       <!-- Hero -->
-      <Hero tagline="Profits To The People" @open="connectWallet" />
+      <Hero tagline="Profits To The People" @open="toggleWallet" />
     </main>
 
     <!-- Connect WalletModal  -->
@@ -98,8 +100,14 @@ import Hero from "@/components/landing/Hero.vue";
 import Modal from "@/components/Modal.vue";
 import Wallet from "../components/landing/Wallet.vue";
 import connect from "../composables/connect/index";
+import AppAlert from "@/components/AppAlert.vue";
 
 const walletConnectModal = ref(false);
+const err = ref({
+  msg: "",
+  type: ""
+})
+
 const loaded = ref(false);
 const { connectWalletConnect, state } = connect();
 
@@ -109,10 +117,13 @@ onBeforeMount(() => {
   }, 2000);
 });
 
-function connectWallet() {
+function toggleWallet() {
   walletConnectModal.value = !walletConnectModal.value;
 }
 
+// TODO:
+// 
+// Implement a proper redirect after authentication
 async function connectMetaMaskWallet() {
   if (typeof window.ethereum !== "undefined") {
     const accounts = await ethereum.request({
@@ -127,7 +138,10 @@ async function connectMetaMaskWallet() {
       window.location.replace("dashboard");
     }
   } else {
-    console.log("Install Metamask");
+    err.value = {
+      msg: "Install Metamask",
+      type: "error"
+    }
   }
 }
 async function connectCoin98() {
@@ -144,15 +158,26 @@ async function connectCoin98() {
       window.location.replace("dashboard");
     }
   } else {
-    console.log("Coin98 Extension is not installed!");
+    err.value = {
+      msg: "Coin98 Extension is not installed!",
+      type: "error"
+    }
   }
 }
 
 async function connectCoinbase() {}
 
 async function useWalletConnect() {
-  await connectWalletConnect();
-  window.location.replace("dashboard");
+  connectWalletConnect().then(data => {
+    if(data.error) {
+      err.value = {
+        msg: "Coin98 Extension is not installed!",
+        type: "error"
+      }
+    } else {
+      window.location.replace("dashboard");
+    }
+  });
 }
 </script>
 

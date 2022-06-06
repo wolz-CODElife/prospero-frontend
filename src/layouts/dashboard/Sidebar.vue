@@ -42,11 +42,21 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { onMounted, ref } from "vue";
 import WalletAddress from "@/components/dashboard/WalletAddress.vue";
 import connect from "@/composables/connect/index";
 
 const { state } = connect();
+onMounted(() => {
+  window.ethereum.on('accountsChanged', function (accounts) {
+    const account = accounts[0];
+    if (account) {
+      state.address = account;
+      address.value = account;
+    }
+    // Time to reload your interface with accounts[0]!
+  })
+})
 
 const address = ref(state.address);
 
