@@ -6,13 +6,7 @@
     role="alert"
   >
     <div class="flex items-center">
-      <img :src="info" alt="" class="mr-[18px]" v-if="props.type == 'info'" />
-
-      <img :src="error" alt="" class="mr-[18px]" v-if="props.type == 'error'" />
-
-      <img :src="warning" alt="" class="mr-[18px]" v-if="props.type == 'warning'" />
-
-      <img :src="success" alt="" class="mr-[18px]" v-if="props.type == 'success'" />
+      <img :src="types[type]" alt="" class="mr-[18px]" />
       <slot></slot>
 
       <button type="button" class="float-right ml-[36px]" aria-label="Close" @click="dismiss" >
@@ -57,14 +51,12 @@ onMounted(() => {
 
 const hidden = ref(false);
 
-const info = ref("https://i.postimg.cc/HxxhYTvZ/image.png");
-
-const success = ref("https://i.postimg.cc/hGkCH3k9/image.png");
-// const error = ref("https://i.postimg.cc/hGkCH3k9/image.png");
-
-const error = ref("https://i.postimg.cc/rygYdR2h/image.png");
-
-const warning = ref("https://i.postimg.cc/SQ8xkq0N/image.png");
+const types = ref({
+  "info": "https://i.postimg.cc/HxxhYTvZ/image.png",
+  "success": "https://i.postimg.cc/hGkCH3k9/image.png",
+  "error": "https://i.postimg.cc/rygYdR2h/image.png",
+  "warning": "https://i.postimg.cc/SQ8xkq0N/image.png"
+})
 
 function dismiss() {
   hidden.value = true;
