@@ -1,9 +1,9 @@
 <template>
-	<div id="app">
-		<component :is="layout">
-			<RouterView />
-		</component>
-	</div>
+  <div id="app">
+    <component :is="layout">
+      <RouterView />
+    </component>
+  </div>
 </template>
 
 <script>
@@ -14,23 +14,22 @@ import { RouterView, useRouter } from "vue-router";
 import { computed } from "vue";
 
 export default {
-	components: {
-		Dashboard,
-		Landing,
-	},
+  components: {
+    Dashboard,
+    Landing,
+  },
 
-	setup() {
-		const { currentRoute } = useRouter();
+  setup() {
+    const { currentRoute } = useRouter();
 
-		const layout = computed(() => {
-			console.log(currentRoute.value.meta.layout);
+    const layout = computed(() => {
+      console.log(currentRoute.value.meta.layout);
 
-			return currentRoute.value.meta.layout;
-		});
-		return {
-			layout,
-		};
-	},
+      return currentRoute.value.meta.layout;
+    });
+    return {
+      layout,
+    };
+  },
 };
-//     })
 </script>
