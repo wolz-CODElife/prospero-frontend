@@ -6,9 +6,9 @@
         <slot />
         <button
           @click="logoutWallet"
-          class="underline text-[#000] w-full uppercase mx-auto"
+          class="underline text-[#000] w-full mt-[60px] mx-auto"
         >
-          Disconnect Wallet
+          Disconnect Wallet?
         </button>
       </div>
     </main>
