@@ -1,6 +1,6 @@
 <template>
   <div
-    class="float-right p-[8px] text-[#353C47]"
+    class="float-right p-[8px] text-[#353C47] animate-bounce"
     :class="props.type"
     v-if="!hidden"
     role="alert"
@@ -52,7 +52,7 @@
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { computed, onMounted, ref } from "vue";
 const props = defineProps({
   type: {
     type: String,
@@ -63,6 +63,12 @@ const props = defineProps({
   //     default: "https://i.postimg.cc/HxxhYTvZ/image.png",
   //   },
 });
+
+onMounted(() => {
+  setTimeout(() => {
+    hidden.value = true
+  }, 3000)
+})
 
 const hidden = ref(false);
 
