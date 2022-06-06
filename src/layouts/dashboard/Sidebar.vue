@@ -1,6 +1,6 @@
 <template>
   <aside class="z-[9999] fixed lg:static">
-    <div class="h-screen">
+    <div class="h-screen w-[300px]">
       <div class="fixed w-[inherit] h-[inherit] bg-black py-[40px] px-[40px]">
         <!-- logo -->
         <img
@@ -18,7 +18,7 @@
           <li
             v-for="(nav, i) in navs"
             :key="i"
-            class="px-[24px] py-[12px] text-base text-white uppercase bg-[#2D3035]"
+            class="px-[24px] py-[8px] text-base text-white uppercase bg-[#2D3035]"
             :class="{
               'bg-[#005A57]': activePage($route.path, nav.title),
             }"
@@ -48,15 +48,15 @@ import connect from "@/composables/connect/index";
 
 const { state } = connect();
 onMounted(() => {
-  window.ethereum.on('accountsChanged', function (accounts) {
+  window.ethereum.on("accountsChanged", function (accounts) {
     const account = accounts[0];
     if (account) {
       state.address = account;
       address.value = account;
     }
     // Time to reload your interface with accounts[0]!
-  })
-})
+  });
+});
 
 const address = ref(state.address);
 

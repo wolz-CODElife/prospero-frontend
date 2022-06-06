@@ -1,6 +1,7 @@
 <template>
-
-  <AppAlert :type="err.type" v-if="err.msg"><p class="slot">{{ err.msg }}</p></AppAlert>
+  <AppAlert :type="err.type" v-if="err.msg"
+    ><p class="slot">{{ err.msg }}</p></AppAlert
+  >
   <div class="bg-landing w-full text-white pb-[60px] fixed" v-if="loaded">
     <!-- Nav  -->
     <nav class="flex items-center justify-end gap-16 pt-[24px] pr-28">
@@ -105,8 +106,8 @@ import AppAlert from "@/components/AppAlert.vue";
 const walletConnectModal = ref(false);
 const err = ref({
   msg: "",
-  type: ""
-})
+  type: "",
+});
 
 const loaded = ref(false);
 const { connectWalletConnect, state } = connect();
@@ -122,7 +123,7 @@ function toggleWallet() {
 }
 
 // TODO:
-// 
+//
 // Implement a proper redirect after authentication
 async function connectMetaMaskWallet() {
   if (typeof window.ethereum !== "undefined") {
@@ -140,8 +141,8 @@ async function connectMetaMaskWallet() {
   } else {
     err.value = {
       msg: "Install Metamask",
-      type: "error"
-    }
+      type: "error",
+    };
   }
 }
 async function connectCoin98() {
@@ -160,20 +161,20 @@ async function connectCoin98() {
   } else {
     err.value = {
       msg: "Coin98 Extension is not installed!",
-      type: "error"
-    }
+      type: "error",
+    };
   }
 }
 
 async function connectCoinbase() {}
 
 async function useWalletConnect() {
-  connectWalletConnect().then(data => {
-    if(data.error) {
+  connectWalletConnect().then((data) => {
+    if (data.error) {
       err.value = {
         msg: "Coin98 Extension is not installed!",
-        type: "error"
-      }
+        type: "error",
+      };
     } else {
       window.location.replace("dashboard");
     }
