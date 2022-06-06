@@ -1,16 +1,14 @@
 import { createApp } from "vue";
-// import { createPinia } from "pinia";
-
 import App from "./App.vue";
 import router from "./router";
-
-// import Dashboard from "./layouts/Dashboard.vue";
-
 import "./assets/css/tailwind.css";
+// import Notifications from '@kyvg/vue3-notification'
+// import { createPinia } from "pinia";
 
 const app = createApp(App);
 
-// app.use(createPinia());
 app.use(router);
-// app.component("Dashboard", Dashboard);
+// app.use(Notifications)
+// app.use(createPinia());
+
 app.mount("#app");
