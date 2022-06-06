@@ -17,7 +17,7 @@
     <img
       src="https://i.postimg.cc/HkYbXP84/Prospero-logo-alone-4x-1hero-logo.png"
       alt=""
-      class="w-[582px] h-[400px] fixed top-[98px] left-[27%]"
+      class="w-[582px] h-[400px] fixed top-[40px] left-[27%]"
     />
 
     <main class="relative">
