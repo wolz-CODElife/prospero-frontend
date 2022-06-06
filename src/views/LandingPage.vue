@@ -27,10 +27,6 @@
 
     <!-- Connect WalletModal  -->
     <Modal v-if="walletConnectModal" @close="walletConnectModal = false">
-      <!-- <h5 class="text-lg lg:text-2xl font-bold text-black" slot="header">
-				Add New Bank Account
-			</h5> -->
-
       <div class="text-white">
         <!-- Logo  -->
         <img

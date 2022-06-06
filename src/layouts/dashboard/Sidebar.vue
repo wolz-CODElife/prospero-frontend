@@ -4,16 +4,9 @@
       <div class="fixed w-[inherit] h-[inherit] bg-black py-[40px] px-[40px]">
         <!-- logo -->
         <img
-          src="https://i.postimg.cc/tJMqnqDk/image.png"
+          src="https://i.postimg.cc/HsKSt0Cp/image.png"
           alt=""
-          class="mx-auto w-[100px]"
-        />
-
-        <!-- Prospero Text -->
-        <img
-          src="@/assets/img/prospero.svg"
-          alt="Prospero Logo Text"
-          class="w-[120px] max-w-[70%] mx-auto pt-[30px] mb-[70px]"
+          class="mx-auto w-[150px]"
         />
 
         <WalletAddress :address="address" />
