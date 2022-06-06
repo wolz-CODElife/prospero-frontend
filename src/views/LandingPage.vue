@@ -115,6 +115,18 @@ const { connectWalletConnect, state } = connect();
 onBeforeMount(() => {
   setTimeout(() => {
     loaded.value = true;
+    // if (window.matchMedia("(max-width: 1024px)").matches) {
+    //   mobile.value = true
+    // } else {
+    //   mobile.value = false
+    // }
+    // window.addEventListener("resize", () => {
+    //   if (window.matchMedia("(max-width: 1024px)").matches) {
+    //     mobile.value = true
+    //   } else {
+    //     mobile.value = false
+    //   }
+    // })
   }, 2000);
 });
 
