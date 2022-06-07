@@ -10,12 +10,27 @@
 
       <img :src="error" alt="" class="mr-[18px]" v-if="props.type == 'error'" />
 
-      <img :src="warning" alt="" class="mr-[18px]" v-if="props.type == 'warning'" />
+      <img
+        :src="warning"
+        alt=""
+        class="mr-[18px]"
+        v-if="props.type == 'warning'"
+      />
 
-      <img :src="success" alt="" class="mr-[18px]" v-if="props.type == 'success'" />
+      <img
+        :src="success"
+        alt=""
+        class="mr-[18px]"
+        v-if="props.type == 'success'"
+      />
       <slot></slot>
 
-      <button type="button" class="float-right ml-[36px]" aria-label="Close" @click="dismiss" >
+      <button
+        type="button"
+        class="float-right ml-[36px]"
+        aria-label="Close"
+        @click="dismiss"
+      >
         <svg
           width="13"
           height="13"
@@ -25,7 +40,7 @@
         >
           <path
             d="M6.243 6.243L11.486 11.486M1 11.486L6.243 6.243L1 11.486ZM11.486 1L6.242 6.243L11.486 1ZM6.242 6.243L1 1L6.242 6.243Z"
-            stroke="#C3C7CD"
+            stroke="#000"
             stroke-width="1.5"
             stroke-linecap="round"
             stroke-linejoin="round"
@@ -51,9 +66,9 @@ const props = defineProps({
 
 onMounted(() => {
   setTimeout(() => {
-    hidden.value = true
-  }, 3000)
-})
+    hidden.value = true;
+  }, 3000);
+});
 
 const hidden = ref(false);
 

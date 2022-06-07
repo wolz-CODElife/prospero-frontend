@@ -1,7 +1,11 @@
 <template>
-  <AppAlert :type="err.type" v-if="err.msg"
-    ><p class="slot">{{ err.msg }}</p></AppAlert
-  >
+  <div v-if="err.msg">
+    <AppAlert :type="err.type"
+      ><p class="slot">{{ err.msg }}</p></AppAlert
+    >
+  </div>
+
+  <!-- <AppAlert type="error"><p class="slot">Error message here</p></AppAlert> -->
   <div class="bg-landing w-full text-white pb-[60px] fixed" v-if="loaded">
     <!-- Nav  -->
     <nav class="flex items-center justify-end gap-16 pt-[24px] pr-28">
@@ -104,12 +108,18 @@ import connect from "../composables/connect/index";
 import AppAlert from "@/components/AppAlert.vue";
 
 const walletConnectModal = ref(false);
+
+// const err =  {
+// 	msg: ref(""),
+// 	type: ref(""),
+// };
 const err = ref({
   msg: "",
   type: "",
 });
 
 const loaded = ref(false);
+
 const { connectWalletConnect, state } = connect();
 
 onBeforeMount(() => {
@@ -139,6 +149,7 @@ async function connectMetaMaskWallet() {
       window.location.replace("dashboard");
     }
   } else {
+    toggleWallet();
     err.value = {
       msg: "Install Metamask",
       type: "error",
