@@ -6,7 +6,10 @@
   </div>
 
   <!-- <AppAlert type="error"><p class="slot">Error message here</p></AppAlert> -->
-  <div class="bg-landing w-full text-white pb-[60px] fixed" v-if="loaded">
+  <div
+    class="bg-landing w-full h-full text-white pb-[60px] fixed"
+    v-if="loaded"
+  >
     <!-- Nav  -->
     <nav class="flex items-center justify-end gap-16 pt-[24px] pr-28">
       <RouterLink to="/history" class="btn text-white text-[16px] uppercase"
@@ -20,14 +23,15 @@
       </button>
     </nav>
 
-    <!-- Logo background   -->
-    <img
-      src="https://i.postimg.cc/HkYbXP84/Prospero-logo-alone-4x-1hero-logo.png"
-      alt=""
-      class="w-[582px] h-[400px] fixed top-[40px] left-[27%]"
-    />
-
     <main class="relative">
+      <!-- Logo background   -->
+      <img
+        src="https://i.postimg.cc/4NBcjk76/image.png"
+        alt=""
+        class="w-[450px] -translate-x-2/4 left-[50%] top-[55px] fixed"
+        style=""
+      />
+
       <!-- Hero -->
       <Hero tagline="Profits To The People" @open="toggleWallet" />
     </main>

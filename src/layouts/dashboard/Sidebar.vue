@@ -9,7 +9,7 @@
           class="mx-auto w-[150px]"
         />
 
-        <WalletAddress :address="address" />
+        <WalletAddress :address="address" @doLogout="logoutWallet" />
 
         <div class="bg-[#2D3035] my-[40px] h-[1px]" />
 
@@ -47,16 +47,8 @@ import WalletAddress from "@/components/dashboard/WalletAddress.vue";
 import connect from "@/composables/connect/index";
 
 const { state } = connect();
-onMounted(() => {
-  window.ethereum.on("accountsChanged", function (accounts) {
-    const account = accounts[0];
-    if (account) {
-      state.address = account;
-      address.value = account;
-    }
-    // Time to reload your interface with accounts[0]!
-  });
-});
+
+const { disconnectWallet } = connect();
 
 const address = ref(state.address);
 
@@ -79,6 +71,22 @@ const navs = ref([
     icon: "https://i.postimg.cc/VNcydzLS/image.png",
   },
 ]);
+
+onMounted(() => {
+  window.ethereum.on("accountsChanged", function (accounts) {
+    const account = accounts[0];
+    if (account) {
+      state.address = account;
+      address.value = account;
+    }
+    // Time to reload your interface with accounts[0]!
+  });
+});
+
+async function logoutWallet() {
+  await disconnectWallet();
+  window.location.replace("/");
+}
 
 function toggleMobileNav() {
   mobileNavShowing.value = !mobileNavShowing.value;
