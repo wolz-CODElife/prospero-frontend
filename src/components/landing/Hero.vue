@@ -42,7 +42,9 @@
         class="w-[60px] mx-auto my-[16px] border-[10px] border-white/5 rounded-full"
       />
       <!-- Avalanche link text  -->
-      <a href="" class="underline text-white">Avalanche</a>
+      <a href="https://www.avax.network" class="underline text-white"
+        >Avalanche</a
+      >
     </div>
   </section>
 </template>
