@@ -4,11 +4,7 @@ module.exports = {
 		extend: {
 			fontFamily: {
 				neurial: ['"Neurial Grotesk"', "sans-serif"],
-			},
-			// color: {
-			// 	success: "#00FF00",
-			// },
-		},
-	},
+			}
+		}	},
 	plugins: [],
 };
