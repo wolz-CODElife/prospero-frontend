@@ -111,6 +111,8 @@ import Wallet from "../components/landing/Wallet.vue";
 import connect from "../composables/connect/index";
 import AppAlert from "@/components/AppAlert.vue";
 
+const { connectWalletConnect, state } = connect();
+
 const walletConnectModal = ref(false);
 
 const err = ref({
@@ -120,7 +122,7 @@ const err = ref({
 
 const loaded = ref(false);
 
-const { connectWalletConnect, state } = connect();
+const isLoggedIn = ref;
 
 onBeforeMount(() => {
   setTimeout(() => {
