@@ -4,7 +4,7 @@
   >
     <div class="col-span-5 grid grid-rows-6 gap-[10px]">
       <!-- Pie chart  -->
-      <div class="row-span-4 bg-[#191A20]"></div>
+      <PieChartContainer />
 
       <!--Social Media  -->
       <div class="row-span-2 bg-[#191A20]"></div>
@@ -19,3 +19,7 @@
     </div>
   </div>
 </template>
+
+<script setup>
+import PieChartContainer from "@/components/dashboard/PieChartContainer.vue";
+</script>
