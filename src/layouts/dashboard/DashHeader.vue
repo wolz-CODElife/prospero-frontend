@@ -100,14 +100,6 @@ const props = defineProps({
 
 const active = ref("holdings");
 
-function toggleActive() {
-  if (active.value === "holdings") {
-    active.value = "portfolio";
-  } else {
-    active.value = "holdings";
-  }
-}
-
 const activeTab = ref("USD");
 
 const tabs = ref([
@@ -127,5 +119,12 @@ const tabs = ref([
 
 function changeTab(tab) {
   activeTab.value = tab;
+}
+function toggleActive() {
+  if (active.value === "holdings") {
+    active.value = "portfolio";
+  } else {
+    active.value = "holdings";
+  }
 }
 </script>

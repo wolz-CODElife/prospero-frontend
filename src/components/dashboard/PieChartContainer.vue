@@ -1,5 +1,5 @@
 <template>
-  <div class="row-span-4 bg-[#191A20] px-[28px] py-[20px]">
+  <div class="row-span-5 bg-[#191A20] px-[28px] py-[20px]">
     <div class="h-[108px] flex justify-between items-center">
       <!-- Left button  -->
       <button
@@ -9,9 +9,9 @@
       </button>
 
       <!-- Empty  -->
-      <div class="uppercase">
-        <h2 class="text-[#868C9D] text-[14px] text-center mt-[16px]">
-          SELECT FIRST PORTFOLIO TO JOIN
+      <div class="">
+        <h2 class="text-[#868C9D] text-[14px] text-center mt-[16px] uppercase">
+          Select first portfolio to join
         </h2>
 
         <img

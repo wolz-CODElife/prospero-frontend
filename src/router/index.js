@@ -22,14 +22,13 @@ const router = createRouter({
 				title: "Prospero | Home",
 				icon: "https://i.postimg.cc/tJMqnqDk/image.png",
 			},
-			// Sidebar: () => import("../layouts/dashboard/Sidebar.vue"),
 		},
 		{
 			path: "/manage",
 			name: "manage",
 			component: () => import("../views/Manage.vue"),
 			meta: {
-				layout: "dashboard",
+				layout: "manage",
 			},
 		},
 		{
