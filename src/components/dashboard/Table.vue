@@ -142,15 +142,14 @@ const disabled = ref(true);
 const tableView = ref(true);
 
 // const props = defineProps({
-// 	tableView: {
-// 		type: Boolean,
-// 		default: true,
-//   },
-
 // 	portfolioList: {
 // 		type: Array,
 // 		required: true,
 // 	},
+// 	tableView: {
+// 		type: Boolean,
+// 		default: true,
+//   },
 
 // selectedPortfolioId: {
 //   type: String,
