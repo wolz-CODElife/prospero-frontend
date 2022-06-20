@@ -96,12 +96,10 @@
 						<tr
 							v-for="(portfolio, i) in portfolioList"
 							key="i"
-							@click="doSelect(portfolio.name)"
+							@click="doSelect(i)"
 							class="text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white hover:bg-[#003D3B]"
 							:class="[
-								activeRow === portfolio.name
-									? 'bg-[#003D3B] '
-									: 'bg-transparent',
+								activeRow === i ? 'bg-[#003D3B] ' : 'bg-transparent',
 							]"
 						>
 							<td class="ml-[20px] pl-[18px]">
@@ -109,7 +107,7 @@
 									type="radio"
 									:name="portfolio.name"
 									:id="portfolio.name"
-									@onchange="doSelect(portfolio.name)"
+									@onchange="doSelect(i)"
 								/>
 							</td>
 							<td>{{ portfolio.name }}</td>
@@ -162,7 +160,7 @@ const tableView = ref(true);
 
 const activeTab = ref("All Portfolios");
 
-const activeRow = ref("");
+const activeRow = ref(null);
 
 const selectedPortfolioId = ref(null);
 
