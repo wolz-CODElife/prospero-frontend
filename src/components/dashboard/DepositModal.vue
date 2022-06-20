@@ -43,8 +43,9 @@
 				<tr
 					v-for="(token, i) in tokenList"
 					key="i"
-					@click="enableDeposit"
+					@click="enableDeposit(i)"
 					class="text-white text-left py-[20px] mx-[28px] px-[28px] border-b border-b-[#2D3035]"
+					:class="[activeRow === i ? 'bg-[#003D3B] ' : 'bg-transparent']"
 				>
 					<td class="flex items-center px-[28px]">
 						<img
@@ -101,24 +102,16 @@ const depositDialog = ref(false);
 
 const depositDisabled = ref(true);
 
+const activeRow = ref(null);
+
 function openDialogModal() {
 	depositDialog.value = true;
 }
 
-function enableDeposit() {
+function enableDeposit(tokenId) {
+	activeRow.value = tokenId;
 	depositDisabled.value = false;
 }
-
-// const props = defineProps({
-//   showDeposit: {
-//     type: Boolean,
-//     default: false,
-//   },
-// });
-// const open = ref(showDeposit);
-// function closeModal() {
-//   open.value = !open.value;
-// }
 
 const tokenList = ref([
 	{

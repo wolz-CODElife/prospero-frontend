@@ -97,7 +97,12 @@
 							v-for="(portfolio, i) in portfolioList"
 							key="i"
 							@click="doSelect(portfolio.name)"
-							class="text-white text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] bg-transparent hover:bg-[#003D3B]"
+							class="text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white hover:bg-[#003D3B]"
+							:class="[
+								activeRow === portfolio.name
+									? 'bg-[#003D3B] '
+									: 'bg-transparent',
+							]"
 						>
 							<td class="ml-[20px] pl-[18px]">
 								<input
@@ -156,6 +161,8 @@ const tableView = ref(true);
 // });
 
 const activeTab = ref("All Portfolios");
+
+const activeRow = ref("");
 
 const selectedPortfolioId = ref(null);
 
@@ -217,7 +224,8 @@ function changeTab(tab) {
 
 function doSelect(val) {
 	selectedPortfolioId.value = val;
-	console.log("selectedPortfolio: ", selectedPortfolioId.value);
+	activeRow.value = val;
+	console.log(activeRow.value);
 	disabled.value = false;
 }
 
