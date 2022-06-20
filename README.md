@@ -35,7 +35,7 @@ See [Configuration Reference](https://cli.vuejs.org/config/).
    -  Child Component - components/dashboard/Table.vue
    -  Parent component - layouts/dashboard/DashMain.vue
    -  Grand-parent - layouts/Dashboard.vue
-      Json location -
+   -  Placeholder Json location - Line 175 of child component
 
 -  Deposit Token Table
    -  Child component - depositModal.vue
