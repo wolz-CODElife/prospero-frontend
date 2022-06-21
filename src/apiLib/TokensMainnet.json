@@ -1,0 +1,38 @@
+[
+  {
+    "address": "0xf57041a5e36526ac5eb845ebbb520fcf38e5056f",
+    "decimals": "18",
+    "name": "Wrapped BTC",
+    "symbol": "WBTC.e",
+    "cChainAddress": "0x50b7545627a5162F82A992c33b87aDc75187B218",
+    "logoURI": "https://raw.githubusercontent.com/ava-labs/avalanche-bridge-resources/main/tokens/WBTC/logo.png",
+    "price": 0
+  },
+  {
+    "address": "0x2acd871e869fe24f9a561751eebd6d2726d8680f",
+    "decimals": "18",
+    "name": "ChainLink Token",
+    "symbol": "LINK",
+    "cChainAddress": "0x5947BB275c521040051D82396192181b413227A3",
+    "logoURI": "https://raw.githubusercontent.com/ava-labs/bridge-tokens/main/avalanche-tokens/0xB3fe5374F67D7a22886A0eE082b2E2f9d2651651/logo.png",
+    "price": 0
+  },
+  {
+    "address": "0xe5bde21d0b17f7fe54668bcddcdf1e69aa63a9c0",
+    "decimals": "18",
+    "name": "Wrapped AVAX",
+    "symbol": "WAVAX",
+    "cChainAddress": "0xb31f66aa3c1e785363f0875a1b74e27b85fd66c7",
+    "logoURI": "https://raw.githubusercontent.com/ava-labs/bridge-tokens/main/avalanche-tokens/0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7/logo.png",
+    "price": 0
+  },
+  {
+    "address": "0xb4dccb8e122b2c4d5eb377f99a62cef7c8120652",
+    "decimals": "18",
+    "name": "Wrapped Eth",
+    "symbol": "WETH.e",
+    "cChainAddress": "0x49D5c2BdFfac6CE2BFdB6640F4F80f226bc10bAB",
+    "logoURI": "https://raw.githubusercontent.com/ava-labs/bridge-tokens/main/avalanche-tokens/0xf20d962a6c8f70c731bd838a3a388D7d48fA6e15/logo.png",
+    "price": 0
+  }
+]

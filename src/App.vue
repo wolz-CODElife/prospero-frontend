@@ -1,15 +1,20 @@
 <template>
+
   <div id="app">
+
     <div
       v-if="mobile"
       class="fixed top-0 z-[1000000] inset-0 overflow-y-hidden bg-black/95 w-full h-full flex items-center justify-center"
     >
       <h1 class="text-white">Please use a desktop</h1>
     </div>
+
     <component :is="layout">
       <RouterView />
     </component>
+
   </div>
+
 </template>
 
 <script>
@@ -18,6 +23,7 @@ import Landing from "./layouts/Landing.vue";
 
 import { RouterView, useRouter } from "vue-router";
 import { ref, onBeforeMount, computed } from "vue";
+//import {initializeApi} from '@/api'
 
 export default {
   components: {
@@ -26,6 +32,9 @@ export default {
   },
 
   setup() {
+
+
+
     const { currentRoute } = useRouter();
     const mobile = ref(false);
 

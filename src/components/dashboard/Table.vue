@@ -136,34 +136,12 @@
 
 <script setup>
 import { ref } from "vue";
-
+import {getLeaderBoardDataForTable} from '@/api'
 const disabled = ref(true);
-
 const tableView = ref(true);
-
-// const props = defineProps({
-// 	tableView: {
-// 		type: Boolean,
-// 		default: true,
-//   },
-
-// 	portfolioList: {
-// 		type: Array,
-// 		required: true,
-// 	},
-
-// selectedPortfolioId: {
-//   type: String,
-//   required: true,
-// }
-// });
-
 const activeTab = ref("All Portfolios");
-
 const activeRow = ref(null);
-
 const selectedPortfolioId = ref(null);
-
 const tabs = ref([
 	{
 		text: "All Portfolios",
@@ -173,48 +151,11 @@ const tabs = ref([
 	},
 ]);
 
-const portfolioList = ref([
-	{
-		name: "AFS1000 🔱",
-		fee: 2.6,
-		d7: 8,
-		d30: 12,
-		d90: 34,
-		y1: 60,
-	},
-	{
-		name: "Harry Mcguire",
-		fee: 2.6,
-		d7: 8,
-		d30: 12,
-		d90: 34,
-		y1: 60,
-	},
-	{
-		name: " 🌈 Lulu Nation Fans",
-		fee: 2.6,
-		d7: 8,
-		d30: 12,
-		d90: 34,
-		y1: 60,
-	},
-	{
-		name: "GX 650 Lords 🏖",
-		fee: 2.6,
-		d7: 8,
-		d30: 12,
-		d90: 34,
-		y1: 60,
-	},
-	{
-		name: "Moon Gatekeepers",
-		fee: 2.6,
-		d7: 8,
-		d30: 12,
-		d90: 34,
-		y1: 60,
-	},
-]);
+const portfolioList = ref([]);
+(async () => {
+	portfolioList.value = await getLeaderBoardDataForTable();
+})()
+
 
 function changeTab(tab) {
 	activeTab.value = tab;
