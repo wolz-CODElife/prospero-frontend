@@ -1,6 +1,7 @@
 <template>
 	<div class="h-full w-full bg-[#191A20] border border-[#2D3035] p-[30px]">
 		<div class="flex justify-between">
+			<!-- Go BACK -->
 			<button
 				class="button text-[#00FF00] uppercase flex gap-[14px] items-center"
 				@click="$emit('goBack')"
@@ -8,15 +9,17 @@
 				<img src="@/assets/img/direction.svg" alt="" />
 				Go BACK
 			</button>
+
 			<h1 class="text-[#868C9D] text-[16px]">DEPOSITING TO PORTFOLIO</h1>
 		</div>
+
 		<div
 			class="mt-[20px] p-[20px] bg-black flex justify-between items-center w-full"
 		>
 			<!-- Name  -->
-
 			<h2 class="text-white">selectedPortfolioId</h2>
 
+			<!-- Instruction -->
 			<div
 				class="py-[8px] px-[15px] max-w-max uppercase flex items-center gap-[14px] bg-[#2D3035] text-white shadow-[0px_0px_5px_rgba(0,0,0,0.5);]"
 			>
@@ -28,6 +31,7 @@
 			</div>
 		</div>
 
+		<!-- Token List Table -->
 		<table class="table-fixed w-full">
 			<thead>
 				<tr
@@ -67,13 +71,17 @@
 				</tr>
 			</tfoot>
 		</table>
+
 		<div class="flex gap-20 mt-[30px] w-full">
+			<!-- Cancel  -->
 			<button
 				class="basis-1/2 btn btn-primary-outline"
 				@click="$emit('goBack')"
 			>
 				Cancel
 			</button>
+
+			<!-- Deposit  -->
 			<button
 				class="basis-1/2 btn btn-primary"
 				:class="
@@ -89,7 +97,52 @@
 		</div>
 
 		<Modal v-if="depositDialog" @close="depositDialog = false">
-			<h1 class="text-white">Confirm Deposit</h1>
+			<!-- Approve Required  -->
+			<div
+				v-if="!confirmDeposit"
+				class="flex flex-col justify-center items-center gap-[30px] text-white my-[20px]"
+			>
+				<img
+					src="@/assets/img/caution.svg"
+					alt=""
+					class="w-[62px] h-[62px]"
+				/>
+				<h1 class="text-[20px] uppercase">Approve required</h1>
+				<p class="text-[16px]">
+					Before you can use Prospero, you need to approve the tokens to be
+					transferred.
+				</p>
+				<button
+					class="btn btn-primary w-full"
+					@click="confirmDeposit = true"
+				>
+					Okay
+				</button>
+			</div>
+
+			<!-- Deposit Successful -->
+			<div
+				v-else
+				class="flex flex-col justify-center items-center gap-[30px] text-white my-[20px]"
+			>
+				<img
+					src="https://i.postimg.cc/Y2vdsnZW/image.png"
+					alt=""
+					class="max-w-[65%]"
+				/>
+				<h1 class="text-[20px] uppercase">Deposit Successful</h1>
+				<p class="text-[16px]">
+					$20.00 has been sent to AFS1000 🔱. Wait a few moments for the
+					tokens to transfer and reflect in your portfolio tab. Gas used
+					$2.24
+				</p>
+				<button
+					class="btn btn-primary uppercase w-full"
+					@click="$emit('goBack')"
+				>
+					Take me to my portfolios
+				</button>
+			</div>
 		</Modal>
 	</div>
 </template>
@@ -99,6 +152,8 @@ import { ref } from "vue";
 import Modal from "../Modal.vue";
 
 const depositDialog = ref(false);
+
+const confirmDeposit = ref(false);
 
 const depositDisabled = ref(true);
 
