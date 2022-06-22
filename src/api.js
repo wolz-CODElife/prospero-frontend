@@ -1,7 +1,8 @@
 const BigNumber = require('bignumber.js');
 const Web3 = require('web3');
-const web3 = new Web3(window.ethereum);
+import detectEthereumProvider from '@metamask/detect-provider';
 const ethers = require('ethers')
+var web3;
 //const ethers = new Ethers(window.ethereum);
 var leaderBoardData={data:[],selectedLeaderIndex:0}//leader board portfolios
 
@@ -19,15 +20,60 @@ var PricesLibraryJson=require('./apiLib/PricesLibrary.json')
 var WAVAX_COIN_ADDRESS="0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7";
 var nativeTokenPrice;
 var EOAAddress="0xeeca92f4eb0b3102a62a414f1ff6290fFE23B67d";
-async function tFun(){
-  //console.log('ssss')
-  return "ssssss"
-};
-var testM="fff";
 
+
+function updateActiveLeaderboardRow(row){
+  leaderBoardData["selectedLeaderIndex"]=row
+}
+async function joinPortfolio(){
+  var selectedLeaderBoardAddress=leaderBoardData["data"][leaderBoardData["selectedLeaderIndex"]]["prosperoWalletAddress"];
+  try{
+    var prosperoBeaconFactoryInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson.abi,  ethersSigner);
+    var tx = await prosperoBeaconFactoryInstance.newTrailerWallet(
+      selectedLeaderBoardAddress
+    );
+    var r = await tx.wait();
+    return {success:true}
+  }catch(e){
+   console.log("Exception joinPortfolio: "+e)
+   console.log("Exception joinPortfolio: "+JSON.stringify(e,null,2))
+   return {success:false, error:e}
+  }
+  return {success:false}
+
+}
+async function createPortfolio(walletName){
+  try{
+    var prosperoBeaconFactoryInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson.abi,  ethersSigner);
+    var tx = await prosperoBeaconFactoryInstance.newProsperoWallet(
+      walletName
+    );
+    var r = await tx.wait();
+    console.log('created wallet success - tx returned:'+JSON.stringify(r,null,2))
+    if (r.hasOwnProperty("events")){
+      var events = r.events;
+      if (events.length>0){
+        var finishedMethodEvent = events[events.length-1];
+        if (finishedMethodEvent.hasOwnProperty("args")){
+          var args = finishedMethodEvent['args']
+          var prosperoWalletAddressCreated = args[args.length-1]
+          //console.log("got prosperoWalletAddressCreated...")
+          return {success:true, prosperoWalletAddressCreated:prosperoWalletAddressCreated}
+        }
+      }
+    }
+    return {success:true, prosperoWalletAddressCreated:null}
+}catch(e){
+ console.log("Exception createPortfolio: "+e)
+ console.log("Exception createPortfolio: "+JSON.stringify(e,null,2))
+ return {success:false, error:e}
+}
+return {success:false, error:null}
+}
 async function getLeaderBoardDataForTable(){
+  try{
   await createLeaderBoardDataObject();
-  //console.log('leaderBoardData:'+JSON.stringify(leaderBoardData,null,2))
+  console.log('leaderBoardData:'+JSON.stringify(leaderBoardData,null,2))
   var leaderBoardDataHere = leaderBoardData.data
   var tableData = []
   for (var i =0;i<leaderBoardDataHere.length;i++){
@@ -51,57 +97,15 @@ async function getLeaderBoardDataForTable(){
     };
     tableData.push(leaderObjForTable);
   }
-/*
-  var testD =
-  [
- {
-   name: "AFS1000 🔱",
-   fee: 2.6,
-   d7: 8,
-   d30: 12,
-   d90: 34,
-   y1: 60,
- },
- {
-   name: "Harry Mcguire",
-   fee: 2.6,
-   d7: 8,
-   d30: 12,
-   d90: 34,
-   y1: 60,
- },
- {
-   name: " 🌈 Lulu Nation Fans",
-   fee: 2.6,
-   d7: 8,
-   d30: 12,
-   d90: 34,
-   y1: 60,
- },
- {
-   name: "GX 650 Lords 🏖",
-   fee: 2.6,
-   d7: 8,
-   d30: 12,
-   d90: 34,
-   y1: 60,
- },
- {
-   name: "Moon Gatekeepers",
-   fee: 2.6,
-   d7: 8,
-   d30: 12,
-   d90: 34,
-   y1: 60,
- },
-]
-*/
   return tableData;
+}catch(e){
+  return {error:e}
+}
 }
 async function createLeaderBoardDataObject(){
   //console.log("createLeaderBoardDataObject called");
-  var leaderTrailerFactoryInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson.abi, ethersSigner);
-  var allLeaderWallets = await leaderTrailerFactoryInstance.getAllProsperoWallets();
+  var prosperoBeaconFactoryInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson.abi, ethersSigner);
+  var allLeaderWallets = await prosperoBeaconFactoryInstance.getAllProsperoWallets();
 
   var leaderBoardDataHere=[]
   for (var i=0;i<allLeaderWallets.length;i++){
@@ -124,7 +128,7 @@ async function createLeaderBoardDataObject(){
     var totalUsdInvestedForLeader = await ProsperoWalletInstance.methods.getTotalUsdInvestedPerUser(walletValues.leaderEOA).call({
       from: EOAAddress
     });
-    var allTrailerWallets = await leaderTrailerFactoryInstance.getTrailersFollowingProsperoWallet(thisLeaderWalletAddress)
+    var allTrailerWallets = await prosperoBeaconFactoryInstance.getTrailersFollowingProsperoWallet(thisLeaderWalletAddress)
 
     //console.log("allTrailerWallets:"+allTrailerWallets)
     var totalUsdInvestedForLeaderBN = BigNumber(totalUsdInvestedForLeader+"")
@@ -340,11 +344,55 @@ async function getBalanacesOfTokensInPortfolioForUserContractCall(user, Prospero
 
 }
 async function initializeApi(){
-  await updatePricesNew();
+  var provider = await detectEthereumProvider();
+  if (provider !== window.ethereum) {
+    console.error('Do you have multiple wallets installed?');
+  }
+  if (provider) {
+    try {
+      var accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+      if (accounts.length==0){
+        alert("Accounts is blank - Create a new Metamask Account.");
+        return;
+      }
+      EOAAddress = accounts[0];
+      if (EOAAddress===null || EOAAddress===undefined){
+        alert("Can not connect to wallet");
+        return;
+      }
+    } catch (error) {
+      if (error.code === 4001) {
+        console.error("user rejected request")
+        return;
+      }
+      console.error("ERROR:"+error);
+    }
+  }else{
+    console.error("Could not find wallet");
+  }
   ethersProvider = await new ethers.providers.Web3Provider(window.ethereum);
   ethersSigner = ethersProvider.getSigner();
+  web3 = new Web3(window.ethereum);
+
+  ethereum.on('accountsChanged', (accounts) => {
+    console.error("Accounts changed -- reloading....")
+    window.location.reload();
+  })
+
+  ethereum.on('disconnect', () =>{
+    console.error("disconnect called...")
+  })
+  ethereum.on('connect', () =>{
+    console.error("connect called...")
+  })
+
+  ethereum.on('chainChanged', () =>{
+    console.error("chain changed...")
+  })
+  await updatePrices();
+
 }
-async function updatePricesNew(){
+async function updatePrices(){
   try{
     var allAvalancheAddresses=""
     var allAddresses=[]
@@ -555,9 +603,9 @@ async function getTokenObject_newMine(tokenAddress){
   console.log("ERROR - could not find token in getTokenObject_newMine")
 }
 async function createMyWalletsDataObject(){
-  var leaderTrailerFactoryInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson["abi"],  accounts[1]);
-  var myWalletsFromContract = await leaderTrailerFactoryInstance.getWallets(EOAAddress);
-  var myWalletTypes = await leaderTrailerFactoryInstance.getWalletTypes(EOAAddress);
+  var prosperoBeaconFactoryInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson["abi"],  accounts[1]);
+  var myWalletsFromContract = await prosperoBeaconFactoryInstance.getWallets(EOAAddress);
+  var myWalletTypes = await prosperoBeaconFactoryInstance.getWalletTypes(EOAAddress);
   //console.log("myWallets***:"+JSON.stringify(myWalletsFromContract,null,2))
   //console.log("myWalletTypes:"+myWalletTypes.length)
   myWallets = {}
@@ -706,4 +754,4 @@ async function getSymbol(tokenAddress){
   return symbol
 }
 
-export { testM, tFun, updatePricesNew, tokenArray, getLeaderBoardDataForTable, initializeApi };
+export {  getLeaderBoardDataForTable, initializeApi, joinPortfolio, createPortfolio, updateActiveLeaderboardRow };

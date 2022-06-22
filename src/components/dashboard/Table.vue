@@ -136,27 +136,11 @@
 
 <script setup>
 import { ref } from "vue";
-import {getLeaderBoardDataForTable} from '@/api'
+import {getLeaderBoardDataForTable, updateActiveLeaderboardRow, createPortfolio} from '@/api'
 
 const disabled = ref(true);
 
 const tableView = ref(true);
-
-// const props = defineProps({
-// 	portfolioList: {
-// 		type: Array,
-// 		required: true,
-// 	},
-// 	tableView: {
-// 		type: Boolean,
-// 		default: true,
-//   },
-
-// selectedPortfolioId: {
-//   type: String,
-//   required: true,
-// }
-// });
 
 const activeTab = ref("All Portfolios");
 
@@ -175,7 +159,12 @@ const tabs = ref([
 
 const portfolioList = ref([]);
 (async () => {
-	portfolioList.value = await getLeaderBoardDataForTable();
+	var leaderBoardData = await getLeaderBoardDataForTable();
+	if (leaderBoardData.hasOwnProperty("error")){
+		console.log(leaderBoardData.error);
+		//error code here
+	}
+	portfolioList.value = leaderBoardData;
 })()
 
 
@@ -187,11 +176,25 @@ function doSelect(val) {
 	selectedPortfolioId.value = val;
 	activeRow.value = val;
 	console.log(activeRow.value);
+	updateActiveLeaderboardRow(val)
 	disabled.value = false;
 }
 
 function showCreate() {
 	tableView.value = false;
+	(async () => {
+		var status = await createPortfolio("Name Of Wallet Goes Here");
+		if (!status.success){
+			console.log(status.error);
+			//error code here
+		}else{
+			if (status.prosperoWalletAddressCreated!=null){
+				console.log("new prosperoWalletAddressCreated:"+status.prosperoWalletAddressCreated)
+			}else{
+				console.log("no new prosperoWalletAddressCreated from tx returned from created but created successfully, wait for finished method event to fire.");
+			}
+		}
+	})()
 }
 
 function showTable() {
