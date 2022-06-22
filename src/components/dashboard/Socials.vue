@@ -28,6 +28,7 @@
 
 <script setup>
 import { ref } from "vue";
+
 const socials = ref([
   {
     title: "Discord",

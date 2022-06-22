@@ -137,11 +137,33 @@
 <script setup>
 import { ref } from "vue";
 import {getLeaderBoardDataForTable} from '@/api'
+
 const disabled = ref(true);
+
 const tableView = ref(true);
+
+// const props = defineProps({
+// 	portfolioList: {
+// 		type: Array,
+// 		required: true,
+// 	},
+// 	tableView: {
+// 		type: Boolean,
+// 		default: true,
+//   },
+
+// selectedPortfolioId: {
+//   type: String,
+//   required: true,
+// }
+// });
+
 const activeTab = ref("All Portfolios");
+
 const activeRow = ref(null);
+
 const selectedPortfolioId = ref(null);
+
 const tabs = ref([
 	{
 		text: "All Portfolios",
