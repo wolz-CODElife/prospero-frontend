@@ -1,6 +1,7 @@
 <template>
 	<div class="row-span-3 bg-[#191A20] py-[20px]">
 		<div v-if="tableView">
+			<!-- All Portfolios / My Portfolios Tab -->
 			<div class="flex justify-between mx-[20px]">
 				<!-- Toggle Tabs  -->
 				<div class="p-[10px] bg-black">
@@ -76,7 +77,7 @@
 				</div>
 			</div>
 
-			<!-- All Portfolio & My Portfolio Tables -->
+			<!-- All Portfolio / My Portfolios Tables -->
 			<div class="my-[20px]">
 				<table class="table-auto w-full">
 					<thead>
@@ -93,13 +94,50 @@
 						</tr>
 					</thead>
 					<tbody>
+						<!-- v-for="(portfolio, i) in AllPortfolios.allPortfolios" -->
 						<tr
-							v-for="(portfolio, i) in portfolioList"
-							key="i"
+							v-if="activeTab === 'All Portfolios'"
+							v-for="portfolio in store.allPortfolios"
+							key="portfo	lio"
+							@click="
+								store.doSelectPortfolio(portfolio), toggleDisabled()
+							"
+							class="text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white hover:bg-[#003D3B]"
+							:class="[
+								store.selectedPortfolio.name === portfolio.name
+									? 'bg-[#003D3B] '
+									: 'bg-transparent',
+							]"
+						>
+							<td class="ml-[20px] pl-[18px]">
+								<input
+									type="radio"
+									:name="portfolio.name"
+									:id="portfolio.name"
+									@onchange="
+										store.doSelectPortfolio(portfolio),
+											toggleDisabled()
+									"
+								/>
+							</td>
+							<td>{{ portfolio.name }}</td>
+							<td class="border-r border-r-[#2D3035] pr-[30px]">
+								{{ portfolio.fee }}
+							</td>
+							<td class="pl-[20px]">{{ portfolio.d7 }}</td>
+							<td>{{ portfolio.d30 }}</td>
+							<td>{{ portfolio.d90 }}</td>
+							<td class="mr-[20px] pr-[18px]">{{ portfolio.y1 }}</td>
+						</tr>
+
+						<!-- <tr
+            v-else
+							v-for="(portfolio, index) in myPortfolios"
+							key="index"
 							@click="doSelect(i)"
 							class="text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white hover:bg-[#003D3B]"
 							:class="[
-								activeRow === i ? 'bg-[#003D3B] ' : 'bg-transparent',
+								activeRow === index ? 'bg-[#003D3B] ' : 'bg-transparent',
 							]"
 						>
 							<td class="ml-[20px] pl-[18px]">
@@ -118,7 +156,7 @@
 							<td>{{ portfolio.d30 }}</td>
 							<td>{{ portfolio.d90 }}</td>
 							<td class="mr-[20px] pr-[18px]">{{ portfolio.y1 }}</td>
-						</tr>
+						</tr> -->
 					</tbody>
 				</table>
 
@@ -136,32 +174,14 @@
 
 <script setup>
 import { ref } from "vue";
+import { useAllPortfolios } from "@/stores/AllPortfolios";
+const store = useAllPortfolios();
 
 const disabled = ref(true);
 
 const tableView = ref(true);
 
-// const props = defineProps({
-// 	portfolioList: {
-// 		type: Array,
-// 		required: true,
-// 	},
-// 	tableView: {
-// 		type: Boolean,
-// 		default: true,
-//   },
-
-// selectedPortfolioId: {
-//   type: String,
-//   required: true,
-// }
-// });
-
 const activeTab = ref("All Portfolios");
-
-const activeRow = ref(null);
-
-const selectedPortfolioId = ref(null);
 
 const tabs = ref([
 	{
@@ -172,57 +192,17 @@ const tabs = ref([
 	},
 ]);
 
-const portfolioList = ref([
-	{
-		name: "AFS1000 🔱",
-		fee: 2.6,
-		d7: 8,
-		d30: 12,
-		d90: 34,
-		y1: 60,
-	},
-	{
-		name: "Harry Mcguire",
-		fee: 2.6,
-		d7: 8,
-		d30: 12,
-		d90: 34,
-		y1: 60,
-	},
-	{
-		name: " 🌈 Lulu Nation Fans",
-		fee: 2.6,
-		d7: 8,
-		d30: 12,
-		d90: 34,
-		y1: 60,
-	},
-	{
-		name: "GX 650 Lords 🏖",
-		fee: 2.6,
-		d7: 8,
-		d30: 12,
-		d90: 34,
-		y1: 60,
-	},
-	{
-		name: "Moon Gatekeepers",
-		fee: 2.6,
-		d7: 8,
-		d30: 12,
-		d90: 34,
-		y1: 60,
-	},
-]);
-
 function changeTab(tab) {
 	activeTab.value = tab;
 }
 
-function doSelect(val) {
-	selectedPortfolioId.value = val;
-	activeRow.value = val;
-	console.log(activeRow.value);
+// function doSelect(val) {
+// 	selectedPortfolioId.value = val;
+// 	activeRow.value = val;
+// 	console.log(activeRow.value);
+// 	disabled.value = false;
+// }
+function toggleDisabled() {
 	disabled.value = false;
 }
 
@@ -235,7 +215,7 @@ function showTable() {
 }
 
 // const filteredPortfolioList = computed(() => {
-// 	return portfolioList;
+// 	return allPortfolios;
 // });
 </script>
 
