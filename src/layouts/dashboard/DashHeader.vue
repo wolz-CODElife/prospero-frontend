@@ -83,14 +83,24 @@
 						: 'border-white border-b-0',
 				]"
 			>
+				<!-- selectedPortfolio is a computed value from store -->
 				<div
 					class="h-full flex flex-col gap-y-[24px] justify-center items-center"
-					v-if="selectedPortfolio === ''"
+					v-if="store.selectedPortfolio.name === ''"
 				>
 					<h2 class="text-center text-[14px] uppercase">
 						{{ props.cmd }}
 					</h2>
 					<img src="@/assets/img/arrow.svg" alt="" />
+				</div>
+
+				<div
+					class="h-full flex flex-col gap-y-[24px] justify-center items-center"
+					v-else
+				>
+					<h2 class="text-center text-[14px] uppercase">
+						{{ store.selectedPortfolio.name }}
+					</h2>
 				</div>
 			</div>
 		</div>
@@ -99,12 +109,16 @@
 
 <script setup>
 import { ref } from "vue";
+import { useAllPortfolios } from "@/stores/AllPortfolios";
+const store = useAllPortfolios();
 
 const props = defineProps({
 	cmd: {
 		type: String,
 		default: "Select First Portfolio to Join",
 	},
+
+	selectedPortfolio: {},
 });
 
 const active = ref("holdings");
