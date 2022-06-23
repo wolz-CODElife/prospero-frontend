@@ -48,16 +48,14 @@ export const useAllPortfolios = defineStore("AllPortfolios", {
 
 			selectedPortfolio: {
 				name: "",
-				fee: null,
-				d7: null,
-				d30: null,
-				d90: null,
-				y1: null,
+				fee: 0,
+				d7: 0,
+				d30: 0,
+				d90: 0,
+				y1: 0,
 			},
 
 			activeHeader: "left",
-
-			// activeRow:
 		};
 	},
 
@@ -74,11 +72,11 @@ export const useAllPortfolios = defineStore("AllPortfolios", {
 				this.activeHeader = "right";
 				this.selectedPortfolio = {
 					name: "",
-					fee: null,
-					d7: null,
-					d30: null,
-					d90: null,
-					y1: null,
+					fee: 0,
+					d7: 0,
+					d30: 0,
+					d90: 0,
+					y1: 0,
 				};
 			} else {
 				this.activeHeader = "left";
