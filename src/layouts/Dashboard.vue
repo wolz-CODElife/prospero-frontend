@@ -12,6 +12,7 @@
 </template>
 
 <script setup>
+import {joinPortfolio, createPortfolio} from '@/api'
 import { ref, onBeforeMount } from "vue";
 import Sidebar from "./dashboard/Sidebar.vue";
 import DashHeader from "./dashboard/DashHeader.vue";
@@ -29,6 +30,14 @@ const joinView = ref(false);
 
 function doJoin() {
 	joinView.value = true;
+	(async () => {
+		var status = await joinPortfolio();
+		if (!status.success){
+			console.log(status.error);
+			//error code here
+		}
+	})()
+
 }
 
 function goBack() {
