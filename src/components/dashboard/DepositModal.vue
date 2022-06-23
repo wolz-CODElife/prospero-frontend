@@ -17,7 +17,7 @@
 			class="mt-[20px] p-[20px] bg-black flex justify-between items-center w-full"
 		>
 			<!-- Name  -->
-			<h2 class="text-white">selectedPortfolioId</h2>
+			<h2 class="text-white">{{ store.selectedPortfolio.name }}</h2>
 
 			<!-- Instruction -->
 			<div
@@ -100,7 +100,7 @@
 			<!-- Approve Required  -->
 			<div
 				v-if="!confirmDeposit"
-				class="flex flex-col justify-center items-center gap-[30px] text-white my-[20px]"
+				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
 			>
 				<img
 					src="@/assets/img/caution.svg"
@@ -123,7 +123,7 @@
 			<!-- Deposit Successful -->
 			<div
 				v-else
-				class="flex flex-col justify-center items-center gap-[30px] text-white my-[20px]"
+				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
 			>
 				<img
 					src="https://i.postimg.cc/Y2vdsnZW/image.png"
@@ -150,6 +150,8 @@
 <script setup>
 import { ref } from "vue";
 import Modal from "../Modal.vue";
+import { useAllPortfolios } from "@/stores/AllPortfolios";
+const store = useAllPortfolios();
 
 const depositDialog = ref(false);
 

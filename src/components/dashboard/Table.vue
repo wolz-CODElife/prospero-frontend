@@ -104,7 +104,7 @@
 							"
 							class="text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white hover:bg-[#003D3B]"
 							:class="[
-								activeRow === portfolio.name
+								store.selectedPortfolio.name === portfolio.name
 									? 'bg-[#003D3B] '
 									: 'bg-transparent',
 							]"
@@ -183,10 +183,6 @@ const tableView = ref(true);
 
 const activeTab = ref("All Portfolios");
 
-const activeRow = ref("");
-
-// const selectedPortfolioId = ref(null);
-
 const tabs = ref([
 	{
 		text: "All Portfolios",
@@ -195,49 +191,6 @@ const tabs = ref([
 		text: "My Portfolios",
 	},
 ]);
-
-// const allPortfolios = ref([
-// 	{
-// 		name: "AFS1000 🔱",
-// 		fee: 2.6,
-// 		d7: 8,
-// 		d30: 12,
-// 		d90: 34,
-// 		y1: 60,
-// 	},
-// 	{
-// 		name: "Harry Mcguire",
-// 		fee: 2.6,
-// 		d7: 8,
-// 		d30: 12,
-// 		d90: 34,
-// 		y1: 60,
-// 	},
-// 	{
-// 		name: " 🌈 Lulu Nation Fans",
-// 		fee: 2.6,
-// 		d7: 8,
-// 		d30: 12,
-// 		d90: 34,
-// 		y1: 60,
-// 	},
-// 	{
-// 		name: "GX 650 Lords 🏖",
-// 		fee: 2.6,
-// 		d7: 8,
-// 		d30: 12,
-// 		d90: 34,
-// 		y1: 60,
-// 	},
-// 	{
-// 		name: "Moon Gatekeepers",
-// 		fee: 2.6,
-// 		d7: 8,
-// 		d30: 12,
-// 		d90: 34,
-// 		y1: 60,
-// 	},
-// ]);
 
 function changeTab(tab) {
 	activeTab.value = tab;

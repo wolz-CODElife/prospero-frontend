@@ -1,15 +1,18 @@
 <template>
 	<div>
-		<div class="grid grid-cols-12 h-full text-[#868C9D]">
-			<!-- Holdings toggle card  -->
+		<div class="grid grid-cols-12 h-full text-[#868C9D] bg-black">
+			<!-- Left side of header  -->
 			<div
-				class="col-span-8 bg-black py-[30px] pl-[30px] border"
+				class="col-span-8 bg-black pl-[30px] py-[20px] border"
 				:class="[
-					active === 'holdings'
+					store.activeHeader === 'left'
 						? 'border-white border-b-0'
 						: 'border-black border-b-white',
 				]"
 			>
+				<!-- :class="
+						store.selectedPortfolio.name === '' ? 'py-[40px]' : 'py-0'
+					" -->
 				<div
 					class="flex items-center justify-between font-medium uppercase"
 				>
@@ -40,7 +43,9 @@
 
 					<!-- Left stats -->
 					<div class="flex-1 ml-[30px]">
-						<h2 class="text-[#868C9D] text-[14px]">My holdings</h2>
+						<h2 class="text-[#868C9D] text-[14px] mt-[16px]">
+							My holdings
+						</h2>
 						<h3 class="text-white text-[24px]">$0</h3>
 						<hr class="my-[12px] border-[#2D3035]" />
 						<h2 class="text-[#868C9D] text-[14px]">ROI</h2>
@@ -50,11 +55,11 @@
 					</div>
 
 					<!--Toggler  -->
-					<button @click="toggleActive" class="mx-[10px]">
+					<button @click="store.toggleActiveHeader" class="mx-[10px]">
 						<img
 							src="@/assets/img/green-toggle.svg"
 							alt=""
-							v-if="active === 'holdings'"
+							v-if="store.activeHeader === 'left'"
 						/>
 						<img src="@/assets/img/white-toggle.svg" alt="" v-else />
 					</button>
@@ -75,15 +80,16 @@
 				</div>
 			</div>
 
+			<!-- Right side of header  -->
 			<div
-				class="col-span-4 bg-black border"
+				class="col-span-4 bg-black border py-[40px]"
 				:class="[
-					active === 'holdings'
+					store.activeHeader === 'left'
 						? 'border-black border-b-white'
 						: 'border-white border-b-0',
 				]"
 			>
-				<!-- selectedPortfolio is a computed value from store -->
+				<!-- Empty Selected Portfolio  -->
 				<div
 					class="h-full flex flex-col gap-y-[24px] justify-center items-center"
 					v-if="store.selectedPortfolio.name === ''"
@@ -94,13 +100,42 @@
 					<img src="@/assets/img/arrow.svg" alt="" />
 				</div>
 
+				<!-- Selected portfolio not empty  -->
 				<div
-					class="h-full flex flex-col gap-y-[24px] justify-center items-center"
 					v-else
+					class="flex items-center justify-between font-medium uppercase"
 				>
-					<h2 class="text-center text-[14px] uppercase">
-						{{ store.selectedPortfolio.name }}
-					</h2>
+					<!-- Left stats -->
+					<div class="flex-1">
+						<div class="pl-[30px]">
+							<h2 class="text-[#868C9D] text-[14px]">Name</h2>
+							<h3 class="text-white text-[16px]">
+								{{ store.selectedPortfolio.name }}
+							</h3>
+						</div>
+
+						<hr class="my-[12px] border-[#2D3035]" />
+						<div class="pl-[30px]">
+							<h2 class="text-[#868C9D] text-[14px]">ROI</h2>
+							<h3 class="text-white text-[16px]">
+								+$0 <span class="text-[14px]">0% <span>^</span></span>
+							</h3>
+						</div>
+					</div>
+
+					<!-- Right stats -->
+					<div class="flex-1">
+						<div class="border-l border-[#2D3035] pl-[10px]">
+							<h2 class="text-[#868C9D] text-[14px]">AUM</h2>
+							<h3 class="text-white text-[16px]">$0</h3>
+						</div>
+
+						<hr class="my-[12px] border-[#2D3035]" />
+						<div class="border-l border-[#2D3035] pl-[10px]">
+							<h2 class="text-[#868C9D] text-[14px]">Investors</h2>
+							<h3 class="text-white text-[16px]">0</h3>
+						</div>
+					</div>
 				</div>
 			</div>
 		</div>
@@ -117,13 +152,7 @@ const props = defineProps({
 		type: String,
 		default: "Select First Portfolio to Join",
 	},
-
-	selectedPortfolio: {},
 });
-
-const active = ref("holdings");
-
-const selectedPortfolio = ref("");
 
 const activeTab = ref("USD");
 
@@ -144,12 +173,5 @@ const tabs = ref([
 
 function changeTab(tab) {
 	activeTab.value = tab;
-}
-function toggleActive() {
-	if (active.value === "holdings") {
-		active.value = "portfolio";
-	} else {
-		active.value = "holdings";
-	}
 }
 </script>
