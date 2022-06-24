@@ -69,7 +69,7 @@
 					</button>
 
 					<button
-						@click="showCreate"
+						@click="portfolioStore.showCreate(), (tableView = false)"
 						class="btn btn-primary-outline w-[125px]"
 					>
 						Create
@@ -97,14 +97,15 @@
 						<!-- v-for="(portfolio, i) in AllPortfolios.allPortfolios" -->
 						<tr
 							v-if="activeTab === 'All Portfolios'"
-							v-for="portfolio in store.allPortfolios"
+							v-for="portfolio in portfolioStore.allPortfolios"
 							key="portfo	lio"
 							@click="
-								store.doSelectPortfolio(portfolio), toggleDisabled()
+								portfolioStore.doSelectPortfolio(portfolio),
+									toggleDisabled()
 							"
 							class="text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white hover:bg-[#003D3B]"
 							:class="[
-								store.selectedPortfolio.name === portfolio.name
+								portfolioStore.selectedPortfolio.name === portfolio.name
 									? 'bg-[#003D3B] '
 									: 'bg-transparent',
 							]"
@@ -115,7 +116,7 @@
 									:name="portfolio.name"
 									:id="portfolio.name"
 									@onchange="
-										store.doSelectPortfolio(portfolio),
+										portfolioStore.doSelectPortfolio(portfolio),
 											toggleDisabled()
 									"
 								/>
@@ -129,34 +130,6 @@
 							<td>{{ portfolio.d90 }}</td>
 							<td class="mr-[20px] pr-[18px]">{{ portfolio.y1 }}</td>
 						</tr>
-
-						<!-- <tr
-            v-else
-							v-for="(portfolio, index) in myPortfolios"
-							key="index"
-							@click="doSelect(i)"
-							class="text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white hover:bg-[#003D3B]"
-							:class="[
-								activeRow === index ? 'bg-[#003D3B] ' : 'bg-transparent',
-							]"
-						>
-							<td class="ml-[20px] pl-[18px]">
-								<input
-									type="radio"
-									:name="portfolio.name"
-									:id="portfolio.name"
-									@onchange="doSelect(i)"
-								/>
-							</td>
-							<td>{{ portfolio.name }}</td>
-							<td class="border-r border-r-[#2D3035] pr-[30px]">
-								{{ portfolio.fee }}
-							</td>
-							<td class="pl-[20px]">{{ portfolio.d7 }}</td>
-							<td>{{ portfolio.d30 }}</td>
-							<td>{{ portfolio.d90 }}</td>
-							<td class="mr-[20px] pr-[18px]">{{ portfolio.y1 }}</td>
-						</tr> -->
 					</tbody>
 				</table>
 
@@ -167,15 +140,20 @@
 		</div>
 
 		<div v-else>
-			<button class="btn btn-primary" @click="showTable()">Go Back</button>
+			<button
+				class="btn btn-primary"
+				@click="portfolioStore.showJoin(), (tableView = true)"
+			>
+				Go Back
+			</button>
 		</div>
 	</div>
 </template>
 
 <script setup>
 import { ref } from "vue";
-import { useAllPortfolios } from "@/stores/AllPortfolios";
-const store = useAllPortfolios();
+import { usePortfolios } from "@/stores/Portfolios";
+const portfolioStore = usePortfolios();
 
 const disabled = ref(true);
 
@@ -206,13 +184,13 @@ function toggleDisabled() {
 	disabled.value = false;
 }
 
-function showCreate() {
-	tableView.value = false;
-}
+// function showCreate() {
+// 	tableView.value = false;
+// }
 
-function showTable() {
-	tableView.value = true;
-}
+// function showTable() {
+// 	tableView.value = true;
+// }
 
 // const filteredPortfolioList = computed(() => {
 // 	return allPortfolios;

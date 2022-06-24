@@ -17,7 +17,7 @@
 			class="mt-[20px] p-[20px] bg-black flex justify-between items-center w-full"
 		>
 			<!-- Name  -->
-			<h2 class="text-white">{{ store.selectedPortfolio.name }}</h2>
+			<h2 class="text-white">{{ portfolioStore.selectedPortfolio.name }}</h2>
 
 			<!-- Instruction -->
 			<div
@@ -76,7 +76,7 @@
 			<!-- Cancel  -->
 			<button
 				class="basis-1/2 btn btn-primary-outline"
-				@click="$emit('goBack')"
+				@click="$emit('goBack'), portfolioStore.reset()"
 			>
 				Cancel
 			</button>
@@ -150,8 +150,8 @@
 <script setup>
 import { ref } from "vue";
 import Modal from "../Modal.vue";
-import { useAllPortfolios } from "@/stores/AllPortfolios";
-const store = useAllPortfolios();
+import { usePortfolios } from "@/stores/Portfolios";
+const portfolioStore = usePortfolios();
 
 const depositDialog = ref(false);
 
