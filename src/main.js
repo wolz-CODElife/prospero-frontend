@@ -1,5 +1,5 @@
 import { createApp } from "vue";
-import {initializeApi} from '@/api'
+import { initializeApi } from "@/api";
 import App from "./App.vue";
 import router from "./router";
 import "./assets/css/tailwind.css";
