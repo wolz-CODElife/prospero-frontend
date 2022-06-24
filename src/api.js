@@ -4,45 +4,46 @@ var factoryAddress="0x8c333B6dF83c551f6f738946344E31021Fe0807e"
 var prosperoPricesAddress="0xbd90c371c3524e86659291892B76820599633da9"
 var pricesLibraryAddress="0x81D8Ed70151e7Ce3d36D2256F629f6862aC2A457"
 var subnetHelperContractAddress="0x4A6cc169c359Fc340bAc1aEb973625CD64CEFdf7"
-
-//END CONTRACT VARIABLES
-var selectedProsperoWalletAddress="0x4cc4b88c622ee9b2c9007a6aea014a093c2fefc5"//CHANGE
-
+//OBJECTS
+var leaderBoardData={data:[],selectedLeaderIndex:0}//leader board portfolios
+var myWallets={}//my wallets either as a portfolio manager or investor
+var tokenArray =require('./apiLib/Tokens.json');
+var balancesInEoa=[];
+//TO DO - have this updated on UI
+var selectedprosperoWalletAddress="0x4cc4b88c622ee9b2c9007a6aea014a093c2fefc5"//CHANGE
+//Libraries
 const BigNumber = require('bignumber.js');
 const Web3 = require('web3');
 import detectEthereumProvider from '@metamask/detect-provider';
 const ethers = require('ethers')
 var web3;
-//const ethers = new Ethers(window.ethereum);
-var leaderBoardData={data:[],selectedLeaderIndex:0}//leader board portfolios
-
-var ethersProvider;
-var ethersSigner;
-var USD_SCALE = 1000000000000000000;//await ProsperoWalletLibConstants.methods.USD_SCALE().call()
-
 //ABIS
-var tokenArray =require('./apiLib/Tokens.json');
 var ProsperoPricesJson =require('./apiLib/ProsperoPrices.json')
 var ProsperoBeaconFactoryJson=require('./apiLib/ProsperoBeaconFactory.json')
 var SubnetHelperContractJson=require('./apiLib/SubnetHelperContract.json')
 var ProsperoWalletJson=require('./apiLib/ProsperoWallet.json')
 var PricesLibraryJson=require('./apiLib/PricesLibrary.json')
 var ERC20Json=require('./apiLib/ERC20.json')
+//Constants
 var WAVAX_COIN_ADDRESS="0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7";
-
 var nativeTokenWrappedAddress=WAVAX_COIN_ADDRESS;
-var nativeTokenPrice;
-var EOAAddress;
-var isSubnet=false;//To Do - change me to something automatic by checking network
-var balancesInEoa=[];
-var NativeTokenName="Avax"
 var ALOT_APPROVE=ethers.utils.parseEther("100000000000000");
+var NativeTokenName="Avax"
+//Other Vars
+var EOAAddress;
+var ethersProvider;
+var ethersSigner;
+var nativeTokenPrice;
+var isSubnet=false;//To Do - change me to something automatic by checking network
 var avaxPrice;
 var GAS_PRICE;
+var USD_SCALE = 1000000000000000000;//await ProsperoWalletLibConstants.methods.USD_SCALE().call()
+//UI Objects - keys changed and formatted for UI
+var leaderBoardUITableObject;
+//FUNCTIONS
 //To do - update amount in balancesInEoa object when user updates USD amount in table
 async function updateAmount(amount, tokenAddress){
   console.log('updateAmount called with amount:'+amount+" tokenAddress:"+tokenAddress)
-  //right here
   for (var i =0;i<balancesInEoa.length;i++){
     var thisDepositingObj=  balancesInEoa[i]
     if ((thisDepositingObj.address).toLowerCase() == (tokenAddress).toLowerCase()){
@@ -98,7 +99,7 @@ async function deposit(){
 
   //await getAmountsDepositing();
   //add tokens and amountss
-  var status = await approveDepositing(tokens,amounts, selectedProsperoWalletAddress);//UPDATE
+  var status = await approveDepositing(tokens,amounts, selectedprosperoWalletAddress);//UPDATE
   if (!status.success){
     return status
   }
@@ -113,7 +114,7 @@ async function deposit(){
   console.log("methodType:"+methodType)
 
   try{
-    var prosperoWalletInstance = await new ethers.Contract(selectedProsperoWalletAddress, ProsperoWalletJson["abi"],  ethersSigner);
+    var prosperoWalletInstance = await new ethers.Contract(selectedprosperoWalletAddress, ProsperoWalletJson["abi"],  ethersSigner);
     console.log("about to dep...")
     var tx = await prosperoWalletInstance.deposit(
       tokens,
@@ -164,12 +165,12 @@ async function calculateGasEstimate (gasEstimate, gasPriceToUse){
     usdAmountOfGas:usdAmountOfGas
   }
 }
-async function approveDepositing(tokens, amounts, selectedProsperoWalletAddress){
+async function approveDepositing(tokens, amounts, selectedprosperoWalletAddress){
  console.log("approveDepositing")
   var zeroBn = BigNumber("0")
   for (var k=0;k<tokens.length;k++){
     var thisTokenInstance = await new ethers.Contract(tokens[k], ERC20Json["abi"],  ethersSigner);
-    var allowance = await thisTokenInstance.allowance(EOAAddress, selectedProsperoWalletAddress);
+    var allowance = await thisTokenInstance.allowance(EOAAddress, selectedprosperoWalletAddress);
     var bnAllowance = BigNumber(allowance+"")
     var bnAmountInWeiToDeposit = BigNumber(amounts[k]+"")
     console.log("dep:"+bnAmountInWeiToDeposit)
@@ -184,8 +185,8 @@ async function approveDepositing(tokens, amounts, selectedProsperoWalletAddress)
             //  var amtToApproveToReachDiff = bnAmountInWeiToDeposit.minus(bnAllowance)
               var amtToApprove = ALOT_APPROVE // can switch to amtToApprove
               //console.log("need to approve this much:"+amtToApproveToReachDiff+" going to approve:"+amtToApprove);
-              //console.log("selectedProsperoWalletAddress:" + selectedProsperoWalletAddress)
-              var tx = await thisTokenInstance.approve(selectedProsperoWalletAddress, amtToApprove+"");
+              //console.log("selectedprosperoWalletAddress:" + selectedprosperoWalletAddress)
+              var tx = await thisTokenInstance.approve(selectedprosperoWalletAddress, amtToApprove+"");
               var f = await tx.wait();
               //console.log("transaction approve returned:"+JSON.stringify(f,null,2)+" for "+thisToken.name)
             }catch(e){
@@ -408,8 +409,42 @@ async function createPortfolio(walletName){
 }
 return {success:false, error:null}
 }
-async function getLeaderBoardDataForTable(){
+async function initLeaderBoardTableObject(){
   try{
+  await createLeaderBoardDataObject();
+  console.log('leaderBoardData:'+JSON.stringify(leaderBoardData,null,2))
+  var leaderBoardDataHere = leaderBoardData.data
+  var tableData = []
+  for (var i =0;i<leaderBoardDataHere.length;i++){
+    var fee =leaderBoardDataHere[i]['leaderPercentageFee'];
+    var profitLeader=leaderBoardDataHere[i]['profitLeader'];
+    fee = fee / USD_SCALE;
+    fee = fee * 100;
+    fee = parseInt(fee)
+    fee = fee + "%"
+    profitLeader = profitLeader * 100;
+    profitLeader= parseInt(profitLeader)
+    profitLeader = profitLeader + "%"
+
+    var leaderObjForTable = {
+      name:leaderBoardDataHere[i]['walletValues']['walletName'],
+      fee:fee,
+      d7: 0,
+      d30: 0,
+      d90: 0,
+      y1: profitLeader,
+    };
+    tableData.push(leaderObjForTable);
+  }
+  leaderBoardUITableObject = tableData;
+}catch(e){
+  return {error:e}
+}
+}
+async function getLeaderBoardDataForTable(){
+  return leaderBoardUITableObject;
+
+  /*try{
   await createLeaderBoardDataObject();
   console.log('leaderBoardData:'+JSON.stringify(leaderBoardData,null,2))
   var leaderBoardDataHere = leaderBoardData.data
@@ -438,7 +473,7 @@ async function getLeaderBoardDataForTable(){
   return tableData;
 }catch(e){
   return {error:e}
-}
+}*/
 }
 async function createLeaderBoardDataObject(){
   //console.log("createLeaderBoardDataObject called");
@@ -457,7 +492,7 @@ async function createLeaderBoardDataObject(){
     //console.log('walletValues:'+JSON.stringify(walletValues,null,2))
     //var leaderEOA = walletValues.leaderEOA
     var valueOfLeadersPortfolio = await getValueOfUsersPortfolio(thisLeaderAddress, walletValues.leaderEOA)
-    //async function getValueOfUsersPortfolio(ProsperoWalletAddress, usersEOA){
+    //async function getValueOfUsersPortfolio(prosperoWalletAddress, usersEOA){
     //console.log('valueOfLeadersPortfolio:'+valueOfLeadersPortfolio)
     var ProsperoWalletInstance = new web3.eth.Contract(
       ProsperoWalletJson.abi,
@@ -515,22 +550,22 @@ async function createLeaderBoardDataObject(){
   //console.log("leaderBoardData:"+JSON.stringify(leaderBoardData,null,2))
   leaderBoardData['data']=leaderBoardDataHere
 }
-async function getValueOfBalancesOfTokensInPortfolioForUser(balancesAndTokensObj, user, ProsperoWalletAddress){
+async function getValueOfBalancesOfTokensInPortfolioForUser(balancesAndTokensObj, user, prosperoWalletAddress){
   //console.log('--getValueOfBalancesOfTokensInPortfolioForUser')
   //console.log('balancesAndTokensObj:'+JSON.stringify(balancesAndTokensObj,null,2))
   if (balancesAndTokensObj==null){
-    balancesAndTokensObj = await getBalanacesOfTokensInPortfolioForUserContractCall(user, ProsperoWalletAddress)
+    balancesAndTokensObj = await getBalanacesOfTokensInPortfolioForUserContractCall(user, prosperoWalletAddress)
   }
   var balancesValue = await getValueOfBalancesOfTokensInPortfolio(balancesAndTokensObj)
   //console.log('balancesValue*:'+JSON.stringify(balancesValue,null,2))
 
   var ProsperoWalletInstance = new web3.eth.Contract(
     ProsperoWalletJson.abi,
-    ProsperoWalletAddress
+    prosperoWalletAddress
   );
   ProsperoWalletInstance.defaultAccount=user
   var totalUsd = await ProsperoWalletInstance.methods.getTotalUsdInvestedPerUser(user).call({from: user})
-  var valueOfUsersPortfolio = await getValueOfUsersPortfolio(ProsperoWalletAddress, user, false);
+  var valueOfUsersPortfolio = await getValueOfUsersPortfolio(prosperoWalletAddress, user, false);
   var percentageUser = await  ProsperoWalletInstance.methods.getPercentageOwnership(user).call({from: user})
   //=console.log('percentageUser:'+percentageUser)
   percentageUser=(percentageUser / USD_SCALE)
@@ -615,11 +650,11 @@ async function getValueOfBalancesOfTokensInPortfolioForUser(balancesAndTokensObj
   //console.log('balancesValueFinal:'+JSON.stringify(balancesValueFinal,null,2))
   return balancesValueFinal
 }
-async function getValueOfUsersPortfolio(ProsperoWalletAddress, usersEOA, shouldKeepAsBigNumber){
+async function getValueOfUsersPortfolio(prosperoWalletAddress, usersEOA, shouldKeepAsBigNumber){
 //  console.log(
 //  "getValueOfUsersPortfolio pricesLibraryAddress: "+pricesLibraryAddress+
 //  " prosperoPricesAddress: "+prosperoPricesAddress+
-//  " ProsperoWalletAddress: "+ProsperoWalletAddress
+//  " prosperoWalletAddress: "+prosperoWalletAddress
 //  +" usersEOA: "+usersEOA
 //  +" PricesLibraryJson.abi:"+JSON.stringify(PricesLibraryJson.abi,null,2))
   try{
@@ -628,13 +663,13 @@ async function getValueOfUsersPortfolio(ProsperoWalletAddress, usersEOA, shouldK
       pricesLibraryAddress
     );
     pricesLibraryInstance.defaultAccount=usersEOA
-    var totalValueOfPortfolio =  await pricesLibraryInstance.methods.getTotalValueOfPortfolio(ProsperoWalletAddress, prosperoPricesAddress).call({
+    var totalValueOfPortfolio =  await pricesLibraryInstance.methods.getTotalValueOfPortfolio(prosperoWalletAddress, prosperoPricesAddress).call({
       from: usersEOA
     });
 
     var ProsperoWalletInstance = new web3.eth.Contract(
       ProsperoWalletJson.abi,
-      ProsperoWalletAddress
+      prosperoWalletAddress
     );
     ProsperoWalletInstance.defaultAccount=usersEOA
     var usersValue = await ProsperoWalletInstance.methods.getUsersValue(usersEOA, totalValueOfPortfolio).call({
@@ -654,12 +689,12 @@ async function getValueOfUsersPortfolio(ProsperoWalletAddress, usersEOA, shouldK
     return 0;
   }
 }
-async function getBalanacesOfTokensInPortfolioForUserContractCall(user, ProsperoWalletAddress){
+async function getBalanacesOfTokensInPortfolioForUserContractCall(user, prosperoWalletAddress){
   //console.log("getBalanacesOfTokensInPortfolioForUserContractCall")
   try{
     var ProsperoWalletInstance = new web3.eth.Contract(
       ProsperoWalletJson.abi,
-      ProsperoWalletAddress
+      prosperoWalletAddress
     );
     var tokens=[]
     var balances=[]
@@ -728,7 +763,8 @@ async function initializeApi(){
     console.error("chain changed...")
   })
   await updatePrices();
-  //await getBalancesInEoa();
+  await initLeaderBoardTableObject();
+  await createMyWalletsDataObject();
 
 }
 async function updatePrices(){
@@ -825,11 +861,11 @@ async function updatePrices(){
     alert('Could not get prices from coingecko, please reload page :'+e)
   }
 }
-async function getWalletValues(ProsperoWalletAddress){
+async function getWalletValues(prosperoWalletAddress){
   try{
     var ProsperoWalletInstance = new web3.eth.Contract(
       ProsperoWalletJson.abi,
-      ProsperoWalletAddress
+      prosperoWalletAddress
     );
     var walletValues = await ProsperoWalletInstance.methods.getWalletValues().call({
       from: EOAAddress
@@ -840,7 +876,7 @@ async function getWalletValues(ProsperoWalletAddress){
       leaderEOA : walletValues[1],
       prosperoPricesAddress : walletValues[2],
       prosperoDataAddress : walletValues[3],
-      ProsperoWalletAddress : walletValues[4],
+      prosperoWalletAddress : walletValues[4],
       walletName : walletValues[5],
       profilePictureUrl : walletValues[6],
       totalSupply_percentageOwnership : walletValues[7],
@@ -956,7 +992,10 @@ async function getTokenObject_newMine(tokenAddress){
   console.log("ERROR - could not find token in getTokenObject_newMine tokenAddress:"+tokenAddress)
 }
 async function createMyWalletsDataObject(){
-  var prosperoBeaconFactoryInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson["abi"],  accounts[1]);
+  //right here
+  console.log('createMyWalletsDataObject factoryAddress:'+factoryAddress+' EOAAddress:'+EOAAddress)
+  var prosperoBeaconFactoryInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson["abi"],  ethersSigner);
+  console.log("got p beacon..")
   var myWalletsFromContract = await prosperoBeaconFactoryInstance.getWallets(EOAAddress);
   var myWalletTypes = await prosperoBeaconFactoryInstance.getWalletTypes(EOAAddress);
   //console.log("myWallets***:"+JSON.stringify(myWalletsFromContract,null,2))
@@ -979,44 +1018,35 @@ async function createMyWalletsDataObject(){
     //console.log("thisWalletsObj:"+JSON.stringify(thisWalletsObj,null,2))
     myWallets[thisWalletAddress]=thisWalletsObj
   }
-  //console.log("myWallets:"+JSON.stringify(myWallets,null,2))
+  console.log("myWallets:"+JSON.stringify(myWallets,null,2))
   //myWallets=myWallets;
 }
 async function getSelectedWalletFromMyWalletsOrLastOneIfNone(){
-  //var selectedProsperoWalletAddress=selectedProsperoWalletAddress
-  //console.log("getSelectedWalletFromMyWalletsOrLastOneIfNone selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
+  //var selectedprosperoWalletAddress=selectedprosperoWalletAddress
+  //console.log("getSelectedWalletFromMyWalletsOrLastOneIfNone selectedprosperoWalletAddress:"+selectedprosperoWalletAddress)
   var thisPortfolio=null;
-  if (selectedProsperoWalletAddress!=undefined && selectedProsperoWalletAddress!=null && selectedProsperoWalletAddress!=""){
-    if(myWallets.hasOwnProperty(selectedProsperoWalletAddress)){
+  if (selectedprosperoWalletAddress!=undefined && selectedprosperoWalletAddress!=null && selectedprosperoWalletAddress!=""){
+    if(myWallets.hasOwnProperty(selectedprosperoWalletAddress)){
       //console.log('has it')
-      thisPortfolio = myWallets[selectedProsperoWalletAddress]
+      thisPortfolio = myWallets[selectedprosperoWalletAddress]
     }
   }
   if (thisPortfolio==null){
-    //console.log("myWallets does not have:"+selectedProsperoWalletAddress+" going with the last one.")
+    //console.log("myWallets does not have:"+selectedprosperoWalletAddress+" going with the last one.")
     //console.log("myWallets:"+JSON.stringify(myWallets,null,2))
 
     for (var key in myWallets) {
       if (myWallets.hasOwnProperty(key)) {
         thisPortfolio=myWallets[key]
       }
-      selectedProsperoWalletAddress = key.toLowerCase();
+      selectedprosperoWalletAddress = key.toLowerCase();
     }
   }
-  //console.log("--selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
+  //console.log("--selectedprosperoWalletAddress:"+selectedprosperoWalletAddress)
   //console.log('returning:'+JSON.stringify(thisPortfolio,null,2))
   return thisPortfolio
 }
-async function updateTokenFields(anAddress, cChainAddress){
-  var thisObj={}
-  thisObj['address']=anAddress.toLowerCase();//wavax
-  thisObj['decimals']=await getDecimals(anAddress);
-  thisObj['name']=await getName(anAddress);
-  thisObj['symbol']=await getSymbol(anAddress);
-  thisObj['cChainAddress']=cChainAddress;
 
-  return thisObj;
-}
 async function updateBalanceToEighteenDecimalsIfNeeded(balance, tokenAddress){
   if (tokenAddress=="0x1d308089a2d1ced3f1ce36b1fcaf815b07217be3"){
     return balance;
@@ -1068,35 +1098,6 @@ async function updateBalanceFromEighteenDecimalsIfNeeded(balance, tokenAddress){
   alert("ERROR - could not find token in updateBalanceFromEighteenDecimalsIfNeeded for address: "+tokenAddress)
 
 }
-async function getDecimals(tokenAddress){
-  try{
 
-    var tokenInst= new web3.eth.Contract(
-      ERCExtendedJson.abi,
-      tokenAddress
-    );
-    var decimals = await tokenInst.methods.decimals().call({from: accounts[0].address})
-    //console.log('*decimals:'+decimals);
-    return decimals
-  }catch(e){console.log("exception - getDecimals:"+e)}
-}
-async function getName(tokenAddress){
-  var tokenInst= new web3.eth.Contract(
-    ERCExtendedJson.abi,
-    tokenAddress
-  );
-  var name = await tokenInst.methods.name().call({from: accounts[0].address})
-  //console.log('name:'+name);
-  return name
-}
-async function getSymbol(tokenAddress){
-  var tokenInst= new web3.eth.Contract(
-    ERCExtendedJson.abi,
-    tokenAddress
-  );
-  var symbol = await tokenInst.methods.symbol().call({from: accounts[0].address})
-  //console.log('symbol:'+symbol);
-  return symbol
-}
 
 export {  getLeaderBoardDataForTable, initializeApi, joinPortfolio, createPortfolio, updateActiveLeaderboardRow, getBalancesInEoa, deposit, updateAmount };
