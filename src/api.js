@@ -1,3 +1,13 @@
+//CONTRACTS VARIABLES:
+var wavaxAddressFakeFuji="0x686bdcc79ec7f849669f3f908feb767f7c8d5b56"
+var factoryAddress="0x8c333B6dF83c551f6f738946344E31021Fe0807e"
+var prosperoPricesAddress="0xbd90c371c3524e86659291892B76820599633da9"
+var pricesLibraryAddress="0x81D8Ed70151e7Ce3d36D2256F629f6862aC2A457"
+var subnetHelperContractAddress="0x4A6cc169c359Fc340bAc1aEb973625CD64CEFdf7"
+
+//END CONTRACT VARIABLES
+var selectedProsperoWalletAddress="0x4cc4b88c622ee9b2c9007a6aea014a093c2fefc5"//CHANGE
+
 const BigNumber = require('bignumber.js');
 const Web3 = require('web3');
 import detectEthereumProvider from '@metamask/detect-provider';
@@ -9,19 +19,338 @@ var leaderBoardData={data:[],selectedLeaderIndex:0}//leader board portfolios
 var ethersProvider;
 var ethersSigner;
 var USD_SCALE = 1000000000000000000;//await ProsperoWalletLibConstants.methods.USD_SCALE().call()
-var factoryAddress="0x0a82054efCf045ED8A84bB8CedD593554BB95B76"
-var prosperoPricesAddress="0xee2d7D2Fb1c0ed021F5035A1c156Cd067203AfF0";
-var pricesLibraryAddress="0x0a3b0EfCD2dF87640fFb58b1B3593A50a37efa29"
-var tokenArray =require('./apiLib/TokensMainnet.json');
+
+//ABIS
+var tokenArray =require('./apiLib/Tokens.json');
 var ProsperoPricesJson =require('./apiLib/ProsperoPrices.json')
 var ProsperoBeaconFactoryJson=require('./apiLib/ProsperoBeaconFactory.json')
+var SubnetHelperContractJson=require('./apiLib/SubnetHelperContract.json')
 var ProsperoWalletJson=require('./apiLib/ProsperoWallet.json')
 var PricesLibraryJson=require('./apiLib/PricesLibrary.json')
+var ERC20Json=require('./apiLib/ERC20.json')
 var WAVAX_COIN_ADDRESS="0xB31f66AA3C1e785363F0875A1B74E27b85FD66c7";
+
+var nativeTokenWrappedAddress=WAVAX_COIN_ADDRESS;
 var nativeTokenPrice;
-var EOAAddress="0xeeca92f4eb0b3102a62a414f1ff6290fFE23B67d";
+var EOAAddress;
+var isSubnet=false;//To Do - change me to something automatic by checking network
+var balancesInEoa=[];
+var NativeTokenName="Avax"
+var ALOT_APPROVE=ethers.utils.parseEther("100000000000000");
+var avaxPrice;
+var GAS_PRICE;
+//To do - update amount in balancesInEoa object when user updates USD amount in table
+async function updateAmount(amount){}
+/*
+async function getInfoSubnetHelperContract(){
+  var sub = await new ethers.Contract(subnetHelperContractAddress, SubnetHelperContractJson["abi"],  ethersSigner);
+  console.log("about to dep...")
+  var f = await sub.getAllTokensOnSubnet();
+  console.log('sub helper:'+f)
+}
+*/
+async function deposit(){
+  //await getInfoSubnetHelperContract();
+  console.log("deposit")
+  //TESTING
+  var total=0
+  var numberOfDeposits =0
+  var tokens=[]
+  var amounts=[]
+  var avaxValue = 0;
+
+  for (var i =0;i<balancesInEoa.length;i++){
+    var thisDepositingObj=  balancesInEoa[i]
+    console.log('thisDepositingObj:'+JSON.stringify(thisDepositingObj,null,2))
+    var usdAmountEnteredByUser=thisDepositingObj['usdAmountEnteredByUser']
+    usdAmountEnteredByUser = Number(usdAmountEnteredByUser)
+    if (usdAmountEnteredByUser>0){
+      console.log('thisDepositingObj.name:'+thisDepositingObj.name)
+        //var weiAmount = await getWeiAmount(usdAmountEnteredByUser, thisDepositingObj.address)
+        var amountInEth = usdAmountEnteredByUser/thisDepositingObj.price;
+        amountInEth = amountInEth.toFixed(16)
+        console.log('amountInEth:'+amountInEth)
+        var weiAmt = web3.utils.toWei(amountInEth+"", 'ether')
+        console.log('weiAmt1:'+weiAmt)
+
+        weiAmt = await updateBalanceFromEighteenDecimalsIfNeeded(weiAmt, thisDepositingObj.address)
+          console.log('weiAmt2:'+weiAmt)
 
 
+        if (thisDepositingObj.name==NativeTokenName){
+        //  console.log("WEI:"+thisDepositingObj.weiDepositing)
+          avaxValue=weiAmt+""
+        }else{
+          tokens.push(thisDepositingObj.address)
+          amounts.push(weiAmt+"")
+        }
+    }
+  }
+
+  //await getAmountsDepositing();
+  //add tokens and amountss
+  var status = await approveDepositing(tokens,amounts, selectedProsperoWalletAddress);//UPDATE
+  if (!status.success){
+    return status
+  }
+
+  var gasEstimate;
+  var shouldJustDeposit=0
+  var firstTimeString=""
+  var methodType = 0;
+  console.log("tokens:"+tokens)
+  console.log("amounts:"+amounts)
+  console.log("avaxValue:"+avaxValue)
+  console.log("methodType:"+methodType)
+
+  try{
+    var prosperoWalletInstance = await new ethers.Contract(selectedProsperoWalletAddress, ProsperoWalletJson["abi"],  ethersSigner);
+    console.log("about to dep...")
+    var tx = await prosperoWalletInstance.deposit(
+      tokens,
+      amounts,
+      methodType,
+      {
+        value:avaxValue+""
+      }
+    );
+    console.log("dep tx 1:"+JSON.stringify(tx,null,2))
+
+    var f = await tx.wait();
+    console.log("dep tx 2 :"+JSON.stringify(f,null,2))
+
+    var cumulativeGasUsed = f.cumulativeGasUsed;
+    var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
+    console.log("gasUsed:"+JSON.stringify(gasUsed,null,2))
+  }catch(exception){
+    console.log("eeeee")
+    console.error("exception:"+JSON.stringify(exception,null,2))
+    console.error("exception:"+exception)
+    return {success:false, error:exception}
+  }
+}
+async function calculateGasEstimate (gasEstimate, gasPriceToUse){
+  ////console.log'calculateGasEstimate')
+  //console.log("gasEstimate:"+gasEstimate)
+  var estimatedGasBigNumber = BigNumber(gasEstimate+"")
+  if (gasPriceToUse!=undefined){
+    GAS_PRICE = gasPriceToUse;
+  }else{
+    GAS_PRICE=await web3.eth.getGasPrice();
+  }
+  //serverResponse = await postData("https://api.avax.network/ext/bc/C/rpc", {method:"eth_baseFee", id:1});
+  //feeHex = serverResponse.result
+  //eth_baseFee = parseInt(feeHex,16)
+  ////console.log'eth_baseFee:'+eth_baseFee)
+  //GAS_PRICE=eth_baseFee;
+  //console.log("GAS_PRICE NOW:"+GAS_PRICE)
+  var estimatedGasCostWei = estimatedGasBigNumber.multipliedBy(GAS_PRICE+"");
+  //console.log("Estimate calculateGasEstimate wei:"+estimatedGasCostWei)
+  var estimatedCostInEth=ethers.utils.formatEther(estimatedGasCostWei+"")
+  var usdAmountOfGas = avaxPrice * estimatedCostInEth
+  //console.log("Estimate calculateGasEstimate eth:"+estimatedCostInEth)
+  return {
+    estimatedGasCostWei:estimatedGasCostWei,
+    estimatedCostInEth:estimatedCostInEth,
+    usdAmountOfGas:usdAmountOfGas
+  }
+}
+async function approveDepositing(tokens, amounts, selectedProsperoWalletAddress){
+ console.log("approveDepositing")
+  var zeroBn = BigNumber("0")
+  for (var k=0;k<tokens.length;k++){
+    var thisTokenInstance = await new ethers.Contract(tokens[k], ERC20Json["abi"],  ethersSigner);
+    var allowance = await thisTokenInstance.allowance(EOAAddress, selectedProsperoWalletAddress);
+    var bnAllowance = BigNumber(allowance+"")
+    var bnAmountInWeiToDeposit = BigNumber(amounts[k]+"")
+    console.log("dep:"+bnAmountInWeiToDeposit)
+    console.log("all:"+bnAllowance)
+
+    if (bnAmountInWeiToDeposit.isGreaterThan(bnAllowance)){
+      console.log("NOT ENOUGH APPROVED")
+
+            try{
+
+
+            //  var amtToApproveToReachDiff = bnAmountInWeiToDeposit.minus(bnAllowance)
+              var amtToApprove = ALOT_APPROVE // can switch to amtToApprove
+              //console.log("need to approve this much:"+amtToApproveToReachDiff+" going to approve:"+amtToApprove);
+              //console.log("selectedProsperoWalletAddress:" + selectedProsperoWalletAddress)
+              var tx = await thisTokenInstance.approve(selectedProsperoWalletAddress, amtToApprove+"");
+              var f = await tx.wait();
+              //console.log("transaction approve returned:"+JSON.stringify(f,null,2)+" for "+thisToken.name)
+            }catch(e){
+              return {success:false, error:e}
+            }
+          }
+        }
+        return {success:true}
+      }
+async function getAmountsDepositing(){
+  console.log("getAmountsDepositing..")
+  //console.log("usdAmountToDepositForEachTokenForEachToken:"+usdAmountToDepositForEachTokenForEachToken)
+  var depositingObj=[]
+  for (var k=0;k<balancesInEoa.length;k++){
+    var usdAmountToDepositForEachTokenForEachToken=   Number(balancesInEoa[k]['usdAmountEnteredByUser']);
+   console.log("*** usdAmountToDepositForEachTokenForEachToken:"+usdAmountToDepositForEachTokenForEachToken)
+    var usdAmountToDepositForEachTokenForEachTokenBn= BigNumber(usdAmountToDepositForEachTokenForEachToken+'');
+    var thisToken = balancesInEoa[k]
+
+    var bnBal = BigNumber(thisToken.balance+"")
+    var zeroBn = BigNumber("0")
+    //console.log("bnBal:"+bnBal+"zeroBn"+zeroBn)
+    var obj;
+    var balancsInEoa=[]
+    console.log("token:"+thisToken.name)
+    console.log("This Token:"+JSON.stringify(thisToken,null,2))
+    //console.log("bnBal:"+bnBal)
+      if (bnBal.isGreaterThan(zeroBn)){
+        console.log("greter than zero")
+
+        var amountInEthToDepositHelper = usdAmountToDepositForEachTokenForEachToken / Number(thisToken.price);
+        console.log("thisToken.price:"+thisToken.price)
+        console.log("usdAmountToDepositForEachTokenForEachToken:"+usdAmountToDepositForEachTokenForEachToken)
+
+        console.log("amountInEthToDepositHelper:"+amountInEthToDepositHelper)
+
+        console.log("thisToken.decimals:"+thisToken.decimals)
+        amountInEthToDepositHelper=amountInEthToDepositHelper.toFixed(thisToken.decimals)
+        console.log("amountInEthToDepositHelper:"+amountInEthToDepositHelper+" p:"+Number(thisToken.price))
+        var amountInEthToDeposit = amountInEthToDepositHelper;// / Number(thisToken.price)
+        console.log("amountInEthToDeposit:"+amountInEthToDeposit)
+        var amountInWeiToDeposit = ethers.utils.parseEther(amountInEthToDeposit+"")
+        console.log("amountInWeiToDeposit:"+amountInWeiToDeposit)
+
+        var thisAddress = thisToken.address
+        //console.log("ThisAddress:"+thisAddress)
+        //if (thisToken.address="AVAX"){
+        //  thisAddress
+        //}
+        obj={
+          //totalUSDAmountToDeposit:totalUSDAmountToDeposit,
+          usdAmountEnteredByUser:Number(balancesInEoa[k]['usdAmountEnteredByUser']),
+          weiDepositing:amountInWeiToDeposit+"",
+          usdDepositing:usdAmountToDepositForEachTokenForEachToken+"",
+          ethDepositing:amountInEthToDeposit+"",
+          name: thisToken.name,
+          usdAmount:thisToken.usdAmount,
+          balance: thisToken.balance,
+          balanceInEth:thisToken.balanceInEth,
+          address:thisToken.address,
+          currentPercentageInPortfolio:thisToken.currentPercentageInPortfolio
+        }
+      }else{
+        obj={
+          //totalUSDAmountToDeposit:totalUSDAmountToDeposit,
+          usdAmountEnteredByUser:0,
+          weiDepositing:0+"",
+          usdDepositing:0+"",
+          ethDepositing:0+"",
+          name: thisToken.name,
+          usdAmount:thisToken.usdAmount,
+          balance: thisToken.balance,
+          balanceInEth:thisToken.balanceInEth,
+          address:thisToken.address,
+          currentPercentageInPortfolio:thisToken.currentPercentageInPortfolio
+        }
+
+    }
+    balancesInEoa[k]['ethDepositing']=obj['ethDepositing']
+    balancesInEoa[k]['weiDepositing']=obj['weiDepositing']
+    balancesInEoa[k]['usdAmountEnteredByUser']=Number(obj['usdAmountEnteredByUser'])
+
+    depositingObj.push(obj)
+  }
+  balancesInEoa=depositingObj
+  //await initDepositWithdraw()
+  //console.log("depositingObj:"+JSON.stringify(depositingObj,null,2))
+}
+async function getBalancesInEoa(){
+  console.log("getBalancesInEoa - to do: call me when deposit tab is opened")
+  var totalValue = 0;
+  var nativeTokenObj;
+  for (var k=0;k<tokenArray.length;k++){
+    var thisToken=tokenArray[k];
+    var thisTokenInstance = await new ethers.Contract(tokenArray[k]["address"], ERC20Json.abi,  ethersSigner);
+    var balance = await thisTokenInstance.balanceOf(EOAAddress)
+    var balanceNowBn = BigNumber(balance+"")
+    var balanceInEth = ethers.utils.formatEther(balance+"")
+    var usdValue = await getUSDValue_MINE(balance+"", thisToken.address)
+    totalValue=totalValue+Number(usdValue);
+    var thisTokenName =  thisToken.name
+    if ((thisToken.address).toLowerCase() == (wavaxAddressFakeFuji).toLowerCase()){
+      nativeTokenObj=thisToken;
+    }
+    //TESTING - REMOVE ME
+    /*if (thisToken.symbol =="WETH.e"){
+      console.log("updating..")
+      var obj = {
+        usdAmountEnteredByUser:100,
+        index:k,
+        icon:thisToken.logoURI,
+        name:thisTokenName,
+        available:usdValue.toFixed(2)+"",
+        balance:balance+"",
+        balanceInEth:balanceInEth+"",
+        price:(thisToken.price).toFixed(2),
+        address:thisToken.address,
+        EOAAddress:EOAAddress,
+        decimals:thisToken.decimals,
+        isNativeToken:false
+      }
+    }else{*/
+    var obj = {
+      usdAmountEnteredByUser:0,
+      index:k,
+      icon:thisToken.logoURI,
+      name:thisTokenName,
+      available:usdValue.toFixed(2)+"",
+      balance:balance+"",
+      balanceInEth:balanceInEth+"",
+      price:(thisToken.price).toFixed(2),
+      address:thisToken.address,
+      EOAAddress:EOAAddress,
+      decimals:thisToken.decimals,
+      isNativeToken:false
+    }
+  //}
+    balancesInEoa.push(obj)
+  }
+  //NATIVE TOKEN, doesn't work with subnet yet
+  if (!isSubnet){
+    var index = tokenArray.length;
+    var balanceAvaxNow = await ethersProvider.getBalance(EOAAddress);
+    console.log('v-2')
+    //var usdValueAvax = await getUSDValue_MINE(balanceAvaxNow+"", nativeTokenWrappedAddress)
+    var balanceInEthAvax =  ethers.utils.formatEther(balanceAvaxNow+"")
+    console.log('avaxPrice:'+avaxPrice+' balanceInEthAvax:'+balanceInEthAvax)
+    var usdValueAvax = avaxPrice * balanceInEthAvax;
+    console.log('usdValueAvax in getBalancesInEoa:'+usdValueAvax)
+
+    var obj = {
+      usdAmountEnteredByUser:0,//TESTING - TO DO REMOVE ME....
+      index:index,
+      icon:nativeTokenObj.logoURI,
+      name:NativeTokenName,
+      available:usdValueAvax.toFixed(2)+"",
+      balance:balance+"",
+      balanceInEth:balanceInEth+"",
+      price:(nativeTokenObj.price).toFixed(2),
+      address:nativeTokenObj.address,
+      EOAAddress:EOAAddress,
+      decimals:nativeTokenObj.decimals,
+      isNativeToken:true
+    }
+    balancesInEoa.push(obj)
+  }
+  console.log("balancesInEoa:"+JSON.stringify(balancesInEoa,null,2))
+  return balancesInEoa;
+  //balancesInEoa = balancesInEoa
+  //console.log("balancesInEoa:"+balancesInEoa)
+  //if (shouldInitDepositingObject){
+  //depositingObject=balancesInEoa;
+  //}
+}
 function updateActiveLeaderboardRow(row){
   leaderBoardData["selectedLeaderIndex"]=row
 }
@@ -390,6 +719,7 @@ async function initializeApi(){
     console.error("chain changed...")
   })
   await updatePrices();
+  //await getBalancesInEoa();
 
 }
 async function updatePrices(){
@@ -437,7 +767,7 @@ async function updatePrices(){
         var twentyFourHour = anObj['usd_24h_change']
         var twentyFourHourChange = twentyFourHour/100
         twentyFourHourChange = twentyFourHourChange * usd
-        if (address == WAVAX_COIN_ADDRESS){
+        if (address == nativeTokenWrappedAddress){
           nativeTokenPrice=usd;
         }
         tokenArray[i]['twentyFourHour'] = twentyFourHourChange;
@@ -462,14 +792,20 @@ async function updatePrices(){
         ProsperoPricesJson.abi,
         prosperoPricesAddress
       );
-      //console.log('allAddresses:'+allAddresses)
-
       var prosperoPrices = await prosperoPrices.methods.getPrices(allAddresses).call({from:EOAAddress});
       for (var i =0;i<prosperoPrices.length;i++){
         var prosperoPrice = BigNumber(prosperoPrices[i]+"")
         var usdBN = BigNumber(USD_SCALE+"")
         prosperoPrice = prosperoPrice.dividedBy(usdBN)
         tokenArray[i]['price']=prosperoPrice;
+        var lowerCaseCAdd = tokenArray[i]['cChainAddress']
+        var wavaxLowerC = WAVAX_COIN_ADDRESS.toLowerCase();
+        //console.log("lowerCaseCAdd:"+lowerCaseCAdd)
+        //console.log("wavaxLowerC  :"+wavaxLowerC)
+
+        if (lowerCaseCAdd==wavaxLowerC){
+          avaxPrice = prosperoPrice;
+        }
       }
     }catch(e){
       console.log("updatePricesNew exception1:"+e);
@@ -552,8 +888,9 @@ async function getValueOfBalancesOfTokensInPortfolio(balancesAndTokensObj){
   balanceValue['totalValue']=totalValue
   return balanceValue;
 }
-async function  getUSDValue_MINE(amountInWei, address){
+async function getUSDValue_MINE(amountInWei, address){
   //console.log("getUSDValue_MINE amountInWei:"+amountInWei+" address:"+address)
+
   var amountInWeiUpScaledForLowDecimalPoints = await updateBalanceToEighteenDecimalsIfNeeded(amountInWei, address)
 
   var amountInEther= Number(ethers.utils.formatEther(amountInWeiUpScaledForLowDecimalPoints+"")+"")
@@ -563,7 +900,10 @@ async function  getUSDValue_MINE(amountInWei, address){
   //console.log('address:'+address)
 
   //console.log('amountInE:'+amountInEther)
-  if (address == WAVAX_COIN_ADDRESS){
+  if (address == "0x1d308089a2d1ced3f1ce36b1fcaf815b07217be3"){
+    return (amountInEther * nativeTokenPrice)
+  }
+  if (address == nativeTokenWrappedAddress){
     //console.log('isNativeToken')
     return (amountInEther * nativeTokenPrice)
     //
@@ -581,7 +921,7 @@ async function  getUSDValue_MINE(amountInWei, address){
     }
   }
   alert("COULD NOT FIND PRICE IN getUSDValue_MINE address:"+address)
-  //console.log("COULD NOT FIND PRICE IN getUSDValue_MINE")
+  console.log("COULD NOT FIND PRICE IN getUSDValue_MINE"+address)
 }
 async function toPlainString(num) {
   return (''+ +num).replace(/(-?)(\d*)\.?(\d*)e([+-]\d+)/,
@@ -593,6 +933,10 @@ async function toPlainString(num) {
 }
 async function getTokenObject_newMine(tokenAddress){
   tokenAddress = tokenAddress.toLowerCase();
+  if (tokenAddress == ("0x1D308089a2D1Ced3f1Ce36B1FcaF815b07217be3").toLowerCase()){
+    tokenAddress ="0x3f226a80e63c859288b717db124d640c64e6fe66"
+  }
+  tokenAddress = tokenAddress.toLowerCase();
   for (var i =0; i<tokenArray.length;i++){
     var thisAdd = tokenArray[i].address
     thisAdd=thisAdd.toLowerCase();
@@ -600,7 +944,7 @@ async function getTokenObject_newMine(tokenAddress){
       return tokenArray[i]
     }
   }
-  console.log("ERROR - could not find token in getTokenObject_newMine")
+  console.log("ERROR - could not find token in getTokenObject_newMine tokenAddress:"+tokenAddress)
 }
 async function createMyWalletsDataObject(){
   var prosperoBeaconFactoryInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson["abi"],  accounts[1]);
@@ -628,21 +972,6 @@ async function createMyWalletsDataObject(){
   }
   //console.log("myWallets:"+JSON.stringify(myWallets,null,2))
   //myWallets=myWallets;
-}
-async function handleLeaderOrTrailerView(){
-  if (selectedProsperoWalletAddress!=undefined){
-    if ((leaderBoardData['data']).lenth>0){
-      leaderIndex = leaderBoardData['selectedLeaderIndex']
-      var portfolio =leaderBoardData['data'][leaderIndex]
-      //  var portfolio =DApp['leaderBoardData']['data'][leaderIndex]
-
-      if (selectedProsperoWalletAddress == portfolio['prosperoWalletAddress']){
-        //console.log("Leader looking to manage portfolio")
-      }else{
-        //console.log("NOT Leader looking to manage portfolio")
-      }
-    }
-  }
 }
 async function getSelectedWalletFromMyWalletsOrLastOneIfNone(){
   //var selectedProsperoWalletAddress=selectedProsperoWalletAddress
@@ -680,10 +1009,15 @@ async function updateTokenFields(anAddress, cChainAddress){
   return thisObj;
 }
 async function updateBalanceToEighteenDecimalsIfNeeded(balance, tokenAddress){
+  if (tokenAddress=="0x1d308089a2d1ced3f1ce36b1fcaf815b07217be3"){
+    return balance;
+  }
   for (var i =0;i<tokenArray.length;i++){
     tokenAddress=tokenAddress.toLowerCase();
     var thisA=(tokenArray[i]['address']).toLowerCase()
-    if (thisA == tokenAddress){
+    var thisACChainAddress=(tokenArray[i]['cChainAddress']).toLowerCase()
+
+    if (thisA == tokenAddress || tokenAddress == thisACChainAddress){
       if (tokenArray[i]['decimals'] == 18){
         return balance
       }else{
@@ -699,9 +1033,9 @@ async function updateBalanceToEighteenDecimalsIfNeeded(balance, tokenAddress){
     }
   }
   console.log("ERROR - could not find token in updateBalanceToEighteenDecimalsIfNeeded for address: "+tokenAddress)
+  alert("ERROR - could not find token in updateBalanceToEighteenDecimalsIfNeeded for address: "+tokenAddress)
 
 }
-//uses tokenArray.decimal to revert back from say Bitcoin being scaled up
 async function updateBalanceFromEighteenDecimalsIfNeeded(balance, tokenAddress){
   for (var i =0;i<tokenArray.length;i++){
     tokenAddress=tokenAddress.toLowerCase();
@@ -722,6 +1056,8 @@ async function updateBalanceFromEighteenDecimalsIfNeeded(balance, tokenAddress){
     }
   }
   console.log("ERROR - could not find token in updateBalanceFromEighteenDecimalsIfNeeded for address: "+tokenAddress)
+  alert("ERROR - could not find token in updateBalanceFromEighteenDecimalsIfNeeded for address: "+tokenAddress)
+
 }
 async function getDecimals(tokenAddress){
   try{
@@ -754,4 +1090,4 @@ async function getSymbol(tokenAddress){
   return symbol
 }
 
-export {  getLeaderBoardDataForTable, initializeApi, joinPortfolio, createPortfolio, updateActiveLeaderboardRow };
+export {  getLeaderBoardDataForTable, initializeApi, joinPortfolio, createPortfolio, updateActiveLeaderboardRow, getBalancesInEoa, deposit };

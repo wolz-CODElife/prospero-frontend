@@ -136,7 +136,7 @@
 
 <script setup>
 import { ref } from "vue";
-import {getLeaderBoardDataForTable, updateActiveLeaderboardRow, createPortfolio} from '@/api'
+import {getLeaderBoardDataForTable, updateActiveLeaderboardRow, createPortfolio, getBalancesInEoa, deposit} from '@/api'
 
 const disabled = ref(true);
 
@@ -166,6 +166,8 @@ const portfolioList = ref([]);
 	}
 	portfolioList.value = leaderBoardData;
 })()
+
+
 
 
 function changeTab(tab) {

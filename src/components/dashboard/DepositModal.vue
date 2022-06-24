@@ -56,7 +56,7 @@
 					</td>
 					<td>${{ token.price }}</td>
 					<td>${{ token.available }}</td>
-					<td>${{ token.amount }}</td>
+					<td>${{ token.usdAmountEnteredByUser }}</td>
 				</tr>
 			</tbody>
 			<tfoot class="bg-[#2D3035] text-white py-[14px] px-[22px]">
@@ -95,6 +95,9 @@
 </template>
 
 <script setup>
+//balancesInEoa
+import {getBalancesInEoa, deposit} from '@/api'
+
 import { ref } from "vue";
 import Modal from "../Modal.vue";
 
@@ -105,6 +108,13 @@ const depositDisabled = ref(true);
 const activeRow = ref(null);
 
 function openDialogModal() {
+	(async () => {
+		var status = await deposit();
+		if (!status.success){
+			console.log(status.error);
+			//error code here
+		}
+	})()
 	depositDialog.value = true;
 }
 
@@ -113,6 +123,17 @@ function enableDeposit(tokenId) {
 	depositDisabled.value = false;
 }
 
+
+const tokenList = ref([]);
+(async () => {
+	var tokenListData = await getBalancesInEoa();//getLeaderBoardDataForTable();
+	if (tokenListData.hasOwnProperty("error")){
+		console.log(tokenListData.error);
+		//error code here
+	}
+	tokenList.value = tokenListData;
+})()
+/*
 const tokenList = ref([
 	{
 		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
@@ -185,6 +206,7 @@ const tokenList = ref([
 		amount: 12,
 	},
 ]);
+*/
 </script>
 
 <style lang="postcss">
