@@ -96,7 +96,7 @@
 
 <script setup>
 //balancesInEoa
-import {getBalancesInEoa, deposit} from '@/api'
+import {getBalancesInEoa, deposit, updateAmount} from '@/api'
 
 import { ref } from "vue";
 import Modal from "../Modal.vue";

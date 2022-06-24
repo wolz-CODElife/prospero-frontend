@@ -40,7 +40,16 @@ var ALOT_APPROVE=ethers.utils.parseEther("100000000000000");
 var avaxPrice;
 var GAS_PRICE;
 //To do - update amount in balancesInEoa object when user updates USD amount in table
-async function updateAmount(amount){}
+async function updateAmount(amount, tokenAddress){
+  console.log('updateAmount called with amount:'+amount+" tokenAddress:"+tokenAddress)
+  //right here
+  for (var i =0;i<balancesInEoa.length;i++){
+    var thisDepositingObj=  balancesInEoa[i]
+    if ((thisDepositingObj.address).toLowerCase() == (tokenAddress).toLowerCase()){
+      balancesInEoa[i]['usdAmountEnteredByUser']=amount
+    }
+  }
+}
 /*
 async function getInfoSubnetHelperContract(){
   var sub = await new ethers.Contract(subnetHelperContractAddress, SubnetHelperContractJson["abi"],  ethersSigner);
@@ -281,7 +290,7 @@ async function getBalancesInEoa(){
     if ((thisToken.address).toLowerCase() == (wavaxAddressFakeFuji).toLowerCase()){
       nativeTokenObj=thisToken;
     }
-    //TESTING - REMOVE ME
+    //TESTING
     /*if (thisToken.symbol =="WETH.e"){
       console.log("updating..")
       var obj = {
@@ -1090,4 +1099,4 @@ async function getSymbol(tokenAddress){
   return symbol
 }
 
-export {  getLeaderBoardDataForTable, initializeApi, joinPortfolio, createPortfolio, updateActiveLeaderboardRow, getBalancesInEoa, deposit };
+export {  getLeaderBoardDataForTable, initializeApi, joinPortfolio, createPortfolio, updateActiveLeaderboardRow, getBalancesInEoa, deposit, updateAmount };
