@@ -23,7 +23,6 @@ const router = createRouter({
 				icon: "https://i.postimg.cc/tJMqnqDk/image.png",
 			},
 		},
-
 		{
 			path: "/manage",
 			name: "manage",
