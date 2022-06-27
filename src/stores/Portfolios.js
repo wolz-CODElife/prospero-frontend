@@ -1,6 +1,6 @@
 import { defineStore } from "pinia";
 
-export const useAllPortfolios = defineStore("AllPortfolios", {
+export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
 		return {
 			allPortfolios: [
@@ -46,18 +46,22 @@ export const useAllPortfolios = defineStore("AllPortfolios", {
 				},
 			],
 
+			joinedPortfolios: [],
+
+			createdPortfolios: [],
+
 			selectedPortfolio: {
 				name: "",
-				fee: null,
-				d7: null,
-				d30: null,
-				d90: null,
-				y1: null,
+				fee: 0,
+				d7: 0,
+				d30: 0,
+				d90: 0,
+				y1: 0,
 			},
 
 			activeHeader: "left",
 
-			// activeRow:
+			createMode: false,
 		};
 	},
 
@@ -74,15 +78,35 @@ export const useAllPortfolios = defineStore("AllPortfolios", {
 				this.activeHeader = "right";
 				this.selectedPortfolio = {
 					name: "",
-					fee: null,
-					d7: null,
-					d30: null,
-					d90: null,
-					y1: null,
+					fee: 0,
+					d7: 0,
+					d30: 0,
+					d90: 0,
+					y1: 0,
 				};
 			} else {
 				this.activeHeader = "left";
 			}
+		},
+
+		showCreate() {
+			this.reset();
+			this.createMode = true;
+		},
+
+		showJoin() {
+			this.createMode = false;
+		},
+
+		reset() {
+			this.selectedPortfolio = {
+				name: "",
+				fee: 0,
+				d7: 0,
+				d30: 0,
+				d90: 0,
+				y1: 0,
+			};
 		},
 	},
 

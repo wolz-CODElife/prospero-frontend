@@ -34,11 +34,4 @@ function doJoin() {
 function goBack() {
 	joinView.value = false;
 }
-
-// const showDeposit = ref(false);
-// const showWithdraw = ref(false);
-// function openDeposit() {
-//   console.log("Opened Deposit");
-//   showDeposit.value = true;
-// }
 </script>
