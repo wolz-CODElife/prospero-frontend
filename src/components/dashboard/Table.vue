@@ -147,14 +147,27 @@
 				<button
 					v-if="firstView"
 					class="button text-[#00FF00] uppercase flex gap-[14px] items-center"
-					click="portfolioStore.showJoin(), (tableView = true)"
+					@click="
+						portfolioStore.showJoin(),
+							(tableView = true),
+							(firstView = true)
+					"
 				>
 					<img src="@/assets/img/direction.svg" alt="" />
 					Go BACK
 				</button>
 
 				<!-- Second create view  -->
-				<div class="p-[10px] bg-black" v-else>
+				<!-- Go BACK -->
+				<button
+					v-else
+					class="button text-[#00FF00] uppercase flex gap-[14px] items-center mb-[16px]"
+					@click="firstView = true"
+				>
+					<img src="@/assets/img/direction.svg" alt="" />
+					Go BACK
+				</button>
+				<div class="p-[10px] bg-black" v-if="!firstView">
 					<div class="flex">
 						<div
 							class="py-[8px] px-[15px] text-[14px] uppercase cursor-text bg-black text-[#868C9D]"
