@@ -10,12 +10,14 @@ var myWallets={}//my wallets either as a portfolio manager or investor
 var tokenArray =require('./apiLib/Tokens.json');
 var balancesInEoa=[];
 //TO DO - have this updated on UI
-var selectedprosperoWalletAddress="0x4cc4b88c622ee9b2c9007a6aea014a093c2fefc5"//CHANGE
+var selectedProsperoWalletAddress="0x4cc4b88c622ee9b2c9007a6aea014a093c2fefc5"//CHANGE
 //Libraries
 const BigNumber = require('bignumber.js');
 const Web3 = require('web3');
 import detectEthereumProvider from '@metamask/detect-provider';
 const ethers = require('ethers')
+const axios = require('axios')
+
 var web3;
 //ABIS
 var ProsperoPricesJson =require('./apiLib/ProsperoPrices.json')
@@ -51,14 +53,242 @@ async function updateAmount(amount, tokenAddress){
     }
   }
 }
-/*
-async function getInfoSubnetHelperContract(){
-  var sub = await new ethers.Contract(subnetHelperContractAddress, SubnetHelperContractJson["abi"],  ethersSigner);
-  console.log("about to dep...")
-  var f = await sub.getAllTokensOnSubnet();
-  console.log('sub helper:'+f)
+//To do - update once you know how to do the selected leader board
+async function updateSelectedProsperoWalletAddress(address){
+  console.log('updateSelectedProsperoWallet called with address:'+address)
+  selectedProsperoWalletAddress=address;
 }
+/*
+To Do:
+withdraw swap into wavax?
+history - the graph
 */
+//percentages example=[.50,.50]
+async function getGraphData(){
+  var prspUrl = "https://api.thegraph.com/subgraphs/name/lapat/prospero" ; // https://thegraph.com/explorer/subgraph/uniswap/uniswap-v2
+//var main = async () =>{
+    try {
+        var result = await axios.post(
+            prspUrl,
+            {
+
+                query: `
+                {
+                    latestBalancesFactories
+                     {
+                       id
+                       tokens
+                       users
+                       balances
+                       percentageOwnerships
+                       usdInvested
+                       usersValues
+                       addressVars
+                       intVars
+                       walletName
+                       }
+                   }
+                `
+            }
+            );
+            console.log ("Query result: \n", result.data.data.latestBalancesFactories);
+            var graphData = result.data;
+            for (var i =0;i<graphData.length;i++){
+              var graphItem = graphData[i];
+              console.log("graphItem:"+JSON.stringify(graphItem,null,2))
+            }
+    } catch (err){
+        console.log(err);
+    }
+//}
+}
+async function getHistoricalPrices(){
+  console.log('getHistoricalPrices')
+  for (var i=0;i<tokenArray.length;i++){
+      var thisToken = tokenArray[i];
+      //https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=365&interval=daily
+      var tokenHistory = JSON.parse(localStorage.getItem(thisToken.id));
+      var shouldSearch = false;
+      if (tokenHistory!=undefined){
+        if (!tokenHistory.hasOwnProperty("prices")){
+          shouldSearch=true;
+        }
+      }
+      if (shouldSearch){
+        console.log('searching...')
+      var hUrl="https://api.coingecko.com/api/v3/coins/"+thisToken.id+"/market_chart?vs_currency=usd&days=365&interval=daily"
+      var  historicalPricesResponseHere = await fetch(hUrl);
+      var priceObjHere = await historicalPricesResponseHere.json();
+      console.log("p:"+JSON.stringify(priceObjHere,null,2))
+      localStorage.setItem(thisToken.id, JSON.stringify(priceObjHere));
+      }
+    }
+    console.log('got them...')
+    for (var i=0;i<tokenArray.length;i++){
+      var thisToken = tokenArray[i];
+      var theStorage = localStorage.getItem(thisToken.id)
+      theStorage = theStorage
+      var tokenHistory = JSON.parse(theStorage);
+      console.log("thisToken.id:"+thisToken.id+"tokenHistory:"+JSON.stringify(tokenHistory,null,2))
+      for (var k=0;k<theStorage.length;k++){
+         var theDate = new Date(theStorage[k][0]);
+         var justDate = theDate.getMonth() +"-"+ theDate.getDate() +"-"+ theDate.getFullYear();
+         tokenHistory['date']=justDate
+         console.log('justDate:'+justDate)
+      }
+      //localStorage.setItem(thisToken.id, JSON.stringify(priceObjHere));
+
+
+
+    }
+
+}
+async function withdraw(tokenSwappingInto, amountToWithdraw){
+  try{
+    var valueOfUsersPortfolioBefore = await getValueOfUsersPortfolio(selectedProsperoWalletAddress, EOAAddress, false)
+    //console.log('valueOfUsersPortfolio before:'+valueOfUsersPortfolioBefore)
+    console.log('withdraw amountToWithdraw            :'+(amountToWithdraw/USD_SCALE))
+    var otherToken;
+    var balSwappingIntoTokenBefore;
+    if (tokenSwappingInto.length>0){
+      otherToken = new web3.eth.Contract(
+        ERC20Json.abi,
+        tokenSwappingInto[0]
+      );
+      balSwappingIntoTokenBefore = await otherToken.methods.balanceOf(EOAAddress).call();
+      console.log("token swapping into:"+tokenSwappingInto[0])
+      //  var usdThisUserThisToken = await getUSDValue_MINE(1, tokenSwappingInto[0])//(usdBn.multipliedBy(percentageUserBn))+""
+    }
+    if (tokenSwappingInto.length>1){
+      return {success:false, error:"You can not swap into multiple tokens."}
+    }
+    var prosperoWalletInstance = new web3.eth.Contract(
+      ProsperoWalletJson.abi,
+      selectedProsperoWalletAddress
+    );
+
+    var web3Tx = await prosperoWalletInstance.methods.withdraw(
+      amountToWithdraw+"",
+      tokenSwappingInto
+    ).send({
+      from: EOAAddress
+    }).on('error', function(error, receipt){
+      console.log("withdraw error:"+error)
+      return {success:false, error:error}
+    })
+    .on('transactionHash', function(transactionHash){
+      //console.log("transactionhash:"+transactionHash)
+    })
+    .on('receipt', function(receipt){
+      //console.log("got receipt:"+JSON.stringify(receipt,null,2))
+      ////console.logreceipt.contractAddress) // contains the new contract address
+    })
+    .on('confirmation', function(confirmationNumber, receipt){
+      //console.log("receipt conf:"+JSON.stringify(receipt,null,2))
+    })
+    var cumulativeGasUsed = web3Tx.cumulativeGasUsed;
+    var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
+    console.log('gasUsed:'+JSON.stringify(gasUsed,null,2));
+    var valueOfUsersPortfolioAfter = await getValueOfUsersPortfolio(selectedProsperoWalletAddress, EOAAddress, false);
+    //console.log("valueOfUsersPortfolioBefore:"+valueOfUsersPortfolioBefore);
+    //console.log("valueOfUsersPortfolioAfter :"+valueOfUsersPortfolioAfter);
+    var success=false;
+    if ((Number(valueOfUsersPortfolioAfter)) < (Number(valueOfUsersPortfolioBefore))){
+      success = true;
+    }
+    if (!success){
+      console.log("Error withdraw - Value of the portfolio is not less after the withdraw, before value:"+valueOfUsersPortfolioBefore+" after:"+valueOfUsersPortfolioAfter);
+      return {success:false, error:"Value of the portfolio is not less after the withdraw, before value:"+valueOfUsersPortfolioBefore+" after:"+valueOfUsersPortfolioAfter}
+    }
+
+
+    if (tokenSwappingInto.length==1){
+      var balSwappingIntoTokenAfter = await otherToken.methods.balanceOf(EOAAddress).call();
+      balSwappingIntoTokenBefore=BigNumber(balSwappingIntoTokenBefore+"")
+      balSwappingIntoTokenAfter=BigNumber(balSwappingIntoTokenAfter+"")
+      var successWithdrawSwap = false;
+      if (balSwappingIntoTokenAfter.isGreaterThan(balSwappingIntoTokenBefore)){
+        successWithdrawSwap=true;
+      }
+      if (!successWithdrawSwap){
+        console.log("balSwappingIntoTokenBefore:"+balSwappingIntoTokenBefore)
+        console.log("balSwappingIntoTokenAfter :"+balSwappingIntoTokenAfter)
+        console.log("withdrawAmt              :"+amountToWithdraw)
+        var msg = "Withdraw swap was not successfull, balances did not change."
+        console.log(msg)
+        return {success:false, error:msg}
+      }
+    }
+    return {success:true}
+  }catch(e){
+    console.log("exception in withdraw"+e);
+    return {success:false, error:e}
+  }
+}
+async function rebalance(percentages, tokenAddressesToRemix){
+  console.log("rebalance percentagesIn:"+percentages+" tokenAddressesToRemix:"+tokenAddressesToRemix)
+  var thisWalletsObjBefore = await getValueOfBalancesOfTokensInPortfolioForUser(null, EOAAddress, selectedProsperoWalletAddress)
+  console.log(" thisWalletsObjBefore:"+JSON.stringify(thisWalletsObjBefore,null,2))
+  var areDiff = returnTrueIfPercentagesAreDiff(thisWalletsObjBefore, percentages, tokenAddressesToRemix);
+  if (!areDiff){
+    console.log("Goal tokens and percentages are the same as current.")
+    return {success:false, error:"Goal tokens and percentages are the same as current."}
+  }
+  try{
+  for (var x=0;x<percentages.length;x++){
+    percentages[x]=percentages[x]/100;
+    //console.log("percentages[x]:"+percentages[x])
+    var thisPercBn=BigNumber(percentages[x]+"");
+    //console.log("thisPercBn:"+thisPercBn)
+    var percScaleBn=BigNumber(USD_SCALE+"");
+    //console.log("percScaleBn:"+percScaleBn)
+    var thisFinalPerc = thisPercBn.multipliedBy(percScaleBn);
+    //console.log("thisFinalPerc:"+thisFinalPerc)
+    percentages[x]=thisFinalPerc;
+  }
+  console.log("percentages formatted:"+percentages)
+  var prosperoWalletInstance = new web3.eth.Contract(
+    ProsperoWalletJson.abi,
+    selectedProsperoWalletAddress
+  );
+  var web3Tx = await prosperoWalletInstance.methods.rebalancePortfolio(
+    tokenAddressesToRemix,
+    percentages
+  ).send({
+    from: EOAAddress
+  }).on('error', function(error, receipt){
+    console.log("error rebalancePortfolio:"+error)
+    return {success:false, error:error}
+  })
+  .on('transactionHash', function(transactionHash){
+    //console.log("transactionhash:"+transactionHash)
+  })
+  .on('receipt', function(receipt){
+    //console.log("got receipt:"+JSON.stringify(receipt,null,2))
+    ////console.logreceipt.contractAddress) // contains the new contract address
+  })
+  .on('confirmation', function(confirmationNumber, receipt){
+    //console.log("receipt conf:"+JSON.stringify(receipt,null,2))
+  })
+  var cumulativeGasUsed = web3Tx.cumulativeGasUsed;
+  var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
+  console.log('gasUsed:'+JSON.stringify(gasUsed,null,2));
+
+  var thisWalletsObj = await getValueOfBalancesOfTokensInPortfolioForUser(null, EOAAddress, selectedProsperoWalletAddress)
+  //console.log('thisWalletsObj:'+JSON.stringify(thisWalletsObj,null,2))
+  var areGoalPercentagesAndActualClose = await returnTrueIfPercentagesAreLessAndClose(thisWalletsObj, percentages, tokenAddressesToRemix)
+  if (!areGoalPercentagesAndActualClose){
+    console.log("Current percentages do not match goal percentages.");
+
+    return {success:false, error:"Current percentages do not match goal percentages."}
+  }
+  return {success:true};
+}catch(exception){
+  console.error("exception rebalance():"+JSON.stringify(exception,null,2))
+  console.error("exception rebalance():"+exception)
+  return {success:false, error:exception}
+}
+}
 async function deposit(){
   //await getInfoSubnetHelperContract();
   console.log("deposit")
@@ -68,7 +298,6 @@ async function deposit(){
   var tokens=[]
   var amounts=[]
   var avaxValue = 0;
-
   for (var i =0;i<balancesInEoa.length;i++){
     var thisDepositingObj=  balancesInEoa[i]
     console.log('thisDepositingObj:'+JSON.stringify(thisDepositingObj,null,2))
@@ -82,11 +311,8 @@ async function deposit(){
         console.log('amountInEth:'+amountInEth)
         var weiAmt = web3.utils.toWei(amountInEth+"", 'ether')
         console.log('weiAmt1:'+weiAmt)
-
         weiAmt = await updateBalanceFromEighteenDecimalsIfNeeded(weiAmt, thisDepositingObj.address)
-          console.log('weiAmt2:'+weiAmt)
-
-
+        console.log('weiAmt2:'+weiAmt)
         if (thisDepositingObj.name==NativeTokenName){
         //  console.log("WEI:"+thisDepositingObj.weiDepositing)
           avaxValue=weiAmt+""
@@ -96,14 +322,12 @@ async function deposit(){
         }
     }
   }
-
   //await getAmountsDepositing();
   //add tokens and amountss
-  var status = await approveDepositing(tokens,amounts, selectedprosperoWalletAddress);//UPDATE
+  var status = await approveDepositing(tokens,amounts, selectedProsperoWalletAddress);//UPDATE
   if (!status.success){
     return status
   }
-
   var gasEstimate;
   var shouldJustDeposit=0
   var firstTimeString=""
@@ -112,9 +336,9 @@ async function deposit(){
   console.log("amounts:"+amounts)
   console.log("avaxValue:"+avaxValue)
   console.log("methodType:"+methodType)
-
   try{
-    var prosperoWalletInstance = await new ethers.Contract(selectedprosperoWalletAddress, ProsperoWalletJson["abi"],  ethersSigner);
+    var valueOfUsersPortfolioBefore = await getValueOfUsersPortfolio(selectedProsperoWalletAddress, EOAAddress, false)
+    var prosperoWalletInstance = await new ethers.Contract(selectedProsperoWalletAddress, ProsperoWalletJson.abi,  ethersSigner);
     console.log("about to dep...")
     var tx = await prosperoWalletInstance.deposit(
       tokens,
@@ -125,17 +349,24 @@ async function deposit(){
       }
     );
     console.log("dep tx 1:"+JSON.stringify(tx,null,2))
-
     var f = await tx.wait();
     console.log("dep tx 2 :"+JSON.stringify(f,null,2))
-
     var cumulativeGasUsed = f.cumulativeGasUsed;
     var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
     console.log("gasUsed:"+JSON.stringify(gasUsed,null,2))
+
+    var valueOfUsersPortfolioAfter = await getValueOfUsersPortfolio(selectedProsperoWalletAddress, EOAAddress, false);
+    var success=false;
+    if ((Number(valueOfUsersPortfolioAfter)) > (Number(valueOfUsersPortfolioBefore))){
+      success = true;
+    }
+    if (!success){
+      return {success:false, error:"Value of the portfolio is not more after the deposit, before value:"+valueOfUsersPortfolioBefore+" after:"+valueOfUsersPortfolioAfter}
+    }
+    return {success:true}
   }catch(exception){
-    console.log("eeeee")
-    console.error("exception:"+JSON.stringify(exception,null,2))
-    console.error("exception:"+exception)
+    console.error("exception deposit:"+JSON.stringify(exception,null,2))
+    console.error("exception deposit:"+exception)
     return {success:false, error:exception}
   }
 }
@@ -165,12 +396,12 @@ async function calculateGasEstimate (gasEstimate, gasPriceToUse){
     usdAmountOfGas:usdAmountOfGas
   }
 }
-async function approveDepositing(tokens, amounts, selectedprosperoWalletAddress){
+async function approveDepositing(tokens, amounts, selectedProsperoWalletAddress){
  console.log("approveDepositing")
   var zeroBn = BigNumber("0")
   for (var k=0;k<tokens.length;k++){
     var thisTokenInstance = await new ethers.Contract(tokens[k], ERC20Json["abi"],  ethersSigner);
-    var allowance = await thisTokenInstance.allowance(EOAAddress, selectedprosperoWalletAddress);
+    var allowance = await thisTokenInstance.allowance(EOAAddress, selectedProsperoWalletAddress);
     var bnAllowance = BigNumber(allowance+"")
     var bnAmountInWeiToDeposit = BigNumber(amounts[k]+"")
     console.log("dep:"+bnAmountInWeiToDeposit)
@@ -185,8 +416,8 @@ async function approveDepositing(tokens, amounts, selectedprosperoWalletAddress)
             //  var amtToApproveToReachDiff = bnAmountInWeiToDeposit.minus(bnAllowance)
               var amtToApprove = ALOT_APPROVE // can switch to amtToApprove
               //console.log("need to approve this much:"+amtToApproveToReachDiff+" going to approve:"+amtToApprove);
-              //console.log("selectedprosperoWalletAddress:" + selectedprosperoWalletAddress)
-              var tx = await thisTokenInstance.approve(selectedprosperoWalletAddress, amtToApprove+"");
+              //console.log("selectedProsperoWalletAddress:" + selectedProsperoWalletAddress)
+              var tx = await thisTokenInstance.approve(selectedProsperoWalletAddress, amtToApprove+"");
               var f = await tx.wait();
               //console.log("transaction approve returned:"+JSON.stringify(f,null,2)+" for "+thisToken.name)
             }catch(e){
@@ -746,22 +977,26 @@ async function initializeApi(){
   ethersProvider = await new ethers.providers.Web3Provider(window.ethereum);
   ethersSigner = ethersProvider.getSigner();
   web3 = new Web3(window.ethereum);
-
   ethereum.on('accountsChanged', (accounts) => {
     console.error("Accounts changed -- reloading....")
     window.location.reload();
   })
-
   ethereum.on('disconnect', () =>{
     console.error("disconnect called...")
   })
   ethereum.on('connect', () =>{
     console.error("connect called...")
   })
-
   ethereum.on('chainChanged', () =>{
     console.error("chain changed...")
   })
+
+
+
+
+  //await getGraphData();
+
+  console.log("Web3 version", web3.version);
   await updatePrices();
   await initLeaderBoardTableObject();
   await createMyWalletsDataObject();
@@ -992,10 +1227,9 @@ async function getTokenObject_newMine(tokenAddress){
   console.log("ERROR - could not find token in getTokenObject_newMine tokenAddress:"+tokenAddress)
 }
 async function createMyWalletsDataObject(){
-  //right here
-  console.log('createMyWalletsDataObject factoryAddress:'+factoryAddress+' EOAAddress:'+EOAAddress)
+  //console.log('createMyWalletsDataObject factoryAddress:'+factoryAddress+' EOAAddress:'+EOAAddress)
   var prosperoBeaconFactoryInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson["abi"],  ethersSigner);
-  console.log("got p beacon..")
+  //console.log("got p beacon..")
   var myWalletsFromContract = await prosperoBeaconFactoryInstance.getWallets(EOAAddress);
   var myWalletTypes = await prosperoBeaconFactoryInstance.getWalletTypes(EOAAddress);
   //console.log("myWallets***:"+JSON.stringify(myWalletsFromContract,null,2))
@@ -1022,31 +1256,30 @@ async function createMyWalletsDataObject(){
   //myWallets=myWallets;
 }
 async function getSelectedWalletFromMyWalletsOrLastOneIfNone(){
-  //var selectedprosperoWalletAddress=selectedprosperoWalletAddress
-  //console.log("getSelectedWalletFromMyWalletsOrLastOneIfNone selectedprosperoWalletAddress:"+selectedprosperoWalletAddress)
+  //var selectedProsperoWalletAddress=selectedProsperoWalletAddress
+  //console.log("getSelectedWalletFromMyWalletsOrLastOneIfNone selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
   var thisPortfolio=null;
-  if (selectedprosperoWalletAddress!=undefined && selectedprosperoWalletAddress!=null && selectedprosperoWalletAddress!=""){
-    if(myWallets.hasOwnProperty(selectedprosperoWalletAddress)){
+  if (selectedProsperoWalletAddress!=undefined && selectedProsperoWalletAddress!=null && selectedProsperoWalletAddress!=""){
+    if(myWallets.hasOwnProperty(selectedProsperoWalletAddress)){
       //console.log('has it')
-      thisPortfolio = myWallets[selectedprosperoWalletAddress]
+      thisPortfolio = myWallets[selectedProsperoWalletAddress]
     }
   }
   if (thisPortfolio==null){
-    //console.log("myWallets does not have:"+selectedprosperoWalletAddress+" going with the last one.")
+    //console.log("myWallets does not have:"+selectedProsperoWalletAddress+" going with the last one.")
     //console.log("myWallets:"+JSON.stringify(myWallets,null,2))
 
     for (var key in myWallets) {
       if (myWallets.hasOwnProperty(key)) {
         thisPortfolio=myWallets[key]
       }
-      selectedprosperoWalletAddress = key.toLowerCase();
+      selectedProsperoWalletAddress = key.toLowerCase();
     }
   }
-  //console.log("--selectedprosperoWalletAddress:"+selectedprosperoWalletAddress)
+  //console.log("--selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
   //console.log('returning:'+JSON.stringify(thisPortfolio,null,2))
   return thisPortfolio
 }
-
 async function updateBalanceToEighteenDecimalsIfNeeded(balance, tokenAddress){
   if (tokenAddress=="0x1d308089a2d1ced3f1ce36b1fcaf815b07217be3"){
     return balance;
@@ -1098,6 +1331,124 @@ async function updateBalanceFromEighteenDecimalsIfNeeded(balance, tokenAddress){
   alert("ERROR - could not find token in updateBalanceFromEighteenDecimalsIfNeeded for address: "+tokenAddress)
 
 }
+function areTokensAndBalanacesDifferent(balancesAndTokensBefore, balancesAndTokensAfter){
 
+  var balBefore=balancesAndTokensBefore.balances
+  var balAfter=balancesAndTokensAfter.balances
+  var tokBefore=balancesAndTokensBefore.tokens
+  var tokAfter=balancesAndTokensAfter.tokens
+  if (balBefore.length!=balAfter.length){
+    return true
+  }
+  if (tokBefore.length!=tokAfter.length){
+    return true
+  }
+  for (var j =0;j<balBefore.length;j++){
+    if (balBefore[j] != balAfter[j]){
+      return true;
+    }
+    if (tokBefore[j] != tokAfter[j]){
+      return true;
+    }
+    //console.log("before Token:"+balancesAndTokensBefore['tokens'][j])
+    //console.log("before   bal:"+balancesAndTokensBefore['balances'][j])
+    //console.log("after  Token:"+balancesAndTokensAfter['tokens'][j])
+    //console.log("after bal:"+balancesAndTokensAfter['balances'][j])
+  }
+  return false;
+}
+async function getBalanacesOfTokensInPortfolioForUser(user, thisProsperoWalletAddress){
+  try{
+    var ProsperoWalletInstance = new web3.eth.Contract(
+      ProsperoWalletJson.abi,
+      thisProsperoWalletAddress
+    );
+    var tokens=[]
+    var balances=[]
+    ProsperoWalletInstance.defaultAccount=user
+    var numberOfTokensInPortfolio = await ProsperoWalletInstance.methods.getPortfolioTokensSize().call({from: accounts[1].address})
+    //console.log("numberOfTokensInPortfolio:"+numberOfTokensInPortfolio)
+    for (var i = 0;i < numberOfTokensInPortfolio;i++) {
+      tokens[i] = await ProsperoWalletInstance.methods.portfolioTokens(i).call({from: accounts[1].address})
+      //console.log("TOKEN:"+tokens[i] )
+      balances[i] = await ProsperoWalletInstance.methods.getBalanceOfTokenInPortfolioForUser(user, tokens[i]).call({from: accounts[1].address})
+      //console.log("****BAL:"+balances[i] )
+    }
+  }catch(e){
+    console.log('exception getBalanacesOfTokensInPortfolioForUser:'+e)
+    return {success:false, error:e}
+  }
+  return {balances:balances,tokens:tokens}
 
-export {  getLeaderBoardDataForTable, initializeApi, joinPortfolio, createPortfolio, updateActiveLeaderboardRow, getBalancesInEoa, deposit, updateAmount };
+}
+async function returnTrueIfPercentagesAreLessAndClose(balancesValue, goalPercentages, goalTokens){
+  //console.log("balancesValue:"+JSON.stringify(balancesValue,null,2))
+  //console.log('gp:'+goalPercentages)
+  //console.log('gt:'+goalTokens)
+for (var i =0;i<goalTokens.length;i++){
+  var thisToken = goalTokens[i]
+  thisToken = thisToken.toLowerCase();
+  //console.log('thisToken:'+thisToken)
+  var thisPerc = goalPercentages[i]
+  thisPerc = thisPerc/USD_SCALE;
+  if (balancesValue.hasOwnProperty(thisToken)){
+    var thisObj = balancesValue[thisToken]
+    var actualPercentage = thisObj['percentage'];
+    //actualPercentage=actualPercentage/USD_SCALE
+    var diff = thisPerc - actualPercentage;
+    //console.log('thisPerc        :'+thisPerc)
+    //console.log('actualPercentage:'+actualPercentage)
+    diff = Math.abs(diff)
+    //console.log('diff:'+diff)
+    if (actualPercentage < thisPerc){
+      if (diff < .015){//To do - get this number from constants in contract
+        //return true
+      }else{
+        console.log("**** Percentage for swap was off by more than 1.5%, difference is:"+diff+" for address:"+thisToken)
+        alert("**** Percentage for swap was off by more than 1.5%, difference is:"+diff+" for address:"+thisToken)
+        return false;
+      }
+    }
+  }else{
+    console.log("ERROR - could not find token returnTrueIfPercentagesAreLessAndClose")
+    return false;
+  }
+}
+return true
+}
+function returnTrueIfPercentagesAreDiff(balancesValue, goalPercentages, goalTokens){
+  //console.log("balancesValue:"+JSON.stringify(balancesValue,null,2))
+  //console.log('gp:'+goalPercentages)
+  //console.log('gt:'+goalTokens)
+var areDiff = false
+for (var i =0;i<goalTokens.length;i++){
+  var thisToken = goalTokens[i]
+  thisToken = thisToken.toLowerCase();
+  //console.log('thisToken:'+thisToken)
+  var thisPerc = goalPercentages[i]
+  thisPerc = thisPerc/100;
+  if (balancesValue.hasOwnProperty(thisToken)){
+    var thisObj = balancesValue[thisToken]
+    var actualPercentage = thisObj['percentage'];
+    actualPercentage=Number(actualPercentage.toFixed(2))
+    //actualPercentage=actualPercentage/USD_SCALE
+    var diff = thisPerc - actualPercentage;
+    //console.log('thisPerc        :'+thisPerc)
+    //console.log('actualPercentage:'+actualPercentage)
+    diff = Math.abs(diff)
+    console.log('diff:'+diff)
+    if (actualPercentage != thisPerc){
+      console.log("diff 1")
+      areDiff=true
+    }
+  }else{
+    console.log("diff 2")
+    areDiff=true
+  }
+}
+console.log("returning: "+areDiff)
+
+return areDiff;
+}
+export {  getLeaderBoardDataForTable, initializeApi, joinPortfolio, createPortfolio,
+  updateActiveLeaderboardRow, getBalancesInEoa, deposit, updateAmount, rebalance, withdraw, getGraphData, getHistoricalPrices };
