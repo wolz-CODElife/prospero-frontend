@@ -18,7 +18,7 @@ const Web3 = require('web3');
 import detectEthereumProvider from '@metamask/detect-provider';
 const ethers = require('ethers')
 const axios = require('axios')
-
+var graphData;
 var web3;
 //ABIS
 var ProsperoPricesJson =require('./apiLib/ProsperoPrices.json')
@@ -46,8 +46,78 @@ var USD_SCALE = 1000000000000000000;//await ProsperoWalletLibConstants.methods.U
 //UI Objects - keys changed and formatted for UI
 var leaderBoardUITableObject;
 var prosperoFactoryEventsInstance;
+
+var DEPOSIT_THEN_REBALANCE=0
+var WITHDRAW_ALL=1
+var WITHDRAW_SWAP=2
+var LEADER_SWAP=3
+var LEADER_STRAIGHT_DEPOSIT=4
+var CREATE_WALLET=5
+var FOLLOW_WALLET=6
 //FUNCTIONS
 //To do - update amount in balancesInEoa object when user updates USD amount in table
+async function updateUIFieldValues(){
+  var portfolio = await getSelectedWalletFromMyWalletsOrLastOneIfNone();
+  var myHoldings = portfolio.totalValue;
+  var usdInvested = portfolio.usdInvested
+  var deposits = portfolio.totalUsd;
+  var profitsUsd = portfolio.profit;
+  var profitPercentage = portfolio.profit/deposits;
+  profitPercentage = profitPercentage * 100;
+  profitPercentage = parseInt(profitPercentage);
+  var withdraws=0;
+  var lastUsdDeposited=0;
+
+  //WITHDRAWS TOTAL BELOW
+  for (var i =0;i<graphData.length;i++){
+    var graphItem = graphData[i];
+    //console.log("graphItem:"+JSON.stringify(graphItem,null,2))
+    var addressVars = graphItem.addressVars
+    var intVars = graphItem.intVars
+    var users = graphItem.users
+    var usersValues = graphItem.usersValues
+    var methodType = intVars[0]
+    var msgSender = addressVars[0];
+    var indexOfUser = -1
+    var usdInvested= graphItem.usdInvested;
+    msgSender = msgSender.toLowerCase();
+    //console.log("*msgSender :"+msgSender)
+    //console.log("*methodType:"+methodType)
+    var eoaALower = EOAAddress.toLowerCase()
+    if (msgSender ==  EOAAddress){
+      //console.log('found sender...')
+      if (methodType == WITHDRAW_SWAP || methodType == WITHDRAW_ALL){
+        //console.log('found WD...')
+        for (var f =0;f<users.length;f++){
+          var thisUsersAddress = users[f];
+          //console.log("thisUsersAddress:"+thisUsersAddress)
+          thisUsersAddress = thisUsersAddress.toLowerCase();
+          if (thisUsersAddress == eoaALower){
+            //console.log('found index...')
+            indexOfUser=f;
+          }
+        }
+        console.log("indexOfUser:"+indexOfUser)
+
+        if (indexOfUser!=-1){
+          var usdDeposited = usdInvested[indexOfUser]
+          if (usdDeposited<lastUsdDeposited){
+            withdraws = withdraws + (lastUsdDeposited - usdDeposited);
+          }
+          lastUsdDeposited=usdDeposited
+        }
+      }
+    }
+
+  }
+  console.log("withdraws:"+withdraws)
+  if (withdraws>0){
+    withdraws = withdraws / USD_SCALE;
+    withdraw = withdraws.toFixed(2)
+  }
+
+  //TO DO - UPDATE UI
+}
 async function updateAmount(amount, tokenAddress){
   console.log('updateAmount called with amount:'+amount+" tokenAddress:"+tokenAddress)
   for (var i =0;i<balancesInEoa.length;i++){
@@ -64,27 +134,20 @@ async function updateSelectedProsperoWalletAddress(address){
 }
 /*
 To Do:
-finished method events firing
 one off values up top - see ui
 historical graph work
 */
 //percentages example=[.50,.50]
 async function initNewEventListener(){
   console.log('initNewEventListener')
-  var DEPOSIT_THEN_REBALANCE=0
-  var WITHDRAW_ALL=1
-  var WITHDRAW_SWAP=2
-  var LEADER_SWAP=3
-  var LEADER_STRAIGHT_DEPOSIT=4
-  var CREATE_WALLET=5
-  var FOLLOW_WALLET=6
+
   //right here
   if (!alreadyListeningToFactoryEvents){
     alreadyListeningToFactoryEvents=true;
     console.log("setting .on....")
     prosperoFactoryEventsInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson.abi,  ethersSigner);
     prosperoFactoryEventsInstance.on("LatestBalancesFactory", async (tokens, users, balances, percentageOwnerships, usdInvested, usersValues, addressVars, intVars, walletName, profilePictureUrl, event) => {
-      
+
       console.log("got LatestBalancesFactory")
       console.log(" LatestBalancesFactory event:"
       +" "+tokens
@@ -143,12 +206,39 @@ async function initNewEventListener(){
 }
 async function getGraphData(){
   var prspUrl = "https://api.thegraph.com/subgraphs/name/lapat/prospero" ; // https://thegraph.com/explorer/subgraph/uniswap/uniswap-v2
-  //var main = async () =>{
+  /*
+  address[] tokens,
+  address[] users,
+  uint256[] balances,
+  uint256[] percentageOwnerships,
+  uint256[] usdInvested,
+  uint256[] usersValues,
+  address[] addressVars,
+  uint256[] intVars,
+  string walletName,
+  string profilePictureUrl
+
+  addressVars[0] = messageSender;
+  addressVars[1] = ProsperoWallet(ProsperoWalletAddress)
+      .getWalletValues()
+      .leader;
+  addressVars[2] = ProsperoWalletAddress;
+
+  intVars[0] = uint256(methodType);
+  intVars[1] = totalValueOfPortfolio;
+  intVars[2] = feeStruct.usdFeeAmountProspero;
+  intVars[3] = feeStruct.usdFeeAmountLeader;
+  intVars[4] = block.timestamp;
+  intVars[5] = feeStruct.profitAmount;
+  for (uint256 i = 6; i < intVars.length; i++) {
+      intVars[i] = ProsperoWallet(ProsperoWalletAddress)
+          .last_remixGoalPercentages(i - 6);
+  }
+  */
   try {
     var result = await axios.post(
       prspUrl,
       {
-
         query: `
         {
           latestBalancesFactories
@@ -169,7 +259,7 @@ async function getGraphData(){
       }
     );
     console.log ("Query result: \n", result.data.data.latestBalancesFactories);
-    var graphData = result.data;
+    graphData = result.data.data.latestBalancesFactories;
     for (var i =0;i<graphData.length;i++){
       var graphItem = graphData[i];
       console.log("graphItem:"+JSON.stringify(graphItem,null,2))
@@ -1083,6 +1173,7 @@ async function initializeApi(){
 
 
   //await getGraphData();
+  await getGraphData();
   blockNumWhenWebAppLaunched = await web3.eth.getBlockNumber();
   await initNewEventListener();
   console.log("Web3 version", web3.version);
@@ -1540,4 +1631,5 @@ function returnTrueIfPercentagesAreDiff(balancesValue, goalPercentages, goalToke
   return areDiff;
 }
 export {  getLeaderBoardDataForTable, initializeApi, joinPortfolio, createPortfolio,
-  updateActiveLeaderboardRow, getBalancesInEoa, deposit, updateAmount, rebalance, withdraw, getGraphData, getHistoricalPrices };
+  updateActiveLeaderboardRow, getBalancesInEoa, deposit, updateAmount, rebalance, withdraw, getGraphData, getHistoricalPrices,
+updateUIFieldValues };
