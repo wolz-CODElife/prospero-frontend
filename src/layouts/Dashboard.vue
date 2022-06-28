@@ -5,18 +5,21 @@
 			<DepositModal v-if="joinView" @go-back="goBack" />
 			<div v-else>
 				<DashHeader />
-				<DashMain @do-join="doJoin" />
+				<DashMain @do-join="doJoin" :disabled="smDisabled" />
 			</div>
 		</main>
 	</div>
 </template>
 
 <script setup>
-import { ref, onBeforeMount } from "vue";
+import { ref, computed, onBeforeMount } from "vue";
 import Sidebar from "./dashboard/Sidebar.vue";
 import DashHeader from "./dashboard/DashHeader.vue";
 import DashMain from "./dashboard/DashMain.vue";
 import DepositModal from "@/components/dashboard/DepositModal.vue";
+import { usePortfolios } from "@/stores/Portfolios";
+
+const portfolioStore = usePortfolios();
 
 // Route protection
 onBeforeMount(() => {
@@ -26,6 +29,8 @@ onBeforeMount(() => {
 });
 
 const joinView = ref(false);
+
+const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 
 function doJoin() {
 	joinView.value = true;

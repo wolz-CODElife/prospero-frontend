@@ -9,10 +9,10 @@
 						<li
 							v-for="tab in tabs"
 							:key="tab"
-							@click="changeTab(tab.text)"
+							@click="portfolioStore.changeActivePortfolioType"
 							class="py-[8px] px-[15px] text-[14px] w-[160px] uppercase cursor-pointer"
 							:class="[
-								activeTab === tab.text
+								portfolioStore.activePortfolioType === tab.text
 									? 'bg-[#2D3035] text-white'
 									: 'bg-black text-[#868C9D] shadow-[0px_0px_5px_rgba(0,0,0,0.5);]',
 							]"
@@ -94,7 +94,6 @@
 						</tr>
 					</thead>
 					<tbody>
-						<!-- v-for="(portfolio, i) in AllPortfolios.allPortfolios" -->
 						<tr
 							v-if="activeTab === 'All Portfolios'"
 							v-for="portfolio in portfolioStore.allPortfolios"
@@ -110,7 +109,7 @@
 									: 'bg-transparent',
 							]"
 						>
-							<td class="ml-[20px] pl-[[18px]]">
+							<td class="ml-[20px] pl-[20px]">
 								<input
 									type="radio"
 									:name="portfolio.name"
@@ -143,10 +142,11 @@
 		<div v-else>
 			<!-- Top -->
 			<div class="p-[10px]">
-				<!-- Go BACK -->
+				<!-- Go back - Create first view -->
 				<button
 					v-if="firstView"
 					class="button text-[#00FF00] uppercase flex gap-[14px] items-center"
+					pro
 					@click="
 						portfolioStore.showJoin(),
 							(tableView = true),
@@ -157,8 +157,8 @@
 					Go BACK
 				</button>
 
-				<!-- Second create view  -->
-				<!-- Go BACK -->
+				<!--   -->
+				<!-- Go back - Create second view -->
 				<button
 					v-else
 					class="button text-[#00FF00] uppercase flex gap-[14px] items-center mb-[16px]"

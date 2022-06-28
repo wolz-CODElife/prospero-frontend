@@ -112,7 +112,7 @@
 							<div class="pl-[30px]">
 								<h2 class="text-[#868C9D] text-[14px]">Name</h2>
 								<h3 class="text-white text-[16px]">
-									{{ portfolioStore.selectedPortfolio.name }}
+									{{ slice(portfolioStore.selectedPortfolio.name) }}
 								</h3>
 							</div>
 
@@ -165,7 +165,7 @@
 							<div class="pl-[30px]">
 								<h2 class="text-[#868C9D] text-[14px]">Name</h2>
 								<h3 class="text-white text-[16px]">
-									{{ portfolioStore.selectedPortfolio.name }}
+									{{ slice(portfolioStore.selectedPortfolio.name) }}
 								</h3>
 							</div>
 
@@ -231,5 +231,10 @@ const tabs = ref([
 
 function changeTab(tab) {
 	activeTab.value = tab;
+}
+
+function slice(str) {
+	if (str.length <= 13) return str;
+	return str.slice(0, 10) + "...";
 }
 </script>

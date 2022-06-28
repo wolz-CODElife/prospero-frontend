@@ -61,6 +61,8 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			activeHeader: "left",
 
+			activePortfolioType: "All Portfolios", // or mine or mine & manager
+
 			createMode: false,
 		};
 	},
@@ -76,16 +78,18 @@ export const usePortfolios = defineStore("Portfolios", {
 		toggleActiveHeader() {
 			if (this.activeHeader === "left") {
 				this.activeHeader = "right";
-				this.selectedPortfolio = {
-					name: "",
-					fee: 0,
-					d7: 0,
-					d30: 0,
-					d90: 0,
-					y1: 0,
-				};
+				this.reset();
 			} else {
 				this.activeHeader = "left";
+			}
+		},
+
+		changeActivePortfolioType() {
+			if (this.activePortfolioType === "All Portfolios") {
+				this.activePortfolioType = "My Portfolios";
+				this.reset();
+			} else {
+				this.activePortfolioType = "All Portfolios";
 			}
 		},
 
@@ -108,6 +112,8 @@ export const usePortfolios = defineStore("Portfolios", {
 				y1: 0,
 			};
 		},
+
+		depositToCreate() {},
 	},
 
 	getters: {},
