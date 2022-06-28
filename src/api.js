@@ -139,7 +139,7 @@ historical graph work
 */
 //percentages example=[.50,.50]
 async function initNewEventListener(){
-  console.log('initNewEventListener')
+  //console.log('initNewEventListener')
 
   //right here
   if (!alreadyListeningToFactoryEvents){
@@ -258,14 +258,14 @@ async function getGraphData(){
         `
       }
     );
-    console.log ("Query result: \n", result.data.data.latestBalancesFactories);
+    //console.log ("Query result: \n", result.data.data.latestBalancesFactories);
     graphData = result.data.data.latestBalancesFactories;
     for (var i =0;i<graphData.length;i++){
       var graphItem = graphData[i];
-      console.log("graphItem:"+JSON.stringify(graphItem,null,2))
+      //console.log("graphItem:"+JSON.stringify(graphItem,null,2))
     }
   } catch (err){
-    console.log(err);
+    console.log("error getGraphData:"+err);
   }
   //}
 }
@@ -1099,7 +1099,7 @@ async function getValueOfUsersPortfolio(prosperoWalletAddress, usersEOA, shouldK
   }
 }
 async function getBalanacesOfTokensInPortfolioForUserContractCall(user, prosperoWalletAddress){
-  console.log("getBalanacesOfTokensInPortfolioForUserContractCall")
+  //console.log("getBalanacesOfTokensInPortfolioForUserContractCall")
   try{
     var ProsperoWalletInstance = new web3.eth.Contract(
       ProsperoWalletJson.abi,
@@ -1115,9 +1115,9 @@ async function getBalanacesOfTokensInPortfolioForUserContractCall(user, prospero
     for (var i = 0;i < numberOfTokensInPortfolio;i++) {
       //console.log("I:"+i)
       tokens[i] = await ProsperoWalletInstance.methods.portfolioTokens(i).call({from: EOAAddress})
-      console.log("****TOKEN:"+tokens[i] )
+      //console.log("****TOKEN:"+tokens[i] )
       balances[i] = await ProsperoWalletInstance.methods.getBalanceOfTokenInPortfolioForUser(user,tokens[i]).call({from: EOAAddress})
-      console.log("*****BAL:"+balances[i] )
+      //console.log("*****BAL:"+balances[i] )
     }
   }catch(e){
     console.log('error getBalanacesOfTokensInPortfolioForUserContractCall - exception:'+e)
@@ -1155,6 +1155,8 @@ async function initializeApi(){
   ethersProvider = await new ethers.providers.Web3Provider(window.ethereum);
   ethersSigner = ethersProvider.getSigner();
   web3 = new Web3(window.ethereum);
+  console.log("Web3 version", web3.version);
+
   ethereum.on('accountsChanged', (accounts) => {
     console.error("Accounts changed -- reloading....")
     window.location.reload();
@@ -1176,7 +1178,6 @@ async function initializeApi(){
   await getGraphData();
   blockNumWhenWebAppLaunched = await web3.eth.getBlockNumber();
   await initNewEventListener();
-  console.log("Web3 version", web3.version);
   await updatePrices();
   await initLeaderBoardTableObject();
   await createMyWalletsDataObject();
