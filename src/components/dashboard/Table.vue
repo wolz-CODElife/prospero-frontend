@@ -1,7 +1,7 @@
 <template>
 	<div class="row-span-3 bg-[#191A20] py-[20px]">
 		<div v-if="tableView">
-			<!-- All Portfolios / My Portfolios Tab -->
+			<!-- All Portfolios / My Portfolios -->
 			<div class="flex justify-between mx-[20px]">
 				<!-- Toggle Tabs  -->
 				<div class="p-[10px] bg-black">
@@ -9,10 +9,10 @@
 						<li
 							v-for="tab in tabs"
 							:key="tab"
-							@click="changeTab(tab.text)"
+							@click="portfolioStore.changeActivePortfolioType"
 							class="py-[8px] px-[15px] text-[14px] w-[160px] uppercase cursor-pointer"
 							:class="[
-								activeTab === tab.text
+								portfolioStore.activePortfolioType === tab.text
 									? 'bg-[#2D3035] text-white'
 									: 'bg-black text-[#868C9D] shadow-[0px_0px_5px_rgba(0,0,0,0.5);]',
 							]"
@@ -22,11 +22,34 @@
 					</ul>
 				</div>
 
-				<!-- Deposit / withdraw  -->
+				<!-- Join / create  -->
 				<div
 					class="flex items-center gap-[12px]"
-					v-if="activeTab !== 'All Portfolios'"
+					v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
 				>
+					<button
+						@click="$emit('doJoin')"
+						class="btn btn-primary w-[125px]"
+						:class="
+							disabled
+								? 'opacity-50 cursor-text'
+								: 'opacity-1 cursor-pointer'
+						"
+						:disabled="disabled"
+					>
+						Join
+					</button>
+
+					<button
+						@click="portfolioStore.showCreate(), (tableView = false)"
+						class="btn btn-primary-outline w-[125px]"
+					>
+						Create
+					</button>
+				</div>
+
+				<!-- Deposit / withdraw  -->
+				<div class="flex items-center gap-[12px]" v-else>
 					<button
 						class="btn btn-primary w-[125px]"
 						:class="
@@ -52,29 +75,6 @@
 						Withdraw
 					</button>
 				</div>
-
-				<!-- Join / create  -->
-				<div class="flex items-center gap-[12px]" v-else>
-					<button
-						@click="$emit('doJoin')"
-						class="btn btn-primary w-[125px]"
-						:class="
-							disabled
-								? 'opacity-50 cursor-text'
-								: 'opacity-1 cursor-pointer'
-						"
-						:disabled="disabled"
-					>
-						Join
-					</button>
-
-					<button
-						@click="portfolioStore.showCreate(), (tableView = false)"
-						class="btn btn-primary-outline w-[125px]"
-					>
-						Create
-					</button>
-				</div>
 			</div>
 
 			<!-- All Portfolio / My Portfolios Tables -->
@@ -94,7 +94,6 @@
 						</tr>
 					</thead>
 					<tbody>
-						<!-- v-for="(portfolio, i) in AllPortfolios.allPortfolios" -->
 						<tr
 							v-if="activeTab === 'All Portfolios'"
 							v-for="portfolio in portfolioStore.allPortfolios"
@@ -110,7 +109,7 @@
 									: 'bg-transparent',
 							]"
 						>
-							<td class="ml-[20px] pl-[[18px]]">
+							<td class="ml-[20px] pl-[20px]">
 								<input
 									type="radio"
 									:name="portfolio.name"
@@ -143,10 +142,11 @@
 		<div v-else>
 			<!-- Top -->
 			<div class="p-[10px]">
-				<!-- Go BACK -->
+				<!-- Go back - Create first view -->
 				<button
 					v-if="firstView"
 					class="button text-[#00FF00] uppercase flex gap-[14px] items-center"
+					pro
 					@click="
 						portfolioStore.showJoin(),
 							(tableView = true),
@@ -157,8 +157,8 @@
 					Go BACK
 				</button>
 
-				<!-- Second create view  -->
-				<!-- Go BACK -->
+				<!--   -->
+				<!-- Go back - Create second view -->
 				<button
 					v-else
 					class="button text-[#00FF00] uppercase flex gap-[14px] items-center mb-[16px]"

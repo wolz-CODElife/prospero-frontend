@@ -7,7 +7,7 @@
 			<PieChartContainer />
 
 			<!--Social Media  -->
-			<Socials />
+			<Socials v-bind="$attrs" />
 		</div>
 
 		<div class="col-span-8 grid grid-rows-5 gap-[10px]">

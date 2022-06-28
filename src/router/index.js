@@ -28,7 +28,7 @@ const router = createRouter({
 			name: "manage",
 			component: () => import("../views/Manage.vue"),
 			meta: {
-				layout: "manage",
+				layout: "dashboard",
 			},
 		},
 		{

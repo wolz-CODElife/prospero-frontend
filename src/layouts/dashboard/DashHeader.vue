@@ -89,22 +89,11 @@
 						: 'border-white border-b-0',
 				]"
 			>
-				<!-- Create Mode  -->
-				<div v-if="portfolioStore.createMode">
-					<!-- Empty Created or Joined Portfolio  -->
+				<!-- Join Mode  -->
+				<div v-if="portfolioStore.activeMode === 'join'">
+					<!-- Selected portfolio not empty  -->
 					<div
-						class="h-full flex flex-col gap-y-[24px] justify-center items-center"
-						v-if="portfolioStore.createdPortfolios.length === 0"
-					>
-						<h2 class="text-center text-[14px] uppercase">
-							Create First Portfolio to Manage
-						</h2>
-						<img src="@/assets/img/arrow.svg" alt="" />
-					</div>
-
-					<!-- My portfolio not empty  -->
-					<div
-						v-if="portfolioStore.selectedPortfolio.name !== ''"
+						v-if="portfolioStore.selectedPortfolio.name"
 						class="flex items-center justify-between font-medium uppercase"
 					>
 						<!-- Left stats -->
@@ -112,7 +101,7 @@
 							<div class="pl-[30px]">
 								<h2 class="text-[#868C9D] text-[14px]">Name</h2>
 								<h3 class="text-white text-[16px]">
-									{{ portfolioStore.selectedPortfolio.name }}
+									{{ slice(portfolioStore.selectedPortfolio.name) }}
 								</h3>
 							</div>
 
@@ -140,24 +129,47 @@
 							</div>
 						</div>
 					</div>
-				</div>
-
-				<!-- Join Mode  -->
-				<div v-else>
 					<!-- Empty Selected Portfolio  -->
 					<div
 						class="h-full flex flex-col gap-y-[24px] justify-center items-center"
-						v-if="portfolioStore.selectedPortfolio.name === ''"
+						v-else
+					>
+						<h2
+							class="text-center text-[14px] uppercase"
+							v-if="
+								portfolioStore.activePortfolioType === 'My Portfolios'
+							"
+						>
+							Select A portfolio to display here
+						</h2>
+						<h2 class="text-center text-[14px] uppercase" v-else>
+							Select
+							<span v-if="portfolioStore.joinedPortfolios.length === 0"
+								>first</span
+							>
+							Portfolio to Join
+						</h2>
+
+						<img src="@/assets/img/arrow.svg" alt="" />
+					</div>
+				</div>
+
+				<!-- Create Mode  -->
+				<div v-if="portfolioStore.activeMode === 'create'">
+					<!-- Empty Created or Joined Portfolio  -->
+					<div
+						class="h-full flex flex-col gap-y-[24px] justify-center items-center"
+						v-if="portfolioStore.createdPortfolios.length === 0"
 					>
 						<h2 class="text-center text-[14px] uppercase">
-							{{ props.cmd }}
+							Create First Portfolio to Manage
 						</h2>
 						<img src="@/assets/img/arrow.svg" alt="" />
 					</div>
 
-					<!-- Selected portfolio not empty  -->
+					<!-- My portfolio not empty  -->
 					<div
-						v-else
+						v-if="portfolioStore.selectedPortfolio.name"
 						class="flex items-center justify-between font-medium uppercase"
 					>
 						<!-- Left stats -->
@@ -165,7 +177,7 @@
 							<div class="pl-[30px]">
 								<h2 class="text-[#868C9D] text-[14px]">Name</h2>
 								<h3 class="text-white text-[16px]">
-									{{ portfolioStore.selectedPortfolio.name }}
+									{{ slice(portfolioStore.selectedPortfolio.name) }}
 								</h3>
 							</div>
 
@@ -231,5 +243,10 @@ const tabs = ref([
 
 function changeTab(tab) {
 	activeTab.value = tab;
+}
+
+function slice(str) {
+	if (str.length <= 13) return str;
+	return str.slice(0, 10) + "...";
 }
 </script>
