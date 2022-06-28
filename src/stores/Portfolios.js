@@ -63,7 +63,9 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			activePortfolioType: "All Portfolios", // or mine or mine & manager
 
-			createMode: false,
+			// createMode: false,
+
+			activeMode: "join", //create //deposit //withdraw
 		};
 	},
 
@@ -95,11 +97,12 @@ export const usePortfolios = defineStore("Portfolios", {
 
 		showCreate() {
 			this.reset();
-			this.createMode = true;
+			this.activeMode = "create";
 		},
 
 		showJoin() {
-			this.createMode = false;
+			this.reset();
+			this.activeMode = "join";
 		},
 
 		reset() {

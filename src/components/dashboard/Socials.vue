@@ -1,73 +1,13 @@
 <template>
 	<div class="row-span-1 bg-[#191A20] py-[20px]">
 		<!-- Top -->
-		<!-- Create First portfolio to manage  -->
-		<div
-			class="w-full flex justify-center items-center gap-x-[24px]"
-			v-if="portfolioStore.createMode"
-		>
-			<h2 class="text-[#868C9D] text-[14px] uppercase">
-				Create
-				<span v-if="portfolioStore.createdPortfolios.length === 0"
-					>First</span
-				>
-				portfolio to manage
-			</h2>
-
-			<img src="@/assets/img/arrow.svg" alt="" class="-rotate-90" />
-		</div>
-
-		<!-- Select first portfolio to join on only "All Portfolios" -->
-		<div class="w-full flex justify-center items-center gap-x-[24px]" v-else>
-			<!-- All Instruction permutations in H2 -->
-			<div v-if="portfolioStore.activePortfolioType === 'All Portfolios'">
-				<div>
-					<h2
-						class="text-[#868C9D] text-[14px] uppercase"
-						v-if="portfolioStore.selectedPortfolio.name"
-					>
-						Follow {{ portfolioStore.selectedPortfolio.name }} Community
-					</h2>
-
-					<h2 class="text-[#868C9D] text-[14px] uppercase" v-else>
-						Select
-						<span v-if="portfolioStore.joinedPortfolios.length === 0"
-							>first</span
-						>
-						portfolio to join
-					</h2>
-				</div>
-			</div>
-
-			<!-- All Instruction permutations in H2 -->
-			<div v-else>
-				<div>
-					<h2
-						class="text-[#868C9D] text-[14px] uppercase"
-						v-if="portfolioStore.selectedPortfolio.name"
-					>
-						{{ portfolioStore.selectedPortfolio.name }} Community
-					</h2>
-
-					<h2 class="text-[#868C9D] text-[14px] uppercase" v-else>
-						Select a portfolio to display here
-					</h2>
-				</div>
-			</div>
-
-			<img
-				v-if="!portfolioStore.selectedPortfolio.name"
-				src="@/assets/img/arrow.svg"
-				alt=""
-				class="-rotate-90"
-			/>
-		</div>
+		<SocialsDirection />
 
 		<hr class="my-[12px] border-[#2D3035]" />
 
 		<!-- Bottom  -->
 		<div
-			v-if="portfolioStore.createMode"
+			v-if="portfolioStore.activeMode === 'create'"
 			class="text-center text-[60px] text-white"
 		>
 			New UI here
@@ -98,6 +38,7 @@
 </template>
 
 <script setup>
+import SocialsDirection from "./SocialsDirection.vue";
 import { usePortfolios } from "@/stores/Portfolios";
 
 // Store
