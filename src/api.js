@@ -9,6 +9,7 @@ var leaderBoardData={data:[],selectedLeaderIndex:0}//leader board portfolios
 var myWallets={}//my wallets either as a portfolio manager or investor
 var tokenArray =require('./apiLib/Tokens.json');
 var balancesInEoa=[];
+var EventBlocksAlreadyHandledProsperoFactoryWallet=[]
 //TO DO - have this updated on UI
 var selectedProsperoWalletAddress="0x4cc4b88c622ee9b2c9007a6aea014a093c2fefc5"//CHANGE
 //Libraries
@@ -39,9 +40,12 @@ var nativeTokenPrice;
 var isSubnet=false;//To Do - change me to something automatic by checking network
 var avaxPrice;
 var GAS_PRICE;
+var alreadyListeningToFactoryEvents=false;
+var blockNumWhenWebAppLaunched=0;
 var USD_SCALE = 1000000000000000000;//await ProsperoWalletLibConstants.methods.USD_SCALE().call()
 //UI Objects - keys changed and formatted for UI
 var leaderBoardUITableObject;
+var prosperoFactoryEventsInstance;
 //FUNCTIONS
 //To do - update amount in balancesInEoa object when user updates USD amount in table
 async function updateAmount(amount, tokenAddress){
@@ -60,87 +64,162 @@ async function updateSelectedProsperoWalletAddress(address){
 }
 /*
 To Do:
-withdraw swap into wavax?
-history - the graph
+finished method events firing
+one off values up top - see ui
+historical graph work
 */
 //percentages example=[.50,.50]
+async function initNewEventListener(){
+  console.log('initNewEventListener')
+  var DEPOSIT_THEN_REBALANCE=0
+  var WITHDRAW_ALL=1
+  var WITHDRAW_SWAP=2
+  var LEADER_SWAP=3
+  var LEADER_STRAIGHT_DEPOSIT=4
+  var CREATE_WALLET=5
+  var FOLLOW_WALLET=6
+  //right here
+  if (!alreadyListeningToFactoryEvents){
+    alreadyListeningToFactoryEvents=true;
+    console.log("setting .on....")
+    prosperoFactoryEventsInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson.abi,  ethersSigner);
+    prosperoFactoryEventsInstance.on("LatestBalancesFactory", async (tokens, users, balances, percentageOwnerships, usdInvested, usersValues, addressVars, intVars, walletName, profilePictureUrl, event) => {
+      
+      console.log("got LatestBalancesFactory")
+      console.log(" LatestBalancesFactory event:"
+      +" "+tokens
+      +" "+users
+      +" "+balances
+      +" "+percentageOwnerships
+      +" "+usdInvested
+      +" "+usersValues
+      +" "+addressVars
+      +" "+intVars
+      +" "+walletName
+      +" "+JSON.stringify(event));
+
+      var methodType = intVars[0]
+      var eoaAddressMsgSender = addressVars[0]
+      eoaAddressMsgSender=eoaAddressMsgSender.toLowerCase();
+      var myEoaAddress = (EOAAddress).toLowerCase();
+      console.log('methodType:'+methodType)
+      console.log("eoaAddressMsgSender:"+eoaAddressMsgSender)
+      console.log("event.blockNumber:"+event.blockNumber)
+      console.log("blockNumWhenWebAppLaunched:"+blockNumWhenWebAppLaunched)
+
+      if (event.blockNumber<=blockNumWhenWebAppLaunched){
+        return;
+      }
+      var blocksAlreadyHadled = EventBlocksAlreadyHandledProsperoFactoryWallet
+      console.log("J:"+JSON.stringify(EventBlocksAlreadyHandledProsperoFactoryWallet, null, 2))
+      EventBlocksAlreadyHandledProsperoFactoryWallet.push(event.blockNumber+"")
+      var alertString ="Error - no methodType found.";
+      if (methodType==CREATE_WALLET){
+        //if (eoaAddressMsgSender != myEoaAddress){
+        //  return;
+        //}
+        alertString ="A new Prospero wallet has been created, refreshing page now."
+      }else if (methodType==FOLLOW_WALLET){
+        //if (eoaAddressMsgSender != myEoaAddress){
+        //  return;
+        //}
+        alertString ="A Prospero wallet has recently been followed, refreshing page now."
+      }else if (methodType == LEADER_SWAP){
+        alertString ="A rebalance has just completed on a Prospero wallet, refreshing page now."
+      }else if (methodType == DEPOSIT_THEN_REBALANCE){
+        alertString ="A deposit has just been completed on a Prospero wallet, refreshing page now."
+      }else if (methodType == WITHDRAW_ALL){
+        alertString ="A withdraw has just been completed on a Prospero wallet, refreshing page now."
+      }else if (methodType == WITHDRAW_SWAP){
+        alertString ="A withdraw swap has just been completed on a Prospero wallet, refreshing page now."
+      }else if (methodType == LEADER_STRAIGHT_DEPOSIT){
+        alertString ="A deposit has just been completed on a Prospero wallet, refreshing page now."
+      }
+      //LEADER_STRAIGHT_DEPOSIT
+      confirm(alertString);
+      window.location.reload();
+    })
+  }
+}
 async function getGraphData(){
   var prspUrl = "https://api.thegraph.com/subgraphs/name/lapat/prospero" ; // https://thegraph.com/explorer/subgraph/uniswap/uniswap-v2
-//var main = async () =>{
-    try {
-        var result = await axios.post(
-            prspUrl,
-            {
+  //var main = async () =>{
+  try {
+    var result = await axios.post(
+      prspUrl,
+      {
 
-                query: `
-                {
-                    latestBalancesFactories
-                     {
-                       id
-                       tokens
-                       users
-                       balances
-                       percentageOwnerships
-                       usdInvested
-                       usersValues
-                       addressVars
-                       intVars
-                       walletName
-                       }
-                   }
-                `
-            }
-            );
-            console.log ("Query result: \n", result.data.data.latestBalancesFactories);
-            var graphData = result.data;
-            for (var i =0;i<graphData.length;i++){
-              var graphItem = graphData[i];
-              console.log("graphItem:"+JSON.stringify(graphItem,null,2))
-            }
-    } catch (err){
-        console.log(err);
+        query: `
+        {
+          latestBalancesFactories
+          {
+            id
+            tokens
+            users
+            balances
+            percentageOwnerships
+            usdInvested
+            usersValues
+            addressVars
+            intVars
+            walletName
+          }
+        }
+        `
+      }
+    );
+    console.log ("Query result: \n", result.data.data.latestBalancesFactories);
+    var graphData = result.data;
+    for (var i =0;i<graphData.length;i++){
+      var graphItem = graphData[i];
+      console.log("graphItem:"+JSON.stringify(graphItem,null,2))
     }
-//}
+  } catch (err){
+    console.log(err);
+  }
+  //}
 }
 async function getHistoricalPrices(){
   console.log('getHistoricalPrices')
   for (var i=0;i<tokenArray.length;i++){
-      var thisToken = tokenArray[i];
-      //https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=365&interval=daily
-      var tokenHistory = JSON.parse(localStorage.getItem(thisToken.id));
-      var shouldSearch = false;
-      if (tokenHistory!=undefined){
-        if (!tokenHistory.hasOwnProperty("prices")){
-          shouldSearch=true;
-        }
+    var thisToken = tokenArray[i];
+    //https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=365&interval=daily
+    var tokenHistory = JSON.parse(localStorage.getItem(thisToken.id));
+    var shouldSearch = false;
+    if (tokenHistory!=undefined){
+      if (!tokenHistory.hasOwnProperty("prices")){
+        shouldSearch=true;
       }
-      if (shouldSearch){
-        console.log('searching...')
+    }
+    if (shouldSearch){
+      console.log('searching...')
       var hUrl="https://api.coingecko.com/api/v3/coins/"+thisToken.id+"/market_chart?vs_currency=usd&days=365&interval=daily"
       var  historicalPricesResponseHere = await fetch(hUrl);
       var priceObjHere = await historicalPricesResponseHere.json();
       console.log("p:"+JSON.stringify(priceObjHere,null,2))
       localStorage.setItem(thisToken.id, JSON.stringify(priceObjHere));
-      }
     }
-    console.log('got them...')
-    for (var i=0;i<tokenArray.length;i++){
-      var thisToken = tokenArray[i];
-      var theStorage = localStorage.getItem(thisToken.id)
-      theStorage = theStorage
-      var tokenHistory = JSON.parse(theStorage);
-      console.log("thisToken.id:"+thisToken.id+"tokenHistory:"+JSON.stringify(tokenHistory,null,2))
-      for (var k=0;k<theStorage.length;k++){
-         var theDate = new Date(theStorage[k][0]);
-         var justDate = theDate.getMonth() +"-"+ theDate.getDate() +"-"+ theDate.getFullYear();
-         tokenHistory['date']=justDate
-         console.log('justDate:'+justDate)
-      }
-      //localStorage.setItem(thisToken.id, JSON.stringify(priceObjHere));
-
-
-
+  }
+  console.log('got them...')
+  for (var i=0;i<tokenArray.length;i++){
+    var thisToken = tokenArray[i];
+    var theStorage = localStorage.getItem(thisToken.id)
+    theStorage = theStorage
+    var tokenHistory = JSON.parse(theStorage);
+    console.log("thisToken.id:"+thisToken.id+"tokenHistory:"+JSON.stringify(tokenHistory,null,2))
+    for (var k=0;k<theStorage.length;k++){
+      var theDate = new Date(theStorage[k][0]);
+      var justDate = theDate.getMonth() +"-"+ theDate.getDate() +"-"+ theDate.getFullYear();
+      tokenHistory['date']=justDate
+      console.log('justDate:'+justDate)
     }
+    //TO DO:
+    //get value of portfolio at every day
+    //get total profit for every day
+
+
+
+  }
 
 }
 async function withdraw(tokenSwappingInto, amountToWithdraw){
@@ -234,60 +313,69 @@ async function rebalance(percentages, tokenAddressesToRemix){
     console.log("Goal tokens and percentages are the same as current.")
     return {success:false, error:"Goal tokens and percentages are the same as current."}
   }
-  try{
+  var totalPerc = 0;
   for (var x=0;x<percentages.length;x++){
-    percentages[x]=percentages[x]/100;
-    //console.log("percentages[x]:"+percentages[x])
-    var thisPercBn=BigNumber(percentages[x]+"");
-    //console.log("thisPercBn:"+thisPercBn)
-    var percScaleBn=BigNumber(USD_SCALE+"");
-    //console.log("percScaleBn:"+percScaleBn)
-    var thisFinalPerc = thisPercBn.multipliedBy(percScaleBn);
-    //console.log("thisFinalPerc:"+thisFinalPerc)
-    percentages[x]=thisFinalPerc;
+    totalPerc = totalPerc + percentages[x];
   }
-  console.log("percentages formatted:"+percentages)
-  var prosperoWalletInstance = new web3.eth.Contract(
-    ProsperoWalletJson.abi,
-    selectedProsperoWalletAddress
-  );
-  var web3Tx = await prosperoWalletInstance.methods.rebalancePortfolio(
-    tokenAddressesToRemix,
-    percentages
-  ).send({
-    from: EOAAddress
-  }).on('error', function(error, receipt){
-    console.log("error rebalancePortfolio:"+error)
-    return {success:false, error:error}
-  })
-  .on('transactionHash', function(transactionHash){
-    //console.log("transactionhash:"+transactionHash)
-  })
-  .on('receipt', function(receipt){
-    //console.log("got receipt:"+JSON.stringify(receipt,null,2))
-    ////console.logreceipt.contractAddress) // contains the new contract address
-  })
-  .on('confirmation', function(confirmationNumber, receipt){
-    //console.log("receipt conf:"+JSON.stringify(receipt,null,2))
-  })
-  var cumulativeGasUsed = web3Tx.cumulativeGasUsed;
-  var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
-  console.log('gasUsed:'+JSON.stringify(gasUsed,null,2));
-
-  var thisWalletsObj = await getValueOfBalancesOfTokensInPortfolioForUser(null, EOAAddress, selectedProsperoWalletAddress)
-  //console.log('thisWalletsObj:'+JSON.stringify(thisWalletsObj,null,2))
-  var areGoalPercentagesAndActualClose = await returnTrueIfPercentagesAreLessAndClose(thisWalletsObj, percentages, tokenAddressesToRemix)
-  if (!areGoalPercentagesAndActualClose){
-    console.log("Current percentages do not match goal percentages.");
-
-    return {success:false, error:"Current percentages do not match goal percentages."}
+  if (totalPerc != 100){
+    var msg = "Percentages do not add up to 100."
+    console.log(msg)
+    return {success:false, error:msg}
   }
-  return {success:true};
-}catch(exception){
-  console.error("exception rebalance():"+JSON.stringify(exception,null,2))
-  console.error("exception rebalance():"+exception)
-  return {success:false, error:exception}
-}
+  try{
+    for (var x=0;x<percentages.length;x++){
+      percentages[x]=percentages[x]/100;
+      //console.log("percentages[x]:"+percentages[x])
+      var thisPercBn=BigNumber(percentages[x]+"");
+      //console.log("thisPercBn:"+thisPercBn)
+      var percScaleBn=BigNumber(USD_SCALE+"");
+      //console.log("percScaleBn:"+percScaleBn)
+      var thisFinalPerc = thisPercBn.multipliedBy(percScaleBn);
+      //console.log("thisFinalPerc:"+thisFinalPerc)
+      percentages[x]=thisFinalPerc;
+    }
+    console.log("percentages formatted:"+percentages)
+    var prosperoWalletInstance = new web3.eth.Contract(
+      ProsperoWalletJson.abi,
+      selectedProsperoWalletAddress
+    );
+    var web3Tx = await prosperoWalletInstance.methods.rebalancePortfolio(
+      tokenAddressesToRemix,
+      percentages
+    ).send({
+      from: EOAAddress
+    }).on('error', function(error, receipt){
+      console.log("error rebalancePortfolio:"+error)
+      return {success:false, error:error}
+    })
+    .on('transactionHash', function(transactionHash){
+      //console.log("transactionhash:"+transactionHash)
+    })
+    .on('receipt', function(receipt){
+      //console.log("got receipt:"+JSON.stringify(receipt,null,2))
+      ////console.logreceipt.contractAddress) // contains the new contract address
+    })
+    .on('confirmation', function(confirmationNumber, receipt){
+      //console.log("receipt conf:"+JSON.stringify(receipt,null,2))
+    })
+    var cumulativeGasUsed = web3Tx.cumulativeGasUsed;
+    var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
+    console.log('gasUsed:'+JSON.stringify(gasUsed,null,2));
+
+    var thisWalletsObj = await getValueOfBalancesOfTokensInPortfolioForUser(null, EOAAddress, selectedProsperoWalletAddress)
+    //console.log('thisWalletsObj:'+JSON.stringify(thisWalletsObj,null,2))
+    var areGoalPercentagesAndActualClose = await returnTrueIfPercentagesAreLessAndClose(thisWalletsObj, percentages, tokenAddressesToRemix)
+    if (!areGoalPercentagesAndActualClose){
+      console.log("Current percentages do not match goal percentages.");
+
+      return {success:false, error:"Current percentages do not match goal percentages."}
+    }
+    return {success:true};
+  }catch(exception){
+    console.error("exception rebalance():"+JSON.stringify(exception,null,2))
+    console.error("exception rebalance():"+exception)
+    return {success:false, error:exception}
+  }
 }
 async function deposit(){
   //await getInfoSubnetHelperContract();
@@ -305,21 +393,21 @@ async function deposit(){
     usdAmountEnteredByUser = Number(usdAmountEnteredByUser)
     if (usdAmountEnteredByUser>0){
       console.log('thisDepositingObj.name:'+thisDepositingObj.name)
-        //var weiAmount = await getWeiAmount(usdAmountEnteredByUser, thisDepositingObj.address)
-        var amountInEth = usdAmountEnteredByUser/thisDepositingObj.price;
-        amountInEth = amountInEth.toFixed(16)
-        console.log('amountInEth:'+amountInEth)
-        var weiAmt = web3.utils.toWei(amountInEth+"", 'ether')
-        console.log('weiAmt1:'+weiAmt)
-        weiAmt = await updateBalanceFromEighteenDecimalsIfNeeded(weiAmt, thisDepositingObj.address)
-        console.log('weiAmt2:'+weiAmt)
-        if (thisDepositingObj.name==NativeTokenName){
+      //var weiAmount = await getWeiAmount(usdAmountEnteredByUser, thisDepositingObj.address)
+      var amountInEth = usdAmountEnteredByUser/thisDepositingObj.price;
+      amountInEth = amountInEth.toFixed(16)
+      console.log('amountInEth:'+amountInEth)
+      var weiAmt = web3.utils.toWei(amountInEth+"", 'ether')
+      console.log('weiAmt1:'+weiAmt)
+      weiAmt = await updateBalanceFromEighteenDecimalsIfNeeded(weiAmt, thisDepositingObj.address)
+      console.log('weiAmt2:'+weiAmt)
+      if (thisDepositingObj.name==NativeTokenName){
         //  console.log("WEI:"+thisDepositingObj.weiDepositing)
-          avaxValue=weiAmt+""
-        }else{
-          tokens.push(thisDepositingObj.address)
-          amounts.push(weiAmt+"")
-        }
+        avaxValue=weiAmt+""
+      }else{
+        tokens.push(thisDepositingObj.address)
+        amounts.push(weiAmt+"")
+      }
     }
   }
   //await getAmountsDepositing();
@@ -397,7 +485,7 @@ async function calculateGasEstimate (gasEstimate, gasPriceToUse){
   }
 }
 async function approveDepositing(tokens, amounts, selectedProsperoWalletAddress){
- console.log("approveDepositing")
+  console.log("approveDepositing")
   var zeroBn = BigNumber("0")
   for (var k=0;k<tokens.length;k++){
     var thisTokenInstance = await new ethers.Contract(tokens[k], ERC20Json["abi"],  ethersSigner);
@@ -410,30 +498,30 @@ async function approveDepositing(tokens, amounts, selectedProsperoWalletAddress)
     if (bnAmountInWeiToDeposit.isGreaterThan(bnAllowance)){
       console.log("NOT ENOUGH APPROVED")
 
-            try{
+      try{
 
 
-            //  var amtToApproveToReachDiff = bnAmountInWeiToDeposit.minus(bnAllowance)
-              var amtToApprove = ALOT_APPROVE // can switch to amtToApprove
-              //console.log("need to approve this much:"+amtToApproveToReachDiff+" going to approve:"+amtToApprove);
-              //console.log("selectedProsperoWalletAddress:" + selectedProsperoWalletAddress)
-              var tx = await thisTokenInstance.approve(selectedProsperoWalletAddress, amtToApprove+"");
-              var f = await tx.wait();
-              //console.log("transaction approve returned:"+JSON.stringify(f,null,2)+" for "+thisToken.name)
-            }catch(e){
-              return {success:false, error:e}
-            }
-          }
-        }
-        return {success:true}
+        //  var amtToApproveToReachDiff = bnAmountInWeiToDeposit.minus(bnAllowance)
+        var amtToApprove = ALOT_APPROVE // can switch to amtToApprove
+        //console.log("need to approve this much:"+amtToApproveToReachDiff+" going to approve:"+amtToApprove);
+        //console.log("selectedProsperoWalletAddress:" + selectedProsperoWalletAddress)
+        var tx = await thisTokenInstance.approve(selectedProsperoWalletAddress, amtToApprove+"");
+        var f = await tx.wait();
+        //console.log("transaction approve returned:"+JSON.stringify(f,null,2)+" for "+thisToken.name)
+      }catch(e){
+        return {success:false, error:e}
       }
+    }
+  }
+  return {success:true}
+}
 async function getAmountsDepositing(){
   console.log("getAmountsDepositing..")
   //console.log("usdAmountToDepositForEachTokenForEachToken:"+usdAmountToDepositForEachTokenForEachToken)
   var depositingObj=[]
   for (var k=0;k<balancesInEoa.length;k++){
     var usdAmountToDepositForEachTokenForEachToken=   Number(balancesInEoa[k]['usdAmountEnteredByUser']);
-   console.log("*** usdAmountToDepositForEachTokenForEachToken:"+usdAmountToDepositForEachTokenForEachToken)
+    console.log("*** usdAmountToDepositForEachTokenForEachToken:"+usdAmountToDepositForEachTokenForEachToken)
     var usdAmountToDepositForEachTokenForEachTokenBn= BigNumber(usdAmountToDepositForEachTokenForEachToken+'');
     var thisToken = balancesInEoa[k]
 
@@ -445,55 +533,55 @@ async function getAmountsDepositing(){
     console.log("token:"+thisToken.name)
     console.log("This Token:"+JSON.stringify(thisToken,null,2))
     //console.log("bnBal:"+bnBal)
-      if (bnBal.isGreaterThan(zeroBn)){
-        console.log("greter than zero")
+    if (bnBal.isGreaterThan(zeroBn)){
+      console.log("greter than zero")
 
-        var amountInEthToDepositHelper = usdAmountToDepositForEachTokenForEachToken / Number(thisToken.price);
-        console.log("thisToken.price:"+thisToken.price)
-        console.log("usdAmountToDepositForEachTokenForEachToken:"+usdAmountToDepositForEachTokenForEachToken)
+      var amountInEthToDepositHelper = usdAmountToDepositForEachTokenForEachToken / Number(thisToken.price);
+      console.log("thisToken.price:"+thisToken.price)
+      console.log("usdAmountToDepositForEachTokenForEachToken:"+usdAmountToDepositForEachTokenForEachToken)
 
-        console.log("amountInEthToDepositHelper:"+amountInEthToDepositHelper)
+      console.log("amountInEthToDepositHelper:"+amountInEthToDepositHelper)
 
-        console.log("thisToken.decimals:"+thisToken.decimals)
-        amountInEthToDepositHelper=amountInEthToDepositHelper.toFixed(thisToken.decimals)
-        console.log("amountInEthToDepositHelper:"+amountInEthToDepositHelper+" p:"+Number(thisToken.price))
-        var amountInEthToDeposit = amountInEthToDepositHelper;// / Number(thisToken.price)
-        console.log("amountInEthToDeposit:"+amountInEthToDeposit)
-        var amountInWeiToDeposit = ethers.utils.parseEther(amountInEthToDeposit+"")
-        console.log("amountInWeiToDeposit:"+amountInWeiToDeposit)
+      console.log("thisToken.decimals:"+thisToken.decimals)
+      amountInEthToDepositHelper=amountInEthToDepositHelper.toFixed(thisToken.decimals)
+      console.log("amountInEthToDepositHelper:"+amountInEthToDepositHelper+" p:"+Number(thisToken.price))
+      var amountInEthToDeposit = amountInEthToDepositHelper;// / Number(thisToken.price)
+      console.log("amountInEthToDeposit:"+amountInEthToDeposit)
+      var amountInWeiToDeposit = ethers.utils.parseEther(amountInEthToDeposit+"")
+      console.log("amountInWeiToDeposit:"+amountInWeiToDeposit)
 
-        var thisAddress = thisToken.address
-        //console.log("ThisAddress:"+thisAddress)
-        //if (thisToken.address="AVAX"){
-        //  thisAddress
-        //}
-        obj={
-          //totalUSDAmountToDeposit:totalUSDAmountToDeposit,
-          usdAmountEnteredByUser:Number(balancesInEoa[k]['usdAmountEnteredByUser']),
-          weiDepositing:amountInWeiToDeposit+"",
-          usdDepositing:usdAmountToDepositForEachTokenForEachToken+"",
-          ethDepositing:amountInEthToDeposit+"",
-          name: thisToken.name,
-          usdAmount:thisToken.usdAmount,
-          balance: thisToken.balance,
-          balanceInEth:thisToken.balanceInEth,
-          address:thisToken.address,
-          currentPercentageInPortfolio:thisToken.currentPercentageInPortfolio
-        }
-      }else{
-        obj={
-          //totalUSDAmountToDeposit:totalUSDAmountToDeposit,
-          usdAmountEnteredByUser:0,
-          weiDepositing:0+"",
-          usdDepositing:0+"",
-          ethDepositing:0+"",
-          name: thisToken.name,
-          usdAmount:thisToken.usdAmount,
-          balance: thisToken.balance,
-          balanceInEth:thisToken.balanceInEth,
-          address:thisToken.address,
-          currentPercentageInPortfolio:thisToken.currentPercentageInPortfolio
-        }
+      var thisAddress = thisToken.address
+      //console.log("ThisAddress:"+thisAddress)
+      //if (thisToken.address="AVAX"){
+      //  thisAddress
+      //}
+      obj={
+        //totalUSDAmountToDeposit:totalUSDAmountToDeposit,
+        usdAmountEnteredByUser:Number(balancesInEoa[k]['usdAmountEnteredByUser']),
+        weiDepositing:amountInWeiToDeposit+"",
+        usdDepositing:usdAmountToDepositForEachTokenForEachToken+"",
+        ethDepositing:amountInEthToDeposit+"",
+        name: thisToken.name,
+        usdAmount:thisToken.usdAmount,
+        balance: thisToken.balance,
+        balanceInEth:thisToken.balanceInEth,
+        address:thisToken.address,
+        currentPercentageInPortfolio:thisToken.currentPercentageInPortfolio
+      }
+    }else{
+      obj={
+        //totalUSDAmountToDeposit:totalUSDAmountToDeposit,
+        usdAmountEnteredByUser:0,
+        weiDepositing:0+"",
+        usdDepositing:0+"",
+        ethDepositing:0+"",
+        name: thisToken.name,
+        usdAmount:thisToken.usdAmount,
+        balance: thisToken.balance,
+        balanceInEth:thisToken.balanceInEth,
+        address:thisToken.address,
+        currentPercentageInPortfolio:thisToken.currentPercentageInPortfolio
+      }
 
     }
     balancesInEoa[k]['ethDepositing']=obj['ethDepositing']
@@ -524,73 +612,73 @@ async function getBalancesInEoa(){
     }
     //TESTING
     /*if (thisToken.symbol =="WETH.e"){
-      console.log("updating..")
-      var obj = {
-        usdAmountEnteredByUser:100,
-        index:k,
-        icon:thisToken.logoURI,
-        name:thisTokenName,
-        available:usdValue.toFixed(2)+"",
-        balance:balance+"",
-        balanceInEth:balanceInEth+"",
-        price:(thisToken.price).toFixed(2),
-        address:thisToken.address,
-        EOAAddress:EOAAddress,
-        decimals:thisToken.decimals,
-        isNativeToken:false
-      }
-    }else{*/
+    console.log("updating..")
     var obj = {
-      usdAmountEnteredByUser:0,
-      index:k,
-      icon:thisToken.logoURI,
-      name:thisTokenName,
-      available:usdValue.toFixed(2)+"",
-      balance:balance+"",
-      balanceInEth:balanceInEth+"",
-      price:(thisToken.price).toFixed(2),
-      address:thisToken.address,
-      EOAAddress:EOAAddress,
-      decimals:thisToken.decimals,
-      isNativeToken:false
-    }
-  //}
-    balancesInEoa.push(obj)
+    usdAmountEnteredByUser:100,
+    index:k,
+    icon:thisToken.logoURI,
+    name:thisTokenName,
+    available:usdValue.toFixed(2)+"",
+    balance:balance+"",
+    balanceInEth:balanceInEth+"",
+    price:(thisToken.price).toFixed(2),
+    address:thisToken.address,
+    EOAAddress:EOAAddress,
+    decimals:thisToken.decimals,
+    isNativeToken:false
   }
-  //NATIVE TOKEN, doesn't work with subnet yet
-  if (!isSubnet){
-    var index = tokenArray.length;
-    var balanceAvaxNow = await ethersProvider.getBalance(EOAAddress);
-    console.log('v-2')
-    //var usdValueAvax = await getUSDValue_MINE(balanceAvaxNow+"", nativeTokenWrappedAddress)
-    var balanceInEthAvax =  ethers.utils.formatEther(balanceAvaxNow+"")
-    console.log('avaxPrice:'+avaxPrice+' balanceInEthAvax:'+balanceInEthAvax)
-    var usdValueAvax = avaxPrice * balanceInEthAvax;
-    console.log('usdValueAvax in getBalancesInEoa:'+usdValueAvax)
+}else{*/
+var obj = {
+  usdAmountEnteredByUser:0,
+  index:k,
+  icon:thisToken.logoURI,
+  name:thisTokenName,
+  available:usdValue.toFixed(2)+"",
+  balance:balance+"",
+  balanceInEth:balanceInEth+"",
+  price:(thisToken.price).toFixed(2),
+  address:thisToken.address,
+  EOAAddress:EOAAddress,
+  decimals:thisToken.decimals,
+  isNativeToken:false
+}
+//}
+balancesInEoa.push(obj)
+}
+//NATIVE TOKEN, doesn't work with subnet yet
+if (!isSubnet){
+  var index = tokenArray.length;
+  var balanceAvaxNow = await ethersProvider.getBalance(EOAAddress);
+  console.log('v-2')
+  //var usdValueAvax = await getUSDValue_MINE(balanceAvaxNow+"", nativeTokenWrappedAddress)
+  var balanceInEthAvax =  ethers.utils.formatEther(balanceAvaxNow+"")
+  console.log('avaxPrice:'+avaxPrice+' balanceInEthAvax:'+balanceInEthAvax)
+  var usdValueAvax = avaxPrice * balanceInEthAvax;
+  console.log('usdValueAvax in getBalancesInEoa:'+usdValueAvax)
 
-    var obj = {
-      usdAmountEnteredByUser:0,//TESTING - TO DO REMOVE ME....
-      index:index,
-      icon:nativeTokenObj.logoURI,
-      name:NativeTokenName,
-      available:usdValueAvax.toFixed(2)+"",
-      balance:balance+"",
-      balanceInEth:balanceInEth+"",
-      price:(nativeTokenObj.price).toFixed(2),
-      address:nativeTokenObj.address,
-      EOAAddress:EOAAddress,
-      decimals:nativeTokenObj.decimals,
-      isNativeToken:true
-    }
-    balancesInEoa.push(obj)
+  var obj = {
+    usdAmountEnteredByUser:0,//TESTING - TO DO REMOVE ME....
+    index:index,
+    icon:nativeTokenObj.logoURI,
+    name:NativeTokenName,
+    available:usdValueAvax.toFixed(2)+"",
+    balance:balance+"",
+    balanceInEth:balanceInEth+"",
+    price:(nativeTokenObj.price).toFixed(2),
+    address:nativeTokenObj.address,
+    EOAAddress:EOAAddress,
+    decimals:nativeTokenObj.decimals,
+    isNativeToken:true
   }
-  console.log("balancesInEoa:"+JSON.stringify(balancesInEoa,null,2))
-  return balancesInEoa;
-  //balancesInEoa = balancesInEoa
-  //console.log("balancesInEoa:"+balancesInEoa)
-  //if (shouldInitDepositingObject){
-  //depositingObject=balancesInEoa;
-  //}
+  balancesInEoa.push(obj)
+}
+console.log("balancesInEoa:"+JSON.stringify(balancesInEoa,null,2))
+return balancesInEoa;
+//balancesInEoa = balancesInEoa
+//console.log("balancesInEoa:"+balancesInEoa)
+//if (shouldInitDepositingObject){
+//depositingObject=balancesInEoa;
+//}
 }
 function updateActiveLeaderboardRow(row){
   leaderBoardData["selectedLeaderIndex"]=row
@@ -605,9 +693,9 @@ async function joinPortfolio(){
     var r = await tx.wait();
     return {success:true}
   }catch(e){
-   console.log("Exception joinPortfolio: "+e)
-   console.log("Exception joinPortfolio: "+JSON.stringify(e,null,2))
-   return {success:false, error:e}
+    console.log("Exception joinPortfolio: "+e)
+    console.log("Exception joinPortfolio: "+JSON.stringify(e,null,2))
+    return {success:false, error:e}
   }
   return {success:false}
 
@@ -633,44 +721,44 @@ async function createPortfolio(walletName){
       }
     }
     return {success:true, prosperoWalletAddressCreated:null}
-}catch(e){
- console.log("Exception createPortfolio: "+e)
- console.log("Exception createPortfolio: "+JSON.stringify(e,null,2))
- return {success:false, error:e}
-}
-return {success:false, error:null}
+  }catch(e){
+    console.log("Exception createPortfolio: "+e)
+    console.log("Exception createPortfolio: "+JSON.stringify(e,null,2))
+    return {success:false, error:e}
+  }
+  return {success:false, error:null}
 }
 async function initLeaderBoardTableObject(){
   try{
-  await createLeaderBoardDataObject();
-  console.log('leaderBoardData:'+JSON.stringify(leaderBoardData,null,2))
-  var leaderBoardDataHere = leaderBoardData.data
-  var tableData = []
-  for (var i =0;i<leaderBoardDataHere.length;i++){
-    var fee =leaderBoardDataHere[i]['leaderPercentageFee'];
-    var profitLeader=leaderBoardDataHere[i]['profitLeader'];
-    fee = fee / USD_SCALE;
-    fee = fee * 100;
-    fee = parseInt(fee)
-    fee = fee + "%"
-    profitLeader = profitLeader * 100;
-    profitLeader= parseInt(profitLeader)
-    profitLeader = profitLeader + "%"
+    await createLeaderBoardDataObject();
+    console.log('leaderBoardData:'+JSON.stringify(leaderBoardData,null,2))
+    var leaderBoardDataHere = leaderBoardData.data
+    var tableData = []
+    for (var i =0;i<leaderBoardDataHere.length;i++){
+      var fee =leaderBoardDataHere[i]['leaderPercentageFee'];
+      var profitLeader=leaderBoardDataHere[i]['profitLeader'];
+      fee = fee / USD_SCALE;
+      fee = fee * 100;
+      fee = parseInt(fee)
+      fee = fee + "%"
+      profitLeader = profitLeader * 100;
+      profitLeader= parseInt(profitLeader)
+      profitLeader = profitLeader + "%"
 
-    var leaderObjForTable = {
-      name:leaderBoardDataHere[i]['walletValues']['walletName'],
-      fee:fee,
-      d7: 0,
-      d30: 0,
-      d90: 0,
-      y1: profitLeader,
-    };
-    tableData.push(leaderObjForTable);
+      var leaderObjForTable = {
+        name:leaderBoardDataHere[i]['walletValues']['walletName'],
+        fee:fee,
+        d7: 0,
+        d30: 0,
+        d90: 0,
+        y1: profitLeader,
+      };
+      tableData.push(leaderObjForTable);
+    }
+    leaderBoardUITableObject = tableData;
+  }catch(e){
+    return {error:e}
   }
-  leaderBoardUITableObject = tableData;
-}catch(e){
-  return {error:e}
-}
 }
 async function getLeaderBoardDataForTable(){
   return leaderBoardUITableObject;
@@ -681,29 +769,29 @@ async function getLeaderBoardDataForTable(){
   var leaderBoardDataHere = leaderBoardData.data
   var tableData = []
   for (var i =0;i<leaderBoardDataHere.length;i++){
-    var fee =leaderBoardDataHere[i]['leaderPercentageFee'];
-    var profitLeader=leaderBoardDataHere[i]['profitLeader'];
-    fee = fee / USD_SCALE;
-    fee = fee * 100;
-    fee = parseInt(fee)
-    fee = fee + "%"
-    profitLeader = profitLeader * 100;
-    profitLeader= parseInt(profitLeader)
-    profitLeader = profitLeader + "%"
+  var fee =leaderBoardDataHere[i]['leaderPercentageFee'];
+  var profitLeader=leaderBoardDataHere[i]['profitLeader'];
+  fee = fee / USD_SCALE;
+  fee = fee * 100;
+  fee = parseInt(fee)
+  fee = fee + "%"
+  profitLeader = profitLeader * 100;
+  profitLeader= parseInt(profitLeader)
+  profitLeader = profitLeader + "%"
 
-    var leaderObjForTable = {
-      name:leaderBoardDataHere[i]['walletValues']['walletName'],
-      fee:fee,
-      d7: 0,
-      d30: 0,
-      d90: 0,
-      y1: profitLeader,
-    };
-    tableData.push(leaderObjForTable);
-  }
-  return tableData;
+  var leaderObjForTable = {
+  name:leaderBoardDataHere[i]['walletValues']['walletName'],
+  fee:fee,
+  d7: 0,
+  d30: 0,
+  d90: 0,
+  y1: profitLeader,
+};
+tableData.push(leaderObjForTable);
+}
+return tableData;
 }catch(e){
-  return {error:e}
+return {error:e}
 }*/
 }
 async function createLeaderBoardDataObject(){
@@ -759,7 +847,6 @@ async function createLeaderBoardDataObject(){
     leaderBoardObject['numberOfTrailers']=allTrailerWallets.length
     leaderBoardObject['profitPercentage']=profitPercentage
     leaderBoardObject['prosperoWalletAddress']=thisLeaderWalletAddress
-
     //leaderBoardObject = {
     //  prosperoWalletAddress:thisLeaderWalletAddress,
     //  balancesValue:balancesValue,
@@ -782,9 +869,10 @@ async function createLeaderBoardDataObject(){
   leaderBoardData['data']=leaderBoardDataHere
 }
 async function getValueOfBalancesOfTokensInPortfolioForUser(balancesAndTokensObj, user, prosperoWalletAddress){
-  //console.log('--getValueOfBalancesOfTokensInPortfolioForUser')
+  //console.log('--getValueOfBalancesOfTokensInPortfolioForUser user:'+user+' prosperoWalletAddress:'+prosperoWalletAddress+' balancesAndTokensObj:'+JSON.stringify(balancesAndTokensObj,null,2))
   //console.log('balancesAndTokensObj:'+JSON.stringify(balancesAndTokensObj,null,2))
   if (balancesAndTokensObj==null){
+    //console.log('is null')
     balancesAndTokensObj = await getBalanacesOfTokensInPortfolioForUserContractCall(user, prosperoWalletAddress)
   }
   var balancesValue = await getValueOfBalancesOfTokensInPortfolio(balancesAndTokensObj)
@@ -798,7 +886,7 @@ async function getValueOfBalancesOfTokensInPortfolioForUser(balancesAndTokensObj
   var totalUsd = await ProsperoWalletInstance.methods.getTotalUsdInvestedPerUser(user).call({from: user})
   var valueOfUsersPortfolio = await getValueOfUsersPortfolio(prosperoWalletAddress, user, false);
   var percentageUser = await  ProsperoWalletInstance.methods.getPercentageOwnership(user).call({from: user})
-  //=console.log('percentageUser:'+percentageUser)
+  //console.log('percentageUser:'+percentageUser)
   percentageUser=(percentageUser / USD_SCALE)
   //var percentageUserBn = BigNumber(percentageUser)
   //console.log('percentageUser with USD Scale:'+percentageUser)
@@ -882,12 +970,12 @@ async function getValueOfBalancesOfTokensInPortfolioForUser(balancesAndTokensObj
   return balancesValueFinal
 }
 async function getValueOfUsersPortfolio(prosperoWalletAddress, usersEOA, shouldKeepAsBigNumber){
-//  console.log(
-//  "getValueOfUsersPortfolio pricesLibraryAddress: "+pricesLibraryAddress+
-//  " prosperoPricesAddress: "+prosperoPricesAddress+
-//  " prosperoWalletAddress: "+prosperoWalletAddress
-//  +" usersEOA: "+usersEOA
-//  +" PricesLibraryJson.abi:"+JSON.stringify(PricesLibraryJson.abi,null,2))
+  //  console.log(
+  //  "getValueOfUsersPortfolio pricesLibraryAddress: "+pricesLibraryAddress+
+  //  " prosperoPricesAddress: "+prosperoPricesAddress+
+  //  " prosperoWalletAddress: "+prosperoWalletAddress
+  //  +" usersEOA: "+usersEOA
+  //  +" PricesLibraryJson.abi:"+JSON.stringify(PricesLibraryJson.abi,null,2))
   try{
     var pricesLibraryInstance = new web3.eth.Contract(
       PricesLibraryJson.abi,
@@ -921,7 +1009,7 @@ async function getValueOfUsersPortfolio(prosperoWalletAddress, usersEOA, shouldK
   }
 }
 async function getBalanacesOfTokensInPortfolioForUserContractCall(user, prosperoWalletAddress){
-  //console.log("getBalanacesOfTokensInPortfolioForUserContractCall")
+  console.log("getBalanacesOfTokensInPortfolioForUserContractCall")
   try{
     var ProsperoWalletInstance = new web3.eth.Contract(
       ProsperoWalletJson.abi,
@@ -933,16 +1021,16 @@ async function getBalanacesOfTokensInPortfolioForUserContractCall(user, prospero
     //console.log("1 calling getPortfolioTokensSize")
 
     var numberOfTokensInPortfolio = await ProsperoWalletInstance.methods.getPortfolioTokensSize().call({from: EOAAddress})
-    //console.log("numberOfTokensInPortfolio:"+numberOfTokensInPortfolio)
+    console.log("numberOfTokensInPortfolio:"+numberOfTokensInPortfolio)
     for (var i = 0;i < numberOfTokensInPortfolio;i++) {
       //console.log("I:"+i)
       tokens[i] = await ProsperoWalletInstance.methods.portfolioTokens(i).call({from: EOAAddress})
-      //console.log("****TOKEN:"+tokens[i] )
+      console.log("****TOKEN:"+tokens[i] )
       balances[i] = await ProsperoWalletInstance.methods.getBalanceOfTokenInPortfolioForUser(user,tokens[i]).call({from: EOAAddress})
-      //console.log("*****BAL:"+balances[i] )
+      console.log("*****BAL:"+balances[i] )
     }
   }catch(e){
-    //console.log('getBalanacesOfTokensInPortfolioForUserContractCall - exception:'+e)
+    console.log('error getBalanacesOfTokensInPortfolioForUserContractCall - exception:'+e)
   }
   return {balances:balances,tokens:tokens}
 
@@ -995,7 +1083,8 @@ async function initializeApi(){
 
 
   //await getGraphData();
-
+  blockNumWhenWebAppLaunched = await web3.eth.getBlockNumber();
+  await initNewEventListener();
   console.log("Web3 version", web3.version);
   await updatePrices();
   await initLeaderBoardTableObject();
@@ -1385,70 +1474,70 @@ async function returnTrueIfPercentagesAreLessAndClose(balancesValue, goalPercent
   //console.log("balancesValue:"+JSON.stringify(balancesValue,null,2))
   //console.log('gp:'+goalPercentages)
   //console.log('gt:'+goalTokens)
-for (var i =0;i<goalTokens.length;i++){
-  var thisToken = goalTokens[i]
-  thisToken = thisToken.toLowerCase();
-  //console.log('thisToken:'+thisToken)
-  var thisPerc = goalPercentages[i]
-  thisPerc = thisPerc/USD_SCALE;
-  if (balancesValue.hasOwnProperty(thisToken)){
-    var thisObj = balancesValue[thisToken]
-    var actualPercentage = thisObj['percentage'];
-    //actualPercentage=actualPercentage/USD_SCALE
-    var diff = thisPerc - actualPercentage;
-    //console.log('thisPerc        :'+thisPerc)
-    //console.log('actualPercentage:'+actualPercentage)
-    diff = Math.abs(diff)
-    //console.log('diff:'+diff)
-    if (actualPercentage < thisPerc){
-      if (diff < .015){//To do - get this number from constants in contract
-        //return true
-      }else{
-        console.log("**** Percentage for swap was off by more than 1.5%, difference is:"+diff+" for address:"+thisToken)
-        alert("**** Percentage for swap was off by more than 1.5%, difference is:"+diff+" for address:"+thisToken)
-        return false;
+  for (var i =0;i<goalTokens.length;i++){
+    var thisToken = goalTokens[i]
+    thisToken = thisToken.toLowerCase();
+    //console.log('thisToken:'+thisToken)
+    var thisPerc = goalPercentages[i]
+    thisPerc = thisPerc/USD_SCALE;
+    if (balancesValue.hasOwnProperty(thisToken)){
+      var thisObj = balancesValue[thisToken]
+      var actualPercentage = thisObj['percentage'];
+      //actualPercentage=actualPercentage/USD_SCALE
+      var diff = thisPerc - actualPercentage;
+      //console.log('thisPerc        :'+thisPerc)
+      //console.log('actualPercentage:'+actualPercentage)
+      diff = Math.abs(diff)
+      //console.log('diff:'+diff)
+      if (actualPercentage < thisPerc){
+        if (diff < .015){//To do - get this number from constants in contract
+          //return true
+        }else{
+          console.log("**** Percentage for swap was off by more than 1.5%, difference is:"+diff+" for address:"+thisToken)
+          alert("**** Percentage for swap was off by more than 1.5%, difference is:"+diff+" for address:"+thisToken)
+          return false;
+        }
       }
+    }else{
+      console.log("ERROR - could not find token returnTrueIfPercentagesAreLessAndClose")
+      return false;
     }
-  }else{
-    console.log("ERROR - could not find token returnTrueIfPercentagesAreLessAndClose")
-    return false;
   }
-}
-return true
+  return true
 }
 function returnTrueIfPercentagesAreDiff(balancesValue, goalPercentages, goalTokens){
   //console.log("balancesValue:"+JSON.stringify(balancesValue,null,2))
   //console.log('gp:'+goalPercentages)
   //console.log('gt:'+goalTokens)
-var areDiff = false
-for (var i =0;i<goalTokens.length;i++){
-  var thisToken = goalTokens[i]
-  thisToken = thisToken.toLowerCase();
-  //console.log('thisToken:'+thisToken)
-  var thisPerc = goalPercentages[i]
-  thisPerc = thisPerc/100;
-  if (balancesValue.hasOwnProperty(thisToken)){
-    var thisObj = balancesValue[thisToken]
-    var actualPercentage = thisObj['percentage'];
-    actualPercentage=Number(actualPercentage.toFixed(2))
-    //actualPercentage=actualPercentage/USD_SCALE
-    var diff = thisPerc - actualPercentage;
-    //console.log('thisPerc        :'+thisPerc)
-    //console.log('actualPercentage:'+actualPercentage)
-    diff = Math.abs(diff)
-    console.log('diff:'+diff)
-    if (actualPercentage != thisPerc){
-      console.log("diff 1")
+  var areDiff = false
+  for (var i =0;i<goalTokens.length;i++){
+    var thisToken = goalTokens[i]
+    thisToken = thisToken.toLowerCase();
+    //console.log('thisToken:'+thisToken)
+    var thisPerc = goalPercentages[i]
+    thisPerc = thisPerc/100;
+    if (balancesValue.hasOwnProperty(thisToken)){
+      var thisObj = balancesValue[thisToken]
+      var actualPercentage = thisObj['percentage'];
+      actualPercentage=Number(actualPercentage.toFixed(2))
+      //actualPercentage=actualPercentage/USD_SCALE
+      var diff = thisPerc - actualPercentage;
+      //console.log('thisPerc        :'+thisPerc)
+      //console.log('actualPercentage:'+actualPercentage)
+      diff = Math.abs(diff)
+      //console.log('diff:'+diff)
+      if (actualPercentage != thisPerc){
+        //console.log("diff 1")
+        areDiff=true
+      }
+    }else{
+      //console.log("diff 2")
       areDiff=true
     }
-  }else{
-    console.log("diff 2")
-    areDiff=true
   }
-}
-console.log("returning: "+areDiff)
+  //console.log("returning: "+areDiff)
 
-return areDiff;
+  return areDiff;
 }
 export {  getLeaderBoardDataForTable, initializeApi, joinPortfolio, createPortfolio,
   updateActiveLeaderboardRow, getBalancesInEoa, deposit, updateAmount, rebalance, withdraw, getGraphData, getHistoricalPrices };
