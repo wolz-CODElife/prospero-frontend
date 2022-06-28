@@ -5,7 +5,7 @@
 			<DepositModal v-if="joinView" @go-back="goBack" />
 			<div v-else>
 				<DashHeader />
-				<DashMain @do-join="doJoin" :disabled="smDisabled" />
+				<DashMain @do-deposit="doDeposit" :disabled="smDisabled" />
 			</div>
 		</main>
 	</div>
@@ -32,7 +32,7 @@ const joinView = ref(false);
 
 const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 
-function doJoin() {
+function doDeposit() {
 	joinView.value = true;
 }
 

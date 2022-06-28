@@ -138,7 +138,7 @@
 				</p>
 				<button
 					class="btn btn-primary uppercase w-full"
-					@click="$emit('goBack')"
+					@click="$emit('goBack'), portfolioStore.reset()"
 				>
 					Take me to my portfolios
 				</button>
