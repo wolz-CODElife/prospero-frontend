@@ -1,7 +1,7 @@
 <template>
 	<div class="row-span-3 bg-[#191A20] py-[20px]">
 		<div v-if="tableView">
-			<!-- All Portfolios / My Portfolios Tab -->
+			<!-- All Portfolios / My Portfolios -->
 			<div class="flex justify-between mx-[20px]">
 				<!-- Toggle Tabs  -->
 				<div class="p-[10px] bg-black">
@@ -22,11 +22,34 @@
 					</ul>
 				</div>
 
-				<!-- Deposit / withdraw  -->
+				<!-- Join / create  -->
 				<div
 					class="flex items-center gap-[12px]"
-					v-if="activeTab !== 'All Portfolios'"
+					v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
 				>
+					<button
+						@click="$emit('doJoin')"
+						class="btn btn-primary w-[125px]"
+						:class="
+							disabled
+								? 'opacity-50 cursor-text'
+								: 'opacity-1 cursor-pointer'
+						"
+						:disabled="disabled"
+					>
+						Join
+					</button>
+
+					<button
+						@click="portfolioStore.showCreate(), (tableView = false)"
+						class="btn btn-primary-outline w-[125px]"
+					>
+						Create
+					</button>
+				</div>
+
+				<!-- Deposit / withdraw  -->
+				<div class="flex items-center gap-[12px]" v-else>
 					<button
 						class="btn btn-primary w-[125px]"
 						:class="
@@ -50,29 +73,6 @@
 						:disabled="disabled"
 					>
 						Withdraw
-					</button>
-				</div>
-
-				<!-- Join / create  -->
-				<div class="flex items-center gap-[12px]" v-else>
-					<button
-						@click="$emit('doJoin')"
-						class="btn btn-primary w-[125px]"
-						:class="
-							disabled
-								? 'opacity-50 cursor-text'
-								: 'opacity-1 cursor-pointer'
-						"
-						:disabled="disabled"
-					>
-						Join
-					</button>
-
-					<button
-						@click="portfolioStore.showCreate(), (tableView = false)"
-						class="btn btn-primary-outline w-[125px]"
-					>
-						Create
 					</button>
 				</div>
 			</div>
