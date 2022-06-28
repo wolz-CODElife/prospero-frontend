@@ -138,7 +138,11 @@
 				</p>
 				<button
 					class="btn btn-primary uppercase w-full"
-					@click="$emit('goBack')"
+					@click="
+						$emit('goBack'),
+							portfolioStore.reset(),
+							(portfolioStore.activeMode = 'join')
+					"
 				>
 					Take me to my portfolios
 				</button>

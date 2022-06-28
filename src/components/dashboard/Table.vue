@@ -1,9 +1,9 @@
 <template>
 	<div class="row-span-3 bg-[#191A20] py-[20px]">
 		<div v-if="tableView">
-			<!-- All Portfolios / My Portfolios -->
+			<!-- Toggle Tabs  -->
 			<div class="flex justify-between mx-[20px]">
-				<!-- Toggle Tabs  -->
+				<!-- All / My -->
 				<div class="p-[10px] bg-black">
 					<ul class="flex">
 						<li
@@ -28,7 +28,7 @@
 					v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
 				>
 					<button
-						@click="$emit('doJoin')"
+						@click="$emit('doDeposit')"
 						class="btn btn-primary w-[125px]"
 						:class="
 							disabled
@@ -51,6 +51,7 @@
 				<!-- Deposit / withdraw  -->
 				<div class="flex items-center gap-[12px]" v-else>
 					<button
+						@click="$emit('doDeposit')"
 						class="btn btn-primary w-[125px]"
 						:class="
 							disabled
@@ -58,7 +59,6 @@
 								: 'opacity-1 cursor-pointer'
 						"
 						:disabled="disabled"
-						@click="$emit('openDeposit')"
 					>
 						Deposit
 					</button>
@@ -93,9 +93,10 @@
 							<th class="pr-[30px]">1YR%</th>
 						</tr>
 					</thead>
-					<tbody>
+					<tbody
+						v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
+					>
 						<tr
-							v-if="activeTab === 'All Portfolios'"
 							v-for="portfolio in portfolioStore.allPortfolios"
 							key="portfo	lio"
 							@click="
@@ -130,6 +131,49 @@
 							<td class="mr-[20px] pr-[18px]">{{ portfolio.y1 }}</td>
 						</tr>
 					</tbody>
+
+					<tbody
+						v-if="portfolioStore.activePortfolioType === 'My Portfolios'"
+					>
+						<tr
+							v-if="portfolioStore.allPortfolios.length > 0"
+							v-for="portfolio in portfolioStore.allPortfolios"
+							key="portfolio"
+							@click="
+								portfolioStore.doSelectPortfolio(portfolio),
+									toggleDisabled()
+							"
+							class="text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white hover:bg-[#003D3B]"
+							:class="[
+								portfolioStore.selectedPortfolio.name === portfolio.name
+									? 'bg-[#003D3B] '
+									: 'bg-transparent',
+							]"
+						>
+							<td class="ml-[20px] pl-[20px]">
+								<input
+									type="radio"
+									:name="portfolio.name"
+									:id="portfolio.name"
+									@onchange="
+										portfolioStore.doSelectPortfolio(portfolio),
+											toggleDisabled()
+									"
+								/>
+							</td>
+							<td>{{ portfolio.name }}</td>
+							<td class="border-r border-r-[#2D3035] pr-[30px]">
+								{{ portfolio.fee }}
+							</td>
+							<td class="pl-[20px]">{{ portfolio.d7 }}</td>
+							<td>{{ portfolio.d30 }}</td>
+							<td>{{ portfolio.d90 }}</td>
+							<td class="mr-[20px] pr-[18px]">{{ portfolio.y1 }}</td>
+						</tr>
+						<td class="text-white text-[24px] text-center" v-else>
+							Join or create a portfolio to deposit or withdraw
+						</td>
+					</tbody>
 				</table>
 
 				<!-- Search  -->
@@ -157,7 +201,6 @@
 					Go BACK
 				</button>
 
-				<!--   -->
 				<!-- Go back - Create second view -->
 				<button
 					v-else
@@ -167,6 +210,7 @@
 					<img src="@/assets/img/direction.svg" alt="" />
 					Go BACK
 				</button>
+
 				<div class="p-[10px] bg-black" v-if="!firstView">
 					<div class="flex">
 						<div
@@ -187,10 +231,14 @@
 			<hr class="border-[#2D3035]" />
 
 			<div v-if="firstView" class="">
-				<h4 class="text-[16px] text-center uppercase text-white mt-[40px]">
+				<h4
+					class="text-[16px] text-center uppercase text-white mt-[40px] mb-[28px]"
+				>
 					Create new portfolio
 				</h4>
+				<!-- Form  -->
 				<div class="w-2/3 mx-auto">
+					<!-- Portfolio name  -->
 					<div class="mb-[18px]">
 						<label
 							for="p-name"
@@ -205,6 +253,7 @@
 						/>
 					</div>
 
+					<!-- Fund fee  -->
 					<div class="mb-[18px]">
 						<label
 							for="p-fee"
@@ -221,7 +270,7 @@
 					</div>
 
 					<button
-						@click.prevent="depositToPortfolio"
+						@click="$emit('doDeposit'), assignName()"
 						class="btn btn-primary"
 						:class="
 							disabledDepToPortfolio
@@ -271,21 +320,13 @@ const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
 
-function changeTab(tab) {
-	activeTab.value = tab;
-}
-
 function toggleDisabled() {
 	disabled.value = false;
 }
 
-function depositToPortfolio() {
-	firstView.value = false;
+function assignName() {
+	portfolioStore.selectedPortfolio.name = portfolioName.value;
 }
-
-// function name(params) {
-
-// }
 </script>
 
 <style lang="postcss">

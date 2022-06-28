@@ -46,6 +46,8 @@ export const usePortfolios = defineStore("Portfolios", {
 				},
 			],
 
+			myPortfolios: [],
+
 			joinedPortfolios: [],
 
 			createdPortfolios: [],
@@ -61,11 +63,9 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			activeHeader: "left",
 
-			activePortfolioType: "All Portfolios", // or mine or mine & manager
+			activePortfolioType: "All Portfolios", // Or 'My Portfolios'
 
-			// createMode: false,
-
-			activeMode: "join", //create //deposit //withdraw
+			activeMode: "join", //create
 		};
 	},
 
@@ -88,9 +88,10 @@ export const usePortfolios = defineStore("Portfolios", {
 
 		changeActivePortfolioType() {
 			if (this.activePortfolioType === "All Portfolios") {
-				this.activePortfolioType = "My Portfolios";
 				this.reset();
+				this.activePortfolioType = "My Portfolios";
 			} else {
+				this.reset();
 				this.activePortfolioType = "All Portfolios";
 			}
 		},
