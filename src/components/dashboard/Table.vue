@@ -338,16 +338,28 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
+// import {
+// 	getLeaderBoardDataForTable,
+// 	updateActiveLeaderboardRow,
+// 	createPortfolio,
+// 	getBalancesInEoa,
+// 	deposit,
+// } from "@/api";
+
+onMounted(() => {
+      portfolioStore.getAllPortfolios()
+})
+
 
 const portfolioStore = usePortfolios();
 
 const disabled = ref(true);
 
-const tableView = ref(false);
+const tableView = ref(true);
 
-const firstView = ref(false);
+const firstView = ref(true);
 
 const portfolioName = ref("KachiBTC");
 
@@ -373,12 +385,52 @@ const allocation = computed(() => {
 });
 
 function toggleDisabled() {
-	disabled.value = false;
-	console.log("disabled is", disabled.value);
+  disabled.value= false
 }
 
 function assignName() {
 	portfolioStore.selectedPortfolio.name = portfolioName.value;
+}
+
+// function showCreate() {
+// 	tableView.value = false;
+// 	(async () => {
+// 		var status = await createPortfolio("Name Of Wallet Goes Here");
+// 		if (!status.success) {
+// 			console.log(status.error);
+// 			//error code here
+// 		} else {
+// 			if (status.prosperoWalletAddressCreated != null) {
+// 				console.log(
+// 					"new prosperoWalletAddressCreated:" +
+// 						status.prosperoWalletAddressCreated
+// 				);
+// 			} else {
+// 				console.log(
+// 					"no new prosperoWalletAddressCreated from tx returned from created but created successfully, wait for finished method event to fire."
+// 				);
+// 			}
+// 		}
+//   })();
+
+//   function doSelect(val) {
+// 	selectedPortfolioId.value = val;
+// 	activeRow.value = val;
+// 	console.log(activeRow.value);
+// 	updateActiveLeaderboardRow(val);
+// 	disabled.value = false;
+// 	console.log("disabled is", disabled.value);
+// }
+
+  // const portfolioList = ref([]);
+// (async () => {
+// 	var leaderBoardData = await getLeaderBoardDataForTable();
+// 	if (leaderBoardData.hasOwnProperty("error")) {
+// 		console.log(leaderBoardData.error);
+// 		//error code here
+// 	}
+// 	portfolioList.value = leaderBoardData;
+// })();
 }
 </script>
 
