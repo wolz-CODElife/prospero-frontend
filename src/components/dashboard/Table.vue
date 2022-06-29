@@ -9,7 +9,10 @@
 						<li
 							v-for="tab in tabs"
 							:key="tab"
-							@click="portfolioStore.changeActivePortfolioType"
+							@click="
+								portfolioStore.changeActivePortfolioType(),
+									(disabled = true)
+							"
 							class="py-[8px] px-[15px] text-[14px] w-[160px] uppercase cursor-pointer"
 							:class="[
 								portfolioStore.activePortfolioType === tab.text
@@ -98,7 +101,7 @@
 					>
 						<tr
 							v-for="portfolio in portfolioStore.allPortfolios"
-							key="portfo	lio"
+							key="portfolio"
 							@click="
 								portfolioStore.doSelectPortfolio(portfolio),
 									toggleDisabled()
@@ -239,10 +242,10 @@
 				<!-- Form  -->
 				<div class="w-2/3 mx-auto">
 					<!-- Portfolio name  -->
-					<div class="mb-[18px]">
+					<div class="mb-[18px] relative">
 						<label
 							for="p-name"
-							class="z-50 ml-[24px] uppercase text-white bg-black px-[8px] py-[4px] -mb-[16px] w-max"
+							class="-top-[10px] z-50 absolute ml-[24px] uppercase text-white bg-black px-[8px] py-[4px] -mb-[16px] w-max"
 							>Enter Portfolio name</label
 						>
 						<input
@@ -254,10 +257,10 @@
 					</div>
 
 					<!-- Fund fee  -->
-					<div class="mb-[18px]">
+					<div class="mb-[18px] relative">
 						<label
 							for="p-fee"
-							class="z-50 ml-[24px] uppercase text-white bg-black px-[8px] py-[4px] -mb-[16px]"
+							class="-top-[10px] z-50 absolute ml-[24px] uppercase text-white bg-black px-[8px] py-[4px] -mb-[16px]"
 							>Fund fee</label
 						>
 						<!-- span % here  -->
@@ -292,20 +295,18 @@
 <script setup>
 import { ref, computed } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
+
 const portfolioStore = usePortfolios();
 
 const disabled = ref(true);
 
 const tableView = ref(true);
 
-const create = ref({
-	depositDisabled: true,
-});
-
 const firstView = ref(true);
+
 const portfolioName = ref("");
+
 const fundFee = ref("1.0");
-const activeTab = ref("All Portfolios");
 
 const tabs = ref([
 	{
@@ -322,6 +323,7 @@ const disabledDepToPortfolio = computed(
 
 function toggleDisabled() {
 	disabled.value = false;
+	console.log("disabled is", disabled.value);
 }
 
 function assignName() {
@@ -346,6 +348,6 @@ label {
 }
 
 [type="text"] {
-	@apply py-[12px] pl-[24px] w-full bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00];
+	@apply py-[22px] pl-[24px] w-full bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00];
 }
 </style>

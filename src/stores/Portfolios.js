@@ -46,12 +46,6 @@ export const usePortfolios = defineStore("Portfolios", {
 				},
 			],
 
-			myPortfolios: [],
-
-			joinedPortfolios: [],
-
-			createdPortfolios: [],
-
 			selectedPortfolio: {
 				name: "",
 				fee: 0,
@@ -60,6 +54,10 @@ export const usePortfolios = defineStore("Portfolios", {
 				d90: 0,
 				y1: 0,
 			},
+
+			joinedPortfolios: [],
+
+			createdPortfolios: [],
 
 			activeHeader: "left",
 
@@ -88,11 +86,11 @@ export const usePortfolios = defineStore("Portfolios", {
 
 		changeActivePortfolioType() {
 			if (this.activePortfolioType === "All Portfolios") {
-				this.reset();
 				this.activePortfolioType = "My Portfolios";
-			} else {
 				this.reset();
+			} else {
 				this.activePortfolioType = "All Portfolios";
+				this.reset();
 			}
 		},
 
@@ -120,5 +118,9 @@ export const usePortfolios = defineStore("Portfolios", {
 		depositToCreate() {},
 	},
 
-	getters: {},
+	getters: {
+		myPortfolios(state) {
+			return state.joinedPortfolios + state.createdPortfolios;
+		},
+	},
 });
