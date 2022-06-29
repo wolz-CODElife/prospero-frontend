@@ -1,50 +1,16 @@
 import { defineStore } from "pinia";
+import {
+	getLeaderBoardDataForTable,
+	updateActiveLeaderboardRow,
+	createPortfolio,
+	getBalancesInEoa,
+	deposit,
+} from "@/api";
 
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
 		return {
-			allPortfolios: [
-				{
-					name: "AFS1000 🔱",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-				},
-				{
-					name: "Harry Mcguire",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-				},
-				{
-					name: " 🌈 Lulu Nation Fans",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-				},
-				{
-					name: "GX 650 Lords 🏖",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-				},
-				{
-					name: "Moon Gatekeepers",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-				},
-			],
+			allPortfolios: [],
 
 			selectedPortfolio: {
 				name: "",
@@ -68,7 +34,19 @@ export const usePortfolios = defineStore("Portfolios", {
 	},
 
 	actions: {
-		// 1. fill empty portfolio list with an API call
+		// Fill empty portfolio list with an API call
+		async getAllPortfolios() {
+			try {
+				let leaderBoardData = await getLeaderBoardDataForTable();
+				if (leaderBoardData.hasOwnProperty("error")) {
+					console.log(leaderBoardData.error);
+					//error code here
+				}
+				this.allPortfolios = leaderBoardData;
+			} catch (error) {
+				console.log(error);
+			}
+		},
 
 		doSelectPortfolio(val) {
 			this.selectedPortfolio = val;
@@ -115,7 +93,35 @@ export const usePortfolios = defineStore("Portfolios", {
 			};
 		},
 
-		depositToCreate() {},
+		// function showCreate() {
+		// 	tableView.value = false;
+		// 	(async () => {
+		// 		var status = await createPortfolio("Name Of Wallet Goes Here");
+		// 		if (!status.success) {
+		// 			console.log(status.error);
+		// 			//error code here
+		// 		} else {
+		// 			if (status.prosperoWalletAddressCreated != null) {
+		// 				console.log(
+		// 					"new prosperoWalletAddressCreated:" +
+		// 						status.prosperoWalletAddressCreated
+		// 				);
+		// 			} else {
+		// 				console.log(
+		// 					"no new prosperoWalletAddressCreated from tx returned from created but created successfully, wait for finished method event to fire."
+		// 				);
+		// 			}
+		// 		}
+		//   })();
+
+		//   function doSelect(val) {
+		// 	selectedPortfolioId.value = val;
+		// 	activeRow.value = val;
+		// 	console.log(activeRow.value);
+		// 	updateActiveLeaderboardRow(val);
+		// 	disabled.value = false;
+		// 	console.log("disabled is", disabled.value);
+		// }
 	},
 
 	getters: {
