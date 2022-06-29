@@ -1,5 +1,6 @@
 <template>
 	<div class="row-span-3 bg-[#191A20] py-[20px]">
+		<!-- Join / Deposit View -->
 		<div v-if="tableView">
 			<!-- Toggle Tabs  -->
 			<div class="flex justify-between mx-[20px]">
@@ -80,7 +81,7 @@
 				</div>
 			</div>
 
-			<!-- All Portfolio / My Portfolios Tables -->
+			<!-- All Portfolios / My Portfolios Tables -->
 			<div class="my-[20px]">
 				<table class="table-auto w-full">
 					<thead>
@@ -96,6 +97,8 @@
 							<th class="pr-[30px]">1YR%</th>
 						</tr>
 					</thead>
+
+					<!-- All Portfolios -->
 					<tbody
 						v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
 					>
@@ -135,6 +138,7 @@
 						</tr>
 					</tbody>
 
+					<!-- My Portfolios  -->
 					<tbody
 						v-if="portfolioStore.activePortfolioType === 'My Portfolios'"
 					>
@@ -185,7 +189,7 @@
 			</div>
 		</div>
 
-		<!-- Create Portfolio  -->
+		<!-- Create / Withdraw View  -->
 		<div v-else>
 			<!-- Top -->
 			<div class="p-[10px]">
@@ -242,10 +246,10 @@
 				<!-- Form  -->
 				<div class="w-2/3 mx-auto">
 					<!-- Portfolio name  -->
-					<div class="mb-[18px] relative">
+					<div class="mb-[28px] relative">
 						<label
 							for="p-name"
-							class="-top-[10px] z-50 absolute ml-[24px] uppercase text-white bg-black px-[8px] py-[4px] -mb-[16px] w-max"
+							class="-top-[12px] z-50 absolute ml-[24px] uppercase text-white text-[12px] bg-black px-[8px] py-[4px] -mb-[16px] w-max"
 							>Enter Portfolio name</label
 						>
 						<input
@@ -253,14 +257,15 @@
 							name="p-name"
 							id="p-name"
 							v-model="portfolioName"
+							class="pt-[28px] pb-[14px] pl-[24px] w-full bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
 						/>
 					</div>
 
 					<!-- Fund fee  -->
-					<div class="mb-[18px] relative">
+					<div class="mb-[28px] relative">
 						<label
 							for="p-fee"
-							class="-top-[10px] z-50 absolute ml-[24px] uppercase text-white bg-black px-[8px] py-[4px] -mb-[16px]"
+							class="-top-[12px] z-50 absolute ml-[24px] uppercase text-white text-[12px] bg-black px-[8px] py-[4px] -mb-[16px]"
 							>Fund fee</label
 						>
 						<!-- span % here  -->
@@ -269,6 +274,7 @@
 							name="p-fee"
 							id="p-fee"
 							v-model="fundFee"
+							class="pt-[28px] pb-[14px] pl-[24px] w-full bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
 						/>
 					</div>
 
@@ -287,7 +293,46 @@
 				</div>
 			</div>
 
-			<div v-else class="text-white">insert table here</div>
+			<div v-else>
+				<table class="table-auto w-full mt-[32px]">
+					<thead>
+						<tr
+							class="text-[#868C9D] text-left border-b border-b-[#2D3035] py-[10px] px-[30px]"
+						>
+							<th class="pl-[20px]">ALLOCATION</th>
+							<th>TOKEN</th>
+							<th>PRICE</th>
+							<th class="border-r border-r-[#2D3035]">MC</th>
+							<th class="pl-[20px]">7D%</th>
+							<th>30D%</th>
+							<th>90D%</th>
+							<th class="pr-[30px]">1YR%</th>
+						</tr>
+					</thead>
+
+					<tbody>
+						<tr
+							class="text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white hover:bg-[#003D3B]"
+						>
+							<td class="flex items-center gap-[20px]">
+								<img src="@/assets/img/delete.svg" alt="" /><input
+									type="text"
+									name=""
+									id=""
+									v-model="allocation"
+								/>
+							</td>
+							<td></td>
+							<td></td>
+							<td class="border-r border-r-[#2D3035] pr-[30px]"></td>
+							<td class="pl-[20px]"></td>
+							<td></td>
+							<td></td>
+							<td class="mr-[20px] pr-[18px]"></td>
+						</tr>
+					</tbody>
+				</table>
+			</div>
 		</div>
 	</div>
 </template>
@@ -300,11 +345,11 @@ const portfolioStore = usePortfolios();
 
 const disabled = ref(true);
 
-const tableView = ref(true);
+const tableView = ref(false);
 
-const firstView = ref(true);
+const firstView = ref(false);
 
-const portfolioName = ref("");
+const portfolioName = ref("KachiBTC");
 
 const fundFee = ref("1.0");
 
@@ -320,6 +365,12 @@ const tabs = ref([
 const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
+
+const placeholder = ref(25);
+
+const allocation = computed(() => {
+	return placeholder.value + "%";
+});
 
 function toggleDisabled() {
 	disabled.value = false;
@@ -347,7 +398,7 @@ label {
 	@apply block;
 }
 
-[type="text"] {
-	@apply py-[22px] pl-[24px] w-full bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00];
-}
+/* [type="text"] {
+	@apply;
+} */
 </style>
