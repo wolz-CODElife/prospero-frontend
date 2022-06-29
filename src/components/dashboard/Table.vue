@@ -9,7 +9,10 @@
 						<li
 							v-for="tab in tabs"
 							:key="tab"
-							@click="portfolioStore.changeActivePortfolioType"
+							@click="
+								portfolioStore.changeActivePortfolioType(),
+									(disabled = true)
+							"
 							class="py-[8px] px-[15px] text-[14px] w-[160px] uppercase cursor-pointer"
 							:class="[
 								portfolioStore.activePortfolioType === tab.text
@@ -98,7 +101,7 @@
 					>
 						<tr
 							v-for="portfolio in portfolioStore.allPortfolios"
-							key="portfo	lio"
+							key="portfolio"
 							@click="
 								portfolioStore.doSelectPortfolio(portfolio),
 									toggleDisabled()
@@ -292,20 +295,18 @@
 <script setup>
 import { ref, computed } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
+
 const portfolioStore = usePortfolios();
 
 const disabled = ref(true);
 
 const tableView = ref(true);
 
-const create = ref({
-	depositDisabled: true,
-});
-
 const firstView = ref(true);
+
 const portfolioName = ref("");
+
 const fundFee = ref("1.0");
-const activeTab = ref("All Portfolios");
 
 const tabs = ref([
 	{
@@ -322,6 +323,7 @@ const disabledDepToPortfolio = computed(
 
 function toggleDisabled() {
 	disabled.value = false;
+	console.log("disabled is", disabled.value);
 }
 
 function assignName() {
