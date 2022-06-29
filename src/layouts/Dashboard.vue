@@ -13,6 +13,7 @@
 
 <script setup>
 import { ref, computed, onBeforeMount } from "vue";
+import { joinPortfolio, createPortfolio } from "@/api";
 import Sidebar from "./dashboard/Sidebar.vue";
 import DashHeader from "./dashboard/DashHeader.vue";
 import DashMain from "./dashboard/DashMain.vue";
@@ -34,6 +35,13 @@ const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 
 function doDeposit() {
 	joinView.value = true;
+	(async () => {
+		var status = await joinPortfolio();
+		if (!status.success) {
+			console.log(status.error);
+			//error code here
+		}
+	})();
 }
 
 function goBack() {
