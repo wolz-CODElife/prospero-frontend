@@ -2,7 +2,7 @@
 	<div class="grid grid-cols-[300px_1fr] gap-0">
 		<Sidebar class="w-[300px]" />
 		<main class="z-10 bg-[#2D3035] p-[28px] relative">
-			<DepositModal v-if="joinView" @go-back="goBack" />
+			<DepositModal v-if="depositView" @go-back="goBack" />
 			<div v-else>
 				<DashHeader />
 				<DashMain @do-deposit="doDeposit" :disabled="smDisabled" />
@@ -29,22 +29,22 @@ onBeforeMount(() => {
 	}
 });
 
-const joinView = ref(false);
+const depositView = ref(false);
 
 const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 
 function doDeposit() {
-	joinView.value = true;
-	(async () => {
-		var status = await joinPortfolio();
-		if (!status.success) {
-			console.log(status.error);
-			//error code here
-		}
-	})();
+	depositView.value = true;
+	// (async () => {
+	// 	var status = await joinPortfolio();
+	// 	if (!status.success) {
+	// 		console.log(status.error);
+	// 		//error code here
+	// 	}
+	// })();
 }
 
 function goBack() {
-	joinView.value = false;
+	depositView.value = false;
 }
 </script>

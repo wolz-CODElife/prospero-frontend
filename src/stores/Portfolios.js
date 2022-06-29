@@ -38,10 +38,6 @@ export const usePortfolios = defineStore("Portfolios", {
 		async getAllPortfolios() {
 			try {
 				let leaderBoardData = await getLeaderBoardDataForTable();
-				if (leaderBoardData.hasOwnProperty("error")) {
-					console.log(leaderBoardData.error);
-					//error code here
-				}
 				this.allPortfolios = leaderBoardData;
 			} catch (error) {
 				console.log(error);

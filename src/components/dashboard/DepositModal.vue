@@ -66,8 +66,8 @@
 			<tfoot class="bg-[#2D3035] text-white py-[14px] px-[22px]">
 				<tr class="px-[20px]">
 					<td colspan="2" class="pl-[32px]">TOTAL</td>
-					<td>$1920</td>
-					<td class="text-[#00FF00]">$20</td>
+					<td>$0</td>
+					<td class="text-[#00FF00]">$0</td>
 				</tr>
 			</tfoot>
 		</table>
@@ -152,13 +152,14 @@
 </template>
 
 <script setup>
-//balancesInEoa
-import {getBalancesInEoa, deposit, updateAmount} from '@/api'
-
-import { ref } from "vue";
+import { getBalancesInEoa, deposit, updateAmount } from "@/api";
+import { onMounted, ref } from "vue";
 import Modal from "../Modal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
+
 const portfolioStore = usePortfolios();
+
+const tokenList = ref([]);
 
 const depositDialog = ref(false);
 
@@ -168,14 +169,28 @@ const depositDisabled = ref(true);
 
 const activeRow = ref(null);
 
+onMounted(() => {
+	getTokenList();
+});
+
+async function getTokenList() {
+	try {
+		let tokenListData = await getBalancesInEoa();
+		tokenList.value = tokenListData;
+		console.log("token list is:", tokenList.value);
+	} catch (error) {
+		console.log(error);
+	}
+}
+
 function openDialogModal() {
 	(async () => {
 		var status = await deposit();
-		if (!status.success){
+		if (!status.success) {
 			console.log(status.error);
 			//error code here
 		}
-	})()
+	})();
 	depositDialog.value = true;
 }
 
@@ -183,91 +198,6 @@ function enableDeposit(tokenId) {
 	activeRow.value = tokenId;
 	depositDisabled.value = false;
 }
-
-
-const tokenList = ref([]);
-(async () => {
-	var tokenListData = await getBalancesInEoa();//getLeaderBoardDataForTable();
-	if (tokenListData.hasOwnProperty("error")){
-		console.log(tokenListData.error);
-		//error code here
-	}
-	tokenList.value = tokenListData;
-})()
-/*
-const tokenList = ref([
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-]);
-*/
 </script>
 
 <style lang="postcss">
