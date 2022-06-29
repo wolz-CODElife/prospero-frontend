@@ -7,6 +7,7 @@ var subnetHelperContractAddress="0x4A6cc169c359Fc340bAc1aEb973625CD64CEFdf7"
 //OBJECTS
 var leaderBoardData={data:[],selectedLeaderIndex:0}//leader board portfolios
 var myWallets={}//my wallets either as a portfolio manager or investor
+var historicalPricesObject={};
 var tokenArray =require('./apiLib/Tokens.json');
 var balancesInEoa=[];
 var EventBlocksAlreadyHandledProsperoFactoryWallet=[]
@@ -294,21 +295,54 @@ async function getHistoricalPrices(){
   for (var i=0;i<tokenArray.length;i++){
     var thisToken = tokenArray[i];
     var theStorage = localStorage.getItem(thisToken.id)
-    theStorage = theStorage
-    var tokenHistory = JSON.parse(theStorage);
-    console.log("thisToken.id:"+thisToken.id+"tokenHistory:"+JSON.stringify(tokenHistory,null,2))
+    theStorage = JSON.parse(theStorage)
+    theStorage=theStorage.prices
+    console.log("theStorage:"+JSON.stringify(theStorage,null,2))
+    //var tokenHistory = JSON.parse(theStorage);
+    //console.log("thisToken.id:"+thisToken.id+"tokenHistory:"+JSON.stringify(tokenHistory,null,2))
     for (var k=0;k<theStorage.length;k++){
       var theDate = new Date(theStorage[k][0]);
-      var justDate = theDate.getMonth() +"-"+ theDate.getDate() +"-"+ theDate.getFullYear();
-      tokenHistory['date']=justDate
+      console.log("t:"+theStorage[k][0])
+      var justDate = (theDate.getMonth()+1) +"-"+ theDate.getDate() +"-"+ theDate.getFullYear();
       console.log('justDate:'+justDate)
+      var addLowerCase = thisToken.address
+      addLowerCase=addLowerCase.toLowerCase();
+      console.log("addLowerCase:"+addLowerCase)
+      console.log("theStorage[k][1]:"+theStorage[k][1])
+      historicalPricesObject[addLowerCase]={}
+      historicalPricesObject[addLowerCase][justDate]=theStorage[k][1]
+      //tokenHistory['date']=justDate
     }
     //TO DO:
     //get value of portfolio at every day
     //get total profit for every day
+  }
+  for (var i =0;i<graphData.length;i++){
+    var graphItem = graphData[i];
+    var timeOfGraph = graphItem["intVars"][4];
+    timeOfGraph = timeOfGraph * 1000
+    var theDate = new Date(timeOfGraph);
+    var justDateTheGraph = (theDate.getMonth()+1) +"-"+ theDate.getDate() +"-"+ theDate.getFullYear();
+    graphData[i]['date']=justDateTheGraph;
+    var tokens = graphItem['tokens']
+    graphData[i]['prices']=[]
+    for (k=0;k<tokens.length;k++){
+      var addLowerCase = tokens[k]
+      addLowerCase=addLowerCase.toLowerCase();
 
-
-
+      if (historicalPricesObject.hasOwnProperty(addLowerCase)){
+        var thisAddObj = historicalPricesObject[addLowerCase];
+        if (thisAddObj.hasOwnProperty(justDateTheGraph)){
+          graphData[i]['prices'].push(historicalPricesObject[addLowerCase][justDateTheGraph])
+        }else{
+          console.log("error - NO DATE getHistoricalPrices:"+justDateTheGraph+" thisAddObj:"+addLowerCase)
+        }
+      }else{
+        console.log("error - NO ADDRESS getHistoricalPrices:"+justDateTheGraph+" thisAddObj:"+addLowerCase)
+      }
+    }
+    console.log("justDateTheGraph:"+justDateTheGraph)
+    console.log("graphItem:"+JSON.stringify(graphData[i],null,2))
   }
 
 }
@@ -685,6 +719,7 @@ async function getAmountsDepositing(){
   //console.log("depositingObj:"+JSON.stringify(depositingObj,null,2))
 }
 async function getBalancesInEoa(){
+  balancesInEoa=[]
   console.log("getBalancesInEoa - to do: call me when deposit tab is opened")
   var totalValue = 0;
   var nativeTokenObj;

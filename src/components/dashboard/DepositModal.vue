@@ -185,6 +185,7 @@ function enableDeposit(tokenId) {
 }
 
 
+
 const tokenList = ref([]);
 (async () => {
 	var tokenListData = await getBalancesInEoa();//getLeaderBoardDataForTable();
