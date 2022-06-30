@@ -1583,6 +1583,7 @@ async function updatePrices(){
     alert('Could not get prices from coingecko, please reload page :'+e)
     return {success:false, error:'Could not get prices from ProsperoPrices, please reload page :'+e}
   }
+  return {success:true}
 }
 async function getWalletValues(prosperoWalletAddress){
   try{
@@ -1939,5 +1940,4 @@ function returnTrueIfPercentagesAreDiff(balancesValue, goalPercentages, goalToke
   return areDiff;
 }
 export {  getLeaderBoardDataForTable, initializeApi, joinPortfolio, createPortfolio,
-  updateActiveLeaderboardRow, getBalancesInEoa, deposit, updateAmount, rebalance, withdraw, getGraphData, getHistoricalPricesUpdateChartsData,
-  updateUIFieldValuesMyPortfolio };
+  updateActiveLeaderboardRow, getBalancesInEoa, deposit, updateAmount, rebalance, withdraw, getGraphData, getHistoricalPricesUpdateChartsData};
