@@ -5,14 +5,15 @@ var prosperoPricesAddress="0xbd90c371c3524e86659291892B76820599633da9"
 var pricesLibraryAddress="0x81D8Ed70151e7Ce3d36D2256F629f6862aC2A457"
 var subnetHelperContractAddress="0x4A6cc169c359Fc340bAc1aEb973625CD64CEFdf7"
 //OBJECTS
-var leaderBoardData={data:[],selectedLeaderIndex:0}//leader board portfolios
+var leaderBoardData=[]//leader board portfolios
 var myWallets={}//my wallets either as a portfolio manager or investor
 var historicalPricesObject={};
 var tokenArray =require('./apiLib/Tokens.json');
 var balancesInEoa=[];
-var EventBlocksAlreadyHandledProsperoFactoryWallet=[]
+var eventBlocksAlreadyHandledProsperoFactoryWallet=[]
 //TO DO - have this updated on UI
-var selectedProsperoWalletAddress="0x4cc4b88c622ee9b2c9007a6aea014a093c2fefc5"//CHANGE
+var selectedProsperoWalletAddress;//="0x4cc4b88c622ee9b2c9007a6aea014a093c2fefc5"//CHANGE
+var selectedLeaderIndex=0;
 //Libraries
 const BigNumber = require('bignumber.js');
 const Web3 = require('web3');
@@ -59,8 +60,133 @@ var CREATE_WALLET=5
 var FOLLOW_WALLET=6
 //FUNCTIONS
 //To do - update amount in balancesInEoa object when user updates USD amount in table
-async function updateUIFieldValues(){
-  var portfolio = await getSelectedWalletFromMyWalletsOrLastOneIfNone();
+async function getChartDataSelectedMyPortfolio(){
+  var portfolio = await getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd();
+  var percentages = []
+  var labels = []
+  var colorArray=[]
+  var images = []
+
+  for (var key in portfolio) {
+    if(keyIsTokenAddress(key, portfolio)){
+      var thisObj=portfolio[key]
+
+      var percentage = thisObj.percentage
+      percentage = (percentage * 100).toFixed(2);
+
+      percentages.push(percentage)
+      labels.push(thisObj.name)
+      images.push(thisObj.image)
+
+    }
+  }
+  for (var i =0;i<percentages.length;i++){
+    colorArray.push(myTokens[i]['color'])
+  }
+  var chartData = {
+    labels:labels,
+    datasets:[
+      {
+        data:percentages,
+        backgroundColor: colorArray,
+        hoverOffset: 4
+      }
+    ]
+  }
+  return {chartData: chartData, percentages:percentages, labels:labels, colorArray:colorArray, images:images}
+
+}
+async function getChartDataSelectedLeader(){
+  var portfolio = await leaderBoardData[selectedLeaderIndex];
+  var percentages = []
+  var labels = []
+  var colorArray=[]
+  var images = []
+  for (var key in portfolio) {
+    if(keyIsTokenAddress(key, portfolio)){
+      var thisObj=portfolio[key]
+
+      var percentage = thisObj.percentage
+      percentage = (percentage * 100).toFixed(2);
+
+      percentages.push(percentage)
+      labels.push(thisObj.name)
+      images.push(thisObj.image)
+    }
+  }
+  for (var i =0;i<percentages.length;i++){
+    colorArray.push(myTokens[i]['color'])
+  }
+  var chartData = {
+    labels:labels,
+    datasets:[
+      {
+        data:percentages,
+        backgroundColor: colorArray,
+        hoverOffset: 4
+      }
+    ]
+  }
+  return {chartData: chartData, percentages:percentages, labels:labels, colorArray:colorArray, images:images}
+  /*
+  var ctx = document.getElementById('yourPortfolioChart').getContext('2d');
+  if(yourPortfolioChart !=null){
+  yourPortfolioChart.destroy()
+  }
+  yourPortfolioChart = new Chart(
+  ctx,
+  {
+  type: 'pie',
+  data:allChartData,
+  options: {
+  plugins: {
+  legend: {
+  display: true,
+  onClick: null
+
+  }
+  },
+  responsive:false,
+  tooltips: {
+  enabled: true,
+  mode: 'single',
+  callbacks: {
+  label: function (tooltipItems, data) {
+  var i = tooltipItems.index;
+  return data.labels[i] + ": " + data.datasets[0].data[i] + " %";
+  }
+  }
+  }
+  }
+  }
+  );*/
+}
+function  keyIsTokenAddress(key, obj){
+  if (obj.hasOwnProperty(key)) {
+    if(
+      key!="totalValue"
+      && key!="wallet_type"
+      && key!="prosperoWalletAddress"
+      && key!="totalUsd"
+      && key!="profit"
+      && key!="walletValues"
+      //&& key!="has_inited_event_listener"
+      && key!="leaderProfit"
+      && key!="profitLeader"
+      && key!="walletName"
+      && key!="prosperoPercentageFeeOfLeader"
+      && key!="leaderPercentageFee"
+      && key!="numberOfTrailers"
+      && key!="profitPercentage"
+    ){
+      return true
+    }
+    return false
+  }
+  return false
+}
+async function updateUIFieldValuesMyPortfolioMyPortfolio(){
+  var portfolio = await getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd();
   var myHoldings = portfolio.totalValue;
   var usdInvested = portfolio.usdInvested
   var deposits = portfolio.totalUsd;
@@ -118,8 +244,16 @@ async function updateUIFieldValues(){
     withdraws = withdraws / USD_SCALE;
     withdraw = withdraws.toFixed(2)
   }
-
   //TO DO - UPDATE UI
+}
+async function updateUIFieldValuesLeaderboard(){
+  var portfolio = leaderBoardData[selectedLeaderIndex]
+  var name = portfolio.walletName;
+  var investors = portfolio.numberOfTrailers;
+  var aum = portfolio.totalValue
+  var profitsUsd = portfolio.profitLeader;
+  var profitsPercentage = portfolio.profitPercentage;
+  //to do - update Ui
 }
 async function updateAmount(amount, tokenAddress){
   console.log('updateAmount called with amount:'+amount+" tokenAddress:"+tokenAddress)
@@ -170,9 +304,9 @@ async function initNewEventListener(){
       if (event.blockNumber<=blockNumWhenWebAppLaunched){
         return;
       }
-      var blocksAlreadyHadled = EventBlocksAlreadyHandledProsperoFactoryWallet
-      console.log("J:"+JSON.stringify(EventBlocksAlreadyHandledProsperoFactoryWallet, null, 2))
-      EventBlocksAlreadyHandledProsperoFactoryWallet.push(event.blockNumber+"")
+      var blocksAlreadyHadled = eventBlocksAlreadyHandledProsperoFactoryWallet
+      console.log("J:"+JSON.stringify(eventBlocksAlreadyHandledProsperoFactoryWallet, null, 2))
+      eventBlocksAlreadyHandledProsperoFactoryWallet.push(event.blockNumber+"")
       var alertString ="Error - no methodType found.";
       if (methodType==CREATE_WALLET){
         //if (eoaAddressMsgSender != myEoaAddress){
@@ -264,7 +398,9 @@ try {
   }
 } catch (err){
   console.log("error getGraphData:"+err);
+  return {success:false, error:err}
 }
+return {success:true}
 //}
 }
 async function getHistoricalPricesUpdateChartsData(){
@@ -383,7 +519,7 @@ async function getHistoricalPricesUpdateChartsData(){
     //console.log("graphItem:"+JSON.stringify(graphData[i],null,2))
   }
   var leaderBoardProfitsDataForHistoryChart = {}
-  var lbData = leaderBoardData.data
+  var lbData = leaderBoardData
   for (var i =0;i<lbData.length;i++){
     var thisProsperoWalletAddressLB = lbData[i].prosperoWalletAddress;
     leaderBoardProfitsDataForHistoryChart[thisProsperoWalletAddressLB]=[]
@@ -912,10 +1048,10 @@ return balancesInEoa;
 //}
 }
 function updateActiveLeaderboardRow(row){
-  leaderBoardData["selectedLeaderIndex"]=row
+  selectedLeaderIndex=row
 }
 async function joinPortfolio(){
-  var selectedLeaderBoardAddress=leaderBoardData["data"][leaderBoardData["selectedLeaderIndex"]]["prosperoWalletAddress"];
+  var selectedLeaderBoardAddress=leaderBoardData[selectedLeaderIndex]["prosperoWalletAddress"];
   try{
     var prosperoBeaconFactoryInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson.abi,  ethersSigner);
     var tx = await prosperoBeaconFactoryInstance.newTrailerWallet(
@@ -963,7 +1099,7 @@ async function initLeaderBoardTableObject(){
   try{
     await createLeaderBoardDataObject();
     console.log('leaderBoardData:'+JSON.stringify(leaderBoardData,null,2))
-    var leaderBoardDataHere = leaderBoardData.data
+    var leaderBoardDataHere = leaderBoardData
     var tableData = []
     for (var i =0;i<leaderBoardDataHere.length;i++){
       var fee =leaderBoardDataHere[i]['leaderPercentageFee'];
@@ -988,8 +1124,9 @@ async function initLeaderBoardTableObject(){
     }
     leaderBoardUITableObject = tableData;
   }catch(e){
-    return {error:e}
+    return {success:false, error:e}
   }
+  return {success:true}
 }
 async function getLeaderBoardDataForTable(){
   return leaderBoardUITableObject;
@@ -997,7 +1134,7 @@ async function getLeaderBoardDataForTable(){
   /*try{
   await createLeaderBoardDataObject();
   console.log('leaderBoardData:'+JSON.stringify(leaderBoardData,null,2))
-  var leaderBoardDataHere = leaderBoardData.data
+  var leaderBoardDataHere = leaderBoardData
   var tableData = []
   for (var i =0;i<leaderBoardDataHere.length;i++){
   var fee =leaderBoardDataHere[i]['leaderPercentageFee'];
@@ -1097,7 +1234,7 @@ async function createLeaderBoardDataObject(){
     return 0;
   });
   //console.log("leaderBoardData:"+JSON.stringify(leaderBoardData,null,2))
-  leaderBoardData['data']=leaderBoardDataHere
+  leaderBoardData=leaderBoardDataHere
 }
 async function getValueOfBalancesOfTokensInPortfolioForUser(balancesAndTokensObj, user, prosperoWalletAddress){
   //console.log('--getValueOfBalancesOfTokensInPortfolioForUser user:'+user+' prosperoWalletAddress:'+prosperoWalletAddress+' balancesAndTokensObj:'+JSON.stringify(balancesAndTokensObj,null,2))
@@ -1261,38 +1398,75 @@ async function getBalanacesOfTokensInPortfolioForUserContractCall(user, prospero
       //console.log("*****BAL:"+balances[i] )
     }
   }catch(e){
-    console.log('error getBalanacesOfTokensInPortfolioForUserContractCall - exception:'+e)
+    console.log('error getBalanacesOfTokensInPortfolioForUserContractCall - exception: '+e)
   }
   return {balances:balances,tokens:tokens}
 
 }
 async function initializeApi(){
+  var status = await initializeBlockchainConnection();
+  if (!status.success){
+    console.error("error initializeBlockchainConnection error: "+status.error)
+    return status;
+  }
+  //Initialize functions
+  status = await getGraphData();
+  if (!status.success){
+    console.error("error getGraphData: "+status.error)
+    return status;
+  }
+  blockNumWhenWebAppLaunched = await web3.eth.getBlockNumber();
+  await initNewEventListener();
+  status = await updatePrices();
+  if (!status.success){
+    console.error("error updatePrices: "+status.error)
+    return status;
+  }
+  status = await initLeaderBoardTableObject();
+  if (!status.success){
+    console.error("error initLeaderBoardTableObject: "+status.error)
+    return status;
+  }
+  var port = await getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd();
+  if (port==null){
+    console.log("This user has no wallets - to do UI no wallets.....")
+  }else{
+    await createMyWalletsDataObject();
+  }
+  return {success:true}
+}
+async function initializeBlockchainConnection(){
   console.log("initializeApi")
   var provider = await detectEthereumProvider();
   if (provider !== window.ethereum) {
     console.error('Do you have multiple wallets installed?');
+    return {success:false, error: 'Do you have multiple wallets installed?'}
   }
   if (provider) {
     try {
       var accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
       if (accounts.length==0){
         alert("Accounts is blank - Create a new Metamask Account.");
-        return;
+        return {success:false, error: "Accounts is blank - Create a new Metamask Account."}
       }
       EOAAddress = accounts[0];
       if (EOAAddress===null || EOAAddress===undefined){
         alert("Can not connect to wallet");
-        return;
+        return {success:false, error: "Can not connect to wallet"}
       }
     } catch (error) {
       if (error.code === 4001) {
         console.error("user rejected request")
-        return;
+        return {success:false, error: "user rejected request"}
       }
       console.error("ERROR:"+error);
+      return {success:false, error: "error"}
+
     }
   }else{
     console.error("Could not find wallet");
+    return {success:false, error: "Could not find wallet"}
+
   }
   ethersProvider = await new ethers.providers.Web3Provider(window.ethereum);
   ethersSigner = ethersProvider.getSigner();
@@ -1312,18 +1486,7 @@ async function initializeApi(){
   ethereum.on('chainChanged', () =>{
     console.error("chain changed...")
   })
-
-
-
-
-  //await getGraphData();
-  await getGraphData();
-  blockNumWhenWebAppLaunched = await web3.eth.getBlockNumber();
-  await initNewEventListener();
-  await updatePrices();
-  await initLeaderBoardTableObject();
-  await createMyWalletsDataObject();
-
+  return {success:true}
 }
 async function updatePrices(){
   try{
@@ -1413,10 +1576,12 @@ async function updatePrices(){
     }catch(e){
       console.log("updatePricesNew exception1:"+e);
       alert('Could not get prices from ProsperoPrices, please reload page :'+e)
+      return {success:false, error:'Could not get prices from ProsperoPrices, please reload page :'+e}
     }
   }catch(e){
     console.log("updatePricesNew exception2:"+address)
     alert('Could not get prices from coingecko, please reload page :'+e)
+    return {success:false, error:'Could not get prices from ProsperoPrices, please reload page :'+e}
   }
 }
 async function getWalletValues(prosperoWalletAddress){
@@ -1566,7 +1731,7 @@ async function createMyWalletsDataObject(){
     //console.log('walletValues:'+JSON.stringify(walletValues,null,2))
     thisWalletsObj['walletValues']=walletValues
     thisWalletsObj['wallet_type']="Leader"
-    thisWalletsObj['has_inited_event_listener']=false
+    //thisWalletsObj['has_inited_event_listener']=false
 
     thisWalletsObj['prosperoWalletAddress']=thisWalletAddress
     if (myWalletTypes[i]==0){
@@ -1578,9 +1743,9 @@ async function createMyWalletsDataObject(){
   console.log("myWallets:"+JSON.stringify(myWallets,null,2))
   //myWallets=myWallets;
 }
-async function getSelectedWalletFromMyWalletsOrLastOneIfNone(){
+async function getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd(){
   //var selectedProsperoWalletAddress=selectedProsperoWalletAddress
-  //console.log("getSelectedWalletFromMyWalletsOrLastOneIfNone selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
+  //console.log("getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
   var thisPortfolio=null;
   if (selectedProsperoWalletAddress!=undefined && selectedProsperoWalletAddress!=null && selectedProsperoWalletAddress!=""){
     if(myWallets.hasOwnProperty(selectedProsperoWalletAddress)){
@@ -1775,4 +1940,4 @@ function returnTrueIfPercentagesAreDiff(balancesValue, goalPercentages, goalToke
 }
 export {  getLeaderBoardDataForTable, initializeApi, joinPortfolio, createPortfolio,
   updateActiveLeaderboardRow, getBalancesInEoa, deposit, updateAmount, rebalance, withdraw, getGraphData, getHistoricalPricesUpdateChartsData,
-  updateUIFieldValues };
+  updateUIFieldValuesMyPortfolio };

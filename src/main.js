@@ -14,7 +14,7 @@ import { createPinia } from "pinia";
 
 await initializeApi();
 //await getGraphData();
-await getHistoricalPricesUpdateChartsData();
+//await getHistoricalPricesUpdateChartsData();
 //TESTING
 //console.log("TESTING")
 //await rebalance([90,10], ["0x9a1a6f9bfb0f93dbec9c0e8ffa36e5628ec681fc","0x03098b801e61f9efb3fdb42676a594bbc587d69d"]);
