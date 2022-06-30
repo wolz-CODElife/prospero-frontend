@@ -48,26 +48,33 @@
 					v-for="(token, i) in tokenList"
 					key="i"
 					@click="enableDeposit(i)"
-					class="text-white text-left py-[20px] mx-[28px] px-[28px] border-b border-b-[#2D3035]"
-					:class="[activeRow === i ? 'bg-[#003D3B] ' : 'bg-transparent']"
+					class="text-white text-left mx-[28px] border-b border-b-[#2D3035]"
 				>
-					<td class="flex items-center px-[28px]">
+					<td class="flex items-center px-[28px] mt-[10px]">
 						<img
 							:src="token.icon"
 							alt=""
 							class="w-[30px] h-[30px] mr-[10px]"
-						/>{{ token.name }}
+						/>{{ slice(token.name, 12, 9) }}
 					</td>
 					<td>${{ token.price }}</td>
 					<td>${{ token.available }}</td>
-					<td>${{ token.usdAmountEnteredByUser }}</td>
+					<td class="py-[10px]">
+						<input
+							class="py-[4px] pl-[8px] w-max bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
+							type="number"
+							aria-label="usd amount"
+							v-model="token.usdAmountEnteredByUser"
+							@change="add($event.target.value, token.name)"
+						/>
+					</td>
 				</tr>
 			</tbody>
 			<tfoot class="bg-[#2D3035] text-white py-[14px] px-[22px]">
 				<tr class="px-[20px]">
 					<td colspan="2" class="pl-[32px]">TOTAL</td>
-					<td>$0</td>
-					<td class="text-[#00FF00]">$0</td>
+					<td>${{ totalAvailable }}</td>
+					<td class="text-[#00FF00]">${{ totalAmtToDeposit }}</td>
 				</tr>
 			</tfoot>
 		</table>
@@ -153,7 +160,7 @@
 
 <script setup>
 import { getBalancesInEoa, deposit, updateAmount } from "@/api";
-import { onMounted, ref } from "vue";
+import { onMounted, computed, ref } from "vue";
 import Modal from "../Modal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
 
@@ -167,7 +174,9 @@ const confirmDeposit = ref(false);
 
 const depositDisabled = ref(true);
 
-const activeRow = ref(null);
+const amt = ref(0);
+
+const amtToDeposit = ref([]);
 
 onMounted(() => {
 	getTokenList();
@@ -175,8 +184,7 @@ onMounted(() => {
 
 async function getTokenList() {
 	try {
-		let tokenListData = await getBalancesInEoa();
-		tokenList.value = tokenListData;
+		tokenList.value = await getBalancesInEoa();
 		console.log("token list is:", tokenList.value);
 	} catch (error) {
 		console.log(error);
@@ -195,21 +203,40 @@ function openDialogModal() {
 }
 
 function enableDeposit(tokenId) {
-	activeRow.value = tokenId;
 	depositDisabled.value = false;
 }
+
+function add(amt, address) {
+	let newTokenList = tokenList.value.map((token) => {
+		if (token.name === name) {
+			token = { ...token, usdAmountEnteredByUser: parseFloat(amt) };
+		}
+		return token;
+	});
+
+	tokenList.value = newTokenList;
+}
+
+const totalAmtToDeposit = computed(() => {
+	return tokenList.value.reduce((accumulator, currentValue) => {
+		if (!(parseFloat(currentValue.usdAmountEnteredByUser) > 0)) {
+			return accumulator + 0;
+		} else {
+			return accumulator + parseFloat(currentValue.usdAmountEnteredByUser);
+		}
+	}, 0);
+});
+
+function slice(str, total, start) {
+	if (str.length <= total) return str;
+	return str.slice(0, start) + "...";
+}
+
+const totalAvailable = computed(() => {
+	return tokenList.value.reduce((accumulator, currentValue) => {
+		return accumulator + parseFloat(currentValue.available);
+	}, 0);
+});
 </script>
 
-<style lang="postcss">
-td {
-	@apply py-[10px];
-}
-
-tbody tr {
-	@apply hover:bg-[#003D3B];
-}
-
-th {
-	@apply uppercase;
-}
-</style>
+<style lang="postcss"></style>
