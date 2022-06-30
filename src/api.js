@@ -11,6 +11,7 @@ var historicalPricesObject={};
 var tokenArray =require('./apiLib/Tokens.json');
 var balancesInEoa=[];
 var eventBlocksAlreadyHandledProsperoFactoryWallet=[]
+var withdrawTableData=[]
 //TO DO - have this updated on UI
 var selectedProsperoWalletAddress;//="0x4cc4b88c622ee9b2c9007a6aea014a093c2fefc5"//CHANGE
 var selectedLeaderIndex=0;
@@ -59,7 +60,19 @@ var LEADER_STRAIGHT_DEPOSIT=4
 var CREATE_WALLET=5
 var FOLLOW_WALLET=6
 //FUNCTIONS
-//To do - update amount in balancesInEoa object when user updates USD amount in table
+async function getWithdrawTableData(){
+  withdrawTableData=[]
+  var portfolio = await getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd()
+  for (var key in portfolio) {
+    if(keyIsTokenAddress(key, portfolio)){
+      var thisObj=portfolio[key]
+      thisObj['address']=key;
+      withdrawTableData.push(thisObj)
+    }
+  }
+  console.log("withdrawTableData:"+JSON.stringify(withdrawTableData,null,2))
+  return withdrawTableData;
+}
 async function getChartDataSelectedMyPortfolio(){
   var portfolio = await getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd();
   var percentages = []
@@ -81,7 +94,7 @@ async function getChartDataSelectedMyPortfolio(){
     }
   }
   for (var i =0;i<percentages.length;i++){
-    colorArray.push(myTokens[i]['color'])
+    colorArray.push(tokenArray[i]['color'])
   }
   var chartData = {
     labels:labels,
@@ -93,8 +106,9 @@ async function getChartDataSelectedMyPortfolio(){
       }
     ]
   }
-  return {chartData: chartData, percentages:percentages, labels:labels, colorArray:colorArray, images:images}
-
+  var dataToReturn={chartData: chartData, percentages:percentages, labels:labels, colorArray:colorArray, images:images}
+  console.log("dataToReturn:"+JSON.stringify(dataToReturn,null,2))
+  return dataToReturn
 }
 async function getChartDataSelectedLeader(){
   var portfolio = await leaderBoardData[selectedLeaderIndex];
@@ -115,7 +129,7 @@ async function getChartDataSelectedLeader(){
     }
   }
   for (var i =0;i<percentages.length;i++){
-    colorArray.push(myTokens[i]['color'])
+    colorArray.push(tokenArray[i]['color'])
   }
   var chartData = {
     labels:labels,
@@ -127,7 +141,10 @@ async function getChartDataSelectedLeader(){
       }
     ]
   }
-  return {chartData: chartData, percentages:percentages, labels:labels, colorArray:colorArray, images:images}
+  var dataToReturn={chartData: chartData, percentages:percentages, labels:labels, colorArray:colorArray, images:images}
+  console.log("dataToReturn:"+JSON.stringify(dataToReturn,null,2))
+
+  return dataToReturn
   /*
   var ctx = document.getElementById('yourPortfolioChart').getContext('2d');
   if(yourPortfolioChart !=null){
@@ -270,12 +287,11 @@ async function updateSelectedProsperoWalletAddress(address){
   selectedProsperoWalletAddress=address;
 }
 async function initNewEventListener(){
-  console.log('initNewEventListener')
-
+  //console.log('initNewEventListener')
   //right here
   if (!alreadyListeningToFactoryEvents){
     alreadyListeningToFactoryEvents=true;
-    console.log("setting .on....")
+    //console.log("setting .on....")
     prosperoFactoryEventsInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson.abi,  ethersSigner);
     prosperoFactoryEventsInstance.on("LatestBalancesFactory", async (tokens, users, balances, percentageOwnerships, usdInvested, usersValues, addressVars, intVars, walletName, profilePictureUrl, event) => {
 
@@ -336,7 +352,7 @@ async function initNewEventListener(){
   }
 }
 async function getGraphData(){
-  console.log("getGraphData")
+  //console.log("getGraphData")
   var prspUrl = "https://api.thegraph.com/subgraphs/name/lapat/prospero" ; // https://thegraph.com/explorer/subgraph/uniswap/uniswap-v2
   /*
   address[] tokens,
@@ -1389,7 +1405,7 @@ async function getBalanacesOfTokensInPortfolioForUserContractCall(user, prospero
     //console.log("1 calling getPortfolioTokensSize")
 
     var numberOfTokensInPortfolio = await ProsperoWalletInstance.methods.getPortfolioTokensSize().call({from: EOAAddress})
-    console.log("numberOfTokensInPortfolio:"+numberOfTokensInPortfolio)
+    //console.log("numberOfTokensInPortfolio:"+numberOfTokensInPortfolio)
     for (var i = 0;i < numberOfTokensInPortfolio;i++) {
       //console.log("I:"+i)
       tokens[i] = await ProsperoWalletInstance.methods.portfolioTokens(i).call({from: EOAAddress})
@@ -1409,6 +1425,7 @@ async function initializeApi(){
     console.error("error initializeBlockchainConnection error: "+status.error)
     return status;
   }
+  await makeRandomColorArray();
   //Initialize functions
   status = await getGraphData();
   if (!status.success){
@@ -1430,7 +1447,7 @@ async function initializeApi(){
 
   await createMyWalletsDataObject();
   var port = await getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd();
-  
+
   return {success:true}
 }
 async function initializeBlockchainConnection(){
@@ -1754,7 +1771,7 @@ async function getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd(){
   }
   if (thisPortfolio==null){
     //console.log("myWallets does not have:"+selectedProsperoWalletAddress+" going with the last one.")
-    console.log("myWallets:"+JSON.stringify(myWallets,null,2))
+    //console.log("myWallets:"+JSON.stringify(myWallets,null,2))
 
     for (var key in myWallets) {
       if (myWallets.hasOwnProperty(key)) {
@@ -1763,8 +1780,8 @@ async function getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd(){
       selectedProsperoWalletAddress = key.toLowerCase();
     }
   }
-  console.log("--selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
-  console.log('returning:'+JSON.stringify(thisPortfolio,null,2))
+  //console.log("--selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
+  //console.log('returning:'+JSON.stringify(thisPortfolio,null,2))
   return thisPortfolio
 }
 async function updateBalanceToEighteenDecimalsIfNeeded(balance, tokenAddress){
@@ -1937,5 +1954,18 @@ function returnTrueIfPercentagesAreDiff(balancesValue, goalPercentages, goalToke
 
   return areDiff;
 }
+async function makeRandomColorArray(){
+
+  //var randomNum = () => Math.floor(Math.random() * (235 - 52 + 1) + 52);
+  for (var i=0;i<tokenArray.length;i++){
+    var randomRGB = `rgb(${Math.floor(Math.random() * (235 - 52 + 1) + 52)}, ${Math.floor(Math.random() * (235 - 52 + 1) + 52)}, ${Math.floor(Math.random() * (235 - 52 + 1) + 52)})`;
+    tokenArray[i]['color']=randomRGB
+    //console.log("COLOR:"+DApp.tokenArray[i]['color'])
+  }
+
+}
 export {  getLeaderBoardDataForTable, initializeApi, joinPortfolio, createPortfolio,
-  updateActiveLeaderboardRow, getBalancesInEoa, deposit, updateAmount, rebalance, withdraw, getGraphData, getHistoricalPricesUpdateChartsData};
+  updateActiveLeaderboardRow, getBalancesInEoa, deposit, updateAmount, rebalance, withdraw, getGraphData, getHistoricalPricesUpdateChartsData,
+  getWithdrawTableData,
+  getChartDataSelectedMyPortfolio,
+  getChartDataSelectedLeader};

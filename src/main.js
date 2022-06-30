@@ -3,7 +3,10 @@ import {
 	initializeApi,
 	rebalance,
 	withdraw,
-	getGraphData
+	getGraphData,
+	getWithdrawTableData,
+	getChartDataSelectedMyPortfolio,
+	getChartDataSelectedLeader
 } from "@/api";
 import App from "./App.vue";
 import router from "./router";
@@ -11,6 +14,9 @@ import "./assets/css/tailwind.css";
 import { createPinia } from "pinia";
 
 await initializeApi();
+//await getWithdrawTableData();
+//await getChartDataSelectedMyPortfolio();
+//await getChartDataSelectedLeader();
 //await getGraphData();
 //await getHistoricalPricesUpdateChartsData();
 //TESTING
