@@ -7,11 +7,14 @@ var subnetHelperContractAddress="0x4A6cc169c359Fc340bAc1aEb973625CD64CEFdf7"
 //OBJECTS
 var leaderBoardData=[]//leader board portfolios
 var myWallets={}//my wallets either as a portfolio manager or investor
-var historicalPricesObject={};
-var tokenArray =require('./apiLib/Tokens.json');
-var balancesInEoa=[];
-var eventBlocksAlreadyHandledProsperoFactoryWallet=[]
-var withdrawTableData=[]
+var historicalPricesObject={};//historical prices for tokens
+var tokenArray =require('./apiLib/Tokens.json');//set of tokens we use
+var balancesInEoa=[];//used in deposits
+var eventBlocksAlreadyHandledProsperoFactoryWallet=[]//to do - remove me.
+var withdrawTableData=[]//withdraws
+var leaderBoardProfitsDataForHistoryChart = {};//historical chart data leaderboard
+var myPortfoliosProfitsDataForHistoryChart = {};//historical chart data my portfolios
+
 //TO DO - have this updated on UI
 var selectedProsperoWalletAddress;//="0x4cc4b88c622ee9b2c9007a6aea014a093c2fefc5"//CHANGE
 var selectedLeaderIndex=0;
@@ -60,6 +63,9 @@ var LEADER_STRAIGHT_DEPOSIT=4
 var CREATE_WALLET=5
 var FOLLOW_WALLET=6
 //FUNCTIONS
+//TO DO:
+//getHistoricalPricesUpdateChartsData -
+//do for my portfolios and write a checker function...
 async function getWithdrawTableData(){
   withdrawTableData=[]
   var portfolio = await getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd()
@@ -419,6 +425,11 @@ try {
 return {success:true}
 //}
 }
+
+//Variables just used below, to do, fix?
+var lastUsdInvested=0;
+var lastBalancesInPort=[]
+var lastAddressInPort=[]
 async function getHistoricalPricesUpdateChartsData(){
   //console.log('getHistoricalPricesUpdateChartsData')
   var now = new Date();
@@ -534,17 +545,25 @@ async function getHistoricalPricesUpdateChartsData(){
     //console.log("justDateTheGraph:"+justDateTheGraph)
     //console.log("graphItem:"+JSON.stringify(graphData[i],null,2))
   }
-  var leaderBoardProfitsDataForHistoryChart = {}
+  leaderBoardProfitsDataForHistoryChart = {}
+  myPortfoliosProfitsDataForHistoryChart = {}
+
+  var myWalletAddresses = []
+  for (var key in myWallets) {
+    var thisProsperoWalletAddress = key;
+    myPortfoliosProfitsDataForHistoryChart[thisProsperoWalletAddress]=[]
+    myWalletAddresses.push(thisProsperoWalletAddress);
+  }
+
   var lbData = leaderBoardData
   for (var i =0;i<lbData.length;i++){
     var thisProsperoWalletAddressLB = lbData[i].prosperoWalletAddress;
     leaderBoardProfitsDataForHistoryChart[thisProsperoWalletAddressLB]=[]
   }
 
-  var lastUsdInvested=0;
-  var lastBalancesInPort=[]
-  var lastAddressInPort=[]
-
+  lastUsdInvested=0;
+  lastBalancesInPort=[]
+  lastAddressInPort=[]
   //Go through every date (gotten earlier) and make the chart data.  3 scenarios:
   //1) found in graph data.
   //2) not found in graph data and there has never been any graph data on it, profit is 0.
@@ -555,7 +574,9 @@ async function getHistoricalPricesUpdateChartsData(){
     for (var i =0;i<lbData.length;i++){
       var thisProsperoWalletAddressLB = lbData[i].prosperoWalletAddress;
       thisProsperoWalletAddressLB=thisProsperoWalletAddressLB.toLowerCase();
-      var foundIt=false
+      var thisLeaderEOA = lbData[i]['walletValues']['leaderEOA']
+      await updateHistoryChartsDataObject(thisProsperoWalletAddressLB, leaderBoardProfitsDataForHistoryChart, thisDate, thisLeaderEOA)
+      /*var foundIt=false
       for (var p =0;p<graphData.length;p++){
         var thisGraphData = graphData[p]
         //console.log("thisGraphDat:"+JSON.stringify(thisGraphData,null,2))
@@ -565,8 +586,8 @@ async function getHistoricalPricesUpdateChartsData(){
           if ((thisProsperoWalletAddress == thisProsperoWalletAddressLB) && (thisGraphData["date"] == thisDate)){
             //console.log("found wallet and date")
             var profit = thisGraphData["usersValues"][0] - thisGraphData["usdInvested"][0]
-            foundIt=true;
-            profit = profit / USD_SCALE
+            foundIt = true;
+            profit = (profit / USD_SCALE);
             //leaderBoardProfitsDataForHistoryChart[thisProsperoWalletAddressLB].push(profit)
             lastUsdInvested = thisGraphData["usdInvested"][0];
             lastAddressInPort = thisGraphData["tokens"]
@@ -600,9 +621,98 @@ async function getHistoricalPricesUpdateChartsData(){
         //console.log("adding 3 thisDate:"+thisDate)
         leaderBoardProfitsDataForHistoryChart[thisProsperoWalletAddressLB].push({date:thisDate, profit: profit})
       }
+      */
     }
   }
-  console.log("leaderBoardProfitsDataForHistoryChart:"+JSON.stringify(leaderBoardProfitsDataForHistoryChart,null,2))
+
+  //Have to do this
+  lastUsdInvested=0;
+  lastBalancesInPort=[]
+  lastAddressInPort=[]
+  for (var k=0;k<dates.length;k++){
+    var thisDate = dates[k]
+    for (var i=0;i<myWalletAddresses.length;i++){
+      var thisProsperoWalletAddressMyPorts= myWalletAddresses[i];
+      thisProsperoWalletAddressMyPorts=thisProsperoWalletAddressMyPorts.toLowerCase();
+      await updateHistoryChartsDataObject(thisProsperoWalletAddressMyPorts, myPortfoliosProfitsDataForHistoryChart, thisDate, EOAAddress)
+    }
+  }
+  console.log("leaderBoardProfitsDataForHistoryChart :"+JSON.stringify(leaderBoardProfitsDataForHistoryChart,null,2))
+  console.log("myPortfoliosProfitsDataForHistoryChart:"+JSON.stringify(myPortfoliosProfitsDataForHistoryChart,null,2))
+}
+function getIndexOfUser(arrayOfAddresses, userAddress){
+  userAddress = userAddress.toLowerCase();
+  for (var p =0;p<arrayOfAddresses.length;p++){
+    var thisAdd = arrayOfAddresses[p]
+    thisAdd=thisAdd.toLowerCase();
+    if (thisAdd == userAddress){
+      return p;
+    }
+  }
+  return -1;
+}
+
+async function updateHistoryChartsDataObject(walletAddress, dataForHistoryChart, thisDate, userAddress){
+  console.log("updateHistoryChartsDataObject")
+  console.log("dataForHistoryChart:"+JSON.stringify(dataForHistoryChart,null,2))
+  console.log("thisDate:"+thisDate)
+  console.log("userAddress:"+userAddress)
+
+  var foundIt=false
+  for (var p =0;p<graphData.length;p++){
+    var thisGraphData = graphData[p]
+    //console.log("thisGraphDat:"+JSON.stringify(thisGraphData,null,2))
+    if (!foundIt){
+      //  addressVars[2] = ProsperoWalletAddress;
+      var thisProsperoWalletAddress = thisGraphData["addressVars"][2]
+      thisProsperoWalletAddress=thisProsperoWalletAddress.toLowerCase();
+      if ((thisProsperoWalletAddress == walletAddress) && (thisGraphData["date"] == thisDate)){
+        //console.log("found wallet and date")
+        var indexOfUser = getIndexOfUser(thisGraphData["users"], userAddress);
+        if (indexOfUser==-1){
+          console.error("updateHistoryChartsDataObject indexOfUser==-1")
+          dataForHistoryChart[walletAddress].push({date:thisDate, profit: 0})
+          lastUsdInvested = 0;
+          lastAddressInPort = thisGraphData["tokens"]
+          lastBalancesInPort = thisGraphData["balances"]
+          break;
+        }
+        var profit = thisGraphData["usersValues"][indexOfUser] - thisGraphData["usdInvested"][indexOfUser]
+        foundIt = true;
+        profit = (profit / USD_SCALE);
+        //dataForHistoryChart[walletAddress].push(profit)
+        lastUsdInvested = thisGraphData["usdInvested"][indexOfUser];
+        lastAddressInPort = thisGraphData["tokens"]
+        lastBalancesInPort = thisGraphData["balances"]
+        //console.log("adding 1 thisDate:"+thisDate)
+        dataForHistoryChart[walletAddress].push({date:thisDate, profit: profit})
+        break;
+      }
+    }
+  }
+  if ((!foundIt) && (lastUsdInvested==0)){
+    dataForHistoryChart[walletAddress].push({date:thisDate, profit: 0})
+    //console.log("adding 2 thisDate:"+thisDate)
+  }else if ((!foundIt) && (lastUsdInvested>0)){
+    //console.log("ffffff")
+    var totalValue = 0;
+    for (var f=0;f<lastAddressInPort.length;f++){
+      var addLowerCase = lastAddressInPort[f]
+      addLowerCase=addLowerCase.toLowerCase()
+      var balance = (lastBalancesInPort[f] / USD_SCALE)
+      var price = historicalPricesObject[addLowerCase][thisDate]
+      //console.log("P here:"+price);
+      var value = balance * price;
+      //console.log("value:"+value)
+      totalValue =totalValue + value
+    }
+    //console.log("TV:"+totalValue)
+    //console.log("lastUsdInvested:"+lastUsdInvested)
+    var profit = totalValue - lastUsdInvested;
+    //console.log("profit:"+profit)
+    //console.log("adding 3 thisDate:"+thisDate)
+    dataForHistoryChart[walletAddress].push({date:thisDate, profit: profit})
+  }
 }
 async function withdraw(tokenSwappingInto, amountToWithdraw){
   try{
@@ -1447,7 +1557,7 @@ async function initializeApi(){
 
   await createMyWalletsDataObject();
   var port = await getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd();
-
+  await getHistoricalPricesUpdateChartsData();
   return {success:true}
 }
 async function initializeBlockchainConnection(){
