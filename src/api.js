@@ -1427,12 +1427,10 @@ async function initializeApi(){
     console.error("error initLeaderBoardTableObject: "+status.error)
     return status;
   }
+
+  await createMyWalletsDataObject();
   var port = await getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd();
-  if (port==null){
-    console.log("This user has no wallets - to do UI no wallets.....")
-  }else{
-    await createMyWalletsDataObject();
-  }
+  
   return {success:true}
 }
 async function initializeBlockchainConnection(){
@@ -1756,7 +1754,7 @@ async function getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd(){
   }
   if (thisPortfolio==null){
     //console.log("myWallets does not have:"+selectedProsperoWalletAddress+" going with the last one.")
-    //console.log("myWallets:"+JSON.stringify(myWallets,null,2))
+    console.log("myWallets:"+JSON.stringify(myWallets,null,2))
 
     for (var key in myWallets) {
       if (myWallets.hasOwnProperty(key)) {
@@ -1765,8 +1763,8 @@ async function getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd(){
       selectedProsperoWalletAddress = key.toLowerCase();
     }
   }
-  //console.log("--selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
-  //console.log('returning:'+JSON.stringify(thisPortfolio,null,2))
+  console.log("--selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
+  console.log('returning:'+JSON.stringify(thisPortfolio,null,2))
   return thisPortfolio
 }
 async function updateBalanceToEighteenDecimalsIfNeeded(balance, tokenAddress){
