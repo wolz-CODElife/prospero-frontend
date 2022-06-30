@@ -47,11 +47,6 @@ const props = defineProps({
 		type: String,
 		required: true,
 	},
-
-	list: {
-		type: Array,
-		required: true,
-	},
 });
 
 const open = ref(false);

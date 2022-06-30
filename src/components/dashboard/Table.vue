@@ -140,8 +140,10 @@
 
 					<!-- My Portfolios  -->
 					<tbody
+						class="w-full"
 						v-if="portfolioStore.activePortfolioType === 'My Portfolios'"
 					>
+						<!-- !empty -->
 						<tr
 							v-if="portfolioStore.myPortfolios.length > 0"
 							v-for="portfolio in portfolioStore.myPortfolios"
@@ -177,7 +179,12 @@
 							<td>{{ portfolio.d90 }}</td>
 							<td class="mr-[20px] pr-[18px]">{{ portfolio.y1 }}</td>
 						</tr>
-						<td class="text-white text-[12px] ml-[16px]" v-else>
+
+						<!-- empty  -->
+						<td
+							class="text-white text-[12px] ml-[16px] text-right w-full mx-auto"
+							v-else
+						>
 							Join or create a portfolio to deposit or withdraw
 						</td>
 					</tbody>
@@ -338,10 +345,10 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onBeforeMount } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
 
-onMounted(() => {
+onBeforeMount(() => {
 	portfolioStore.getAllPortfolios();
 });
 
@@ -385,19 +392,12 @@ function assignName() {
 }
 </script>
 
-<style lang="postcss">
-.btn {
-	@apply py-[8px] px-[15px] uppercase text-white;
+<style lang="postcss" scoped>
+td {
+	@apply py-[10px];
 }
 
-.btn-primary {
-	@apply bg-[#005A57] border border-[#005A57];
-}
-.btn-primary-outline {
-	@apply bg-transparent border border-[#005A57] hover:bg-[#005A57];
-}
-
-label {
-	@apply block;
+tbody tr {
+	@apply hover:bg-[#003D3B];
 }
 </style>

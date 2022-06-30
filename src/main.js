@@ -12,6 +12,7 @@ import App from "./App.vue";
 import router from "./router";
 import "./assets/css/tailwind.css";
 import { createPinia } from "pinia";
+import { initializeApi } from "@/api";
 
 await initializeApi();
 //await getWithdrawTableData();
@@ -25,7 +26,6 @@ await initializeApi();
 //await withdraw([], 1000000000000000000);
 // await updateUIFieldValuesMyPortfolio();
 
-//await getGraphData();
 const app = createApp(App);
 
 app.use(router);

@@ -37,12 +37,7 @@ export const usePortfolios = defineStore("Portfolios", {
 		// Fill empty portfolio list with an API call
 		async getAllPortfolios() {
 			try {
-				let leaderBoardData = await getLeaderBoardDataForTable();
-				if (leaderBoardData.hasOwnProperty("error")) {
-					console.log(leaderBoardData.error);
-					//error code here
-				}
-				this.allPortfolios = leaderBoardData;
+				this.allPortfolios = await getLeaderBoardDataForTable();
 			} catch (error) {
 				console.log(error);
 			}
