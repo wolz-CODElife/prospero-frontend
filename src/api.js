@@ -956,44 +956,28 @@ async function getBalancesInEoa() {
 		var balance = await thisTokenInstance.balanceOf(EOAAddress);
 		var balanceNowBn = BigNumber(balance + "");
 		var balanceInEth = ethers.utils.formatEther(balance + "");
-		var usdValue = await getUSDValue_MINE(balance + "", thisToken.address);
+		var usdValue = await getUSDValue_MINE(balance + "", thisToken?.address);
 		totalValue = totalValue + Number(usdValue);
-		var thisTokenName = thisToken.name;
+		var thisTokenName = thisToken?.name;
 		if (
-			thisToken.address.toLowerCase() == wavaxAddressFakeFuji.toLowerCase()
+			thisToken?.address.toLowerCase() == wavaxAddressFakeFuji.toLowerCase()
 		) {
 			nativeTokenObj = thisToken;
 		}
-		//TESTING
-		/*if (thisToken.symbol =="WETH.e"){
-    console.log("updating..")
-    var obj = {
-    usdAmountEnteredByUser:100,
-    index:k,
-    icon:thisToken.logoURI,
-    name:thisTokenName,
-    available:usdValue.toFixed(2)+"",
-    balance:balance+"",
-    balanceInEth:balanceInEth+"",
-    price:(thisToken.price).toFixed(2),
-    address:thisToken.address,
-    EOAAddress:EOAAddress,
-    decimals:thisToken.decimals,
-    isNativeToken:false
-  }
-}else{*/
+
 		var obj = {
 			usdAmountEnteredByUser: 0,
 			index: k,
-			icon: thisToken.logoURI,
+			icon: thisToken?.logoURI,
 			name: thisTokenName,
-			available: usdValue.toFixed(2) + "",
+			available:
+				usdValue?.toFixed(2) > 0 ? usdValue?.toFixed(2) + "" : "0.00",
 			balance: balance + "",
 			balanceInEth: balanceInEth + "",
-			price: thisToken.price.toFixed(2),
-			address: thisToken.address,
+			price: thisToken?.price.toFixed(2),
+			address: thisToken?.address,
 			EOAAddress: EOAAddress,
-			decimals: thisToken.decimals,
+			decimals: thisToken?.decimals,
 			isNativeToken: false,
 		};
 		//}
@@ -1015,15 +999,18 @@ async function getBalancesInEoa() {
 		var obj = {
 			usdAmountEnteredByUser: 0, //TESTING - TO DO REMOVE ME....
 			index: index,
-			icon: nativeTokenObj.logoURI,
+			icon: nativeTokenObj?.logoURI,
 			name: NativeTokenName,
-			available: usdValueAvax.toFixed(2) + "",
+			available:
+				usdValueAvax?.toFixed(2) > 0
+					? usdValueAvax?.toFixed(2) + ""
+					: "0.00",
 			balance: balance + "",
 			balanceInEth: balanceInEth + "",
-			price: nativeTokenObj.price.toFixed(2),
-			address: nativeTokenObj.address,
+			price: nativeTokenObj?.price.toFixed(2),
+			address: nativeTokenObj?.address,
 			EOAAddress: EOAAddress,
-			decimals: nativeTokenObj.decimals,
+			decimals: nativeTokenObj?.decimals,
 			isNativeToken: true,
 		};
 		balancesInEoa.push(obj);
@@ -1376,7 +1363,7 @@ async function getValueOfBalancesOfTokensInPortfolioForUser(
 				objCopy["symbol"] = tokenObj.symbol;
 				objCopy["price"] = Number(tokenObj.price);
 				objCopy["twentyFourHour"] = tokenObj.twentyFourHour;
-				objCopy["image"] = tokenObj.logoURI;
+				objCopy["image"] = tokenObj?.logoURI;
 				//objCopy['usdValueLeader']=usdWholeWalletThisToken
 
 				//objCopy['percentage']=percentageUser;
