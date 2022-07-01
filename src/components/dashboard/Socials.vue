@@ -8,7 +8,7 @@
 		<!-- Bottom  -->
 		<div
 			v-if="portfolioStore.activeMode === 'create'"
-			class="text-center text-[60px] text-white"
+			class="text-center text-[30px] text-white"
 		>
 			New UI here
 		</div>

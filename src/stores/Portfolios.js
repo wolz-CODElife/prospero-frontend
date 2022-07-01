@@ -30,6 +30,10 @@ export const usePortfolios = defineStore("Portfolios", {
 			activePortfolioType: "All Portfolios", // Or 'My Portfolios'
 
 			activeMode: "join", //create
+
+			tableView: true,
+
+			firstCreateView: true,
 		};
 	},
 

@@ -1,7 +1,7 @@
 <template>
 	<div class="row-span-3 bg-[#191A20] py-[20px]">
 		<!-- Join / Deposit View -->
-		<div v-if="tableView">
+		<div v-if="portfolioStore.tableView">
 			<!-- Toggle Tabs  -->
 			<div class="flex justify-between mx-[20px]">
 				<!-- All / My -->
@@ -32,7 +32,7 @@
 					v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
 				>
 					<button
-						@click="$emit('doDeposit')"
+						@click="$emit('doJoin')"
 						class="btn btn-primary w-[125px]"
 						:class="
 							disabled
@@ -45,7 +45,10 @@
 					</button>
 
 					<button
-						@click="portfolioStore.showCreate(), (tableView = false)"
+						@click="
+							portfolioStore.showCreate(),
+								(portfolioStore.tableView = false)
+						"
 						class="btn btn-primary-outline w-[125px]"
 					>
 						Create
@@ -55,7 +58,6 @@
 				<!-- Deposit / withdraw  -->
 				<div class="flex items-center gap-[12px]" v-else>
 					<button
-						@click="$emit('doDeposit')"
 						class="btn btn-primary w-[125px]"
 						:class="
 							disabled
@@ -202,13 +204,13 @@
 			<div class="p-[10px]">
 				<!-- Go back - Create first view -->
 				<button
-					v-if="firstView"
+					v-if="portfolioStore.firstCreateView"
 					class="button text-[#00FF00] uppercase flex gap-[14px] items-center"
 					pro
 					@click="
 						portfolioStore.showJoin(),
-							(tableView = true),
-							(firstView = true)
+							(portfolioStore.tableView = true),
+							(portfolioStore.firstCreateView = true)
 					"
 				>
 					<img src="@/assets/img/direction.svg" alt="" />
@@ -219,13 +221,16 @@
 				<button
 					v-else
 					class="button text-[#00FF00] uppercase flex gap-[14px] items-center mb-[16px]"
-					@click="firstView = true"
+					@click="portfolioStore.firstCreateView = true"
 				>
 					<img src="@/assets/img/direction.svg" alt="" />
 					Go BACK
 				</button>
 
-				<div class="p-[10px] bg-black" v-if="!firstView">
+				<div
+					class="p-[10px] bg-black"
+					v-if="!portfolioStore.firstCreateView"
+				>
 					<div class="flex">
 						<div
 							class="py-[8px] px-[15px] text-[14px] uppercase cursor-text bg-black text-[#868C9D]"
@@ -244,7 +249,8 @@
 
 			<hr class="border-[#2D3035]" />
 
-			<div v-if="firstView" class="">
+			<!-- View for Home  -->
+			<div v-if="portfolioStore.firstCreateView" class="">
 				<h4
 					class="text-[16px] text-center uppercase text-white mt-[40px] mb-[28px]"
 				>
@@ -286,7 +292,7 @@
 					</div>
 
 					<button
-						@click="$emit('doDeposit'), assignName()"
+						@click="$emit('doCreate'), assignName()"
 						class="btn btn-primary"
 						:class="
 							disabledDepToPortfolio
@@ -300,6 +306,7 @@
 				</div>
 			</div>
 
+			<!-- View for Manage  -->
 			<div v-else>
 				<table class="table-auto w-full mt-[32px]">
 					<thead>
@@ -356,11 +363,7 @@ const portfolioStore = usePortfolios();
 
 const disabled = ref(true);
 
-const tableView = ref(true);
-
-const firstView = ref(true);
-
-const portfolioName = ref("KachiBTC");
+const portfolioName = ref("");
 
 const fundFee = ref("1.0");
 
