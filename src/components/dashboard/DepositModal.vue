@@ -40,7 +40,7 @@
 					<th class="pl-[28px] pt-[20px] pb-[12px]">Token</th>
 					<th>Price</th>
 					<th>Available</th>
-					<th>Amount to Deposit</th>
+					<th>Amount to t</th>
 				</tr>
 			</thead>
 			<tbody>
@@ -57,15 +57,15 @@
 							class="w-[30px] h-[30px] mr-[10px]"
 						/>{{ slice(token.name, 12, 9) }}
 					</td>
-					<td>${{ token.price }}</td>
-					<td>${{ token.available }}</td>
+					<td>${{ parseFloat(token.price) }}</td>
+					<td>${{ parseFloat(token.available) }}</td>
 					<td class="py-[10px]">
 						<input
 							class="py-[4px] pl-[8px] w-max bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
 							type="number"
 							aria-label="usd amount"
 							v-model="token.usdAmountEnteredByUser"
-							@change="add($event.target.value, token.name)"
+							@keyup="add($event.target.value, token.name)"
 						/>
 					</td>
 				</tr>
@@ -88,15 +88,17 @@
 				Cancel
 			</button>
 
+			<!-- @click="openDialogModal" -->
+
 			<!-- Deposit  -->
 			<button
+				@click="$emit('depositAction')"
 				class="basis-1/2 btn btn-primary"
 				:class="
 					depositDisabled
 						? 'opacity-50 cursor-text'
 						: 'opacity-1 cursor-pointer'
 				"
-				@click="openDialogModal"
 				:disabled="depositDisabled"
 			>
 				Deposit
@@ -206,7 +208,7 @@ function enableDeposit(tokenId) {
 	depositDisabled.value = false;
 }
 
-function add(amt, address) {
+function add(amt, name) {
 	let newTokenList = tokenList.value.map((token) => {
 		if (token.name === name) {
 			token = { ...token, usdAmountEnteredByUser: parseFloat(amt) };
@@ -234,7 +236,11 @@ function slice(str, total, start) {
 
 const totalAvailable = computed(() => {
 	return tokenList.value.reduce((accumulator, currentValue) => {
-		return accumulator + parseFloat(currentValue.available);
+		if (!(parseFloat(currentValue.available) > 0)) {
+			return accumulator + 0;
+		} else {
+			return accumulator + parseFloat(currentValue.available);
+		}
 	}, 0);
 });
 </script>
