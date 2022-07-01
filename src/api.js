@@ -65,6 +65,7 @@ var FOLLOW_WALLET = 6;
 //recent transactions (see image )
 //account history (see image )
 //contracts - add no more investors and change % fee for leader
+//louis added here
 async function getValuesOverTimeForLeaderAddress(prosperoWalletAddress) {
 	console.log("getValuesOverTimeForLeaderAddress");
 	var returned = getValuesOverTimeHelper(
