@@ -5,12 +5,16 @@ var prosperoPricesAddress = "0xbd90c371c3524e86659291892B76820599633da9";
 var pricesLibraryAddress = "0x81D8Ed70151e7Ce3d36D2256F629f6862aC2A457";
 var subnetHelperContractAddress = "0x4A6cc169c359Fc340bAc1aEb973625CD64CEFdf7";
 //OBJECTS
-var leaderBoardData = { data: [], selectedLeaderIndex: 0 }; //leader board portfolios
+var leaderBoardData = []; //leader board portfolios
 var myWallets = {}; //my wallets either as a portfolio manager or investor
-var historicalPricesObject = {};
-var tokenArray = require("./apiLib/Tokens.json");
-var balancesInEoa = [];
-var EventBlocksAlreadyHandledProsperoFactoryWallet = [];
+var historicalPricesObject = {}; //historical prices for tokens
+var tokenArray = require("./apiLib/Tokens.json"); //set of tokens we use
+var balancesInEoa = []; //used in deposits
+var eventBlocksAlreadyHandledProsperoFactoryWallet = []; //to do - remove me?  Unused?
+var withdrawTableData = []; //for withdraw table
+var leaderBoardDataOverTime = {}; //historical chart data leaderboard
+var myPortfoliosDataOverTime = {}; //historical chart data my portfolios
+
 //TO DO - have this updated on UI
 var selectedProsperoWalletAddress =
 	"0x4cc4b88c622ee9b2c9007a6aea014a093c2fefc5"; //CHANGE
@@ -57,67 +61,148 @@ var LEADER_STRAIGHT_DEPOSIT = 4;
 var CREATE_WALLET = 5;
 var FOLLOW_WALLET = 6;
 //FUNCTIONS
-//To do - update amount in balancesInEoa object when user updates USD amount in table
-async function updateUIFieldValues() {
-	var portfolio = await getSelectedWalletFromMyWalletsOrLastOneIfNone();
-	var myHoldings = portfolio.totalValue;
-	var usdInvested = portfolio.usdInvested;
-	var deposits = portfolio.totalUsd;
-	var profitsUsd = portfolio.profit;
-	var profitPercentage = portfolio.profit / deposits;
-	profitPercentage = profitPercentage * 100;
-	profitPercentage = parseInt(profitPercentage);
-	var withdraws = 0;
-	var lastUsdDeposited = 0;
-
-	//WITHDRAWS TOTAL BELOW
-	for (var i = 0; i < graphData.length; i++) {
-		var graphItem = graphData[i];
-		//console.log("graphItem:"+JSON.stringify(graphItem,null,2))
-		var addressVars = graphItem.addressVars;
-		var intVars = graphItem.intVars;
-		var users = graphItem.users;
-		var usersValues = graphItem.usersValues;
-		var methodType = intVars[0];
-		var msgSender = addressVars[0];
-		var indexOfUser = -1;
-		var usdInvested = graphItem.usdInvested;
-		msgSender = msgSender.toLowerCase();
-		//console.log("*msgSender :"+msgSender)
-		//console.log("*methodType:"+methodType)
-		var eoaALower = EOAAddress.toLowerCase();
-		if (msgSender == EOAAddress) {
-			//console.log('found sender...')
-			if (methodType == WITHDRAW_SWAP || methodType == WITHDRAW_ALL) {
-				//console.log('found WD...')
-				for (var f = 0; f < users.length; f++) {
-					var thisUsersAddress = users[f];
-					//console.log("thisUsersAddress:"+thisUsersAddress)
-					thisUsersAddress = thisUsersAddress.toLowerCase();
-					if (thisUsersAddress == eoaALower) {
-						//console.log('found index...')
-						indexOfUser = f;
-					}
+//TO DO:
+//recent transactions (see image )
+//account history (see image )
+//contracts - add no more investors and change % fee for leader
+async function getValuesOverTimeForLeaderAddress(prosperoWalletAddress) {
+	console.log("getValuesOverTimeForLeaderAddress");
+	var returned = getValuesOverTimeHelper(
+		leaderBoardDataOverTime,
+		prosperoWalletAddress
+	);
+	console.log("ret:" + JSON.stringify(returned, null, 2));
+	return returned;
+}
+async function getValuesOverTimeForMyPortfolioAddress(prosperoWalletAddress) {
+	console.log("getValuesOverTimeForMyPortfolioAddress");
+	var returned = getValuesOverTimeHelper(
+		myPortfoliosDataOverTime,
+		prosperoWalletAddress
+	);
+	console.log("ret:" + JSON.stringify(returned, null, 2));
+	return returned;
+}
+function getValuesOverTimeHelper(dataOverTimeObj, prosperoWalletAddress) {
+	var startDate = null;
+	var valuesOverTime = { all: 0, "7d": 0, "30d": 0, "90d": 0, "360d": 0 };
+	for (var key in dataOverTimeObj) {
+		var thisAdd = key.toLowerCase();
+		prosperoWalletAddress = prosperoWalletAddress.toLowerCase();
+		if (prosperoWalletAddress == thisAdd) {
+			var dataOverTimeObjCopy = JSON.parse(
+				JSON.stringify(dataOverTimeObj[key])
+			);
+			//({date:thisDate, profit: profit, value:thisGraphData["usersValues"][indexOfUser], usdInvested:thisGraphData["usdInvested"][indexOfUser]})
+			dataOverTimeObjCopy.reverse();
+			//console.log(" dataOverTimeObjCopy:"+JSON.stringify(dataOverTimeObjCopy,null,2))
+			for (var i = 0; i < dataOverTimeObjCopy.length; i++) {
+				var val = dataOverTimeObjCopy[i]["value"] / USD_SCALE;
+				//console.log("val:"+val)
+				if (val != 0) {
+					val = val.toFixed(2);
 				}
-				console.log("indexOfUser:" + indexOfUser);
-
-				if (indexOfUser != -1) {
-					var usdDeposited = usdInvested[indexOfUser];
-					if (usdDeposited < lastUsdDeposited) {
-						withdraws = withdraws + (lastUsdDeposited - usdDeposited);
-					}
-					lastUsdDeposited = usdDeposited;
+				val = val + "";
+				if (i == 0) {
+					valuesOverTime["all"] = val;
+				} else if (i == 7) {
+					valuesOverTime["7d"] = val;
+				} else if (i == 30) {
+					valuesOverTime["30d"] = val;
+				} else if (i == 90) {
+					valuesOverTime["90d"] = val;
+				} else if (i == 365) {
+					valuesOverTime["365d"] = val;
 				}
 			}
 		}
 	}
-	console.log("withdraws:" + withdraws);
-	if (withdraws > 0) {
-		withdraws = withdraws / USD_SCALE;
-		withdraw = withdraws.toFixed(2);
-	}
+	//console.log(" valuesOverTime:"+JSON.stringify(valuesOverTime,null,2))
+	return valuesOverTime;
+}
+//numberOfDays = number of days (number)
+async function getValuesOverTimeForLinechartLeaderboardAddress(
+	prosperoWalletAddress,
+	numberOfDays
+) {
+	//console.log("getValuesOverTimeForLeaderboardAddress")
+	var returned = getValuesOverTimeForLineChartHelper(
+		leaderBoardDataOverTime,
+		prosperoWalletAddress,
+		numberOfDays
+	);
+	//console.log("ret:"+JSON.stringify(returned,null,2))
+	return returned;
+}
+async function getValuesOverTimeForLinechartMyPortfolioAddress(
+	prosperoWalletAddress,
+	numberOfDays
+) {
+	//console.log("getValuesOverTimeForLinechartMyPortfolioAddress")
+	var returned = getValuesOverTimeForLineChartHelper(
+		myPortfoliosDataOverTime,
+		prosperoWalletAddress,
+		numberOfDays
+	);
+	//console.log("ret:"+JSON.stringify(returned,null,2))
+	return returned;
+}
+function getValuesOverTimeForLineChartHelper(
+	dataOverTimeObj,
+	prosperoWalletAddress,
+	numberOfDays
+) {
+	//leaderBoardDataOverTime
 
-	//TO DO - UPDATE UI
+	for (var key in dataOverTimeObj) {
+		var thisAdd = key.toLowerCase();
+		prosperoWalletAddress = prosperoWalletAddress.toLowerCase();
+		if (prosperoWalletAddress == thisAdd) {
+			var dataOverTimeObjCopy = JSON.parse(
+				JSON.stringify(dataOverTimeObj[key])
+			);
+			//({date:thisDate, profit: profit, value:thisGraphData["usersValues"][indexOfUser], usdInvested:thisGraphData["usdInvested"][indexOfUser]})
+			dataOverTimeObjCopy.reverse();
+			var tempData = [];
+			//console.log(" dataOverTimeObjCopy:"+JSON.stringify(dataOverTimeObjCopy,null,2))
+			for (var i = 0; i < dataOverTimeObjCopy.length; i++) {
+				if (i <= numberOfDays) {
+					var dObjToAdd = {
+						date: dataOverTimeObjCopy[i].date,
+						value: dataOverTimeObjCopy[i].value / USD_SCALE,
+					};
+					tempData.push(dObjToAdd);
+				} else {
+					break;
+				}
+			}
+			tempData.reverse();
+			//console.log(" tempData:"+JSON.stringify(tempData,null,2))
+			return tempData;
+		}
+	}
+}
+
+function daysBetween(date_1, date_2) {
+	var difference = date_1.getTime() - date_2.getTime();
+	var totalDays = Math.ceil(difference / (1000 * 3600 * 24));
+	return totalDays;
+}
+async function getWithdrawTableData() {
+	withdrawTableData = [];
+	var portfolio =
+		await getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd();
+	for (var key in portfolio) {
+		if (keyIsTokenAddress(key, portfolio)) {
+			var thisObj = portfolio[key];
+			thisObj["address"] = key;
+			withdrawTableData.push(thisObj);
+		}
+	}
+	console.log(
+		"withdrawTableData:" + JSON.stringify(withdrawTableData, null, 2)
+	);
+	return withdrawTableData;
 }
 async function updateAmount(amount, tokenAddress) {
 	console.log(
@@ -296,21 +381,19 @@ async function getGraphData() {
 		var result = await axios.post(prspUrl, {
 			query: `
         {
-          latestBalancesFactories
-          {
-            id
-            tokens
-            users
-            balances
-            percentageOwnerships
-            usdInvested
-            usersValues
-            addressVars
-            intVars
-            walletName
-          }
+          id
+          tokens
+          users
+          balances
+          percentageOwnerships
+          usdInvested
+          usersValues
+          addressVars
+          intVars
+          walletName
         }
-        `,
+      }
+      `,
 		});
 		//console.log ("Query result: \n", result.data.data.latestBalancesFactories);
 		graphData = result.data.data.latestBalancesFactories;
@@ -320,8 +403,253 @@ async function getGraphData() {
 		}
 	} catch (err) {
 		console.log("error getGraphData:" + err);
+		return { success: false, error: err };
 	}
+	return { success: true };
 	//}
+}
+
+//Variables just used below, to do, fix?
+var lastUsdInvested = 0;
+var lastBalancesInPort = [];
+var lastAddressInPort = [];
+async function getHistoricalPricesUpdateChartsData() {
+	//console.log('getHistoricalPricesUpdateChartsData')
+	//var now = new Date();
+	var maxDateHere;
+	var dates = [];
+	var options = {
+		timeZone: "Europe/London",
+		year: "numeric",
+		month: "numeric",
+		day: "numeric",
+	};
+	var formatter = new Intl.DateTimeFormat([], options);
+	console.log("formatter date:" + formatter.format(new Date()));
+	var now = new Date(formatter.format(new Date()));
+	var nowFloored = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+	nowFloored = nowFloored.getTime() / 1000;
+	console.log("nowFloored:" + nowFloored + " maxDate:" + maxDate);
+	//Only get Coingecko data if we need it, then store it in local storage so we don't have to keep getting it.
+	if (nowFloored > maxDate) {
+		console.log("nowFloored>maxDate");
+		//if (true){
+		for (var i = 0; i < tokenArray.length; i++) {
+			var thisToken = tokenArray[i];
+			localStorage.removeItem(thisToken.id);
+			//https://api.coingecko.com/api/v3/coins/ethereum/market_chart?vs_currency=usd&days=365&interval=daily
+			//var tokenHistory = JSON.parse(localStorage.getItem(thisToken.id));
+			//var shouldSearch = false;
+			//if (!tokenHistory.hasOwnProperty("prices")){
+			//console.log("SHOULD SEARCH - nowFloored>maxDate")
+			//shouldSearch=true;
+			//}
+			//}
+			//if (shouldSearch){
+			console.log("searching...:" + thisToken.id);
+			var hUrl =
+				"https://api.coingecko.com/api/v3/coins/" +
+				thisToken.id +
+				"/market_chart?vs_currency=usd&days=365&interval=daily";
+			var historicalPricesResponseHere = await fetch(hUrl);
+			var priceObjHere = await historicalPricesResponseHere.json();
+			priceObjHere = priceObjHere.prices;
+			for (var k = 0; k < priceObjHere.length; k++) {
+				var theDate = new Date(priceObjHere[k][0]);
+				//console.log("t:"+priceObjHere[k][0])
+				var justDate =
+					theDate.getMonth() +
+					1 +
+					"-" +
+					theDate.getDate() +
+					"-" +
+					theDate.getFullYear();
+				//console.log('justDate:'+justDate)
+				priceObjHere[k].push(justDate);
+				var maxDateThisObj = priceObjHere[k][0] / 1000;
+				if (maxDateThisObj > maxDate) {
+					maxDateHere = new Date(
+						theDate.getFullYear(),
+						theDate.getMonth(),
+						theDate.getDate()
+					);
+				}
+				//var addLowerCase = thisToken.address
+				//addLowerCase=addLowerCase.toLowerCase();
+				//console.log("addLowerCase:"+addLowerCase)
+				////console.log("priceObjHere[k][1]:"+priceObjHere[k][1])
+				//historicalPricesObject[addLowerCase]={}
+				//historicalPricesObject[addLowerCase][justDate]=priceObjHere[k][1]
+				//tokenHistory['date']=justDate
+			}
+			//console.log("p:"+JSON.stringify(priceObjHere,null,2))
+			localStorage.setItem(thisToken.id, JSON.stringify(priceObjHere));
+			//var theDate = new Date(theStorage[k][0]);
+			//console.log("t:"+theStorage[k][0])
+			//var justDate = (theDate.getMonth()+1) +"-"+ theDate.getDate() +"-"+ theDate.getFullYear();
+			localStorage.setItem("maxDate", maxDateHere.getTime() / 1000);
+		}
+	}
+
+	var options = {
+		timeZone: "Europe/London",
+		year: "numeric",
+		month: "numeric",
+		day: "numeric",
+	};
+	var formatter = new Intl.DateTimeFormat([], options);
+	//console.log("formatter date:"+formatter.format(new Date()));
+	var now = new Date(formatter.format(new Date()));
+	var nowFloored = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+	nowFloored = nowFloored.getTime() / 1000;
+
+	//console.log('got them...')
+	//While we are converting coingecko to dates mm-dd-yyyy, add it to a dates array for later
+	for (var i = 0; i < tokenArray.length; i++) {
+		dates = [];
+		var thisToken = tokenArray[i];
+		var theStorage = localStorage.getItem(thisToken.id);
+		theStorage = JSON.parse(theStorage);
+		//console.log('thisToken.id:'+thisToken.id)
+		//console.log("theStorage:"+JSON.stringify(theStorage,null,2))
+		//var tokenHistory = JSON.parse(theStorage);
+		//console.log("thisToken.id:"+thisToken.id+"tokenHistory:"+JSON.stringify(tokenHistory,null,2))
+		var addLowerCase = thisToken.address;
+		addLowerCase = addLowerCase.toLowerCase();
+		historicalPricesObject[addLowerCase] = {};
+		for (var k = 0; k < theStorage.length; k++) {
+			var justDateHere = theStorage[k][2];
+			justDateHere = justDateHere.trim();
+			var justDateHereD = new Date(justDateHere);
+			justDateHereD = justDateHereD.getTime() / 1000;
+			//console.log('justDateHereD:'+justDateHereD)
+			//console.log('nowFloored   :'+nowFloored)
+			if (justDateHereD < nowFloored) {
+				if (!dates.includes(justDateHere)) {
+					dates.push(justDateHere);
+				} else {
+					//console.log("includes")
+				}
+				//console.log("t:"+theStorage[k][0])
+				//var justDateHere = (theDate.getMonth()+1) +"-"+ theDate.getDate() +"-"+ theDate.getFullYear();
+				//console.log('justDate:'+justDate)
+				//console.log("addLowerCase:"+addLowerCase)
+				//console.log("theStorage[k][1]:"+theStorage[k][1])
+				historicalPricesObject[addLowerCase][justDateHere] =
+					theStorage[k][1];
+			} else {
+				//console.log("NOT ADDINa")
+			}
+		}
+	}
+	//Find the value of the portfolio for all the graph data at that date
+	for (var i = 0; i < graphData.length; i++) {
+		//console.log("I;"+i)
+		var graphItem = graphData[i];
+		var timeOfGraph = graphItem["intVars"][4];
+		timeOfGraph = timeOfGraph * 1000;
+		var theDate = new Date(timeOfGraph);
+		var justDateTheGraph =
+			theDate.getMonth() +
+			1 +
+			"-" +
+			theDate.getDate() +
+			"-" +
+			theDate.getFullYear();
+		graphData[i]["date"] = justDateTheGraph;
+		var tokens = graphItem["tokens"];
+		graphData[i]["prices"] = [];
+		//Do not need do this cuz value of port in the graph is already calculated
+		for (k = 0; k < tokens.length; k++) {
+			var addLowerCase = tokens[k];
+			addLowerCase = addLowerCase.toLowerCase();
+			if (historicalPricesObject.hasOwnProperty(addLowerCase)) {
+				var thisAddObj = historicalPricesObject[addLowerCase];
+				if (thisAddObj.hasOwnProperty(justDateTheGraph)) {
+					graphData[i]["prices"].push(
+						historicalPricesObject[addLowerCase][justDateTheGraph]
+					);
+				} else {
+					console.log(
+						"error - NO DATE getHistoricalPricesUpdateChartsData:" +
+							justDateTheGraph +
+							" thisAddObj:" +
+							addLowerCase
+					);
+					console.log("thisAddObj:" + JSON.stringify(thisAddObj, null, 2));
+				}
+			} else {
+				console.log(
+					"error - NO ADDRESS getHistoricalPricesUpdateChartsData:" +
+						justDateTheGraph +
+						" thisAddObj:" +
+						addLowerCase
+				);
+				console.log("thisAddObj:" + JSON.stringify(thisAddObj, null, 2));
+			}
+		}
+		//console.log("justDateTheGraph:"+justDateTheGraph)
+		//console.log("graphItem:"+JSON.stringify(graphData[i],null,2))
+	}
+	leaderBoardDataOverTime = {};
+	myPortfoliosDataOverTime = {};
+
+	var myWalletAddresses = [];
+	for (var key in myWallets) {
+		var thisProsperoWalletAddress = key;
+		myPortfoliosDataOverTime[thisProsperoWalletAddress] = [];
+		myWalletAddresses.push(thisProsperoWalletAddress);
+	}
+
+	var lbData = leaderBoardData;
+	for (var i = 0; i < lbData.length; i++) {
+		var thisProsperoWalletAddressLB = lbData[i].prosperoWalletAddress;
+		leaderBoardDataOverTime[thisProsperoWalletAddressLB] = [];
+	}
+
+	lastUsdInvested = 0;
+	lastBalancesInPort = [];
+	lastAddressInPort = [];
+	//Go through every date (gotten earlier) and make the chart data.  3 scenarios:
+	//1) found in graph data.
+	//2) not found in graph data and there has never been any graph data on it, profit is 0.
+	//3) already found in graph data, not found now, use last usdInvested and lastBalanacesInPort to determine value of port with the price of the tokens on that day.
+	for (var k = 0; k < dates.length; k++) {
+		var thisDate = dates[k];
+		//console.log("thisDate:"+thisDate)
+		for (var i = 0; i < lbData.length; i++) {
+			var thisProsperoWalletAddressLB = lbData[i].prosperoWalletAddress;
+			thisProsperoWalletAddressLB =
+				thisProsperoWalletAddressLB.toLowerCase();
+			var thisLeaderEOA = lbData[i]["walletValues"]["leaderEOA"];
+			await updateHistoryChartsDataObject(
+				thisProsperoWalletAddressLB,
+				leaderBoardDataOverTime,
+				thisDate,
+				thisLeaderEOA
+			);
+		}
+	}
+	//Have to do this
+	lastUsdInvested = 0;
+	lastBalancesInPort = [];
+	lastAddressInPort = [];
+	for (var k = 0; k < dates.length; k++) {
+		var thisDate = dates[k];
+		for (var i = 0; i < myWalletAddresses.length; i++) {
+			var thisProsperoWalletAddressMyPorts = myWalletAddresses[i];
+			thisProsperoWalletAddressMyPorts =
+				thisProsperoWalletAddressMyPorts.toLowerCase();
+			await updateHistoryChartsDataObject(
+				thisProsperoWalletAddressMyPorts,
+				myPortfoliosDataOverTime,
+				thisDate,
+				EOAAddress
+			);
+		}
+	}
+	//console.log("leaderBoardDataOverTime :"+JSON.stringify(leaderBoardDataOverTime,null,2))
+	//console.log("myPortfoliosDataOverTime:"+JSON.stringify(myPortfoliosDataOverTime,null,2))
 }
 async function getHistoricalPrices() {
 	console.log("getHistoricalPrices");
@@ -425,126 +753,103 @@ async function getHistoricalPrices() {
 		console.log("graphItem:" + JSON.stringify(graphData[i], null, 2));
 	}
 }
-async function withdraw(tokenSwappingInto, amountToWithdraw) {
-	try {
-		var valueOfUsersPortfolioBefore = await getValueOfUsersPortfolio(
-			selectedProsperoWalletAddress,
-			EOAAddress,
-			false
-		);
-		//console.log('valueOfUsersPortfolio before:'+valueOfUsersPortfolioBefore)
-		console.log(
-			"withdraw amountToWithdraw            :" + amountToWithdraw / USD_SCALE
-		);
-		var otherToken;
-		var balSwappingIntoTokenBefore;
-		if (tokenSwappingInto.length > 0) {
-			otherToken = new web3.eth.Contract(
-				ERC20Json.abi,
-				tokenSwappingInto[0]
-			);
-			balSwappingIntoTokenBefore = await otherToken.methods
-				.balanceOf(EOAAddress)
-				.call();
-			console.log("token swapping into:" + tokenSwappingInto[0]);
-			//  var usdThisUserThisToken = await getUSDValue_MINE(1, tokenSwappingInto[0])//(usdBn.multipliedBy(percentageUserBn))+""
-		}
-		if (tokenSwappingInto.length > 1) {
-			return {
-				success: false,
-				error: "You can not swap into multiple tokens.",
-			};
-		}
-		var prosperoWalletInstance = new web3.eth.Contract(
-			ProsperoWalletJson.abi,
-			selectedProsperoWalletAddress
-		);
+async function updateHistoryChartsDataObject(
+	walletAddress,
+	dataForHistoryChart,
+	thisDate,
+	userAddress
+) {
+	//console.log("updateHistoryChartsDataObject")
+	//console.log("dataForHistoryChart:"+JSON.stringify(dataForHistoryChart,null,2))
+	//console.log("thisDate:"+thisDate)
+	//console.log("userAddress:"+userAddress)
 
-		var web3Tx = await prosperoWalletInstance.methods
-			.withdraw(amountToWithdraw + "", tokenSwappingInto)
-			.send({
-				from: EOAAddress,
-			})
-			.on("error", function (error, receipt) {
-				console.log("withdraw error:" + error);
-				return { success: false, error: error };
-			})
-			.on("transactionHash", function (transactionHash) {
-				//console.log("transactionhash:"+transactionHash)
-			})
-			.on("receipt", function (receipt) {
-				//console.log("got receipt:"+JSON.stringify(receipt,null,2))
-				////console.logreceipt.contractAddress) // contains the new contract address
-			})
-			.on("confirmation", function (confirmationNumber, receipt) {
-				//console.log("receipt conf:"+JSON.stringify(receipt,null,2))
-			});
-		var cumulativeGasUsed = web3Tx.cumulativeGasUsed;
-		var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
-		console.log("gasUsed:" + JSON.stringify(gasUsed, null, 2));
-		var valueOfUsersPortfolioAfter = await getValueOfUsersPortfolio(
-			selectedProsperoWalletAddress,
-			EOAAddress,
-			false
-		);
-		//console.log("valueOfUsersPortfolioBefore:"+valueOfUsersPortfolioBefore);
-		//console.log("valueOfUsersPortfolioAfter :"+valueOfUsersPortfolioAfter);
-		var success = false;
-		if (
-			Number(valueOfUsersPortfolioAfter) <
-			Number(valueOfUsersPortfolioBefore)
-		) {
-			success = true;
-		}
-		if (!success) {
-			console.log(
-				"Error withdraw - Value of the portfolio is not less after the withdraw, before value:" +
-					valueOfUsersPortfolioBefore +
-					" after:" +
-					valueOfUsersPortfolioAfter
-			);
-			return {
-				success: false,
-				error:
-					"Value of the portfolio is not less after the withdraw, before value:" +
-					valueOfUsersPortfolioBefore +
-					" after:" +
-					valueOfUsersPortfolioAfter,
-			};
-		}
-
-		if (tokenSwappingInto.length == 1) {
-			var balSwappingIntoTokenAfter = await otherToken.methods
-				.balanceOf(EOAAddress)
-				.call();
-			balSwappingIntoTokenBefore = BigNumber(
-				balSwappingIntoTokenBefore + ""
-			);
-			balSwappingIntoTokenAfter = BigNumber(balSwappingIntoTokenAfter + "");
-			var successWithdrawSwap = false;
+	var foundIt = false;
+	for (var p = 0; p < graphData.length; p++) {
+		var thisGraphData = graphData[p];
+		//console.log("thisGraphDat:"+JSON.stringify(thisGraphData,null,2))
+		if (!foundIt) {
+			//  addressVars[2] = ProsperoWalletAddress;
+			var thisProsperoWalletAddress = thisGraphData["addressVars"][2];
+			thisProsperoWalletAddress = thisProsperoWalletAddress.toLowerCase();
 			if (
-				balSwappingIntoTokenAfter.isGreaterThan(balSwappingIntoTokenBefore)
+				thisProsperoWalletAddress == walletAddress &&
+				thisGraphData["date"] == thisDate
 			) {
-				successWithdrawSwap = true;
-			}
-			if (!successWithdrawSwap) {
-				console.log(
-					"balSwappingIntoTokenBefore:" + balSwappingIntoTokenBefore
+				//console.log("found wallet and date")
+				var indexOfUser = getIndexOfUser(
+					thisGraphData["users"],
+					userAddress
 				);
-				console.log(
-					"balSwappingIntoTokenAfter :" + balSwappingIntoTokenAfter
-				);
-				console.log("withdrawAmt              :" + amountToWithdraw);
-				var msg =
-					"Withdraw swap was not successfull, balances did not change.";
-				console.log(msg);
-				return { success: false, error: msg };
+				if (indexOfUser == -1) {
+					//console.error("updateHistoryChartsDataObject indexOfUser==-1")
+					dataForHistoryChart[walletAddress].push({
+						date: thisDate,
+						profit: 0,
+						value: 0,
+						usdInvested: 0,
+					});
+					lastUsdInvested = 0;
+					lastAddressInPort = thisGraphData["tokens"];
+					lastBalancesInPort = thisGraphData["balances"];
+					break;
+				}
+				var profit =
+					thisGraphData["usersValues"][indexOfUser] -
+					thisGraphData["usdInvested"][indexOfUser];
+				foundIt = true;
+				profit = profit / USD_SCALE;
+				//dataForHistoryChart[walletAddress].push(profit)
+				lastUsdInvested = thisGraphData["usdInvested"][indexOfUser];
+				lastAddressInPort = thisGraphData["tokens"];
+				lastBalancesInPort = thisGraphData["balances"];
+				//console.log("adding 1 thisDate:"+thisDate)
+				dataForHistoryChart[walletAddress].push({
+					date: thisDate,
+					profit: profit,
+					value: thisGraphData["usersValues"][indexOfUser],
+					usdInvested: thisGraphData["usdInvested"][indexOfUser],
+				});
+				break;
 			}
 		}
-		return { success: true };
-	} catch (e) {
-		console.log("exception in withdraw" + e);
-		return { success: false, error: e };
+	}
+	if (!foundIt && lastUsdInvested == 0) {
+		dataForHistoryChart[walletAddress].push({
+			date: thisDate,
+			profit: 0,
+			value: 0,
+			usdInvested: 0,
+		});
+		//console.log("adding 2 thisDate:"+thisDate)
+	} else if (!foundIt && lastUsdInvested > 0) {
+		//console.log("calculating:")
+		//console.log("lastUsdInvested  :"+lastUsdInvested)
+		//console.log("lastAddressInPort :"+lastAddressInPort)
+		//console.log("lastBalancesInPort:"+lastBalancesInPort)
+		var totalValue = 0;
+		for (var f = 0; f < lastAddressInPort.length; f++) {
+			//console.log('f:'+f)
+			var addLowerCase = lastAddressInPort[f];
+			addLowerCase = addLowerCase.toLowerCase();
+			var balance = lastBalancesInPort[f] / USD_SCALE;
+			var price = historicalPricesObject[addLowerCase][thisDate];
+			//console.log("P here:"+price);
+			var value = balance * price;
+			//console.log("value:"+value)
+			totalValue = totalValue + value;
+		}
+		//console.log("TV:"+totalValue)
+		//console.log("lastUsdInvested:"+lastUsdInvested)
+		var profit = totalValue - lastUsdInvested;
+		//console.log("profit:"+profit)
+		//console.log("adding 3 thisDate:"+thisDate)
+		dataForHistoryChart[walletAddress].push({
+			date: thisDate,
+			profit: profit,
+			value: totalValue,
+			usdInvested: lastUsdInvested,
+		});
 	}
 }
 async function rebalance(percentages, tokenAddressesToRemix) {
@@ -765,6 +1070,157 @@ async function deposit() {
 		return { success: false, error: exception };
 	}
 }
+async function deposit() {
+	//await getInfoSubnetHelperContract();
+	console.log("deposit");
+	//TESTING
+	var total = 0;
+	var numberOfDeposits = 0;
+	var tokens = [];
+	var amounts = [];
+	var avaxValue = 0;
+	for (var i = 0; i < balancesInEoa.length; i++) {
+		var thisDepositingObj = balancesInEoa[i];
+		console.log(
+			"thisDepositingObj:" + JSON.stringify(thisDepositingObj, null, 2)
+		);
+		var usdAmountEnteredByUser = thisDepositingObj["usdAmountEnteredByUser"];
+		usdAmountEnteredByUser = Number(usdAmountEnteredByUser);
+		if (usdAmountEnteredByUser > 0) {
+			console.log("thisDepositingObj.name:" + thisDepositingObj.name);
+			//var weiAmount = await getWeiAmount(usdAmountEnteredByUser, thisDepositingObj.address)
+			var amountInEth = usdAmountEnteredByUser / thisDepositingObj.price;
+			amountInEth = amountInEth.toFixed(16);
+			console.log("amountInEth:" + amountInEth);
+			var weiAmt = web3.utils.toWei(amountInEth + "", "ether");
+			console.log("weiAmt1:" + weiAmt);
+			weiAmt = await updateBalanceFromEighteenDecimalsIfNeeded(
+				weiAmt,
+				thisDepositingObj.address
+			);
+			console.log("weiAmt2:" + weiAmt);
+			if (thisDepositingObj.name == NativeTokenName) {
+				//  console.log("WEI:"+thisDepositingObj.weiDepositing)
+				avaxValue = weiAmt + "";
+			} else {
+				tokens.push(thisDepositingObj.address);
+				amounts.push(weiAmt + "");
+			}
+		}
+	}
+	//await getAmountsDepositing();
+	//add tokens and amountss
+	var status = await approveDepositing(
+		tokens,
+		amounts,
+		selectedProsperoWalletAddress
+	); //UPDATE
+	if (!status.success) {
+		return status;
+	}
+	var gasEstimate;
+	var shouldJustDeposit = 0;
+	var firstTimeString = "";
+	var methodType = 0;
+	console.log("tokens:" + tokens);
+	console.log("amounts:" + amounts);
+	console.log("avaxValue:" + avaxValue);
+	console.log("methodType:" + methodType);
+	try {
+		var valueOfUsersPortfolioBefore = await getValueOfUsersPortfolio(
+			selectedProsperoWalletAddress,
+			EOAAddress,
+			false
+		);
+		var status = await depositContract(
+			tokens,
+			amounts,
+			methodType,
+			avaxValue,
+			selectedProsperoWalletAddress
+		);
+		if (!status.success) {
+			return status;
+		}
+		/*var prosperoWalletInstance = await new ethers.Contract(selectedProsperoWalletAddress, ProsperoWalletJson.abi,  ethersSigner);
+    console.log("about to dep...")
+    var tx = await prosperoWalletInstance.deposit(
+      tokens,
+      amounts,
+      methodType,
+      {
+        value:avaxValue+""
+      }
+    );
+    console.log("dep tx 1:"+JSON.stringify(tx,null,2))
+    var f = await tx.wait();
+    console.log("dep tx 2 :"+JSON.stringify(f,null,2))
+    var cumulativeGasUsed = f.cumulativeGasUsed;
+    var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
+    console.log("gasUsed:"+JSON.stringify(gasUsed,null,2))
+    */
+		var valueOfUsersPortfolioAfter = await getValueOfUsersPortfolio(
+			selectedProsperoWalletAddress,
+			EOAAddress,
+			false
+		);
+		var success = false;
+		if (
+			Number(valueOfUsersPortfolioAfter) >
+			Number(valueOfUsersPortfolioBefore)
+		) {
+			success = true;
+		}
+		if (!success) {
+			return {
+				success: false,
+				error:
+					"Value of the portfolio is not more after the deposit, before value:" +
+					valueOfUsersPortfolioBefore +
+					" after:" +
+					valueOfUsersPortfolioAfter,
+			};
+		}
+		return { success: true };
+	} catch (exception) {
+		console.error("exception deposit:" + JSON.stringify(exception, null, 2));
+		console.error("exception deposit:" + exception);
+		return { success: false, error: exception };
+	}
+}
+async function depositContract(
+	tokens,
+	amounts,
+	methodType,
+	avaxValue,
+	selectedProsperoWalletAddress
+) {
+	try {
+		var prosperoWalletInstance = await new ethers.Contract(
+			selectedProsperoWalletAddress,
+			ProsperoWalletJson.abi,
+			ethersSigner
+		);
+		var tx = await prosperoWalletInstance.deposit(
+			tokens,
+			amounts,
+			methodType,
+			{
+				value: avaxValue + "",
+			}
+		);
+		console.log("dep tx 1:" + JSON.stringify(tx, null, 2));
+		var f = await tx.wait();
+		console.log("dep tx 2 :" + JSON.stringify(f, null, 2));
+		var cumulativeGasUsed = f.cumulativeGasUsed;
+		var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
+		console.log("gasUsed:" + JSON.stringify(gasUsed, null, 2));
+	} catch (exception) {
+		console.error("exception depositContract:" + exception);
+		return { success: false, error: exception };
+	}
+	return { success: true };
+}
 async function calculateGasEstimate(gasEstimate, gasPriceToUse) {
 	////console.log'calculateGasEstimate')
 	//console.log("gasEstimate:"+gasEstimate)
@@ -790,49 +1246,6 @@ async function calculateGasEstimate(gasEstimate, gasPriceToUse) {
 		estimatedCostInEth: estimatedCostInEth,
 		usdAmountOfGas: usdAmountOfGas,
 	};
-}
-async function approveDepositing(
-	tokens,
-	amounts,
-	selectedProsperoWalletAddress
-) {
-	console.log("approveDepositing");
-	var zeroBn = BigNumber("0");
-	for (var k = 0; k < tokens.length; k++) {
-		var thisTokenInstance = await new ethers.Contract(
-			tokens[k],
-			ERC20Json["abi"],
-			ethersSigner
-		);
-		var allowance = await thisTokenInstance.allowance(
-			EOAAddress,
-			selectedProsperoWalletAddress
-		);
-		var bnAllowance = BigNumber(allowance + "");
-		var bnAmountInWeiToDeposit = BigNumber(amounts[k] + "");
-		console.log("dep:" + bnAmountInWeiToDeposit);
-		console.log("all:" + bnAllowance);
-
-		if (bnAmountInWeiToDeposit.isGreaterThan(bnAllowance)) {
-			console.log("NOT ENOUGH APPROVED");
-
-			try {
-				//  var amtToApproveToReachDiff = bnAmountInWeiToDeposit.minus(bnAllowance)
-				var amtToApprove = ALOT_APPROVE; // can switch to amtToApprove
-				//console.log("need to approve this much:"+amtToApproveToReachDiff+" going to approve:"+amtToApprove);
-				//console.log("selectedProsperoWalletAddress:" + selectedProsperoWalletAddress)
-				var tx = await thisTokenInstance.approve(
-					selectedProsperoWalletAddress,
-					amtToApprove + ""
-				);
-				var f = await tx.wait();
-				//console.log("transaction approve returned:"+JSON.stringify(f,null,2)+" for "+thisToken.name)
-			} catch (e) {
-				return { success: false, error: e };
-			}
-		}
-	}
-	return { success: true };
 }
 async function getAmountsDepositing() {
 	console.log("getAmountsDepositing..");
@@ -2043,6 +2456,18 @@ function returnTrueIfPercentagesAreDiff(
 
 	return areDiff;
 }
+async function makeRandomColorArray() {
+	//var randomNum = () => Math.floor(Math.random() * (235 - 52 + 1) + 52);
+	for (var i = 0; i < tokenArray.length; i++) {
+		var randomRGB = `rgb(${Math.floor(
+			Math.random() * (235 - 52 + 1) + 52
+		)}, ${Math.floor(Math.random() * (235 - 52 + 1) + 52)}, ${Math.floor(
+			Math.random() * (235 - 52 + 1) + 52
+		)})`;
+		tokenArray[i]["color"] = randomRGB;
+		//console.log("COLOR:"+DApp.tokenArray[i]['color'])
+	}
+}
 export {
 	getLeaderBoardDataForTable,
 	initializeApi,
@@ -2055,6 +2480,12 @@ export {
 	rebalance,
 	withdraw,
 	getGraphData,
-	getHistoricalPrices,
-	updateUIFieldValues,
+	getHistoricalPricesUpdateChartsData,
+	getWithdrawTableData,
+	getChartDataSelectedMyPortfolio,
+	getChartDataSelectedLeader,
+	depositContract,
+	getValuesOverTimeForLeaderAddress,
+	getValuesOverTimeForMyPortfolioAddress,
+	getValuesOverTimeForLinechartMyPortfolioAddress,
 };
