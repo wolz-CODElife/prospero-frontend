@@ -363,7 +363,7 @@ const portfolioStore = usePortfolios();
 
 const disabled = ref(true);
 
-const portfolioName = ref("KachiBTC");
+const portfolioName = ref("");
 
 const fundFee = ref("1.0");
 
