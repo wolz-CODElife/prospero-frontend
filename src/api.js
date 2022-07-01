@@ -1,4 +1,5 @@
 //CONTRACTS VARIABLES:
+///simulate merge conflict
 var wavaxAddressFakeFuji = "0x686bdcc79ec7f849669f3f908feb767f7c8d5b56";
 var factoryAddress = "0x8c333B6dF83c551f6f738946344E31021Fe0807e";
 var prosperoPricesAddress = "0xbd90c371c3524e86659291892B76820599633da9";
