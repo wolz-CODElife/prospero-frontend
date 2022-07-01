@@ -30,6 +30,10 @@ export const usePortfolios = defineStore("Portfolios", {
 			activePortfolioType: "All Portfolios", // Or 'My Portfolios'
 
 			activeMode: "join", //create
+
+			tableView: true,
+
+			firstCreateView: true,
 		};
 	},
 
@@ -37,12 +41,7 @@ export const usePortfolios = defineStore("Portfolios", {
 		// Fill empty portfolio list with an API call
 		async getAllPortfolios() {
 			try {
-				let leaderBoardData = await getLeaderBoardDataForTable();
-				if (leaderBoardData.hasOwnProperty("error")) {
-					console.log(leaderBoardData.error);
-					//error code here
-				}
-				this.allPortfolios = leaderBoardData;
+				this.allPortfolios = await getLeaderBoardDataForTable();
 			} catch (error) {
 				console.log(error);
 			}

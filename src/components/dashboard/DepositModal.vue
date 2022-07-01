@@ -48,26 +48,33 @@
 					v-for="(token, i) in tokenList"
 					key="i"
 					@click="enableDeposit(i)"
-					class="text-white text-left py-[20px] mx-[28px] px-[28px] border-b border-b-[#2D3035]"
-					:class="[activeRow === i ? 'bg-[#003D3B] ' : 'bg-transparent']"
+					class="text-white text-left mx-[28px] border-b border-b-[#2D3035]"
 				>
-					<td class="flex items-center px-[28px]">
+					<td class="flex items-center px-[28px] mt-[10px]">
 						<img
 							:src="token.icon"
 							alt=""
 							class="w-[30px] h-[30px] mr-[10px]"
-						/>{{ token.name }}
+						/>{{ slice(token.name, 12, 9) }}
 					</td>
-					<td>${{ token.price }}</td>
-					<td>${{ token.available }}</td>
-					<td>${{ token.usdAmountEnteredByUser }}</td>
+					<td>${{ parseFloat(token.price) }}</td>
+					<td>${{ parseFloat(token.available) }}</td>
+					<td class="py-[10px]">
+						<input
+							class="py-[4px] pl-[8px] w-max bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
+							type="number"
+							aria-label="usd amount"
+							v-model="token.usdAmountEnteredByUser"
+							@keyup="add($event.target.value, token.name)"
+						/>
+					</td>
 				</tr>
 			</tbody>
 			<tfoot class="bg-[#2D3035] text-white py-[14px] px-[22px]">
 				<tr class="px-[20px]">
 					<td colspan="2" class="pl-[32px]">TOTAL</td>
-					<td>$1920</td>
-					<td class="text-[#00FF00]">$20</td>
+					<td>${{ totalAvailable }}</td>
+					<td class="text-[#00FF00]">${{ totalAmtToDeposit }}</td>
 				</tr>
 			</tfoot>
 		</table>
@@ -81,15 +88,17 @@
 				Cancel
 			</button>
 
+			<!-- @click="openDialogModal" -->
+
 			<!-- Deposit  -->
 			<button
+				@click="$emit('depositAction')"
 				class="basis-1/2 btn btn-primary"
 				:class="
 					depositDisabled
 						? 'opacity-50 cursor-text'
 						: 'opacity-1 cursor-pointer'
 				"
-				@click="openDialogModal"
 				:disabled="depositDisabled"
 			>
 				Deposit
@@ -152,13 +161,14 @@
 </template>
 
 <script setup>
-//balancesInEoa
-import {getBalancesInEoa, deposit, updateAmount} from '@/api'
-
-import { ref } from "vue";
+import { getBalancesInEoa, deposit, updateAmount } from "@/api";
+import { onMounted, computed, ref } from "vue";
 import Modal from "../Modal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
+
 const portfolioStore = usePortfolios();
+
+const tokenList = ref([]);
 
 const depositDialog = ref(false);
 
@@ -166,121 +176,73 @@ const confirmDeposit = ref(false);
 
 const depositDisabled = ref(true);
 
-const activeRow = ref(null);
+const amt = ref(0);
+
+const amtToDeposit = ref([]);
+
+onMounted(() => {
+	getTokenList();
+});
+
+async function getTokenList() {
+	try {
+		tokenList.value = await getBalancesInEoa();
+		console.log("token list is:", tokenList.value);
+	} catch (error) {
+		console.log(error);
+	}
+}
 
 function openDialogModal() {
 	(async () => {
 		var status = await deposit();
-		if (!status.success){
+		if (!status.success) {
 			console.log(status.error);
 			//error code here
 		}
-	})()
+	})();
 	depositDialog.value = true;
 }
 
 function enableDeposit(tokenId) {
-	activeRow.value = tokenId;
 	depositDisabled.value = false;
 }
 
+function add(amt, name) {
+	let newTokenList = tokenList.value.map((token) => {
+		if (token.name === name) {
+			token = { ...token, usdAmountEnteredByUser: parseFloat(amt) };
+		}
+		return token;
+	});
 
+	tokenList.value = newTokenList;
+}
 
-const tokenList = ref([]);
-(async () => {
-	var tokenListData = await getBalancesInEoa();//getLeaderBoardDataForTable();
-	if (tokenListData.hasOwnProperty("error")){
-		console.log(tokenListData.error);
-		//error code here
-	}
-	tokenList.value = tokenListData;
-})()
-/*
-const tokenList = ref([
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-	{
-		icon: "https://i.postimg.cc/q7Jkt16B/image.png",
-		name: "Pangolin",
-		price: 2.6,
-		available: 8,
-		amount: 12,
-	},
-]);
-*/
+const totalAmtToDeposit = computed(() => {
+	return tokenList.value.reduce((accumulator, currentValue) => {
+		if (!(parseFloat(currentValue.usdAmountEnteredByUser) > 0)) {
+			return accumulator + 0;
+		} else {
+			return accumulator + parseFloat(currentValue.usdAmountEnteredByUser);
+		}
+	}, 0);
+});
+
+function slice(str, total, start) {
+	if (str.length <= total) return str;
+	return str.slice(0, start) + "...";
+}
+
+const totalAvailable = computed(() => {
+	return tokenList.value.reduce((accumulator, currentValue) => {
+		if (!(parseFloat(currentValue.available) > 0)) {
+			return accumulator + 0;
+		} else {
+			return accumulator + parseFloat(currentValue.available);
+		}
+	}, 0);
+});
 </script>
 
-<style lang="postcss">
-td {
-	@apply py-[10px];
-}
-
-tbody tr {
-	@apply hover:bg-[#003D3B];
-}
-
-th {
-	@apply uppercase;
-}
-</style>
+<style lang="postcss"></style>
