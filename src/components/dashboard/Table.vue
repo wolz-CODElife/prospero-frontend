@@ -6,8 +6,8 @@
 			<div class="flex justify-between mx-[20px]">
 				<!-- All / My -->
 				<div class="p-[10px] bg-black">
-					<ul class="flex">
-						<li
+					<div class="flex">
+						<button
 							v-for="tab in tabs"
 							:key="tab"
 							@click="
@@ -16,14 +16,14 @@
 							"
 							class="py-[8px] px-[15px] text-[14px] w-[160px] uppercase cursor-pointer"
 							:class="[
-								portfolioStore.activePortfolioType === tab.text
+								portfolioStore.activePortfolioType === tab
 									? 'bg-[#2D3035] text-white'
 									: 'bg-black text-[#868C9D] shadow-[0px_0px_5px_rgba(0,0,0,0.5);]',
 							]"
 						>
-							{{ tab.text }}
-						</li>
-					</ul>
+							{{ tab }}
+						</button>
+					</div>
 				</div>
 
 				<!-- Join / create  -->
@@ -207,11 +207,7 @@
 					v-if="portfolioStore.firstCreateView"
 					class="button text-[#00FF00] uppercase flex gap-[14px] items-center"
 					pro
-					@click="
-						portfolioStore.showJoin(),
-							(portfolioStore.tableView = true),
-							(portfolioStore.firstCreateView = true)
-					"
+					@click="portfolioStore.showJoin()"
 				>
 					<img src="@/assets/img/direction.svg" alt="" />
 					Go BACK
@@ -352,12 +348,8 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount } from "vue";
+import { ref, computed } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
-
-onBeforeMount(() => {
-	portfolioStore.getAllPortfolios();
-});
 
 const portfolioStore = usePortfolios();
 
@@ -367,14 +359,7 @@ const portfolioName = ref("");
 
 const fundFee = ref("1.0");
 
-const tabs = ref([
-	{
-		text: "All Portfolios",
-	},
-	{
-		text: "My Portfolios",
-	},
-]);
+const tabs = ref(["All Portfolios", "My Portfolios"]);
 
 const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
