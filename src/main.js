@@ -1,13 +1,13 @@
 import { createApp } from "vue";
-import {
-	initializeApi,
-	rebalance,
-	withdraw,
-	getGraphData,
-	getWithdrawTableData,
-	getChartDataSelectedMyPortfolio,
-	getChartDataSelectedLeader
-} from "@/api";
+// import {
+// 	initializeApi,
+// 	rebalance,
+// 	withdraw,
+// 	getGraphData,
+// 	getWithdrawTableData,
+// 	getChartDataSelectedMyPortfolio,
+// 	getChartDataSelectedLeader
+// } from "@/api";
 import App from "./App.vue";
 import router from "./router";
 import "./assets/css/tailwind.css";
