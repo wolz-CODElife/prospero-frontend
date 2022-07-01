@@ -40,7 +40,7 @@
 					<th class="pl-[28px] pt-[20px] pb-[12px]">Token</th>
 					<th>Price</th>
 					<th>Available</th>
-					<th>Amount to t</th>
+					<th>Amount to Deposit</th>
 				</tr>
 			</thead>
 			<tbody>
