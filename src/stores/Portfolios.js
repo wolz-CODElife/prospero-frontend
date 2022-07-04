@@ -14,18 +14,46 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			myPortfolios: [
 				{
-					name: "MyTestPortfolio",
-					fee: 0,
-					d7: 0,
-					d30: 0,
-					d90: 0,
-					y1: 0,
+					name: "AFS1000 🔱",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+				},
+				{
+					name: "Harry Mcguire",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+				},
+				{
+					name: " 🌈 Lulu Nation Fans",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+				},
+				{
+					name: "GX 650 Lords 🏖",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+				},
+				{
+					name: "Moon Gatekeepers",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
 				},
 			],
-
-			// {
-			//   created: true,
-			// },
 
 			selectedPortfolio: {
 				name: "",
@@ -149,8 +177,8 @@ export const usePortfolios = defineStore("Portfolios", {
 	},
 
 	getters: {
-		myPortfolios(state) {
-			return state.joinedPortfolios + state.createdPortfolios;
-		},
+		// myPortfolios(state) {
+		// 	return state.joinedPortfolios + state.createdPortfolios;
+		// },
 	},
 });

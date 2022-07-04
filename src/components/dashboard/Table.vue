@@ -58,6 +58,7 @@
 				<!-- Deposit / withdraw  -->
 				<div class="flex items-center gap-[12px]" v-else>
 					<button
+						@click="$emit('doJoin')"
 						class="btn btn-primary w-[125px]"
 						:class="
 							disabled
