@@ -7,6 +7,7 @@
 				@go-back="goBack"
 				@redirect="redirect"
 			/>
+
 			<CreateDepositModal
 				v-else-if="createView"
 				@go-back="goBack"
@@ -15,6 +16,7 @@
 
 			<div v-else>
 				<DashHeader />
+
 				<DashMain
 					@do-join="doJoin"
 					@do-create="doCreate"
