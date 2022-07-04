@@ -231,9 +231,9 @@
 				</div>
 			</div>
 
+			<!-- Bottom  -->
 			<hr class="border-[#2D3035]" />
 
-			<!-- Bottom  -->
 			<!-- Create view  -->
 			<div v-if="portfolioStore.firstCreateView" class="">
 				<h4
@@ -374,6 +374,7 @@
 					<span v-else>Need {{ remAllocation }}% more allocation</span>
 				</button>
 
+				<!-- Saved display  -->
 				<button
 					v-else
 					disabled
@@ -385,6 +386,7 @@
 		</div>
 	</div>
 
+	<!-- saveAllocationModal -->
 	<Modal v-if="saveAllocationModal" @close="saveAllocationModal = false">
 		<!-- Loading  -->
 		<div
