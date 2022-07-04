@@ -130,13 +130,13 @@
 								/>
 							</td>
 							<td>{{ portfolio.name }}</td>
-							<td class="border-r border-r-[#2D3035] pr-[30px]">
+							<td class="border-r border-r-[#2D3035]">
 								{{ portfolio.fee }}
 							</td>
-							<td class="pl-[20px]">{{ portfolio.d7 }}</td>
+							<td>{{ portfolio.d7 }}</td>
 							<td>{{ portfolio.d30 }}</td>
 							<td>{{ portfolio.d90 }}</td>
-							<td class="mr-[20px] pr-[18px]">{{ portfolio.y1 }}</td>
+							<td>{{ portfolio.y1 }}</td>
 						</tr>
 					</tbody>
 
@@ -176,10 +176,10 @@
 							<td class="border-r border-r-[#2D3035] pr-[30px]">
 								{{ portfolio.fee }}
 							</td>
-							<td class="pl-[20px]">{{ portfolio.d7 }}</td>
-							<td>{{ portfolio.d30 }}</td>
-							<td>{{ portfolio.d90 }}</td>
-							<td class="mr-[20px] pr-[18px]">{{ portfolio.y1 }}</td>
+							<td>{{ portfolio.d7 }}%</td>
+							<td>{{ portfolio.d30 }}%</td>
+							<td>{{ portfolio.d90 }}%</td>
+							<td>{{ portfolio.y1 }}%</td>
 						</tr>
 
 						<!-- empty  -->
@@ -204,21 +204,11 @@
 			<div class="p-[10px]">
 				<!-- Go back-->
 				<button
-					v-if="portfolioStore.firstCreateView"
 					class="button text-[#00FF00] uppercase flex gap-[14px] items-center mb-[16px]"
 					@click="portfolioStore.showJoin()"
 				>
 					<img src="@/assets/img/direction.svg" alt="" />
 					Go Back
-				</button>
-
-				<!-- + Add new token-->
-				<button
-					v-else
-					class="button text-[#00FF00] uppercase flex gap-[14px] items-center mb-[16px]"
-					@click="$emit('doCreate')"
-				>
-					+ Add new token
 				</button>
 
 				<div
@@ -301,8 +291,17 @@
 					</button>
 				</div>
 			</div>
+
 			<!-- Allocation view  -->
 			<div v-else class="px-[12px] w-full">
+				<!-- + Add new token-->
+				<button
+					class="button text-[#00FF00] uppercase flex gap-[14px] items-center mb-[16px]"
+					@click="$emit('doCreate')"
+				>
+					+ Add new token
+				</button>
+
 				<table class="table-auto w-full mt-[32px]">
 					<thead>
 						<tr
@@ -338,7 +337,7 @@
 									name=""
 									id=""
 									v-model.lazy="token.allocation"
-									@change="newList($event.target.value, token.name)"
+									@keyup="newList($event.target.value, token.name)"
 									class="py-[4px] pl-[12px] w-[55px] bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
 									:disabled="disableInput"
 								/>
@@ -358,7 +357,8 @@
 
 				<!-- Save allocation -->
 				<button
-					@click=""
+					v-if="!success"
+					@click="openSaveAllocationModal"
 					class="btn btn-primary uppercase w-full mt-[32px]"
 					:class="
 						disableSaveAllocation
@@ -373,14 +373,62 @@
 					>
 					<span v-else>Need {{ remAllocation }}% more allocation</span>
 				</button>
+
+				<button
+					v-else
+					disabled
+					class="btn btn-primary uppercase w-full mt-[32px]"
+				>
+					100% - Allocation saved!
+				</button>
 			</div>
 		</div>
 	</div>
+
+	<Modal v-if="saveAllocationModal" @close="saveAllocationModal = false">
+		<!-- Loading  -->
+		<div
+			v-if="loading"
+			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+		>
+			<h1 class="text-[20px] text-center uppercase">Loading...</h1>
+		</div>
+
+		<!-- Error  -->
+		<div
+			v-else-if="error"
+			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+		>
+			<h1 class="text-[20px] text-center uppercase">
+				Unable to save allocation
+			</h1>
+		</div>
+
+		<!-- Successful -->
+		<div
+			v-else
+			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+		>
+			<img
+				src="https://i.postimg.cc/Y2vdsnZW/image.png"
+				alt=""
+				class="max-w-[65%]"
+			/>
+			<h1 class="text-[20px] uppercase">You're All set!</h1>
+
+			<p class="text-[16px]">
+				Your porfolio allocation was successfully saved.
+			</p>
+
+			<button class="btn btn-primary uppercase mx-auto">Thanks</button>
+		</div>
+	</Modal>
 </template>
 
 <script setup>
 import { ref, computed } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
+import Modal from "../Modal.vue";
 
 const portfolioStore = usePortfolios();
 
@@ -419,11 +467,21 @@ const tokenList = ref([
 
 const disabled = ref(true);
 
+const loading = ref(false);
+
+const error = ref(false);
+
+const success = ref(false);
+
+const saveAllocationModal = ref(false);
+
 const portfolioName = ref("");
 
 const fundFee = ref("1.0");
 
 const tabs = ref(["All Portfolios", "My Portfolios"]);
+
+const placeholder = ref(25);
 
 const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
@@ -434,19 +492,6 @@ const disableSaveAllocation = computed(
 );
 
 const disableInput = computed(() => totalAllocation.value === 100);
-
-function newList(amt, name) {
-	let newTokenList = tokenList.value.map((token) => {
-		if (token.name === name) {
-			token = { ...token, allocation: parseFloat(amt) };
-		}
-		return token;
-	});
-
-	tokenList.value = newTokenList;
-
-	console.log(tokenList.value);
-}
 
 const totalAllocation = computed(() => {
 	return tokenList.value.reduce((accumulator, currentValue) => {
@@ -462,8 +507,23 @@ const remAllocation = computed(() => {
 	return 100 - totalAllocation.value;
 });
 
-const placeholder = ref(25);
+function openSaveAllocationModal() {
+	saveAllocationModal.value = true;
+	success.value = true;
+}
 
+function newList(amt, name) {
+	let newTokenList = tokenList.value.map((token) => {
+		if (token.name === name) {
+			token = { ...token, allocation: parseFloat(amt) };
+		}
+		return token;
+	});
+
+	tokenList.value = newTokenList;
+
+	console.log(tokenList.value);
+}
 function toggleDisabled() {
 	disabled.value = false;
 }
