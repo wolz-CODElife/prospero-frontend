@@ -80,11 +80,10 @@ function doCreate() {
 function goBack() {
 	if (joinView.value) {
 		portfolioStore.activeMode = "join";
-		portfolioStore.reset();
 	} else {
 		portfolioStore.activeMode = "create";
-		portfolioStore.reset();
 	}
+	portfolioStore.reset();
 	joinView.value = false;
 	createView.value = false;
 }
@@ -96,7 +95,7 @@ function redirect() {
 		// portfolioStore.myPortfolios.push()
 		portfolioStore.reset();
 	} else {
-		// populate my portfolios array with this new deposit
+		// todo: populate my portfolios array with this new deposit
 		// - if it's a new portfolio you're creating i.e first deposit,
 		// - then push object to my portfolios
 		// - else update existing portfolio with new deposit, rebalance and all
@@ -105,6 +104,7 @@ function redirect() {
 		// simply push object to myPortfolios
 		portfolioStore.activeMode = "create";
 		portfolioStore.firstCreateView = false;
+		// todo: replace with correct values
 		portfolioStore.selectedPortfolio = {
 			name: "test display",
 			fee: 0,
@@ -113,6 +113,7 @@ function redirect() {
 			d90: 0,
 			y1: 0,
 		};
+		portfolioStore.createdPortfolios.push(portfolioStore.selectedPortfolio);
 	}
 	joinView.value = false;
 	createView.value = false;

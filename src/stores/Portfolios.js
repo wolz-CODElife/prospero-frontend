@@ -12,6 +12,21 @@ export const usePortfolios = defineStore("Portfolios", {
 		return {
 			allPortfolios: [],
 
+			myPortfolios: [
+				{
+					name: "MyTestPortfolio",
+					fee: 0,
+					d7: 0,
+					d30: 0,
+					d90: 0,
+					y1: 0,
+				},
+			],
+
+			// {
+			//   created: true,
+			// },
+
 			selectedPortfolio: {
 				name: "",
 				fee: 0,
@@ -34,6 +49,12 @@ export const usePortfolios = defineStore("Portfolios", {
 			tableView: true,
 
 			firstCreateView: true,
+
+			depositDialog: false,
+
+			confirmDeposit: false,
+
+			depositDisabled: true,
 		};
 	},
 
@@ -48,6 +69,8 @@ export const usePortfolios = defineStore("Portfolios", {
 		},
 
 		doSelectPortfolio(val) {
+			// todo: when you filter myPortfolios and you find this portfolio - val,
+			// disable join button, (maybe show deposit instead)
 			this.selectedPortfolio = val;
 			this.activeHeader = "right";
 		},
@@ -79,6 +102,8 @@ export const usePortfolios = defineStore("Portfolios", {
 		showJoin() {
 			this.reset();
 			this.activeMode = "join";
+			portfolioStore.tableView = true;
+			portfolioStore.firstCreateView = true;
 		},
 
 		reset() {

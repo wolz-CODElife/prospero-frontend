@@ -202,25 +202,23 @@
 		<div v-else>
 			<!-- Top -->
 			<div class="p-[10px]">
-				<!-- Go back - Create first view -->
+				<!-- Go back-->
 				<button
 					v-if="portfolioStore.firstCreateView"
-					class="button text-[#00FF00] uppercase flex gap-[14px] items-center"
-					pro
+					class="button text-[#00FF00] uppercase flex gap-[14px] items-center mb-[16px]"
 					@click="portfolioStore.showJoin()"
 				>
 					<img src="@/assets/img/direction.svg" alt="" />
-					Go BACK
+					Go Back
 				</button>
 
-				<!-- Go back - Create second view -->
+				<!-- + Add new token-->
 				<button
 					v-else
 					class="button text-[#00FF00] uppercase flex gap-[14px] items-center mb-[16px]"
-					@click="portfolioStore.firstCreateView = true"
+					@click="$emit('doCreate')"
 				>
-					<img src="@/assets/img/direction.svg" alt="" />
-					Go BACK
+					+ Add new token
 				</button>
 
 				<div
@@ -237,7 +235,7 @@
 						<div
 							class="py-[8px] px-[15px] text-[14px] uppercase cursor-pointer bg-[#2D3035] text-white"
 						>
-							{{ portfolioName }}
+							{{ portfolioStore.createdPortfolios[0].name }}
 						</div>
 					</div>
 				</div>
@@ -245,7 +243,8 @@
 
 			<hr class="border-[#2D3035]" />
 
-			<!-- View for Home  -->
+			<!-- Bottom  -->
+			<!-- Create view  -->
 			<div v-if="portfolioStore.firstCreateView" class="">
 				<h4
 					class="text-[16px] text-center uppercase text-white mt-[40px] mb-[28px]"
@@ -287,6 +286,7 @@
 						/>
 					</div>
 
+					<!-- Open Deposit Modal  -->
 					<button
 						@click="$emit('doCreate'), assignName()"
 						class="btn btn-primary"
@@ -301,47 +301,78 @@
 					</button>
 				</div>
 			</div>
-
-			<!-- View for Manage  -->
-			<div v-else>
+			<!-- Allocation view  -->
+			<div v-else class="px-[12px] w-full">
 				<table class="table-auto w-full mt-[32px]">
 					<thead>
 						<tr
-							class="text-[#868C9D] text-left border-b border-b-[#2D3035] py-[10px] px-[30px]"
+							class="token text-[#868C9D] text-left border-b border-b-[#2D3035] py-[10px] px-[30px]"
 						>
-							<th class="pl-[20px]">ALLOCATION</th>
+							<!-- <th></th> -->
+							<th>ALLOCATION</th>
 							<th>TOKEN</th>
 							<th>PRICE</th>
 							<th class="border-r border-r-[#2D3035]">MC</th>
-							<th class="pl-[20px]">7D%</th>
+							<th>7D%</th>
 							<th>30D%</th>
 							<th>90D%</th>
-							<th class="pr-[30px]">1YR%</th>
+							<th>1YR%</th>
 						</tr>
 					</thead>
 
 					<tbody>
 						<tr
-							class="text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white hover:bg-[#003D3B]"
+							class="token text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white"
+							v-for="(token, i) in tokenList"
+							:key="i"
 						>
 							<td class="flex items-center gap-[20px]">
-								<img src="@/assets/img/delete.svg" alt="" /><input
-									type="text"
+								<!-- Delete token  -->
+								<button>
+									<img src="@/assets/img/delete.svg" alt="" />
+								</button>
+
+								<!-- Input allocation  -->
+								<input
+									type="number"
 									name=""
 									id=""
-									v-model="allocation"
+									v-model.lazy="token.allocation"
+									@change="newList($event.target.value, token.name)"
+									class="py-[4px] pl-[12px] w-[55px] bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
+									:disabled="disableInput"
 								/>
 							</td>
-							<td></td>
-							<td></td>
-							<td class="border-r border-r-[#2D3035] pr-[30px]"></td>
-							<td class="pl-[20px]"></td>
-							<td></td>
-							<td></td>
-							<td class="mr-[20px] pr-[18px]"></td>
+							<td>{{ token.name }}</td>
+							<td>${{ parseFloat(token.price) }}</td>
+							<td class="border-r border-r-[#2D3035]">
+								${{ parseFloat(token.mc) }}M
+							</td>
+							<td>{{ token.d7 }}%</td>
+							<td>{{ token.d30 }}%</td>
+							<td>{{ token.d90 }}%</td>
+							<td>{{ token.y1 }}%</td>
 						</tr>
 					</tbody>
 				</table>
+
+				<!-- Save allocation -->
+				<button
+					@click=""
+					class="btn btn-primary uppercase w-full mt-[32px]"
+					:class="
+						disableSaveAllocation
+							? 'opacity-50 cursor-text '
+							: 'opacity-1 cursor-pointer hover:bg-transparent'
+					"
+					:disabled="disableSaveAllocation"
+				>
+					{{ totalAllocation }}% -
+					<span v-if="!disableSaveAllocation"
+						>Click here to save allocation</span
+					>
+					<span v-else>Need {{ remAllocation }}% more allocation</span>
+				</button>
 			</div>
 		</div>
 	</div>
@@ -352,6 +383,39 @@ import { ref, computed } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
 
 const portfolioStore = usePortfolios();
+
+const tokenList = ref([
+	{
+		name: "Wrapped",
+		price: 12,
+		mc: 340,
+		allocation: 33,
+		d7: 10,
+		d30: 20,
+		d90: 30,
+		y1: 120,
+	},
+	{
+		name: " Test",
+		price: 19,
+		mc: 340,
+		allocation: 33,
+		d7: 10,
+		d30: 20,
+		d90: 30,
+		y1: 120,
+	},
+	{
+		name: "KBTC ",
+		price: 120,
+		mc: 340,
+		allocation: 33,
+		d7: 10,
+		d30: 20,
+		d90: 30,
+		y1: 120,
+	},
+]);
 
 const disabled = ref(true);
 
@@ -365,11 +429,40 @@ const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
 
-const placeholder = ref(25);
+const disableSaveAllocation = computed(
+	() => totalAllocation.value < 100 || totalAllocation.value > 100
+);
 
-const allocation = computed(() => {
-	return placeholder.value + "%";
+const disableInput = computed(() => totalAllocation.value === 100);
+
+function newList(amt, name) {
+	let newTokenList = tokenList.value.map((token) => {
+		if (token.name === name) {
+			token = { ...token, allocation: parseFloat(amt) };
+		}
+		return token;
+	});
+
+	tokenList.value = newTokenList;
+
+	console.log(tokenList.value);
+}
+
+const totalAllocation = computed(() => {
+	return tokenList.value.reduce((accumulator, currentValue) => {
+		if (!(parseFloat(currentValue.allocation) > 0)) {
+			return accumulator + 0;
+		} else {
+			return accumulator + parseFloat(currentValue.allocation);
+		}
+	}, 0);
 });
+
+const remAllocation = computed(() => {
+	return 100 - totalAllocation.value;
+});
+
+const placeholder = ref(25);
 
 function toggleDisabled() {
 	disabled.value = false;
@@ -381,11 +474,13 @@ function assignName() {
 </script>
 
 <style lang="postcss" scoped>
-td {
+td,
+th {
 	@apply py-[10px];
 }
 
-tbody tr {
-	@apply hover:bg-[#003D3B];
+td:not(:first-child),
+th:not(:first-child) {
+	@apply px-[14px];
 }
 </style>
