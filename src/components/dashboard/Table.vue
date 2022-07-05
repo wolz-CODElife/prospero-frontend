@@ -58,6 +58,7 @@
 				<!-- Deposit / withdraw  -->
 				<div class="flex items-center gap-[12px]" v-else>
 					<button
+						@click="$emit('doJoin')"
 						class="btn btn-primary w-[125px]"
 						:class="
 							disabled
@@ -131,12 +132,12 @@
 							</td>
 							<td>{{ portfolio.name }}</td>
 							<td class="border-r border-r-[#2D3035]">
-								{{ portfolio.fee }}
+								{{ portfolio.fee }}%
 							</td>
-							<td>{{ portfolio.d7 }}</td>
-							<td>{{ portfolio.d30 }}</td>
-							<td>{{ portfolio.d90 }}</td>
-							<td>{{ portfolio.y1 }}</td>
+							<td>{{ portfolio.d7 }}%</td>
+							<td>{{ portfolio.d30 }}%</td>
+							<td>{{ portfolio.d90 }}%</td>
+							<td>{{ portfolio.y1 }}%</td>
 						</tr>
 					</tbody>
 
@@ -174,7 +175,7 @@
 							</td>
 							<td>{{ portfolio.name }}</td>
 							<td class="border-r border-r-[#2D3035] pr-[30px]">
-								{{ portfolio.fee }}
+								{{ portfolio.fee }}%
 							</td>
 							<td>{{ portfolio.d7 }}%</td>
 							<td>{{ portfolio.d30 }}%</td>
@@ -200,39 +201,44 @@
 
 		<!-- Create / Withdraw View  -->
 		<div v-else>
-			<!-- Top -->
-			<div class="p-[10px]">
-				<!-- Go back-->
+			<!-- Top  -->
+			<!-- Go back-->
+			<div class="px-[10px]">
 				<button
 					class="button text-[#00FF00] uppercase flex gap-[14px] items-center mb-[16px]"
-					@click="portfolioStore.showJoin()"
+					@click="goBack()"
 				>
 					<img src="@/assets/img/direction.svg" alt="" />
 					Go Back
 				</button>
+			</div>
 
-				<div
-					class="p-[10px] bg-black"
-					v-if="!portfolioStore.firstCreateView"
-				>
-					<div class="flex">
-						<div
-							class="py-[8px] px-[15px] text-[14px] uppercase cursor-text bg-black text-[#868C9D]"
-						>
-							Manage portfolio
-						</div>
+			<div v-if="!portfolioStore.firstCreateView">
+				<hr class="border-[#2D3035]" />
 
-						<div
-							class="py-[8px] px-[15px] text-[14px] uppercase cursor-pointer bg-[#2D3035] text-white"
-						>
-							{{ portfolioStore.createdPortfolios[0].name }}
+				<!-- Manage Portfolio  -->
+				<div class="p-[10px]">
+					<div class="p-[10px] bg-black w-max">
+						<div class="flex">
+							<div
+								class="py-[8px] px-[15px] text-[14px] uppercase cursor-text bg-black text-[#868C9D]"
+							>
+								Manage portfolio
+							</div>
+
+							<div
+								class="py-[8px] px-[15px] text-[14px] uppercase cursor-pointer bg-[#2D3035] text-white"
+							>
+								{{ portfolioStore.createdPortfolios[0].name }}
+							</div>
 						</div>
 					</div>
 				</div>
-			</div>
 
-			<!-- Bottom  -->
-			<hr class="border-[#2D3035]" />
+				<!-- Bottom  -->
+				<hr class="border-[#2D3035]" />
+			</div>
+			<!-- End of top  -->
 
 			<!-- Create view  -->
 			<div v-if="portfolioStore.firstCreateView" class="">
@@ -293,22 +299,51 @@
 			</div>
 
 			<!-- Allocation view  -->
-			<div v-else class="px-[12px] w-full">
-				<!-- + Add new token-->
-				<button
-					class="button text-[#00FF00] uppercase flex gap-[14px] items-center mb-[16px]"
-					@click="$emit('doCreate')"
-				>
-					+ Add new token
-				</button>
+			<div v-else>
+				<div class="flex items-center gap-[28px] p-[10px]">
+					<!-- + Add new token-->
+					<button
+						class="button text-[#00FF00] uppercase mr-auto"
+						@click="$emit('doCreate')"
+					>
+						+ Add new token
+					</button>
 
-				<table class="table-auto w-full mt-[32px]">
+					<!-- Change Fund fee -->
+					<div class="flex items-center gap-[10px]">
+						<label for="" class="uppercase text-white text-[12px]"
+							>Fund fee %</label
+						>
+						<input
+							type="number"
+							name=""
+							id=""
+							v-model.lazy="fundFee"
+							class="py-[4px] pl-[12px] w-[55px] bg-black text-white text-[16px] border border-[#003D3B] focus:outline-none"
+						/>
+					</div>
+
+					<!-- Accepting new investors ? -->
+					<div class="flex items-center gap-[10px]">
+						<label for="" class="uppercase text-white text-[12px]"
+							>Accepting new investors</label
+						>
+						<div class="switch">
+							<input type="checkbox" aria-label="djdn" checked />
+							<span class="slider round"></span>
+						</div>
+					</div>
+				</div>
+
+				<hr class="border-[#2D3035]" />
+
+				<table class="table-auto w-full">
 					<thead>
 						<tr
 							class="token text-[#868C9D] text-left border-b border-b-[#2D3035] py-[10px] px-[30px]"
 						>
 							<!-- <th></th> -->
-							<th>ALLOCATION</th>
+							<th class="pl-[10px]">ALLOCATION</th>
 							<th>TOKEN</th>
 							<th>PRICE</th>
 							<th class="border-r border-r-[#2D3035]">MC</th>
@@ -325,7 +360,7 @@
 							v-for="(token, i) in tokenList"
 							:key="i"
 						>
-							<td class="flex items-center gap-[20px]">
+							<td class="flex items-center gap-[20px] pl-[10px]">
 								<!-- Delete token  -->
 								<button>
 									<img src="@/assets/img/delete.svg" alt="" />
@@ -338,7 +373,7 @@
 									id=""
 									v-model.lazy="token.allocation"
 									@keyup="newList($event.target.value, token.name)"
-									class="py-[4px] pl-[12px] w-[55px] bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
+									class="py-[4px] pl-[12px] w-[55px] bg-black text-white text-[16px] border border-[#003D3B] focus:outline-none"
 									:disabled="disableInput"
 								/>
 							</td>
@@ -387,7 +422,7 @@
 	</div>
 
 	<!-- saveAllocationModal -->
-	<Modal v-if="saveAllocationModal" @close="saveAllocationModal = false">
+	<Modal v-if="saveAllocationModal" @close="closeAllocationModal()">
 		<!-- Loading  -->
 		<div
 			v-if="loading"
@@ -422,7 +457,12 @@
 				Your porfolio allocation was successfully saved.
 			</p>
 
-			<button class="btn btn-primary uppercase mx-auto">Thanks</button>
+			<button
+				@click="closeAllocationModal"
+				class="btn btn-primary uppercase mx-auto"
+			>
+				Thanks
+			</button>
 		</div>
 	</Modal>
 </template>
@@ -526,12 +566,22 @@ function newList(amt, name) {
 
 	console.log(tokenList.value);
 }
+
 function toggleDisabled() {
 	disabled.value = false;
 }
 
 function assignName() {
 	portfolioStore.selectedPortfolio.name = portfolioName.value;
+}
+
+function closeAllocationModal() {
+	saveAllocationModal.value = false;
+}
+
+function goBack() {
+	portfolioStore.tableView = true;
+	// portfolioStore.activePortfolioType = "My Portfolios";
 }
 </script>
 
@@ -544,5 +594,65 @@ th {
 td:not(:first-child),
 th:not(:first-child) {
 	@apply px-[14px];
+}
+
+.switch {
+	position: relative;
+	display: inline-block;
+	width: 60px;
+	height: 34px;
+}
+
+.switch input {
+	opacity: 0;
+	width: 0;
+	height: 0;
+}
+
+.slider {
+	position: absolute;
+	cursor: pointer;
+	top: 0;
+	left: 0;
+	right: 0;
+	bottom: 0;
+	background-color: #ccc;
+	-webkit-transition: 0.4s;
+	transition: 0.4s;
+}
+
+.slider:before {
+	position: absolute;
+	content: "";
+	height: 26px;
+	width: 26px;
+	left: 4px;
+	bottom: 4px;
+	background-color: white;
+	-webkit-transition: 0.4s;
+	transition: 0.4s;
+}
+
+input:checked + .slider {
+	background-color: #04ce04;
+}
+
+input:focus + .slider {
+	box-shadow: 0 0 1px #04ce04;
+}
+
+input:checked + .slider:before {
+	-webkit-transform: translateX(26px);
+	-ms-transform: translateX(26px);
+	transform: translateX(26px);
+}
+
+/* Rounded sliders */
+.slider.round {
+	border-radius: 34px;
+}
+
+.slider.round:before {
+	border-radius: 50%;
 }
 </style>
