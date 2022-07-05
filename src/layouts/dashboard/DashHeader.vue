@@ -129,6 +129,7 @@
 							</div>
 						</div>
 					</div>
+
 					<!-- Empty Selected Portfolio  -->
 					<div
 						class="h-full flex flex-col gap-y-[24px] justify-center items-center"
@@ -142,9 +143,10 @@
 						>
 							Select A portfolio to display here
 						</h2>
+
 						<h2 class="text-center text-[14px] uppercase" v-else>
 							Select
-							<span v-if="portfolioStore.joinedPortfolios.length === 0"
+							<span v-if="portfolioStore.allPortfolios.length === 0"
 								>first</span
 							>
 							Portfolio to Join
@@ -154,20 +156,29 @@
 					</div>
 				</div>
 
-				<!-- Create Mode  -->
-				<div v-if="portfolioStore.activeMode === 'create'">
-					<!-- Empty Created or Joined Portfolio  -->
+				<!-- Create/withdraw Mode  -->
+				<div
+					v-if="
+						portfolioStore.activeMode === 'create' ||
+						portfolioStore.activeMode === 'withdraw'
+					"
+				>
+					<!-- Create Portfolio  -->
 					<div
 						class="h-full flex flex-col gap-y-[24px] justify-center items-center"
-						v-if="portfolioStore.createdPortfolios.length === 0"
+						v-if="portfolioStore.activeMode === 'create'"
 					>
 						<h2 class="text-center text-[14px] uppercase">
-							Create First Portfolio to Manage
+							Create
+							<span v-if="portfolioStore.createdPortfolios.length === 0"
+								>First
+							</span>
+							Portfolio to Manage
 						</h2>
 						<img src="@/assets/img/arrow.svg" alt="" />
 					</div>
 
-					<!-- My portfolio not empty  -->
+					<!-- Selected portfolio not empty  -->
 					<div
 						v-if="portfolioStore.selectedPortfolio.name"
 						class="flex items-center justify-between font-medium uppercase"
