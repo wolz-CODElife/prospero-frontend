@@ -93,11 +93,11 @@
 				@click="$emit('depositAction')"
 				class="basis-1/2 btn btn-primary"
 				:class="
-					portfolioStore.depositDisabled
+					disableDeposit
 						? 'opacity-50 cursor-text'
 						: 'opacity-1 cursor-pointer'
 				"
-				:disabled="portfolioStore.depositDisabled"
+				:disabled="disableDeposit"
 			>
 				Deposit
 			</button>
@@ -276,6 +276,8 @@ function slice(str, total, start) {
 	if (str.length <= total) return str;
 	return str.slice(0, start) + "...";
 }
+
+const disableDeposit = computed(() => totalAvailable.value <= 0);
 
 const totalAvailable = computed(() => {
 	return tokenList.value.reduce((accumulator, currentValue) => {
