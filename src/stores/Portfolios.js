@@ -58,8 +58,6 @@ export const usePortfolios = defineStore("Portfolios", {
 				},
 			],
 
-			// myPortfolios: [],
-
 			myPortfolios: [
 				{
 					name: "AFS1000 🔱",
@@ -117,9 +115,49 @@ export const usePortfolios = defineStore("Portfolios", {
 				y1: 0,
 			},
 
-			joinedPortfolios: [],
+			overview: [
+				{
+					asset: {
+						name: "USD",
+						icon: "https://i.postimg.cc/Mpmky9Ms/image.png",
+					},
+					holdings: "1000.0",
+					roi: { value: "0.0", percent: 0 },
+					deposits: "40.0",
+					withdrawals: "0.0",
+				},
+				{
+					asset: {
+						name: "BTC",
+						icon: "https://i.postimg.cc/MGnDWTSy/image.png",
+					},
+					holdings: "0.0",
+					roi: { value: "50.0", percent: 1 },
+					deposits: "0.0",
+					withdrawals: "20.0",
+				},
+				{
+					asset: {
+						name: "AVAX",
+						icon: "https://i.postimg.cc/br1T18qh/image.png",
+					},
+					holdings: "0.10",
+					roi: { value: "0.0", percent: 0 },
+					deposits: "0.0",
+					withdrawals: "100.0",
+				},
+			],
 
-			// createdPortfolios: [],
+			activeOverview: {
+				asset: {
+					name: "USD",
+					icon: "https://i.postimg.cc/Mpmky9Ms/image.png",
+				},
+				holdings: "1000.0",
+				roi: { value: "0.0", percent: 0 },
+				deposits: "40.0",
+				withdrawals: "0.0",
+			},
 
 			activeHeader: "left",
 
@@ -195,6 +233,12 @@ export const usePortfolios = defineStore("Portfolios", {
 				d90: 0,
 				y1: 0,
 			};
+		},
+
+		updateActiveOverview(asset) {
+			this.activeOverview = this.overview.find(
+				(item) => item.asset.name === asset
+			);
 		},
 
 		// function showCreate() {
