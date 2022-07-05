@@ -16,7 +16,7 @@
 					v-else
 				>
 					Select
-					<span v-if="portfolioStore.joinedPortfolios.length === 0"
+					<span v-if="portfolioStore.allPortfolios.length === 0"
 						>first</span
 					>
 					portfolio to join

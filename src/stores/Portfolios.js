@@ -10,7 +10,55 @@ import {
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
 		return {
-			allPortfolios: [],
+			allPortfolios: [
+				{
+					name: "AFS1000 🔱",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: true,
+				},
+				{
+					name: "Harry Mcguire",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+				{
+					name: " 🌈 Lulu Nation Fans",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+				{
+					name: "GX 650 Lords 🏖",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+				{
+					name: "Moon Gatekeepers",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+			],
+
+			// myPortfolios: [],
 
 			myPortfolios: [
 				{
@@ -20,6 +68,7 @@ export const usePortfolios = defineStore("Portfolios", {
 					d30: 12,
 					d90: 34,
 					y1: 60,
+					created: true,
 				},
 				{
 					name: "Harry Mcguire",
@@ -28,6 +77,7 @@ export const usePortfolios = defineStore("Portfolios", {
 					d30: 12,
 					d90: 34,
 					y1: 60,
+					created: false,
 				},
 				{
 					name: " 🌈 Lulu Nation Fans",
@@ -36,6 +86,7 @@ export const usePortfolios = defineStore("Portfolios", {
 					d30: 12,
 					d90: 34,
 					y1: 60,
+					created: false,
 				},
 				{
 					name: "GX 650 Lords 🏖",
@@ -44,6 +95,7 @@ export const usePortfolios = defineStore("Portfolios", {
 					d30: 12,
 					d90: 34,
 					y1: 60,
+					created: false,
 				},
 				{
 					name: "Moon Gatekeepers",
@@ -52,6 +104,7 @@ export const usePortfolios = defineStore("Portfolios", {
 					d30: 12,
 					d90: 34,
 					y1: 60,
+					created: false,
 				},
 			],
 
@@ -66,7 +119,7 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			joinedPortfolios: [],
 
-			createdPortfolios: [],
+			// createdPortfolios: [],
 
 			activeHeader: "left",
 
@@ -88,16 +141,16 @@ export const usePortfolios = defineStore("Portfolios", {
 
 	actions: {
 		// Fill empty portfolio list with an API call
-		async getAllPortfolios() {
-			try {
-				this.allPortfolios = await getLeaderBoardDataForTable();
-			} catch (error) {
-				console.log(error);
-			}
-		},
+		// async getAllPortfolios() {
+		// 	try {
+		// 		this.allPortfolios = await getLeaderBoardDataForTable();
+		// 	} catch (error) {
+		// 		console.log(error);
+		// 	}
+		// },
 
 		doSelectPortfolio(val) {
-			// todo: when you filter myPortfolios and you find this portfolio - val,
+			// todo: on all portfolios, filter myPortfolios, and if you find this portfolio - val,
 			// disable join button, (maybe show deposit instead)
 			this.selectedPortfolio = val;
 			this.activeHeader = "right";
@@ -115,11 +168,10 @@ export const usePortfolios = defineStore("Portfolios", {
 		changeActivePortfolioType() {
 			if (this.activePortfolioType === "All Portfolios") {
 				this.activePortfolioType = "My Portfolios";
-				this.reset();
 			} else {
 				this.activePortfolioType = "All Portfolios";
-				this.reset();
 			}
+			this.reset();
 		},
 
 		showCreate() {
@@ -177,8 +229,10 @@ export const usePortfolios = defineStore("Portfolios", {
 	},
 
 	getters: {
-		// myPortfolios(state) {
-		// 	return state.joinedPortfolios + state.createdPortfolios;
-		// },
+		createdPortfolios(state) {
+			return state.myPortfolios.filter(
+				(portfolio) => portfolio.created === true
+			);
+		},
 	},
 });

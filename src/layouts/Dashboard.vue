@@ -46,16 +46,16 @@ onBeforeMount(async () => {
 		window.location.replace("/");
 	}
 	// todo: optimize nested try blocks
-	try {
-		await initializeApi();
-		try {
-			portfolioStore.getAllPortfolios();
-		} catch (error) {
-			console.log("get all portfolios error", error);
-		}
-	} catch (error) {
-		console.log("init error", error);
-	}
+	// try {
+	// 	await initializeApi();
+	// 	try {
+	// 		portfolioStore.getAllPortfolios();
+	// 	} catch (error) {
+	// 		console.log("get all portfolios error", error);
+	// 	}
+	// } catch (error) {
+	// 	console.log("init error", error);
+	// }
 });
 
 const joinView = ref(false);
