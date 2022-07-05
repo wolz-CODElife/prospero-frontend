@@ -1,51 +1,40 @@
 <template>
-	<!-- Join -->
 	<div
 		class="w-full flex justify-center items-center gap-x-[24px]"
-		v-if="portfolioStore.activeMode === 'join'"
+		v-if="
+			portfolioStore.activeMode === 'join' ||
+			portfolioStore.activeMode === 'withdraw'
+		"
 	>
-		<!-- 'All Portfolios' instruction permutations-->
-		<div v-if="portfolioStore.activePortfolioType === 'All Portfolios'">
-			<div>
-				<h2
-					class="text-[#868C9D] text-[14px] uppercase"
-					v-if="portfolioStore.selectedPortfolio.name"
-				>
-					Follow {{ portfolioStore.selectedPortfolio.name }} Community
-				</h2>
+		<!-- Selected portfolio not empty  -->
 
-				<h2 class="text-[#868C9D] text-[14px] uppercase" v-else>
-					Select
-					<span v-if="portfolioStore.joinedPortfolios.length === 0"
-						>first</span
-					>
-					portfolio to join
-				</h2>
-			</div>
+		<h2
+			class="text-[#868C9D] text-[14px] uppercase"
+			v-if="portfolioStore.selectedPortfolio.name"
+		>
+			<span v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
+				>Follow</span
+			>
+			{{ portfolioStore.selectedPortfolio.name }} Community
+		</h2>
+
+		<!-- Empty Selected Portfolio  -->
+		<div class="h-full flex gap-[14px] justify-center items-center" v-else>
+			<h2
+				class="text-[#868C9D] text-[14px] text-center uppercase"
+				v-if="portfolioStore.activePortfolioType === 'My Portfolios'"
+			>
+				Select A portfolio to display here
+			</h2>
+
+			<h2 v-else class="text-[#868C9D] text-[14px] uppercase">
+				Select
+				<span v-if="portfolioStore.allPortfolios.length === 0">first</span>
+				Portfolio to Join
+			</h2>
+
+			<img src="@/assets/img/arrow.svg" alt="" class="-rotate-90" />
 		</div>
-
-		<!-- 'My Portfolios' instruction permutations -->
-		<div v-else>
-			<div>
-				<h2
-					class="text-[#868C9D] text-[14px] uppercase"
-					v-if="portfolioStore.selectedPortfolio.name"
-				>
-					{{ portfolioStore.selectedPortfolio.name }} Community
-				</h2>
-
-				<h2 class="text-[#868C9D] text-[14px] uppercase" v-else>
-					Select a portfolio to display here
-				</h2>
-			</div>
-		</div>
-
-		<img
-			v-if="!portfolioStore.selectedPortfolio.name"
-			src="@/assets/img/arrow.svg"
-			alt=""
-			class="-rotate-90"
-		/>
 	</div>
 
 	<!-- Create -->
