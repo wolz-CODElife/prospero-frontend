@@ -17,23 +17,26 @@
 					<div class="w-[130px] p-[10px] bg-[#2D3035]">
 						<ul>
 							<li
-								v-for="tab in tabs"
+								v-for="tab in portfolioStore.overview"
 								:key="tab"
-								@click="changeTab(tab.text)"
+								@click="
+									portfolioStore.updateActiveOverview(tab.asset.name)
+								"
 								class="p-[6px] flex gap-[10px] items-center"
 								:class="[
-									activeTab === tab.text
+									portfolioStore.activeOverview.asset.name ===
+									tab.asset.name
 										? 'bg-black text-white shadow-[0px_0px_5px_rgba(0,0,0,0.5);]'
 										: 'bg-[#2D3035] text-[#868C9D]',
 								]"
 							>
 								<span>
 									<img
-										:src="tab.icon"
+										:src="tab.asset.icon"
 										alt=""
 										class="w-[20px] h-[20px]"
 								/></span>
-								{{ tab.text }}
+								{{ tab.asset.name }}
 							</li>
 						</ul>
 					</div>
@@ -43,11 +46,17 @@
 						<h2 class="text-[#868C9D] text-[14px] mt-[16px]">
 							My holdings
 						</h2>
-						<h3 class="text-white text-[24px]">$0</h3>
+						<h3 class="text-white text-[24px]">
+							${{ portfolioStore.activeOverview?.holdings }}
+						</h3>
 						<hr class="my-[12px] border-[#2D3035]" />
 						<h2 class="text-[#868C9D] text-[14px]">ROI</h2>
 						<h3 class="text-white text-[24px]">
-							+$0 <span class="text-[14px]">0% <span>^</span></span>
+							+${{ portfolioStore.activeOverview?.roi.value }}
+							<span class="text-[14px]"
+								>{{ portfolioStore.activeOverview?.roi.percent }}%
+								<span>^</span></span
+							>
 						</h3>
 					</div>
 
@@ -68,13 +77,17 @@
 					<div class="flex-1">
 						<div class="border-l border-[#2D3035] pl-[10px]">
 							<h2 class="text-[#868C9D] text-[14px]">Deposits</h2>
-							<h3 class="text-white text-[16px]">$0</h3>
+							<h3 class="text-white text-[16px]">
+								${{ portfolioStore.activeOverview?.deposits }}
+							</h3>
 						</div>
 
 						<hr class="my-[12px] border-[#2D3035]" />
 						<div class="border-l border-[#2D3035] pl-[10px]">
 							<h2 class="text-[#868C9D] text-[14px]">Withdrawals</h2>
-							<h3 class="text-white text-[16px]">$0</h3>
+							<h3 class="text-white text-[16px]">
+								${{ portfolioStore.activeOverview?.withdrawals }}
+							</h3>
 						</div>
 					</div>
 				</div>
@@ -224,7 +237,9 @@
 
 <script setup>
 import { ref } from "vue";
+import { storeToRefs } from "pinia";
 import { usePortfolios } from "@/stores/Portfolios";
+import { computed } from "@vue/reactivity";
 
 const portfolioStore = usePortfolios();
 
@@ -234,27 +249,6 @@ const props = defineProps({
 		default: "Select First Portfolio to Join",
 	},
 });
-
-const activeTab = ref("USD");
-
-const tabs = ref([
-	{
-		icon: "https://i.postimg.cc/Mpmky9Ms/image.png",
-		text: "USD",
-	},
-	{
-		icon: "https://i.postimg.cc/MGnDWTSy/image.png",
-		text: "BTC",
-	},
-	{
-		icon: "https://i.postimg.cc/br1T18qh/image.png",
-		text: "AVAX",
-	},
-]);
-
-function changeTab(tab) {
-	activeTab.value = tab;
-}
 
 function slice(str) {
 	if (str.length <= 13) return str;
