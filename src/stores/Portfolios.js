@@ -235,6 +235,14 @@ export const usePortfolios = defineStore("Portfolios", {
 			};
 		},
 
+		goBack() {
+			this.tableView = true;
+			this.activePortfolioType = "All Portfolios";
+			this.activeMode = "join";
+			this.activeHeader = "left";
+			this.reset();
+		},
+
 		updateActiveOverview(asset) {
 			this.activeOverview = this.overview.find(
 				(item) => item.asset.name === asset

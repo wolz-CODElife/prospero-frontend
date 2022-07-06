@@ -206,7 +206,7 @@
 			<div class="px-[10px]">
 				<button
 					class="button text-[#00FF00] uppercase flex gap-[14px] items-center mb-[16px]"
-					@click="goBack()"
+					@click="portfolioStore.goBack()"
 				>
 					<img src="@/assets/img/direction.svg" alt="" />
 					Go Back
@@ -437,7 +437,7 @@
 				<withdrawal-card
 					:title="wcTwo.title"
 					:desc="wcTwo.desc"
-					icon="https://i.postimg.cc/05pNHQs8/image.png"
+					icon="https://i.postimg.cc/Gm3tbWcH/image.png"
 					@withdraw-action="openDirectModal"
 				/>
 			</div>
@@ -816,7 +816,7 @@ function closeDirectModal() {
 }
 
 function reset() {
-	goBack();
+	portfolioStore.goBack();
 	firstView.value = true;
 	amount.value = "";
 	singleToken.value = "";
@@ -850,15 +850,6 @@ function assignName() {
 
 function closeAllocationModal() {
 	saveAllocationModal.value = false;
-}
-
-function goBack() {
-	portfolioStore.tableView = true;
-	portfolioStore.activePortfolioType = "All Portfolios";
-	portfolioStore.activeMode = "join";
-	portfolioStore.reset();
-
-	// portfolioStore.activePortfolioType = "My Portfolios";
 }
 
 function showWithdraw() {

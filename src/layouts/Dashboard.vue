@@ -1,7 +1,8 @@
 <template>
 	<div class="grid grid-cols-[300px_1fr] gap-0">
 		<Sidebar class="w-[300px]" />
-		<main class="z-10 bg-[#2D3035] p-[28px] relative">
+		<main class="p-[28px]">
+			<div></div>
 			<JoinDepositModal
 				v-if="joinView"
 				@go-back="goBack"
@@ -85,7 +86,7 @@ function goBack() {
 	} else {
 		portfolioStore.activeMode = "create";
 	}
-	portfolioStore.reset();
+	portfolioStore.goBack();
 	joinView.value = false;
 	createView.value = false;
 }
@@ -95,7 +96,7 @@ function redirect() {
 		portfolioStore.activeMode = "join";
 		portfolioStore.activePortfolioType = "My Portfolios";
 		// portfolioStore.myPortfolios.push()
-		portfolioStore.reset();
+		portfolioStore.goBack();
 	} else {
 		// todo: populate my portfolios array with this new deposit
 		// - if it's a new portfolio you're creating i.e first deposit,
@@ -115,9 +116,20 @@ function redirect() {
 			d90: 0,
 			y1: 0,
 		};
-		portfolioStore.createdPortfolios.push(portfolioStore.selectedPortfolio);
+		portfolioStore.myPortfolios.push({
+			...portfolioStore.selectedPortfolio,
+			created: true,
+		});
 	}
 	joinView.value = false;
 	createView.value = false;
 }
 </script>
+
+<style lang="postcss" scoped>
+.bg-dashboard {
+	background: url("https://i.postimg.cc/43rfVKWy/image.png") repeat;
+	z-index: 1000;
+	position: absolute;
+}
+</style>
