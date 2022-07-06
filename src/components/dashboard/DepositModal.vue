@@ -64,8 +64,8 @@
 							class="py-[4px] pl-[8px] w-max bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
 							type="number"
 							aria-label="usd amount"
-							v-model="token.usdAmountEnteredByUser"
-							@keyup="add($event.target.value, token.name)"
+							v-model.lazy="token.usdAmountEnteredByUser"
+							@change="add($event.target.value, token.name)"
 						/>
 					</td>
 				</tr>
@@ -88,27 +88,28 @@
 				Cancel
 			</button>
 
-			<!-- @click="openDialogModal" -->
-
 			<!-- Deposit  -->
 			<button
 				@click="$emit('depositAction')"
 				class="basis-1/2 btn btn-primary"
 				:class="
-					depositDisabled
+					disableDeposit
 						? 'opacity-50 cursor-text'
 						: 'opacity-1 cursor-pointer'
 				"
-				:disabled="depositDisabled"
+				:disabled="disableDeposit"
 			>
 				Deposit
 			</button>
 		</div>
 
-		<Modal v-if="depositDialog" @close="depositDialog = false">
-			<!-- Approve Required  -->
+		<Modal
+			v-if="portfolioStore.depositDialog"
+			@close="portfolioStore.depositDialog = false"
+		>
+			<!--  Approve Required  -->
 			<div
-				v-if="!confirmDeposit"
+				v-if="firstView"
 				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
 			>
 				<img
@@ -123,38 +124,58 @@
 				</p>
 				<button
 					class="btn btn-primary w-full"
-					@click="confirmDeposit = true"
+					@click="depositToPortfolio()"
 				>
 					Okay
 				</button>
 			</div>
 
-			<!-- Deposit Successful -->
-			<div
-				v-else
-				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-			>
-				<img
-					src="https://i.postimg.cc/Y2vdsnZW/image.png"
-					alt=""
-					class="max-w-[65%]"
-				/>
-				<h1 class="text-[20px] uppercase">Deposit Successful</h1>
-				<p class="text-[16px]">
-					$20.00 has been sent to AFS1000 🔱. Wait a few moments for the
-					tokens to transfer and reflect in your portfolio tab. Gas used
-					$2.24
-				</p>
-				<button
-					class="btn btn-primary uppercase w-full"
-					@click="
-						$emit('goBack'),
-							portfolioStore.reset(),
-							(portfolioStore.activeMode = 'join')
-					"
+			<div v-else>
+				<!-- Loading  -->
+				<div
+					v-if="loading"
+					class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
 				>
-					Take me to my portfolios
-				</button>
+					<h1 class="text-[20px] text-center uppercase">Loading...</h1>
+				</div>
+
+				<!-- Error  -->
+				<div
+					v-else-if="error"
+					class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+				>
+					<h1 class="text-[20px] text-center uppercase">
+						Deposit Unsucessful
+					</h1>
+				</div>
+
+				<!-- Successful -->
+				<div
+					v-else
+					class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+				>
+					<img
+						src="https://i.postimg.cc/Y2vdsnZW/image.png"
+						alt=""
+						class="max-w-[65%]"
+					/>
+					<h1 class="text-[20px] uppercase">Deposit Successful</h1>
+
+					<!-- todo: replace these with real values  -->
+					<p class="text-[16px]">
+						$20.00 has been sent to AFS1000 🔱. Wait a few moments for the
+						tokens to transfer and reflect in your portfolio tab. Gas used
+						$2.24
+					</p>
+
+					<!-- todo: make text dynamic  -->
+					<button
+						class="btn btn-primary uppercase w-full"
+						@click="$emit('redirect')"
+					>
+						Take me to my portfolios
+					</button>
+				</div>
 			</div>
 		</Modal>
 	</div>
@@ -168,34 +189,66 @@ import { usePortfolios } from "@/stores/Portfolios";
 
 const portfolioStore = usePortfolios();
 
-const tokenList = ref([]);
+const loading = ref(false);
 
-const depositDialog = ref(false);
+const error = ref(false);
 
-const confirmDeposit = ref(false);
+const firstView = ref(true);
 
-const depositDisabled = ref(true);
+/*
+const tokenList = ref([
+	{
+		name: "Wrapped Test",
+		price: 12,
+		available: 34,
+		icon: "https://raw.githubusercontent.com/ava-labs/avalanche-bridge-resources/main/tokens/WBTC/logo.png",
+		usdAmountEnteredByUser: 0,
+	},
+	{
+		name: " Test",
+		price: 19,
+		available: 34,
+		icon: "https://raw.githubusercontent.com/ava-labs/avalanche-bridge-resources/main/tokens/WBTC/logo.png",
+		usdAmountEnteredByUser: 0,
+	},
+	{
+		name: "Wrapped ",
+		price: 120,
+		available: 34,
+		icon: "https://raw.githubusercontent.com/ava-labs/avalanche-bridge-resources/main/tokens/WBTC/logo.png",
+		usdAmountEnteredByUser: 0,
+	},
+]);
+*/
 
-const amt = ref(0);
+ onMounted(() => {
+ 	getTokenList();
+ });
 
-const amtToDeposit = ref([]);
+ async function getTokenList() {
+ 	try {
+ 		tokenList.value = await getBalancesInEoa();
+ 		console.log("token list is:", tokenList.value);
+ 	} catch (error) {
+ 		console.log(error);
+ 	}
+ }
 
-onMounted(() => {
-	getTokenList();
-});
-
-async function getTokenList() {
+async function depositToPortfolio() {
+	firstView.value = false;
 	try {
-		tokenList.value = await getBalancesInEoa();
-		console.log("token list is:", tokenList.value);
+		loading.value = true;
+		const res = await deposit();
+		loading.value = false;
+		console.log(res);
 	} catch (error) {
+		error.value = true;
 		console.log(error);
 	}
 }
 
-//DO WE NEED THIS ANYMORE?
-function openDialogModal() {
-	console.log("openDialogModal")
+
+function enableDeposit(tokenId) {
 	(async () => {
 		var status = await deposit();
 		if (!status.success) {
@@ -203,11 +256,7 @@ function openDialogModal() {
 			//error code here
 		}
 	})();
-	depositDialog.value = true;
-}
-
-function enableDeposit(tokenId) {
-	depositDisabled.value = false;
+	portfolioStore.depositDisabled = false;
 }
 
 function add(amt, name) {
@@ -219,6 +268,8 @@ function add(amt, name) {
 	});
 
 	tokenList.value = newTokenList;
+
+	console.log(tokenList.value);
 }
 
 const totalAmtToDeposit = computed(() => {
@@ -235,6 +286,8 @@ function slice(str, total, start) {
 	if (str.length <= total) return str;
 	return str.slice(0, start) + "...";
 }
+
+const disableDeposit = computed(() => totalAvailable.value <= 0);
 
 const totalAvailable = computed(() => {
 	return tokenList.value.reduce((accumulator, currentValue) => {

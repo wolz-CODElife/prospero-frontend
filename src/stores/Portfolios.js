@@ -11,7 +11,103 @@ import {
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
 		return {
-			allPortfolios: [],
+			/*
+			allPortfolios: [
+				{
+					name: "AFS1000 🔱",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: true,
+				},
+				{
+					name: "Harry Mcguire",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+				{
+					name: " 🌈 Lulu Nation Fans",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+				{
+					name: "GX 650 Lords 🏖",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+				{
+					name: "Moon Gatekeepers",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+			],
+
+			myPortfolios: [
+				{
+					name: "AFS1000 🔱",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: true,
+				},
+				{
+					name: "Harry Mcguire",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+				{
+					name: " 🌈 Lulu Nation Fans",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+				{
+					name: "GX 650 Lords 🏖",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+				{
+					name: "Moon Gatekeepers",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+			],
+			*/
 
 			selectedPortfolio: {
 				name: "",
@@ -22,9 +118,49 @@ export const usePortfolios = defineStore("Portfolios", {
 				y1: 0,
 			},
 
-			joinedPortfolios: [],
+			overview: [
+				{
+					asset: {
+						name: "USD",
+						icon: "https://i.postimg.cc/Mpmky9Ms/image.png",
+					},
+					holdings: "1000.0",
+					roi: { value: "0.0", percent: 0 },
+					deposits: "40.0",
+					withdrawals: "0.0",
+				},
+				{
+					asset: {
+						name: "BTC",
+						icon: "https://i.postimg.cc/MGnDWTSy/image.png",
+					},
+					holdings: "0.0",
+					roi: { value: "50.0", percent: 1 },
+					deposits: "0.0",
+					withdrawals: "20.0",
+				},
+				{
+					asset: {
+						name: "AVAX",
+						icon: "https://i.postimg.cc/br1T18qh/image.png",
+					},
+					holdings: "0.10",
+					roi: { value: "0.0", percent: 0 },
+					deposits: "0.0",
+					withdrawals: "100.0",
+				},
+			],
 
-			createdPortfolios: [],
+			activeOverview: {
+				asset: {
+					name: "USD",
+					icon: "https://i.postimg.cc/Mpmky9Ms/image.png",
+				},
+				holdings: "1000.0",
+				roi: { value: "0.0", percent: 0 },
+				deposits: "40.0",
+				withdrawals: "0.0",
+			},
 
 			activeHeader: "left",
 
@@ -35,6 +171,12 @@ export const usePortfolios = defineStore("Portfolios", {
 			tableView: true,
 
 			firstCreateView: true,
+
+			depositDialog: false,
+
+			confirmDeposit: false,
+
+			depositDisabled: true,
 		};
 	},
 
@@ -44,13 +186,23 @@ export const usePortfolios = defineStore("Portfolios", {
 			console.log("getAllPortfolios called")
 			try {
 				this.allPortfolios = await getLeaderBoardDataForTable();
-				//console.log("this.allPortfolios:"+JSON.stringify(this.allPortfolios,null,2))
+			} catch (error) {
+				console.log(error);
+			}
+		},
+
+		async getMyPortfolios() {
+			console.log("getMyPortfolios called")
+			try {
+				this.allPortfolios = await getMyPortfoliosDataForTable();
 			} catch (error) {
 				console.log(error);
 			}
 		},
 
 		doSelectPortfolio(val) {
+			// todo: on all portfolios, filter myPortfolios, and if you find this portfolio - val,
+			// disable join button, (maybe show deposit instead)
 			this.selectedPortfolio = val;
 			this.activeHeader = "right";
 		},
@@ -67,11 +219,10 @@ export const usePortfolios = defineStore("Portfolios", {
 		changeActivePortfolioType() {
 			if (this.activePortfolioType === "All Portfolios") {
 				this.activePortfolioType = "My Portfolios";
-				this.reset();
 			} else {
 				this.activePortfolioType = "All Portfolios";
-				this.reset();
 			}
+			this.reset();
 		},
 
 		showCreate() {
@@ -82,6 +233,8 @@ export const usePortfolios = defineStore("Portfolios", {
 		showJoin() {
 			this.reset();
 			this.activeMode = "join";
+			portfolioStore.tableView = true;
+			portfolioStore.firstCreateView = true;
 		},
 
 		reset() {
@@ -93,6 +246,12 @@ export const usePortfolios = defineStore("Portfolios", {
 				d90: 0,
 				y1: 0,
 			};
+		},
+
+		updateActiveOverview(asset) {
+			this.activeOverview = this.overview.find(
+				(item) => item.asset.name === asset
+			);
 		},
 
 		// function showCreate() {
@@ -127,8 +286,10 @@ export const usePortfolios = defineStore("Portfolios", {
 	},
 
 	getters: {
-		myPortfolios(state) {
-			return state.joinedPortfolios + state.createdPortfolios;
+		createdPortfolios(state) {
+			return state.myPortfolios.filter(
+				(portfolio) => portfolio.created === true
+			);
 		},
 	},
 });

@@ -1,25 +1,28 @@
 <template>
-	<DepositModal @deposit-action="joinDepositAction" @go-back="props.goBack" />
+	<DepositModal
+		@deposit-action="joinDepositAction"
+		@go-back="props.goBack"
+		@redirect="props.redirect"
+	/>
 </template>
 
 <script setup>
 import DepositModal from "./dashboard/DepositModal.vue";
-import { deposit } from "@/api";
+import { usePortfolios } from "@/stores/Portfolios";
+
+const portfolioStore = usePortfolios();
 
 const props = defineProps({
 	goBack: {
+		type: Function,
+	},
+	redirect: {
 		type: Function,
 	},
 });
 
 function joinDepositAction() {
 	console.log("Opened Join Deposit Action");
-	(async () => {
-		var status = await deposit();
-		if (!status.success) {
-			console.log(status.error);
-			//error code here
-		}
-	})();
+	portfolioStore.depositDialog = true;
 }
 </script>
