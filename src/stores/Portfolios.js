@@ -5,12 +5,15 @@ import {
 	createPortfolio,
 	getBalancesInEoa,
 	deposit,
+	getMyPortfoliosDataForTable
 } from "@/api";
 
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
 		return {
-			allPortfolios: [
+			
+			allPortfolios: [],
+			/*
 				{
 					name: "AFS1000 🔱",
 					fee: 2.6,
@@ -57,8 +60,9 @@ export const usePortfolios = defineStore("Portfolios", {
 					created: false,
 				},
 			],
-
-			myPortfolios: [
+*/
+			myPortfolios: [],
+			/*
 				{
 					name: "AFS1000 🔱",
 					fee: 2.6,
@@ -105,6 +109,7 @@ export const usePortfolios = defineStore("Portfolios", {
 					created: false,
 				},
 			],
+			*/
 
 			selectedPortfolio: {
 				name: "",
@@ -179,13 +184,23 @@ export const usePortfolios = defineStore("Portfolios", {
 
 	actions: {
 		// Fill empty portfolio list with an API call
-		// async getAllPortfolios() {
-		// 	try {
-		// 		this.allPortfolios = await getLeaderBoardDataForTable();
-		// 	} catch (error) {
-		// 		console.log(error);
-		// 	}
-		// },
+		async getAllPortfolios() {
+			console.log("getAllPortfolios called")
+			try {
+				this.allPortfolios = await getLeaderBoardDataForTable();
+			} catch (error) {
+				console.log(error);
+			}
+		},
+
+		async getMyPortfolios() {
+			try {
+				console.log("getMyPortfolios called")
+				this.myPortfolios = await getMyPortfoliosDataForTable();
+			} catch (error) {
+				console.log(error);
+			}
+		},
 
 		doSelectPortfolio(val) {
 			// todo: on all portfolios, filter myPortfolios, and if you find this portfolio - val,

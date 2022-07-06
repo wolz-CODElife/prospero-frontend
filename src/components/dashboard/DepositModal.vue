@@ -182,7 +182,7 @@
 </template>
 
 <script setup>
-import { getBalancesInEoa, deposit, updateAmount } from "@/api";
+import { getBalancesInEoa, deposit, updateAmount} from "@/api";
 import { onMounted, computed, ref } from "vue";
 import Modal from "../Modal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
@@ -195,7 +195,8 @@ const error = ref(false);
 
 const firstView = ref(true);
 
-const tokenList = ref([
+const tokenList = ref([]);
+/*
 	{
 		name: "Wrapped Test",
 		price: 12,
@@ -218,35 +219,37 @@ const tokenList = ref([
 		usdAmountEnteredByUser: 0,
 	},
 ]);
+*/
 
-// onMounted(() => {
-// 	getTokenList();
-// });
+ onMounted(() => {
+ 	getTokenList();
+ });
 
-// async function getTokenList() {
-// 	try {
-// 		tokenList.value = await getBalancesInEoa();
-// 		console.log("token list is:", tokenList.value);
-// 	} catch (error) {
-// 		console.log(error);
-// 	}
-// }
+ async function getTokenList() {
+ 	try {
+ 		tokenList.value = await getBalancesInEoa();
+ 		console.log("token list is:", tokenList.value);
+ 	} catch (error) {
+ 		console.log(error);
+ 	}
+ }
 
 async function depositToPortfolio() {
 	firstView.value = false;
+	
 	try {
 		loading.value = true;
 		const res = await deposit();
 		loading.value = false;
 		console.log(res);
+		if (res.success){
+			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
+			console.log("usdAmountOfGas to show in modal:"+usdAmountOfGas);
+		}
 	} catch (error) {
 		error.value = true;
 		console.log(error);
 	}
-}
-
-function enableDeposit(tokenId) {
-	portfolioStore.depositDisabled = false;
 }
 
 function add(amt, name) {
