@@ -11,8 +11,9 @@ import {
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
 		return {
+			
+			allPortfolios: [],
 			/*
-			allPortfolios: [
 				{
 					name: "AFS1000 🔱",
 					fee: 2.6,
@@ -59,8 +60,9 @@ export const usePortfolios = defineStore("Portfolios", {
 					created: false,
 				},
 			],
-
-			myPortfolios: [
+*/
+			myPortfolios: [],
+			/*
 				{
 					name: "AFS1000 🔱",
 					fee: 2.6,
@@ -192,9 +194,9 @@ export const usePortfolios = defineStore("Portfolios", {
 		},
 
 		async getMyPortfolios() {
-			console.log("getMyPortfolios called")
 			try {
-				this.allPortfolios = await getMyPortfoliosDataForTable();
+				console.log("getMyPortfolios called")
+				this.myPortfolios = await getMyPortfoliosDataForTable();
 			} catch (error) {
 				console.log(error);
 			}

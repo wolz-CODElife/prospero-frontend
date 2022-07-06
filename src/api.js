@@ -63,7 +63,7 @@ var USD_SCALE = 1000000000000000000;//await ProsperoWalletLibConstants.methods.U
 var leaderBoardUITableObject;
 var myPortfolioDataForTable;
 
-var prosperoFactoryEventsInstance;
+var prosperoFactoryEventsInstance=null;
 
 var DEPOSIT_THEN_REBALANCE=0
 var WITHDRAW_ALL=1
@@ -79,15 +79,15 @@ var FOLLOW_WALLET=6
 //account history (see image )
 //contracts - add no more investors and change % fee for leader
 async function getValuesOverTimeForLeaderAddress(prosperoWalletAddress){
-  console.log("getValuesOverTimeForLeaderAddress")
+  //console.log("getValuesOverTimeForLeaderAddress")
   var returned = getValuesOverTimeHelper(leaderBoardDataOverTime, prosperoWalletAddress)
-  console.log("ret:"+JSON.stringify(returned,null,2))
+  //console.log("ret:"+JSON.stringify(returned,null,2))
   return returned;
 }
 async function getValuesOverTimeForMyPortfolioAddress(prosperoWalletAddress){
-  console.log("getValuesOverTimeForMyPortfolioAddress")
+  //console.log("getValuesOverTimeForMyPortfolioAddress")
   var returned = getValuesOverTimeHelper(myPortfoliosDataOverTime, prosperoWalletAddress)
-  console.log("ret:"+JSON.stringify(returned,null,2))
+  //console.log("ret:"+JSON.stringify(returned,null,2))
   return returned;
 }
 function getValuesOverTimeHelper(dataOverTimeObj, prosperoWalletAddress){
@@ -105,9 +105,9 @@ function getValuesOverTimeHelper(dataOverTimeObj, prosperoWalletAddress){
         //var val = dataOverTimeObjCopy[i]['value']/USD_SCALE
         //var usdInvested = dataOverTimeObjCopy[i]['usdInvested']/USD_SCALE
         //var profit = val - usdInvested
-        console.log("DDD:"+JSON.stringify(dataOverTimeObjCopy[i],null,2))
+        //console.log("DDD:"+JSON.stringify(dataOverTimeObjCopy[i],null,2))
         var profit = dataOverTimeObjCopy[i]['profit']/USD_SCALE
-        console.log("profit:"+profit)
+        //console.log("profit:"+profit)
         //if (proifit != 0){
          // profit = profit.toFixed(2)
         //}
@@ -405,9 +405,9 @@ async function updateSelectedProsperoWalletAddress(address){
 }
 async function initNewEventListener(){
   console.log('initNewEventListener')
-  if (!alreadyListeningToFactoryEvents){
+  if (prosperoFactoryEventsInstance==null){
     alreadyListeningToFactoryEvents=true;
-    //console.log("setting .on....")
+    console.log("setting .on in initNewEventListener");
     prosperoFactoryEventsInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson.abi,  ethersSigner);
     prosperoFactoryEventsInstance.on("LatestBalancesFactory", async (tokens, users, balances, percentageOwnerships, usdInvested, usersValues, addressVars, intVars, walletName, profilePictureUrl, event) => {
 
@@ -585,7 +585,7 @@ console.log("formatter date:"+formatter.format(new Date()));
 var now = new Date(formatter.format(new Date()))
   var nowFloored = new Date(now.getFullYear(), now.getMonth(), now.getDate());
   nowFloored = (nowFloored.getTime()/1000)
-  console.log("nowFloored:"+nowFloored+" maxDate:"+maxDate)
+  //console.log("nowFloored:"+nowFloored+" maxDate:"+maxDate)
   //Only get Coingecko data if we need it, then store it in local storage so we don't have to keep getting it.
   if (nowFloored>maxDate){
  //if (true){
@@ -1006,10 +1006,8 @@ async function rebalance(percentages, tokenAddressesToRemix){
     return {success:false, error:exception}
   }
 }
-async function deposit(){
-  //await getInfoSubnetHelperContract();
-  //console.log("deposit")
-  //TESTING
+async function shouldApprove(){
+  //console.log("shouldApprove called");
   var total=0
   var numberOfDeposits =0
   var tokens=[]
@@ -1029,7 +1027,7 @@ async function deposit(){
       var weiAmt = web3.utils.toWei(amountInEth+"", 'ether')
       //console.log('weiAmt1:'+weiAmt)
       weiAmt = await updateBalanceFromEighteenDecimalsIfNeeded(weiAmt, thisDepositingObj.address)
-      console.log('weiAmt2:'+weiAmt)
+      //console.log('weiAmt2:'+weiAmt)
       if (thisDepositingObj.name==NativeTokenName){
         //  console.log("WEI:"+thisDepositingObj.weiDepositing)
         avaxValue=weiAmt+""
@@ -1038,6 +1036,48 @@ async function deposit(){
         amounts.push(weiAmt+"")
       }
     }
+  }
+  var shouldApprove = await shouldApproveDepositing(tokens,amounts, selectedProsperoWalletAddress);//UPDATE
+  return shouldApprove;
+
+}
+async function deposit(){
+  //await getInfoSubnetHelperContract();
+  //console.log("deposit")
+  //TESTING
+  var total=0
+  var numberOfDeposits =0
+  var tokens=[]
+  var amounts=[]
+  var avaxValue = 0;
+  var foundOneAmtAboveZero=false;
+  for (var i =0;i<balancesInEoa.length;i++){
+    var thisDepositingObj=  balancesInEoa[i]
+    //console.log('thisDepositingObj:'+JSON.stringify(thisDepositingObj,null,2))
+    var usdAmountEnteredByUser=thisDepositingObj['usdAmountEnteredByUser']
+    usdAmountEnteredByUser = Number(usdAmountEnteredByUser)
+    if (usdAmountEnteredByUser>0){
+      //console.log('thisDepositingObj.name:'+thisDepositingObj.name)
+      //var weiAmount = await getWeiAmount(usdAmountEnteredByUser, thisDepositingObj.address)
+      var amountInEth = usdAmountEnteredByUser/thisDepositingObj.price;
+      amountInEth = amountInEth.toFixed(16)
+      //console.log('amountInEth:'+amountInEth)
+      var weiAmt = web3.utils.toWei(amountInEth+"", 'ether')
+      //console.log('weiAmt1:'+weiAmt)
+      weiAmt = await updateBalanceFromEighteenDecimalsIfNeeded(weiAmt, thisDepositingObj.address)
+      //console.log('weiAmt2:'+weiAmt)
+      if (thisDepositingObj.name==NativeTokenName){
+        //  console.log("WEI:"+thisDepositingObj.weiDepositing)
+        avaxValue=weiAmt+""
+      }else{
+        tokens.push(thisDepositingObj.address)
+        amounts.push(weiAmt+"")
+      }
+      foundOneAmtAboveZero=true;
+    }
+  }
+  if (!foundOneAmtAboveZero){
+    return {success:false, error:"You did not enter any amounts to be deposited."};
   }
   //await getAmountsDepositing();
   //add tokens and amountss
@@ -1084,7 +1124,7 @@ async function deposit(){
     if (!success){
       return {success:false, error:"Value of the portfolio is not more after the deposit, before value:"+valueOfUsersPortfolioBefore+" after:"+valueOfUsersPortfolioAfter}
     }
-    return {success:true}
+    return status;
   }catch(exception){
     console.error("exception deposit:"+JSON.stringify(exception,null,2))
     console.error("exception deposit:"+exception)
@@ -1092,6 +1132,7 @@ async function deposit(){
   }
 }
 async function depositContract(tokens, amounts, methodType, avaxValue, selectedProsperoWalletAddress){
+  var gasUsed={};
   try{
     var prosperoWalletInstance = await new ethers.Contract(selectedProsperoWalletAddress, ProsperoWalletJson.abi,  ethersSigner);
   var tx = await prosperoWalletInstance.deposit(
@@ -1106,13 +1147,13 @@ async function depositContract(tokens, amounts, methodType, avaxValue, selectedP
   var f = await tx.wait();
   console.log("dep tx 2 :"+JSON.stringify(f,null,2))
   var cumulativeGasUsed = f.cumulativeGasUsed;
-  var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
+  gasUsed = await calculateGasEstimate(cumulativeGasUsed);
   console.log("gasUsed:"+JSON.stringify(gasUsed,null,2))
   }catch(exception){
     console.error("exception depositContract:"+exception)
     return {success:false, error:exception}
   }
-  return {success:true}
+  return {success:true, gasUsed:gasUsed}
 }
 async function calculateGasEstimate (gasEstimate, gasPriceToUse){
   ////console.log'calculateGasEstimate')
@@ -1139,20 +1180,40 @@ async function calculateGasEstimate (gasEstimate, gasPriceToUse){
     estimatedCostInEth:estimatedCostInEth,
     usdAmountOfGas:usdAmountOfGas
   }
+
 }
-async function approveDepositing(tokens, amounts, selectedProsperoWalletAddress){
-  console.log("approveDepositing")
+async function shouldApproveDepositing(tokens, amounts, selectedProsperoWalletAddress){
+  //console.log("shouldApproveDepositing")
   var zeroBn = BigNumber("0")
   for (var k=0;k<tokens.length;k++){
     var thisTokenInstance = await new ethers.Contract(tokens[k], ERC20Json["abi"],  ethersSigner);
     var allowance = await thisTokenInstance.allowance(EOAAddress, selectedProsperoWalletAddress);
     var bnAllowance = BigNumber(allowance+"")
     var bnAmountInWeiToDeposit = BigNumber(amounts[k]+"")
-    console.log("dep:"+bnAmountInWeiToDeposit)
-    console.log("all:"+bnAllowance)
+    //console.log("dep:"+bnAmountInWeiToDeposit)
+    //console.log("all:"+bnAllowance)
 
     if (bnAmountInWeiToDeposit.isGreaterThan(bnAllowance)){
-      console.log("NOT ENOUGH APPROVED")
+      //console.log("NOT ENOUGH APPROVED")
+      return true;
+    }
+  }
+  return false;
+}
+
+async function approveDepositing(tokens, amounts, selectedProsperoWalletAddress){
+  //console.log("approveDepositing")
+  var zeroBn = BigNumber("0")
+  for (var k=0;k<tokens.length;k++){
+    var thisTokenInstance = await new ethers.Contract(tokens[k], ERC20Json["abi"],  ethersSigner);
+    var allowance = await thisTokenInstance.allowance(EOAAddress, selectedProsperoWalletAddress);
+    var bnAllowance = BigNumber(allowance+"")
+    var bnAmountInWeiToDeposit = BigNumber(amounts[k]+"")
+    //console.log("dep:"+bnAmountInWeiToDeposit)
+    //console.log("all:"+bnAllowance)
+
+    if (bnAmountInWeiToDeposit.isGreaterThan(bnAllowance)){
+      //console.log("NOT ENOUGH APPROVED")
 
       try{
 
@@ -1252,7 +1313,7 @@ async function getAmountsDepositing(){
 }
 async function getBalancesInEoa(){
   balancesInEoa=[]
-  console.log("getBalancesInEoa - to do: call me when deposit tab is opened")
+  //console.log("getBalancesInEoa - to do: call me when deposit tab is opened")
   var totalValue = 0;
   var nativeTokenObj;
   for (var k=0;k<tokenArray.length;k++){
@@ -1339,7 +1400,8 @@ async function joinPortfolio(){
   return {success:false}
 
 }
-async function createPortfolio(walletName){
+async function createPortfolio(walletName, fundFee){
+  console.log("api createPortfolio walletName:"+walletName+" fundFee:"+fundFee);
   try{
     var prosperoBeaconFactoryInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson.abi,  ethersSigner);
     var tx = await prosperoBeaconFactoryInstance.newProsperoWallet(
@@ -2021,11 +2083,11 @@ async function updateMyPortfoliosDataForTable(){
     var prospWalletAddressLower = prosperoWalletAddress.toLowerCase();
     //THIS FUNCTION IS WRONG...
     var valuesOfTimeObj = await getValuesOverTimeForMyPortfolioAddress(prospWalletAddressLower)
-    console.log("valuesOfTimeObj:"+JSON.stringify(valuesOfTimeObj,null,2))
+    //console.log("valuesOfTimeObj:"+JSON.stringify(valuesOfTimeObj,null,2))
    // console.log("TP:"+JSON.stringify(thisPortfolio,null,2))
     var walletValues = thisPortfolio['walletValues'];
     var name = walletValues['walletName']
-    console.log("name:"+name)
+    //console.log("name:"+name)
     var fee = walletValues.leaderPercentageFee;
     fee = fee / USD_SCALE
     fee = fee * 100;
@@ -2049,7 +2111,7 @@ async function updateMyPortfoliosDataForTable(){
     }
     myPortfolioDataForTable.push(objForTable);
 }
-console.log('myPortfolioDataForTable:'+JSON.stringify(myPortfolioDataForTable,null,2))
+//console.log('myPortfolioDataForTable:'+JSON.stringify(myPortfolioDataForTable,null,2))
 //return myPortfolioDataForTable
 
 }
@@ -2272,5 +2334,6 @@ export {
   getValuesOverTimeForLeaderAddress,
   getValuesOverTimeForMyPortfolioAddress,
   getValuesOverTimeForLinechartMyPortfolioAddress,
-  getMyPortfoliosDataForTable
+  getMyPortfoliosDataForTable,
+  shouldApprove
 };
