@@ -53,6 +53,14 @@ function doJoin() {
 }
 
 function doCreate() {
+	
+	 (async () => {
+	 	var status = await createPortfolio("Created wallet name here", 20);
+	 	if (!status.success) {
+	 		console.log(status.error);
+	 		//error code here
+	 	}
+	 })();
 	createView.value = true;
 }
 

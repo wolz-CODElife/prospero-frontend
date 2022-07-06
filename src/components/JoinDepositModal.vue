@@ -4,6 +4,7 @@
 
 <script setup>
 import DepositModal from "./dashboard/DepositModal.vue";
+import { deposit } from "@/api";
 
 const props = defineProps({
 	goBack: {
@@ -13,5 +14,12 @@ const props = defineProps({
 
 function joinDepositAction() {
 	console.log("Opened Join Deposit Action");
+	(async () => {
+		var status = await deposit();
+		if (!status.success) {
+			console.log(status.error);
+			//error code here
+		}
+	})();
 }
 </script>

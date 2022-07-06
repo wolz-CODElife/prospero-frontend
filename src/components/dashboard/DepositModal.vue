@@ -193,7 +193,9 @@ async function getTokenList() {
 	}
 }
 
+//DO WE NEED THIS ANYMORE?
 function openDialogModal() {
+	console.log("openDialogModal")
 	(async () => {
 		var status = await deposit();
 		if (!status.success) {

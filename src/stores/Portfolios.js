@@ -5,6 +5,7 @@ import {
 	createPortfolio,
 	getBalancesInEoa,
 	deposit,
+	getMyPortfoliosDataForTable
 } from "@/api";
 
 export const usePortfolios = defineStore("Portfolios", {
@@ -40,8 +41,10 @@ export const usePortfolios = defineStore("Portfolios", {
 	actions: {
 		// Fill empty portfolio list with an API call
 		async getAllPortfolios() {
+			console.log("getAllPortfolios called")
 			try {
 				this.allPortfolios = await getLeaderBoardDataForTable();
+				//console.log("this.allPortfolios:"+JSON.stringify(this.allPortfolios,null,2))
 			} catch (error) {
 				console.log(error);
 			}
