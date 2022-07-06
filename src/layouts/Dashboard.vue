@@ -68,14 +68,14 @@ const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 
 function doJoin() {
 	joinView.value = true;
-	console.log("doJoin called");
-	 (async () => {
-	 	var status = await joinPortfolio();
-	 	if (!status.success) {
-	 		console.log(status.error);
-	 		//error code here
-	 	}
-	 })();
+	//console.log("doJoin called");
+	 //(async () => {
+	 //	var status = await joinPortfolio();
+	 //	if (!status.success) {
+	 //		console.log(status.error);
+	 //		//error code here
+	 //	}
+	 //})();
 }
 
 function doCreate() {
