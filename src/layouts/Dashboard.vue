@@ -2,7 +2,6 @@
 	<div class="grid grid-cols-[300px_1fr] gap-0">
 		<Sidebar class="w-[300px]" />
 		<main class="p-[28px]">
-			<div></div>
 			<JoinDepositModal
 				v-if="joinView"
 				@go-back="goBack"
@@ -37,7 +36,7 @@ import DashMain from "./dashboard/DashMain.vue";
 import JoinDepositModal from "@/components/JoinDepositModal.vue";
 import CreateDepositModal from "@/components/CreateDepositModal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
-import { initializeApi,  rebalance } from "@/api";
+import { initializeApi, rebalance } from "@/api";
 
 const portfolioStore = usePortfolios();
 
@@ -47,18 +46,18 @@ onBeforeMount(async () => {
 		window.location.replace("/");
 	}
 	// todo: optimize nested try blocks
-	 try {
+	try {
 		console.log("calling initializeAPI");
-	 	await initializeApi();
-	 	try {
-	 		portfolioStore.getAllPortfolios();
+		await initializeApi();
+		try {
+			portfolioStore.getAllPortfolios();
 			portfolioStore.getMyPortfolios();
-	 	} catch (error) {
-	 		console.log("get all portfolios error", error);
-	 	}
-	 } catch (error) {
-	 	console.log("init error", error);
-	 }
+		} catch (error) {
+			console.log("get all portfolios error", error);
+		}
+	} catch (error) {
+		console.log("init error", error);
+	}
 });
 
 const joinView = ref(false);
@@ -70,24 +69,24 @@ const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 function doJoin() {
 	joinView.value = true;
 	//console.log("doJoin called");
-	 //(async () => {
-	 //	var status = await joinPortfolio();
-	 //	if (!status.success) {
-	 //		console.log(status.error);
-	 //		//error code here
-	 //	}
-	 //})();
+	//(async () => {
+	//	var status = await joinPortfolio();
+	//	if (!status.success) {
+	//		console.log(status.error);
+	//		//error code here
+	//	}
+	//})();
 }
 
 function doCreate() {
-		console.log("CREATE..");
-	 (async () => {
-	 	var status = await createPortfolio("Created wallet name here", 20);
-	 	if (!status.success) {
-	 		console.log(status.error);
-	 		//error code here
-	 	}
-	 })();
+	console.log("CREATE..");
+	(async () => {
+		var status = await createPortfolio("Created wallet name here", 20);
+		if (!status.success) {
+			console.log(status.error);
+			//error code here
+		}
+	})();
 	createView.value = true;
 }
 
@@ -137,10 +136,10 @@ function redirect() {
 }
 </script>
 
-<style lang="postcss" scoped>
-.bg-dashboard {
-	background: url("https://i.postimg.cc/43rfVKWy/image.png") repeat;
-	z-index: 1000;
-	position: absolute;
+<style>
+main {
+	background: #1f2127 url(https://i.postimg.cc/bwgqP5RR/Backgd.png) no-repeat
+		right bottom;
+	background-size: cover;
 }
 </style>

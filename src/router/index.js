@@ -28,7 +28,7 @@ const router = createRouter({
 			name: "manage",
 			component: () => import("../views/Manage.vue"),
 			meta: {
-				layout: "dashboard",
+				layout: "manager",
 			},
 		},
 		{
@@ -36,7 +36,7 @@ const router = createRouter({
 			name: "history",
 			component: () => import("../views/History.vue"),
 			meta: {
-				layout: "dashboard",
+				layout: "account",
 			},
 		},
 	],
