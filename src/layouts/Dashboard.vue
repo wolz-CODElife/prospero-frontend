@@ -1,7 +1,7 @@
 <template>
 	<div class="grid grid-cols-[300px_1fr] gap-0">
 		<Sidebar class="w-[300px]" />
-		<main class="z-10 bg-[#2D3035] p-[28px] relative">
+		<main class="p-[28px]">
 			<JoinDepositModal
 				v-if="joinView"
 				@go-back="goBack"
@@ -36,7 +36,7 @@ import DashMain from "./dashboard/DashMain.vue";
 import JoinDepositModal from "@/components/JoinDepositModal.vue";
 import CreateDepositModal from "@/components/CreateDepositModal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
-import { initializeApi,  rebalance } from "@/api";
+import { initializeApi, rebalance } from "@/api";
 
 const portfolioStore = usePortfolios();
 
@@ -46,18 +46,18 @@ onBeforeMount(async () => {
 		window.location.replace("/");
 	}
 	// todo: optimize nested try blocks
-	 try {
+	try {
 		console.log("calling initializeAPI");
-	 	await initializeApi();
-	 	try {
-	 		portfolioStore.getAllPortfolios();
+		await initializeApi();
+		try {
+			portfolioStore.getAllPortfolios();
 			portfolioStore.getMyPortfolios();
-	 	} catch (error) {
-	 		console.log("get all portfolios error", error);
-	 	}
-	 } catch (error) {
-	 	console.log("init error", error);
-	 }
+		} catch (error) {
+			console.log("get all portfolios error", error);
+		}
+	} catch (error) {
+		console.log("init error", error);
+	}
 });
 
 const joinView = ref(false);
@@ -69,24 +69,24 @@ const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 function doJoin() {
 	joinView.value = true;
 	//console.log("doJoin called");
-	 //(async () => {
-	 //	var status = await joinPortfolio();
-	 //	if (!status.success) {
-	 //		console.log(status.error);
-	 //		//error code here
-	 //	}
-	 //})();
+	//(async () => {
+	//	var status = await joinPortfolio();
+	//	if (!status.success) {
+	//		console.log(status.error);
+	//		//error code here
+	//	}
+	//})();
 }
 
 function doCreate() {
-		console.log("CREATE..");
-	 (async () => {
-	 	var status = await createPortfolio("Created wallet name here", 20);
-	 	if (!status.success) {
-	 		console.log(status.error);
-	 		//error code here
-	 	}
-	 })();
+	console.log("CREATE..");
+	(async () => {
+		var status = await createPortfolio("Created wallet name here", 20);
+		if (!status.success) {
+			console.log(status.error);
+			//error code here
+		}
+	})();
 	createView.value = true;
 }
 
@@ -96,7 +96,7 @@ function goBack() {
 	} else {
 		portfolioStore.activeMode = "create";
 	}
-	portfolioStore.reset();
+	portfolioStore.goBack();
 	joinView.value = false;
 	createView.value = false;
 }
@@ -106,7 +106,7 @@ function redirect() {
 		portfolioStore.activeMode = "join";
 		portfolioStore.activePortfolioType = "My Portfolios";
 		// portfolioStore.myPortfolios.push()
-		portfolioStore.reset();
+		portfolioStore.goBack();
 	} else {
 		// todo: populate my portfolios array with this new deposit
 		// - if it's a new portfolio you're creating i.e first deposit,
@@ -126,9 +126,20 @@ function redirect() {
 			d90: 0,
 			y1: 0,
 		};
-		portfolioStore.createdPortfolios.push(portfolioStore.selectedPortfolio);
+		portfolioStore.myPortfolios.push({
+			...portfolioStore.selectedPortfolio,
+			created: true,
+		});
 	}
 	joinView.value = false;
 	createView.value = false;
 }
 </script>
+
+<style>
+main {
+	background: #1f2127 url(https://i.postimg.cc/bwgqP5RR/Backgd.png) no-repeat
+		right bottom;
+	background-size: cover;
+}
+</style>
