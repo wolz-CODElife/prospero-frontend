@@ -20,7 +20,7 @@
 			</button>
 		</nav>
 
-		<main class="relative">
+		<div class="relative">
 			<!-- Logo background   -->
 			<img
 				src="https://i.postimg.cc/4NBcjk76/image.png"
@@ -31,7 +31,7 @@
 
 			<!-- Hero -->
 			<Hero tagline="Profits To The People" @open="toggleWallet" />
-		</main>
+		</div>
 
 		<!-- Connect WalletModal  -->
 		<Modal v-if="walletConnectModal" @close="walletConnectModal = false">

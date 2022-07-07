@@ -11,6 +11,39 @@
 					class="mx-auto w-[150px]"
 				/>
 
+				<div
+					class="text-center w-[220px] bg-pool mb-[40px] py-[16px] px-[28px] bg-[url('https://i.postimg.cc/mgjp5LvY/image.png')]"
+					v-if="layout === 'manager'"
+				>
+					<h1 class="text-white uppercase text-[12px]">
+						QUARTERLY PERFORMANCE BONUS POOL
+					</h1>
+
+					<h2 class="text-[#54AC68] text-[24px] my-[20px]">$50,060.19</h2>
+
+					<div class="flex justify-center">
+						<div class="flex" v-for="item in countdown" :key="item">
+							<div class="flex flex-col">
+								<h5 class="text-[16px] text-white">
+									{{ item.figure }}
+								</h5>
+
+								<h6 class="text-[10px] text-[#C3C7CD] uppercase">
+									{{ item.unit }}
+								</h6>
+							</div>
+
+							<!-- colon divider -->
+							<p
+								class="text-white text-[16px] mx-[18px]"
+								v-if="item !== countdown[2]"
+							>
+								:
+							</p>
+						</div>
+					</div>
+				</div>
+
 				<WalletAddress :address="address" @doLogout="logoutWallet" />
 
 				<div class="bg-[#2D3035] my-[40px] h-[1px]" />
@@ -46,13 +79,19 @@
 </template>
 
 <script setup>
-import { onMounted, ref } from "vue";
+import { onMounted, ref, computed } from "vue";
 import WalletAddress from "@/components/dashboard/WalletAddress.vue";
 import connect from "@/composables/connect/index";
+import { useRouter } from "vue-router";
 
-const { state } = connect();
+const { currentRoute } = useRouter();
 
-const { disconnectWallet } = connect();
+const layout = computed(() => {
+	console.log("current route is: ", currentRoute);
+	return currentRoute.value.meta.layout;
+});
+
+const { state, disconnectWallet } = connect();
 
 const address = ref(state.address);
 
@@ -73,6 +112,28 @@ const navs = ref([
 		title: "History",
 		link: "/history",
 		icon: "https://i.postimg.cc/VNcydzLS/image.png",
+	},
+]);
+
+// const colon = computed(() => {
+
+//   if (countdown.value[2]) {
+//     return
+//   }
+// })
+
+const countdown = ref([
+	{
+		figure: "60",
+		unit: "days",
+	},
+	{
+		figure: "15",
+		unit: "hrs",
+	},
+	{
+		figure: "38",
+		unit: "mins",
 	},
 ]);
 
@@ -103,3 +164,16 @@ function activePage(link, title) {
 	return false;
 }
 </script>
+
+<style>
+.bg-pool {
+	background-size: cover;
+}
+div.countdown:not(:last-child)::after {
+	content: ":";
+	color: white;
+	font-size: 16px;
+	font-weight: 900;
+	display: inline-flex;
+}
+</style>
