@@ -1,5 +1,6 @@
 <template>
 	<div class="row-span-3 bg-[#191A20] pt-[20px]">
+		<!-- This is the view of the 'Table' section of Prospero when the route is on /dashboard  -->
 		<div v-if="path === 'dashboard'">
 			<!-- Join / Deposit View -->
 			<div v-if="portfolioStore.tableView">
@@ -243,59 +244,73 @@
 				<div v-if="portfolioStore.activeMode === 'create'">
 					<!-- Top  -->
 
-					<!-- Manage Portfolio  -->
-					<div v-if="portfolioStore.firstCreateView">
-						<hr class="border-[#2D3035]" />
+					<!-- Create view  -->
+					<div v-if="portfolioStore.firstCreateView" class="">
+						<!-- Create new portfolio -->
+						<h4
+							class="text-[16px] text-center uppercase text-white mt-[40px] mb-[28px]"
+						>
+							Create new portfolio
+						</h4>
 
-						<div class="p-[10px]">
-							<div class="p-[10px] bg-black w-max">
-								<!-- select portfolio to rebalance  -->
-								<div class="w-[230px] relative">
-									<div
-										@click="toggleDropdown"
-										class="bg-[#2D3035] text-white text-[14px] py-[8px] shadow rounded flex items-center justify-between gap-[16px] cursor-pointer px-[15px]"
-									>
-										<span v-if="portfolioStore.selectedPortfolio">
-											{{ portfolioStore.selectedPortfolio.name }}
-										</span>
-										<span class="text-white text-[14px]" v-else
-											>Select a portfolio</span
-										>
-										<img
-											src="@/assets/img/left-angle.svg"
-											alt=""
-											class="fill-[#868C9D] -rotate-90"
-										/>
-									</div>
-
-									<!-- Dropdown -->
-									<ul
-										v-if="open"
-										class="absolute bg-[#2D3035] mt-[8px] py-[4px] cursor-pointer w-full rounded shadow"
-									>
-										<li
-											v-for="portfolio in portfolioStore.myPortfolios"
-											:key="portfolio"
-											@click="
-												portfolioStore.doSelectPortfolio(portfolio),
-													(open = false)
-											"
-											class="hover:bg-slate hover:bg-opacity-10 text-white px-[12px] py-[4px]"
-										>
-											{{ portfolio.name }}
-										</li>
-									</ul>
-								</div>
+						<!-- Form  -->
+						<div class="w-2/3 mx-auto">
+							<!-- Portfolio name  -->
+							<div class="mb-[28px] relative">
+								<label
+									for="p-name"
+									class="-top-[12px] z-50 absolute ml-[24px] uppercase text-white text-[12px] bg-black px-[8px] py-[4px] -mb-[16px] w-max"
+									>Enter Portfolio name</label
+								>
+								<input
+									type="text"
+									name="p-name"
+									id="p-name"
+									v-model="portfolioName"
+									class="pt-[28px] pb-[14px] pl-[24px] w-full bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
+								/>
 							</div>
+
+							<!-- Fund fee  -->
+							<div class="mb-[28px] relative">
+								<label
+									for="p-fee"
+									class="-top-[12px] z-50 absolute ml-[24px] uppercase text-white text-[12px] bg-black px-[8px] py-[4px] -mb-[16px]"
+									>Fund fee</label
+								>
+								<!-- span % here  -->
+								<input
+									type="text"
+									name="p-fee"
+									id="p-fee"
+									v-model="fundFee"
+									class="pt-[28px] pb-[14px] pl-[24px] w-full bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
+								/>
+							</div>
+
+							<!-- Open Deposit Modal  -->
+							<button
+								@click="$emit('doCreate'), assignName()"
+								class="btn btn-primary"
+								:class="
+									disabledDepToPortfolio
+										? 'opacity-50 cursor-text '
+										: 'opacity-1 cursor-pointer hover:bg-transparent'
+								"
+								:disabled="disabledDepToPortfolio"
+							>
+								Deposit to Portfolio
+							</button>
 						</div>
-
-						<!-- Bottom  -->
-						<hr class="border-[#2D3035]" />
 					</div>
-					<!-- End of top  -->
 
-					<!-- Allocation view  -->
-					<div v-if="portfolioStore.firstCreateView">
+					<!-- Manage Portfolio  -->
+					<div v-else>
+						<!-- select area  -->
+					</div>
+
+					<!-- Allocation view on redirect -->
+					<div v-if="!portfolioStore.firstCreateView">
 						<div class="flex items-center gap-[28px] p-[10px]">
 							<!-- + Add new token-->
 							<button
@@ -438,6 +453,7 @@
 			</div>
 		</div>
 
+		<!-- This is the view of the 'Table' section of Prospero when the route is on /manage  -->
 		<div v-else-if="path === 'manage'">
 			<!-- Go back-->
 			<div class="px-[10px]">
@@ -448,59 +464,7 @@
 
 			<!-- Manage Portfolio  -->
 			<div>
-				<div>
-					<hr class="border-[#2D3035]" />
-
-					<div class="p-[10px]">
-						<div class="p-[10px] bg-black w-max">
-							<!-- <Filter
-								:list="portfolioStore.myPortfolios"
-								v-model="portfolioToShow"
-							/> -->
-							<div class="w-[230px] relative">
-								<div
-									@click="toggleDropdown"
-									class="bg-[#2D3035] text-white text-[14px] py-[8px] shadow rounded flex items-center justify-between gap-[16px] cursor-pointer px-[15px]"
-								>
-									<span v-if="portfolioStore.selectedPortfolio">
-										{{ portfolioStore.selectedPortfolio.name }}
-									</span>
-									<span class="text-white text-[14px]" v-else
-										>Select a portfolio</span
-									>
-									<img
-										src="@/assets/img/left-angle.svg"
-										alt=""
-										class="fill-[#868C9D] -rotate-90"
-									/>
-								</div>
-
-								<!-- Dropdown -->
-								<ul
-									v-if="open"
-									class="absolute bg-[#2D3035] mt-[8px] py-[4px] cursor-pointer w-full rounded shadow"
-								>
-									<li
-										v-for="portfolio in portfolioStore.myPortfolios"
-										:key="portfolio"
-										@click="
-											portfolioStore.doSelectPortfolio(portfolio),
-												(open = false)
-										"
-										class="hover:bg-slate hover:bg-opacity-10 text-white px-[12px] py-[4px]"
-									>
-										{{ portfolio.name }}
-									</li>
-								</ul>
-							</div>
-						</div>
-					</div>
-
-					<!-- Bottom  -->
-					<hr class="border-[#2D3035]" />
-				</div>
-				<!-- End of top  -->
-
+				<Select />
 				<!-- Allocation view  -->
 				<div>
 					<div class="flex items-center gap-[28px] p-[10px]">
@@ -866,6 +830,7 @@ import WithdrawalCard from "./WithdrawalCard.vue";
 import WcOverview from "./WcOverview.vue";
 // import Filter from "../manage/Filter.vue";
 import { useRouter } from "vue-router";
+import Select from "../manage/Select.vue";
 
 const { currentRoute } = useRouter();
 
@@ -980,12 +945,6 @@ const remAllocation = computed(() => {
 	return 100 - totalAllocation.value;
 });
 
-const open = ref(false);
-
-function toggleDropdown() {
-	open.value = !open.value;
-}
-
 function doWithdraw() {
 	// todo: add api call
 	firstView.value = false;
@@ -1058,6 +1017,7 @@ watch(
 	() => currentRoute.value.name,
 	() => {
 		success.value = false;
+		portfolioStore.reset();
 		console.log("success is now ", success.value);
 	}
 );
