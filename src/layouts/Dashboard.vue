@@ -137,6 +137,15 @@ function redirect() {
 </script>
 
 <style>
+@font-face {
+	font-family: "Neurial Grotesk", sans-serif;
+	src: url(@/assets/fonts/NeurialGrotesk-Regular.otf) format("opentype");
+}
+
+body {
+	font-family: "Neurial Grotesk";
+}
+
 main {
 	background: #1f2127 url(https://i.postimg.cc/bwgqP5RR/Backgd.png) no-repeat
 		right bottom;
