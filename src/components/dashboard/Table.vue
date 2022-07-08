@@ -306,6 +306,7 @@
 
 					<!-- Manage Portfolio  -->
 					<div v-else>
+						<Select />
 						<!-- select area  -->
 					</div>
 
@@ -1018,7 +1019,6 @@ watch(
 	() => {
 		success.value = false;
 		portfolioStore.reset();
-		console.log("success is now ", success.value);
 	}
 );
 </script>
