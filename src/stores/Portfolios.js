@@ -11,8 +11,7 @@ import {
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
 		return {
-			allPortfolios: [],
-			/*
+			allPortfolios: [
 				{
 					name: "AFS1000 🔱",
 					fee: 2.6,
@@ -59,7 +58,7 @@ export const usePortfolios = defineStore("Portfolios", {
 					created: false,
 				},
 			],
-*/
+
 			myPortfolios: [
 				{
 					name: "New User",
@@ -77,39 +76,10 @@ export const usePortfolios = defineStore("Portfolios", {
 					d30: 12,
 					d90: 34,
 					y1: 60,
-					created: false,
+					created: true,
 				},
 				{
 					name: " 🌈 Lulu Nation Fans",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: false,
-				},
-				{
-					name: "GX 650 Lords 🏖",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: false,
-				},
-				{
-					name: "Moon Gatekeepers",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: false,
-				},
-			],
-			/*
-				{
-					name: "AFS1000 🔱",
 					fee: 2.6,
 					d7: 8,
 					d30: 12,
@@ -118,31 +88,13 @@ export const usePortfolios = defineStore("Portfolios", {
 					created: true,
 				},
 				{
-					name: "Harry Mcguire",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: false,
-				},
-				{
-					name: " 🌈 Lulu Nation Fans",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: false,
-				},
-				{
 					name: "GX 650 Lords 🏖",
 					fee: 2.6,
 					d7: 8,
 					d30: 12,
 					d90: 34,
 					y1: 60,
-					created: false,
+					created: true,
 				},
 				{
 					name: "Moon Gatekeepers",
@@ -151,10 +103,9 @@ export const usePortfolios = defineStore("Portfolios", {
 					d30: 12,
 					d90: 34,
 					y1: 60,
-					created: false,
+					created: true,
 				},
 			],
-			*/
 
 			selectedPortfolio: {
 				name: "",
@@ -344,6 +295,12 @@ export const usePortfolios = defineStore("Portfolios", {
 		createdPortfolios(state) {
 			return state.myPortfolios.filter(
 				(portfolio) => portfolio.created === true
+			);
+		},
+
+		joinedPortfolios(state) {
+			return state.myPortfolios.filter(
+				(portfolio) => portfolio.created === false
 			);
 		},
 	},

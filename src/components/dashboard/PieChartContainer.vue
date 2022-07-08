@@ -13,7 +13,14 @@
 			</button>
 
 			<!-- Directions  -->
-			<PieChartDirection />
+			<DashDir
+				empty-selected-card-classes="h-full flex flex-col gap-y-[24px] justify-center items-center"
+				arrow-class="-rotate-45 mx-auto mt-[26px]"
+			>
+				<template #selectedPortfolioDisplay>
+					<p class="text-center text-white">Insert token charts here</p>
+				</template>
+			</DashDir>
 
 			<!-- Right button  -->
 			<button
@@ -39,5 +46,6 @@
 </template>
 
 <script setup>
-import PieChartDirection from "./pieChartDirection.vue";
+import DashDir from "@/layouts/dashboard/DashDir.vue";
+import Stats from "@/layouts/dashboard/Stats.vue";
 </script>
