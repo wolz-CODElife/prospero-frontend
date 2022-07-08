@@ -19,6 +19,7 @@
 
 				<DashMain
 					@do-join="doJoin"
+					@do-justDeposit="doJustDeposit"
 					@do-create="doCreate"
 					:disabled="smDisabled"
 				/>
@@ -29,7 +30,7 @@
 
 <script setup>
 import { ref, computed, onBeforeMount, onMounted } from "vue";
-import { joinPortfolio, createPortfolio, deposit } from "@/api";
+import { updateUIStatus } from "@/api";
 import Sidebar from "./dashboard/Sidebar.vue";
 import DashHeader from "./dashboard/DashHeader.vue";
 import DashMain from "./dashboard/DashMain.vue";
@@ -67,26 +68,20 @@ const createView = ref(false);
 const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 
 function doJoin() {
+	console.log('doJoin function')
+	updateUIStatus(2)
 	joinView.value = true;
-	//console.log("doJoin called");
-	 //(async () => {
-	 //	var status = await joinPortfolio();
-	 //	if (!status.success) {
-	 //		console.log(status.error);
-	 //		//error code here
-	 //	}
-	 //})();
+}
+
+function doJustDeposit() {
+	console.log('doJuseDeposit function')
+	updateUIStatus(3)
+	joinView.value = true;
 }
 
 function doCreate() {
-		console.log("CREATE..");
-	 (async () => {
-	 	var status = await createPortfolio("Created wallet name here", 20);
-	 	if (!status.success) {
-	 		console.log(status.error);
-	 		//error code here
-	 	}
-	 })();
+	console.log('doCreate function')
+	updateUIStatus(1)
 	createView.value = true;
 }
 

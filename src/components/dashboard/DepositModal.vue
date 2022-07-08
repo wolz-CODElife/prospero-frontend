@@ -97,7 +97,7 @@
 						? 'opacity-50 cursor-text'
 						: 'opacity-1 cursor-pointer'
 				"
-				:disabled="disableDeposit"
+				
 			>
 				Deposit
 			</button>
@@ -182,7 +182,7 @@
 </template>
 
 <script setup>
-import { getBalancesInEoa, deposit, updateAmount} from "@/api";
+import { getBalancesInEoa, handleDepositType} from "@/api";
 import { onMounted, computed, ref } from "vue";
 import Modal from "../Modal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
@@ -228,28 +228,38 @@ const tokenList = ref([]);
  async function getTokenList() {
  	try {
  		tokenList.value = await getBalancesInEoa();
- 		console.log("token list is:", tokenList.value);
  	} catch (error) {
  		console.log(error);
  	}
  }
+ function enableDeposit(f){
+
+ }
+
+
 
 async function depositToPortfolio() {
 	firstView.value = false;
 	
-	try {
-		loading.value = true;
-		const res = await deposit();
-		loading.value = false;
-		console.log(res);
+		console.log("depositToPortfolio called");
+		try {
+	 	var res = await handleDepositType();
 		if (res.success){
 			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
 			console.log("usdAmountOfGas to show in modal:"+usdAmountOfGas);
+		}else{
+			console.log("ERROR - 1");
+	 		console.log(res.error);
+	 		//error code here
+	 	}
+		} catch (error) {
+			console.log("ERROR - 2");
+			error.value = true;
+			console.log(error);
 		}
-	} catch (error) {
-		error.value = true;
-		console.log(error);
-	}
+		console.log("Done with create portfolio and deposit");
+		
+
 }
 
 function add(amt, name) {

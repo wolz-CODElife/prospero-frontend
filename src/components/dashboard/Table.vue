@@ -58,7 +58,7 @@
 				<!-- Deposit / withdraw  -->
 				<div class="flex items-center gap-[12px]" v-else>
 					<button
-						@click="$emit('doJoin')"
+						@click="$emit('doJustDeposit')"
 						class="btn btn-primary w-[125px]"
 						:class="
 							disabled
@@ -288,7 +288,7 @@
 
 						<!-- Open Deposit Modal  -->
 						<button
-							@click="$emit('doCreate'), assignName()"
+							@click="$emit('doCreate'), updateNameAndFeeApi(), assignName()"
 							class="btn btn-primary"
 							:class="
 								disabledDepToPortfolio
@@ -679,11 +679,12 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
+import { ref, computed} from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
 import Modal from "../Modal.vue";
 import WithdrawalCard from "./WithdrawalCard.vue";
 import WcOverview from "./WcOverview.vue";
+import { withdraw, getWithdrawTableData, updateNewWalletVariables} from "@/api";
 
 const portfolioStore = usePortfolios();
 
@@ -730,6 +731,12 @@ const tokenList = ref([
 	},
 ]);
 
+
+
+ //onMounted(() => {
+ 	//await getTokenList();
+ //});
+
 const disabled = ref(true);
 
 const loading = ref(false);
@@ -762,6 +769,16 @@ const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
 
+
+  async function getTokenList() {
+ 	try {
+ 		tokenList.value = await getWithdrawTableData()();
+ 		//console.log("token list is:", tokenList.value);
+ 	} catch (error) {
+ 		console.log(error);
+ 	}
+ }
+
 const disableWithdraw = computed(() => {
 	if (swap.value) {
 		!amount.value || !singleToken.value;
@@ -788,8 +805,27 @@ const remAllocation = computed(() => {
 	return 100 - totalAllocation.value;
 });
 
-function doWithdraw() {
-	// todo: add api call
+function updateNameAndFeeApi(){
+	console.log("updateNameAndFeeApi portfolioName:"+portfolioName.value+" fundFee:"+fundFee.value);	
+	updateNewWalletVariables(portfolioName.value, fundFee.value);
+ }
+
+async function doWithdraw() {
+	//to do - add tokens swapping into
+	try {
+		const res = await withdraw([], amount);
+		console.log(res);
+		if (res.success){
+			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
+			console.log("usdAmountOfGas to show in modal:"+usdAmountOfGas);
+		}else{
+			error.value = true;
+			console.log(success.error);
+		}
+	} catch (error) {
+		error.value = true;
+		console.log(error);
+	}
 	firstView.value = false;
 	loading.value = false;
 	error.value = false;

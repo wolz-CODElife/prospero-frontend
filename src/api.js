@@ -18,14 +18,16 @@ var myWallets={}//my wallets either as a portfolio manager or investor
 var historicalPricesObject={};//historical prices for tokens
 var tokenArray =require('./apiLib/Tokens.json');//set of tokens we use
 var balancesInEoa=[];//used in deposits
-var eventBlocksAlreadyHandledProsperoFactoryWallet=[]//to do - remove me?  Unused?
+var eventBlocksAlreadyHandledLatestBalances=[]
+var eventBlocksAlreadyHandledFinishedMethod=[]//to do - remove me?  Unused?
+
 var withdrawTableData=[]//for withdraw table
 var leaderBoardDataOverTime = {};//historical chart data leaderboard
 var myPortfoliosDataOverTime = {};//historical chart data my portfolios
 
 //TO DO - have this updated on UI
 var selectedProsperoWalletAddress;//="0x4cc4b88c622ee9b2c9007a6aea014a093c2fefc5"//CHANGE
-var selectedLeaderIndex=0;
+var myWallets=0;
 //Libraries
 const BigNumber = require('bignumber.js');
 const Web3 = require('web3');
@@ -59,10 +61,12 @@ var GAS_PRICE;
 var alreadyListeningToFactoryEvents=false;
 var blockNumWhenWebAppLaunched=0;
 var USD_SCALE = 1000000000000000000;//await ProsperoWalletLibConstants.methods.USD_SCALE().call()
+var walletWaitingForEOA = "";//do not use anymore
+var activePortfolioType="All Portfolios";//default
 //UI Objects - keys changed and formatted for UI
 var leaderBoardUITableObject;
 var myPortfolioDataForTable;
-
+var newWalletObject;
 var prosperoFactoryEventsInstance=null;
 
 var DEPOSIT_THEN_REBALANCE=0
@@ -72,12 +76,77 @@ var LEADER_SWAP=3
 var LEADER_STRAIGHT_DEPOSIT=4
 var CREATE_WALLET=5
 var FOLLOW_WALLET=6
+
+var UIStatus;
+var UI_CREATE_THEN_DEPOSIT = 1
+var UI_JOIN_THEN_DEPOSIT = 2
+var UI_DEPOSIT_MY_PORTFOLIO = 3
 //FUNCTIONS
 //TO DO:
 //get rid of warnings solidity
 //recent transactions (see image )
 //account history (see image )
 //contracts - add no more investors and change % fee for leader
+
+function updateUIStatus(newUIStatusType){
+  UIStatus = newUIStatusType;
+}
+
+function updateNewWalletVariables(walletName, fundFee){
+  newWalletObject = {"walletName": walletName, "fundFee":fundFee};
+}
+
+
+async function handleDepositType(){
+  console.log("handleDepositType")
+  if (UIStatus == UI_CREATE_THEN_DEPOSIT){
+    var res = await createPortfolioThenDeposit();
+  }else if (UIStatus == UI_JOIN_THEN_DEPOSIT){
+    var res = await joinPortfolioThenDeposit();
+  }else if (UIStatus == UI_DEPOSIT_MY_PORTFOLIO){
+    var res = await deposit();
+  }
+  return res;
+}
+
+async function createPortfolioThenDeposit(){
+  console.log("createPortfolioThenDeposit, setting walletWaitingForEOA");
+  console.log('EOAAddress:'+EOAAddress)
+  //walletWaitingForEOA=EOAAddress;
+  //walletWaitingForEOA=walletWaitingForEOA.toLowerCase();
+  //console.log("walletWaitingForEOA:"+walletWaitingForEOA)
+  console.log("newWalletObject: "+JSON.stringify(newWalletObject,null,2))
+  var status = await createPortfolio(newWalletObject.walletName, newWalletObject.fundFee);
+  if (!status.success){
+    console.log("createPortfolio fail.");
+    //walletWaitingForEOA="";
+    return status;
+  }
+  if (status.prosperoWalletAddressCreated==null){
+    console.log("****** prosperoWalletAddressCreated is null - problem ***** ")
+  }else{
+    console.log("prosperoWalletAddressCreated is NOT null, continuing... walletAddress:"+status.prosperoWalletAddressCreated)
+    selectedProsperoWalletAddress=status.prosperoWalletAddressCreated;
+  }
+  //reset it if it was set
+  status = await deposit();
+  //walletWaitingForEOA="";
+  return status;
+}
+
+async function joinPortfolioThenDeposit(){
+  console.log("joinPortfolioThenDeposit");
+  var status = await joinPortfolio();
+  if (!status.success){
+    console.log("joinPortfolio fail.");
+    return status;
+  }
+  //reset it if it was set
+  status = await deposit();
+  //walletWaitingForEOA="";
+  return status;
+}
+
 async function getValuesOverTimeForLeaderAddress(prosperoWalletAddress){
   //console.log("getValuesOverTimeForLeaderAddress")
   var returned = getValuesOverTimeHelper(leaderBoardDataOverTime, prosperoWalletAddress)
@@ -227,8 +296,23 @@ async function getChartDataSelectedMyPortfolio(){
   console.log("dataToReturn:"+JSON.stringify(dataToReturn,null,2))
   return dataToReturn
 }
+function getLeadersPortfolioForAddress(prosperoWalletAddress){
+  for (var i =0;i<leaderBoardData;i++){
+    var thisProsperoWalletAddress = leaderBoardData[i]['prosperoWalletAddress']
+    thisProsperoWalletAddress=thisProsperoWalletAddress.toLowerCase();
+    prosperoWalletAddress=prosperoWalletAddress.toLowerCase();
+    if (thisProsperoWalletAddress == prosperoWalletAddress){
+      return leaderBoardData[i];
+    }
+  }
+  console.error("** getLeadersPortfolioForAddress - no portfolio found **")
+}
 async function getChartDataSelectedLeader(){
-  var portfolio = await leaderBoardData[selectedLeaderIndex];
+  if (leaderBoardData.length==0){
+   return {}
+  }
+
+  var portfolio = getLeadersPortfolioForAddress(selectedProsperoWalletAddress);
   var percentages = []
   var labels = []
   var colorArray=[]
@@ -381,7 +465,7 @@ async function updateUIFieldValuesMyPortfolioMyPortfolio(){
   //TO DO - UPDATE UI
 }
 async function updateUIFieldValuesLeaderboard(){
-  var portfolio = leaderBoardData[selectedLeaderIndex]
+  var portfolio = getLeadersPortfolioForAddress(selectedProsperoWalletAddress);
   var name = portfolio.walletName;
   var investors = portfolio.numberOfTrailers;
   var aum = portfolio.totalValue
@@ -432,59 +516,97 @@ async function initNewEventListener(){
       console.log("eoaAddressMsgSender:"+eoaAddressMsgSender)
       console.log("event.blockNumber:"+event.blockNumber)
       console.log("blockNumWhenWebAppLaunched:"+blockNumWhenWebAppLaunched)
+      console.log("walletWaitingForEOA:"+walletWaitingForEOA)
 
       if (event.blockNumber<=blockNumWhenWebAppLaunched){
         return;
       }
-      var blocksAlreadyHadled = eventBlocksAlreadyHandledProsperoFactoryWallet
-      console.log("J:"+JSON.stringify(eventBlocksAlreadyHandledProsperoFactoryWallet, null, 2))
-      eventBlocksAlreadyHandledProsperoFactoryWallet.push(event.blockNumber+"")
+      if (eventBlocksAlreadyHandledLatestBalances.includes(event.blockNumber)){
+        return;
+      }
+      //var blocksAlreadyHadled = eventBlocksAlreadyHandledProsperoFactoryWallet
+      eventBlocksAlreadyHandledLatestBalances.push(event.blockNumber+"")
+
       var alertString ="Error - no methodType found.";
-      if (methodType==CREATE_WALLET){
-        //if (eoaAddressMsgSender != myEoaAddress){
-        //  return;
-        //}
+
+      //CREATE AND FOLLOW DOES NOT FIRE - REMOVE?
+      /*if (methodType==CREATE_WALLET){
+        if (EOAAddress == eoaAddressMsgSender){
+          console.log("received event of created wallet - it is the wallet the user was waiting for, doing nothing.")
+          //walletWaitingForEOA="";
+          return;
+        }
         alertString ="A new Prospero wallet has been created, refreshing page now."
       }else if (methodType==FOLLOW_WALLET){
-        //if (eoaAddressMsgSender != myEoaAddress){
-        //  return;
-        //}
+        if (EOAAddress == eoaAddressMsgSender){
+          console.log("received event of created wallet - it is the wallet the user was waiting for, doing nothing.")
+          //walletWaitingForEOA="";
+          return;
+        }
         alertString ="A Prospero wallet has recently been followed, refreshing page now."
-      }else if (methodType == LEADER_SWAP){
+      }else 
+      */
+     if (methodType == LEADER_SWAP){
         alertString ="A rebalance has just completed on a Prospero wallet, refreshing page now."
       }else if (methodType == DEPOSIT_THEN_REBALANCE){
+        if (EOAAddress == eoaAddressMsgSender){
+          console.log("received event of created wallet - it is the wallet the user was waiting for, doing nothing.")
+          //walletWaitingForEOA="";
+          return;
+        }
         alertString ="A deposit has just been completed on a Prospero wallet, refreshing page now."
       }else if (methodType == WITHDRAW_ALL){
         alertString ="A withdraw has just been completed on a Prospero wallet, refreshing page now."
       }else if (methodType == WITHDRAW_SWAP){
         alertString ="A withdraw swap has just been completed on a Prospero wallet, refreshing page now."
       }else if (methodType == LEADER_STRAIGHT_DEPOSIT){
+        if (EOAAddress == eoaAddressMsgSender){
+          console.log("received event of created wallet - it is the wallet the user was waiting for, doing nothing.")
+          //walletWaitingForEOA="";
+          return;
+        }
         alertString ="A deposit has just been completed on a Prospero wallet, refreshing page now."
       }
-      //LEADER_STRAIGHT_DEPOSIT
       confirm(alertString);
       window.location.reload();
     })
     //ONLY FOR CREATION OF WALLET AND FOLLOW - todo, consolidate to one function
-    prosperoFactoryEventsInstance.on("FinishedMethodFactory", async ( methodType, eoaAddressLeaderTrailer, prosperoWalletAddress, event) => {
+    prosperoFactoryEventsInstance.on("FinishedMethodFactory", async ( methodType, eoaAddressMsgSender, prosperoWalletAddress, event) => {
 
       console.log("got FinishedMethodFactory"
       +" "+methodType
-      +" "+eoaAddressLeaderTrailer
+      +" "+eoaAddressMsgSender
       +" "+prosperoWalletAddress
       +" "+JSON.stringify(event));
 
       if (event.blockNumber<=blockNumWhenWebAppLaunched){
         return;
       }
+      if (eventBlocksAlreadyHandledFinishedMethod.includes(event.blockNumber)){
+        return;
+      }
+      eventBlocksAlreadyHandledFinishedMethod.push(event.blockNumber+"")
+      eoaAddressMsgSender=eoaAddressMsgSender.toLowerCase();
+      console.log("walletWaitingForEOA:"+walletWaitingForEOA)
+      console.log("eoaAddressMsgSender:"+eoaAddressMsgSender)
 
       var alertString ="Error - no methodType found.";
       if (methodType==CREATE_WALLET){
+        if (EOAAddress == eoaAddressMsgSender){
+          console.log("received event of created wallet - it is the wallet the user was waiting for, doing nothing.")
+          //walletWaitingForEOA="";
+          return;
+        }
         //if (eoaAddressMsgSender != myEoaAddress){
         //  return;
         //}
         alertString ="A new Prospero wallet has been created, refreshing page now."
       }else if (methodType==FOLLOW_WALLET){
+        if (EOAAddress == eoaAddressMsgSender){
+          console.log("received event of created wallet - it is the wallet the user was waiting for, doing nothing.")
+          //walletWaitingForEOA="";
+          return;
+        }
         //if (eoaAddressMsgSender != myEoaAddress){
         //  return;
         //}
@@ -1043,7 +1165,7 @@ async function shouldApprove(){
 }
 async function deposit(){
   //await getInfoSubnetHelperContract();
-  //console.log("deposit")
+  console.log("deposit")
   //TESTING
   var total=0
   var numberOfDeposits =0
@@ -1077,14 +1199,22 @@ async function deposit(){
     }
   }
   if (!foundOneAmtAboveZero){
+    console.log("Use did not enter any amounts to be deposited.")
     return {success:false, error:"You did not enter any amounts to be deposited."};
   }
   //await getAmountsDepositing();
   //add tokens and amountss
-  var status = await approveDepositing(tokens,amounts, selectedProsperoWalletAddress);//UPDATE
-  if (!status.success){
-    return status
+  var shouldApproveTheTokens = await shouldApprove();
+  if (shouldApproveTheTokens){
+    console.log("SHOW APPROVE DIALOUGE");
+    var status = await approveDepositing(tokens,amounts, selectedProsperoWalletAddress);//UPDATE
+    if (!status.success){
+      return status
+    }
+  }else{
+    console.log("Nothing to approve, everything good");
   }
+
   var gasEstimate;
   var shouldJustDeposit=0
   var firstTimeString=""
@@ -1232,88 +1362,11 @@ async function approveDepositing(tokens, amounts, selectedProsperoWalletAddress)
   }
   return {success:true}
 }
-async function getAmountsDepositing(){
-  console.log("getAmountsDepositing..")
-  //console.log("usdAmountToDepositForEachTokenForEachToken:"+usdAmountToDepositForEachTokenForEachToken)
-  var depositingObj=[]
-  for (var k=0;k<balancesInEoa.length;k++){
-    var usdAmountToDepositForEachTokenForEachToken=   Number(balancesInEoa[k]['usdAmountEnteredByUser']);
-    console.log("*** usdAmountToDepositForEachTokenForEachToken:"+usdAmountToDepositForEachTokenForEachToken)
-    var usdAmountToDepositForEachTokenForEachTokenBn= BigNumber(usdAmountToDepositForEachTokenForEachToken+'');
-    var thisToken = balancesInEoa[k]
 
-    var bnBal = BigNumber(thisToken.balance+"")
-    var zeroBn = BigNumber("0")
-    //console.log("bnBal:"+bnBal+"zeroBn"+zeroBn)
-    var obj;
-    var balancsInEoa=[]
-    console.log("token:"+thisToken.name)
-    console.log("This Token:"+JSON.stringify(thisToken,null,2))
-    //console.log("bnBal:"+bnBal)
-    if (bnBal.isGreaterThan(zeroBn)){
-      console.log("greter than zero")
-
-      var amountInEthToDepositHelper = usdAmountToDepositForEachTokenForEachToken / Number(thisToken.price);
-      console.log("thisToken.price:"+thisToken.price)
-      console.log("usdAmountToDepositForEachTokenForEachToken:"+usdAmountToDepositForEachTokenForEachToken)
-
-      console.log("amountInEthToDepositHelper:"+amountInEthToDepositHelper)
-
-      console.log("thisToken.decimals:"+thisToken.decimals)
-      amountInEthToDepositHelper=amountInEthToDepositHelper.toFixed(thisToken.decimals)
-      console.log("amountInEthToDepositHelper:"+amountInEthToDepositHelper+" p:"+Number(thisToken.price))
-      var amountInEthToDeposit = amountInEthToDepositHelper;// / Number(thisToken.price)
-      console.log("amountInEthToDeposit:"+amountInEthToDeposit)
-      var amountInWeiToDeposit = ethers.utils.parseEther(amountInEthToDeposit+"")
-      console.log("amountInWeiToDeposit:"+amountInWeiToDeposit)
-
-      var thisAddress = thisToken.address
-      //console.log("ThisAddress:"+thisAddress)
-      //if (thisToken.address="AVAX"){
-      //  thisAddress
-      //}
-      obj={
-        //totalUSDAmountToDeposit:totalUSDAmountToDeposit,
-        usdAmountEnteredByUser:Number(balancesInEoa[k]['usdAmountEnteredByUser']),
-        weiDepositing:amountInWeiToDeposit+"",
-        usdDepositing:usdAmountToDepositForEachTokenForEachToken+"",
-        ethDepositing:amountInEthToDeposit+"",
-        name: thisToken.name,
-        usdAmount:thisToken.usdAmount,
-        balance: thisToken.balance,
-        balanceInEth:thisToken.balanceInEth,
-        address:thisToken.address,
-        currentPercentageInPortfolio:thisToken.currentPercentageInPortfolio
-      }
-    }else{
-      obj={
-        //totalUSDAmountToDeposit:totalUSDAmountToDeposit,
-        usdAmountEnteredByUser:0,
-        weiDepositing:0+"",
-        usdDepositing:0+"",
-        ethDepositing:0+"",
-        name: thisToken.name,
-        usdAmount:thisToken.usdAmount,
-        balance: thisToken.balance,
-        balanceInEth:thisToken.balanceInEth,
-        address:thisToken.address,
-        currentPercentageInPortfolio:thisToken.currentPercentageInPortfolio
-      }
-
-    }
-    balancesInEoa[k]['ethDepositing']=obj['ethDepositing']
-    balancesInEoa[k]['weiDepositing']=obj['weiDepositing']
-    balancesInEoa[k]['usdAmountEnteredByUser']=Number(obj['usdAmountEnteredByUser'])
-
-    depositingObj.push(obj)
-  }
-  balancesInEoa=depositingObj
-  //await initDepositWithdraw()
-  //console.log("depositingObj:"+JSON.stringify(depositingObj,null,2))
-}
 async function getBalancesInEoa(){
+  console.log("getBalancesInEoa")
+
   balancesInEoa=[]
-  //console.log("getBalancesInEoa - to do: call me when deposit tab is opened")
   var totalValue = 0;
   var nativeTokenObj;
   for (var k=0;k<tokenArray.length;k++){
@@ -1374,23 +1427,22 @@ if (!isSubnet){
 */
 //console.log("balancesInEoa:"+JSON.stringify(balancesInEoa,null,2))
 return balancesInEoa;
-//balancesInEoa = balancesInEoa
-//console.log("balancesInEoa:"+balancesInEoa)
-//if (shouldInitDepositingObject){
-//depositingObject=balancesInEoa;
-//}
 }
-function updateActiveLeaderboardRow(row){
-  selectedLeaderIndex=row
+
+function updateSelectedWallet(prosperoWalletAddress){
+  selectedProsperoWalletAddress=prosperoWalletAddress;
 }
+
 async function joinPortfolio(){
-  var selectedLeaderBoardAddress=leaderBoardData[selectedLeaderIndex]["prosperoWalletAddress"];
+
+  console.log("joingPortfolio called with:"+selectedProsperoWalletAddress)
   try{
     var prosperoBeaconFactoryInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson.abi,  ethersSigner);
     var tx = await prosperoBeaconFactoryInstance.newTrailerWallet(
-      selectedLeaderBoardAddress
+      selectedProsperoWalletAddress
     );
     var r = await tx.wait();
+    console.log("receipt:"+JSON.stringify(r,null,2))
     return {success:true}
   }catch(e){
     console.log("Exception joinPortfolio: "+e)
@@ -1446,13 +1498,19 @@ async function initLeaderBoardTableObject(){
       profitLeader= parseInt(profitLeader)
       profitLeader = profitLeader + "%"
 
+      var prosperoWalletAddress =leaderBoardDataHere[i].prosperoWalletAddress;
+      prosperoWalletAddress=prosperoWalletAddress.toLowerCase();
       var leaderObjForTable = {
+        index:i,
         name:leaderBoardDataHere[i]['walletValues']['walletName'],
         fee:fee,
         d7: 0,
         d30: 0,
         d90: 0,
         y1: profitLeader,
+        prosperoWalletAddress:prosperoWalletAddress,
+        portfolioObject:leaderBoardDataHere[i]
+
       };
       tableData.push(leaderObjForTable);
     }
@@ -1468,6 +1526,7 @@ async function getLeaderBoardDataForTable(){
 
 async function getMyPortfoliosDataForTable(){
   //right here 
+  console.log("getMyPortfoliosDataForTabl - myPortfolioDataForTable:"+JSON.stringify(myPortfolioDataForTable,null,2));
   return myPortfolioDataForTable;
 }
 
@@ -1722,25 +1781,17 @@ async function initializeApi(){
   }
   await makeRandomColorArray();
   //Initialize functions
-  status = await getGraphData();
+  await initializeDataObjects();
+}
+async function initializeDataObjects(){
+  var status = await getGraphData();
   if (!status.success){
     console.error("error getGraphData: "+status.error)
     return status;
   }
   blockNumWhenWebAppLaunched = await web3.eth.getBlockNumber();
   await initNewEventListener();
-  /*
-  console.log("heree subnetHelperContractAddress:"+subnetHelperContractAddress)
-	var subnetHelperContract = new web3.eth.Contract(
-		SubnetHelperContractJson.abi,
-		subnetHelperContractAddress
-	);
-	var tokens= await subnetHelperContract.methods.getAllTokensOnSubnet(
-	).call({
-		from: EOAAddress
-	})
-	console.log("ALL TOKENS:"+tokens)
-  */
+
   status = await updatePrices();
   if (!status.success){
     console.error("error updatePrices: "+status.error)
@@ -1751,15 +1802,10 @@ async function initializeApi(){
     console.error("error initLeaderBoardTableObject: "+status.error)
     return status;
   }
-
   await createMyWalletsDataAndUIObject();
   var port = await getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd();
   await getHistoricalPricesUpdateChartsData();
-	await getBalancesInEoa();
-
-
-
-
+	//await getBalancesInEoa();
   return {success:true}
 }
 async function initializeBlockchainConnection(){
@@ -1781,6 +1827,7 @@ async function initializeBlockchainConnection(){
         alert("Can not connect to wallet");
         return {success:false, error: "Can not connect to wallet"}
       }
+      EOAAddress = EOAAddress.toLowerCase();
     } catch (error) {
       if (error.code === 4001) {
         console.error("user rejected request")
@@ -2074,10 +2121,11 @@ async function createMyWalletsDataAndUIObject(){
 }
 
 async function updateMyPortfoliosDataForTable(){
-  //console.log("getMyPortfoliosDataForTable called")
+  console.log("getMyPortfoliosDataForTable called")
   //right here
   //console.log("myPortfoliosDataOverTime:"+JSON.stringify(myPortfoliosDataOverTime,null,2))
   myPortfolioDataForTable=[]
+  var cntr=0;
   for (var prosperoWalletAddress in myWallets) {
     var thisPortfolio = myWallets[prosperoWalletAddress]
     var prospWalletAddressLower = prosperoWalletAddress.toLowerCase();
@@ -2099,17 +2147,22 @@ async function updateMyPortfoliosDataForTable(){
       profitPercAll=profitPercAll.toFixed(2);
       profitPercAll=profitPercAll*100;
     }
+    var prosperoWalletAddressLower = prosperoWalletAddress.toLowerCase();
     var objForTable =
 
     {
-      name: name,
+        index:cntr,
+        name: name,
                 fee: Number(fee),
                 d7: 0,
                 d30: 0,
                 d90: 0,
-                y1:profitPercAll
+                y1:profitPercAll,
+                prosperoWalletAddress:prosperoWalletAddressLower,
+                portfolioObect:thisPortfolio
     }
     myPortfolioDataForTable.push(objForTable);
+    cntr=cntr+1;
 }
 //console.log('myPortfolioDataForTable:'+JSON.stringify(myPortfolioDataForTable,null,2))
 //return myPortfolioDataForTable
@@ -2189,8 +2242,8 @@ async function updateBalanceFromEighteenDecimalsIfNeeded(balance, tokenAddress){
   }
   console.log("ERROR - could not find token in updateBalanceFromEighteenDecimalsIfNeeded for address: "+tokenAddress)
   alert("ERROR - could not find token in updateBalanceFromEighteenDecimalsIfNeeded for address: "+tokenAddress)
-
 }
+
 function areTokensAndBalanacesDifferent(balancesAndTokensBefore, balancesAndTokensAfter){
 
   var balBefore=balancesAndTokensBefore.balances
@@ -2217,6 +2270,7 @@ function areTokensAndBalanacesDifferent(balancesAndTokensBefore, balancesAndToke
   }
   return false;
 }
+
 async function getBalanacesOfTokensInPortfolioForUser(user, thisProsperoWalletAddress){
   try{
     var ProsperoWalletInstance = new web3.eth.Contract(
@@ -2239,8 +2293,8 @@ async function getBalanacesOfTokensInPortfolioForUser(user, thisProsperoWalletAd
     return {success:false, error:e}
   }
   return {balances:balances,tokens:tokens}
-
 }
+
 async function returnTrueIfPercentagesAreLessAndClose(balancesValue, goalPercentages, goalTokens){
   //console.log("balancesValue:"+JSON.stringify(balancesValue,null,2))
   //console.log('gp:'+goalPercentages)
@@ -2324,7 +2378,6 @@ export {
   initializeApi,
   joinPortfolio,
   createPortfolio,
-  updateActiveLeaderboardRow,
   getBalancesInEoa,
   deposit, updateAmount, rebalance, withdraw, getGraphData, getHistoricalPricesUpdateChartsData,
   getWithdrawTableData,
@@ -2335,5 +2388,10 @@ export {
   getValuesOverTimeForMyPortfolioAddress,
   getValuesOverTimeForLinechartMyPortfolioAddress,
   getMyPortfoliosDataForTable,
-  shouldApprove
+  shouldApprove,
+  createPortfolioThenDeposit,
+  updateSelectedWallet,
+  updateUIStatus,
+  updateNewWalletVariables,
+  handleDepositType
 };

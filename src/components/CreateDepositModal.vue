@@ -9,6 +9,7 @@
 <script setup>
 import DepositModal from "./dashboard/DepositModal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
+import { createPortfolioThenDeposit} from "@/api";
 
 const portfolioStore = usePortfolios();
 
@@ -21,8 +22,10 @@ const props = defineProps({
 	},
 });
 
-function createDepositAction() {
+async function createDepositAction() {
 	console.log("Opened Create Deposit Action");
-	portfolioStore.depositDialog = true;
+	
+	portfolioStore.depositDialog = true;//THIS LINE OPENS MODAL BUT MAKES MESTAMASK NOT OPEN AUTOMATICALLY
+	
 }
 </script>
