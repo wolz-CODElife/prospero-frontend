@@ -11,9 +11,10 @@
 					class="mx-auto w-[150px]"
 				/>
 
+				<!-- QUARTERLY PERFORMANCE BONUS POOL -->
 				<div
 					class="text-center w-[220px] bg-pool mb-[40px] py-[16px] px-[28px] bg-[url('https://i.postimg.cc/mgjp5LvY/image.png')]"
-					v-if="layout === 'manager'"
+					v-if="path === 'manage'"
 				>
 					<h1 class="text-white uppercase text-[12px]">
 						QUARTERLY PERFORMANCE BONUS POOL
@@ -44,6 +45,7 @@
 					</div>
 				</div>
 
+				<!-- Wallet Address  -->
 				<WalletAddress :address="address" @doLogout="logoutWallet" />
 
 				<div class="bg-[#2D3035] my-[40px] h-[1px]" />
@@ -53,11 +55,16 @@
 					<li
 						v-for="(nav, i) in navs"
 						:key="i"
-						class="px-[24px] py-[8px] text-base text-white uppercase bg-[#2D3035]"
-						:class="{
-							'bg-[#005A57]': activePage($route.path, nav.title),
-						}"
+						class="px-[24px] py-[8px] text-base text-white uppercase"
+						:class="[
+							activePath === nav.link ? 'bg-[#005A57]' : 'bg-[#2D3035]',
+						]"
 					>
+						<!-- <button
+          @click="changeRoute()"
+          >
+
+          </button> -->
 						<RouterLink
 							:to="nav.link"
 							class="flex items-center gap-x-[16px] text-[16px] nav-title"
@@ -86,9 +93,12 @@ import { useRouter } from "vue-router";
 
 const { currentRoute } = useRouter();
 
-const layout = computed(() => {
-	console.log("current route is: ", currentRoute);
-	return currentRoute.value.meta.layout;
+const path = computed(() => {
+	return currentRoute.value.name;
+});
+
+const activePath = computed(() => {
+	return currentRoute.value.path;
 });
 
 const { state, disconnectWallet } = connect();
@@ -163,6 +173,8 @@ function activePage(link, title) {
 	if (title.toLowerCase() === path && re.test(link)) return true;
 	return false;
 }
+
+function changeRoute() {}
 </script>
 
 <style>

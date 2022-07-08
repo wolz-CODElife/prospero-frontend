@@ -28,8 +28,12 @@
 		</div>
 
 		<!-- Pie chart  -->
-		<div class="mt-[32px]">
-			<img src="https://i.postimg.cc/KjHz2Jzs/image.png" alt="" />
+		<div class="mt-[90px]">
+			<img
+				src="https://i.postimg.cc/KjHz2Jzs/image.png"
+				alt=""
+				class="w-[250px] mx-auto"
+			/>
 		</div>
 	</div>
 </template>

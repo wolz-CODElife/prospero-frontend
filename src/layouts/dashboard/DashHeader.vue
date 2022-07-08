@@ -3,7 +3,7 @@
 		<div class="grid grid-cols-12 h-full text-[#868C9D] bg-black">
 			<!-- Left side of header  -->
 			<div
-				class="col-span-8 bg-black pl-[30px] py-[20px] border"
+				class="col-span-8 bg-black pl-[30px] py-[10px] border"
 				:class="[
 					portfolioStore.activeHeader === 'left'
 						? 'border-white border-b-0'
@@ -95,7 +95,7 @@
 
 			<!-- Right side of header  -->
 			<div
-				class="col-span-4 bg-black border py-[40px]"
+				class="col-span-4 bg-black border py-[20px]"
 				:class="[
 					portfolioStore.activeHeader === 'left'
 						? 'border-black border-b-white'
