@@ -1,21 +1,21 @@
 <template>
 	<div
-		class="border border-t-0 border-white w-full grid grid-cols-12 gap-[10px] pt-[10px]"
+		class="border border-t-0 border-white w-full min-h-fit grid grid-cols-12 gap-[10px] pt-[10px]"
 	>
-		<div class="col-span-4 grid grid-rows-5 gap-[10px]">
+		<div class="col-span-4 grid grid-rows-5 gap-y-[10px]">
 			<!-- Pie chart  -->
-			<PieChartContainer />
+			<PieChartContainer class="" />
 
 			<!--Social Media  -->
-			<Socials v-bind="$attrs" />
+			<Socials v-bind="$attrs" class="" />
 		</div>
 
 		<div class="col-span-8 grid grid-rows-5 gap-[10px]">
 			<!-- Line chart  -->
-			<div class="row-span-2 bg-[#191A20]"></div>
+			<div class="bg-[#191A20] row-span-2"></div>
 
 			<!--Table  -->
-			<Table v-bind="$attrs" />
+			<Table v-bind="$attrs" class="row-span-3" />
 		</div>
 	</div>
 </template>

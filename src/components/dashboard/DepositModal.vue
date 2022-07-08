@@ -89,15 +89,15 @@
 			</button>
 
 			<!-- Deposit  -->
-			<button
-				@click="$emit('depositAction')"
-				class="basis-1/2 btn btn-primary"
-				:class="
+			<!-- :class="
 					disableDeposit
 						? 'opacity-50 cursor-text'
 						: 'opacity-1 cursor-pointer'
 				"
-				:disabled="disableDeposit"
+				:disabled="disableDeposit" -->
+			<button
+				@click="$emit('depositAction')"
+				class="basis-1/2 btn btn-primary"
 			>
 				Deposit
 			</button>
@@ -182,7 +182,7 @@
 </template>
 
 <script setup>
-import { getBalancesInEoa, deposit, updateAmount} from "@/api";
+import { getBalancesInEoa, deposit, updateAmount } from "@/api";
 import { onMounted, computed, ref } from "vue";
 import Modal from "../Modal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
@@ -221,30 +221,30 @@ const tokenList = ref([]);
 ]);
 */
 
- onMounted(() => {
- 	getTokenList();
- });
+onMounted(() => {
+	getTokenList();
+});
 
- async function getTokenList() {
- 	try {
- 		tokenList.value = await getBalancesInEoa();
- 		console.log("token list is:", tokenList.value);
- 	} catch (error) {
- 		console.log(error);
- 	}
- }
+async function getTokenList() {
+	try {
+		tokenList.value = await getBalancesInEoa();
+		console.log("token list is:", tokenList.value);
+	} catch (error) {
+		console.log(error);
+	}
+}
 
 async function depositToPortfolio() {
 	firstView.value = false;
-	
+
 	try {
 		loading.value = true;
 		const res = await deposit();
 		loading.value = false;
 		console.log(res);
-		if (res.success){
+		if (res.success) {
 			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
-			console.log("usdAmountOfGas to show in modal:"+usdAmountOfGas);
+			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
 		}
 	} catch (error) {
 		error.value = true;

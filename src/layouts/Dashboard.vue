@@ -1,7 +1,7 @@
 <template>
-	<div class="grid grid-cols-[300px_1fr] gap-0">
+	<div class="grid grid-cols-[300px_1fr] gap-0 max-h-screen">
 		<Sidebar class="w-[300px]" />
-		<main class="p-[28px]">
+		<main class="py-[14px] px-[28px]">
 			<JoinDepositModal
 				v-if="joinView"
 				@go-back="goBack"
