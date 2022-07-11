@@ -88,7 +88,90 @@ var UI_DEPOSIT_MY_PORTFOLIO = 3
 //account history (see image )
 //contracts - add no more investors and change % fee for leader
 
+//manage - kachi
+function getTokenListForManageUI(){
+  console.log('getTokenListForManageUI')
+  if (selectedProsperoWalletAddress==null || selectedProsperoWalletAddress==undefined){
+    console.log("selectedProsperoWalletAddress is null")
+    return [{}];
+    return;
+  }
+  var portToManage = []
+  var portfolio = getLeadersPortfolioForAddress(selectedProsperoWalletAddress);
+  for (var key in portfolio) {
+    if (keyIsTokenAddressNew(key)){
+      var price = portfolio[key]['price']
+      var name = portfolio[key]['symbol']
+      var allocation = portfolio[key]['percentage']
+      var uiObj = {
+        price:price,
+        name:name,
+        uiObj:uiObj
+      }
+      portToManage.push(uiObj);
+    }
+    /*
+    name: "KBTC ",
+		price: 120,
+		mc: 340,
+		allocation: 33,
+		d7: 10,
+		d30: 20,
+		d90: 30,
+		y1: 120,
+
+
+    "totalValue": 3073.8131865138007,
+    "totalUsd": 2840.413199702937,
+    "profit": 233.39998681086354,
+    "0xaa425487e19499171991397c29da7ba5c2c5d248": {
+      "usdValue": 3073.8131865138002,
+      "balance": "141236795768630974",
+      "percentage": 0.9999999999999999,
+      "name": "Wrapped BTC",
+      "symbol": "WBTC.e",
+      "price": 21763.54376907,
+      "twentyFourHour": 872.418310043064,
+      "image": "https://raw.githubusercontent.com/ava-labs/avalanche-bridge-resources/main/tokens/WBTC/logo.png"
+    },
+    "prosperoWalletAddress": "0x45adf1db8c12e68928712d8a20b5b342c3c47bc8",
+    "profitLeader": 233.39998681086308,
+    "walletValues": {
+      "ProsperoBeaconFactoryAddress": "0x377D251772a4FCd2C039C718b14e229364bdC04e",
+      "leaderEOA": "0xeeca92f4eb0b3102a62a414f1ff6290fFE23B67d",
+      "prosperoPricesAddress": "0x3eac8c5D6518D434CB27E12f8b6565ed50B5b992",
+      "prosperoDataAddress": "0x6264915AC05931470C35beccD6847dEB1F5B5fBd",
+      "prosperoWalletAddress": "0x45adF1db8c12E68928712D8A20b5b342C3C47bC8",
+      "walletName": "testers wallet",
+      "profilePictureUrl": "",
+      "totalSupply_percentageOwnership": "2850015852606667454968",
+      "leaderPercentageFee": "200000000000000000",
+      "prosperoPercentageFeeOfLeader": "200000000000000000"
+    },
+    "walletName": "testers wallet",
+    "leaderPercentageFee": "200000000000000000",
+    "prosperoPercentageFeeOfLeader": "200000000000000000",
+    "numberOfTrailers": 3,
+    "profitPercentage": 0.07593174101630303
+  },
+    */
+  }
+  return portToManage;
+}
+function keyIsTokenAddressNew(aKey){
+  for (var i=0;i<tokenArray.length;i++){
+    var thisAdd = tokenArray[i]['address']
+    thisAdd = thisAdd.toLowerCase();
+    aKey = aKey.toLowerCase();
+    if (thisAdd == aKey){
+      return true;
+    }
+  }
+  return false;
+}
+
 function updateUIStatus(newUIStatusType){
+  console.log("updateUIStatus called with:"+newUIStatusType);
   UIStatus = newUIStatusType;
 }
 
@@ -98,14 +181,21 @@ function updateNewWalletVariables(walletName, fundFee){
 
 
 async function handleDepositType(){
-  console.log("handleDepositType")
+  console.log("handleDepositType UIStatus:"+UIStatus)
   if (UIStatus == UI_CREATE_THEN_DEPOSIT){
+    console.log("UI_CREATE_THEN_DEPOSIT")
     var res = await createPortfolioThenDeposit();
   }else if (UIStatus == UI_JOIN_THEN_DEPOSIT){
+    console.log(" UI_JOIN_THEN_DEPOSIT")
     var res = await joinPortfolioThenDeposit();
   }else if (UIStatus == UI_DEPOSIT_MY_PORTFOLIO){
+    console.log(" UI_DEPOSIT_MY_PORTFOLIO")
     var res = await deposit();
+  }else{
+  console.log("ERROR - no UI STATUS FOUND")
   }
+  console.log("done handleDeposit")
+
   return res;
 }
 
@@ -248,9 +338,9 @@ function daysBetween(date_1, date_2){
 }
 async function getWithdrawTableData(){
   withdrawTableData=[]
-  var portfolio = await getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd()
+  var portfolio = await getMyWallet()
   for (var key in portfolio) {
-    if(keyIsTokenAddress(key, portfolio)){
+    if(keyIsTokenAddress(key)){
       var thisObj=portfolio[key]
       thisObj['address']=key;
       withdrawTableData.push(thisObj)
@@ -260,7 +350,7 @@ async function getWithdrawTableData(){
   return withdrawTableData;
 }
 async function getChartDataSelectedMyPortfolio(){
-  var portfolio = await getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd();
+  var portfolio = await getMyWallet();
   var percentages = []
   var labels = []
   var colorArray=[]
@@ -305,7 +395,7 @@ function getLeadersPortfolioForAddress(prosperoWalletAddress){
       return leaderBoardData[i];
     }
   }
-  console.error("** getLeadersPortfolioForAddress - no portfolio found **")
+  console.error("** getLeadersPortfolioForAddress - no portfolio found ** prosperoWalletAddress:"+prosperoWalletAddress)
 }
 async function getChartDataSelectedLeader(){
   if (leaderBoardData.length==0){
@@ -403,8 +493,18 @@ function  keyIsTokenAddress(key, obj){
   }
   return false
 }
+
+function getMyWallet(){
+  if (selectedProsperoWalletAddress==null || selectedProsperoWalletAddress==undefined || selectedProsperoWalletAddress==""){
+    console.error("** error selectedProsperoWalletAddress is empty **")
+    return;
+  }
+  return  myWallets[selectedProsperoWalletAddress];
+}
+
+//Left side header - Kachi
 async function updateUIFieldValuesMyPortfolioMyPortfolio(){
-  var portfolio = await getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd();
+  var portfolio = getMyWallet();
   var myHoldings = portfolio.totalValue;
   var usdInvested = portfolio.usdInvested
   var deposits = portfolio.totalUsd;
@@ -464,6 +564,8 @@ async function updateUIFieldValuesMyPortfolioMyPortfolio(){
   }
   //TO DO - UPDATE UI
 }
+
+//Right side header - Kachi
 async function updateUIFieldValuesLeaderboard(){
   var portfolio = getLeadersPortfolioForAddress(selectedProsperoWalletAddress);
   var name = portfolio.walletName;
@@ -976,8 +1078,10 @@ async function updateHistoryChartsDataObject(walletAddress, dataForHistoryChart,
 async function withdraw(tokenSwappingInto, amountToWithdraw){
   try{
     var valueOfUsersPortfolioBefore = await getValueOfUsersPortfolio(selectedProsperoWalletAddress, EOAAddress, false)
-    //console.log('valueOfUsersPortfolio before:'+valueOfUsersPortfolioBefore)
-    console.log('withdraw amountToWithdraw            :'+(amountToWithdraw/USD_SCALE))
+    console.log('valueOfUsersPortfolio before:'+valueOfUsersPortfolioBefore);
+    amountToWithdraw = (amountToWithdraw * USD_SCALE);
+    amountToWithdraw = parseInt(amountToWithdraw);
+    console.log("amountScaled:"+amountToWithdraw);
     var otherToken;
     var balSwappingIntoTokenBefore;
     if (tokenSwappingInto.length>0){
@@ -1430,12 +1534,13 @@ return balancesInEoa;
 }
 
 function updateSelectedWallet(prosperoWalletAddress){
+  console.log("updateSelectedWallet called with:"+prosperoWalletAddress)
   selectedProsperoWalletAddress=prosperoWalletAddress;
 }
 
 async function joinPortfolio(){
 
-  console.log("joingPortfolio called with:"+selectedProsperoWalletAddress)
+  console.log("joingPortfolio called with selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
   try{
     var prosperoBeaconFactoryInstance = await new ethers.Contract(factoryAddress, ProsperoBeaconFactoryJson.abi,  ethersSigner);
     var tx = await prosperoBeaconFactoryInstance.newTrailerWallet(
@@ -1790,7 +1895,7 @@ async function initializeDataObjects(){
     return status;
   }
   blockNumWhenWebAppLaunched = await web3.eth.getBlockNumber();
-  await initNewEventListener();
+  //await initNewEventListener();
 
   status = await updatePrices();
   if (!status.success){
@@ -1803,7 +1908,7 @@ async function initializeDataObjects(){
     return status;
   }
   await createMyWalletsDataAndUIObject();
-  var port = await getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd();
+  var port = await getMyWallet();
   await getHistoricalPricesUpdateChartsData();
 	//await getBalancesInEoa();
   return {success:true}
@@ -1842,6 +1947,8 @@ async function initializeBlockchainConnection(){
     return {success:false, error: "Could not find wallet"}
 
   }
+  //udates selectedProsperoWalletAddres to last wallet on init
+  //getMyWallet();
   ethersProvider = await new ethers.providers.Web3Provider(window.ethereum);
   ethersSigner = ethersProvider.getSigner();
   web3 = new Web3(window.ethereum);
@@ -2098,8 +2205,13 @@ async function createMyWalletsDataAndUIObject(){
   //console.log("myWallets***:"+JSON.stringify(myWalletsFromContract,null,2))
   //console.log("myWalletTypes:"+myWalletTypes.length)
   myWallets = {}
+  var firstWallet = ""
   for (var i=0;i<myWalletsFromContract.length;i++){
+
     var thisWalletAddress = myWalletsFromContract[i].toLowerCase();
+    if (i==0){
+      firstWallet=thisWalletAddress;
+    }
     //console.log('thisWalletAddress:'+thisWalletAddress)
     var thisWalletsObj = await getValueOfBalancesOfTokensInPortfolioForUser(null, EOAAddress, thisWalletAddress)
     var walletValues = await getWalletValues(thisWalletAddress)
@@ -2116,12 +2228,14 @@ async function createMyWalletsDataAndUIObject(){
     myWallets[thisWalletAddress]=thisWalletsObj
   }
   console.log("myWallets:"+JSON.stringify(myWallets,null,2))
+  console.log("setting first wallet to prosperoWalletAddress");
+  selectedProsperoWalletAddress=firstWallet;
   //myWallets=myWallets;
   await updateMyPortfoliosDataForTable();
 }
 
 async function updateMyPortfoliosDataForTable(){
-  console.log("getMyPortfoliosDataForTable called")
+  console.log("updateMyPortfoliosDataForTable")
   //right here
   //console.log("myPortfoliosDataOverTime:"+JSON.stringify(myPortfoliosDataOverTime,null,2))
   myPortfolioDataForTable=[]
@@ -2393,5 +2507,6 @@ export {
   updateSelectedWallet,
   updateUIStatus,
   updateNewWalletVariables,
-  handleDepositType
+  handleDepositType,
+  getTokenListForManageUI
 };

@@ -39,7 +39,6 @@ const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 
 function doJoin() {
 	joinView.value = true;
-
 }
 
 function doCreate() {

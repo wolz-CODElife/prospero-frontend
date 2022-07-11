@@ -257,7 +257,7 @@ async function depositToPortfolio() {
 			error.value = true;
 			console.log(error);
 		}
-		console.log("Done with create portfolio and deposit");
+		console.log("done");
 		
 
 }

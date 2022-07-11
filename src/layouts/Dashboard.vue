@@ -68,22 +68,23 @@ const createView = ref(false);
 const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 
 function doJoin() {
-	console.log('doJoin function')
-	updateUIStatus(2)
+	console.log('doJoin function caing - dashboard')
+	//updateUIStatus(2)
 	joinView.value = true;
 }
 
 function doJustDeposit() {
-	console.log('doJuseDeposit function')
+	console.log('doJuseDeposit function caing updateUIStatus(3)')
 	updateUIStatus(3)
 	joinView.value = true;
 }
 
 function doCreate() {
-	console.log('doCreate function')
+	console.log('doCreate function caing updateUIStatus(1)')
 	updateUIStatus(1)
 	createView.value = true;
 }
+
 
 function goBack() {
 	if (joinView.value) {

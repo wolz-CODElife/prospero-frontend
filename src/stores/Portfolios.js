@@ -8,7 +8,6 @@ import {
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
 		return {
-			
 			allPortfolios: [],
 			/*
 				{
@@ -58,7 +57,53 @@ export const usePortfolios = defineStore("Portfolios", {
 				},
 			],
 */
-			myPortfolios: [],
+			myPortfolios: [
+				{
+					name: "New User",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: true,
+				},
+				{
+					name: "Harry Mcguire",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+				{
+					name: " 🌈 Lulu Nation Fans",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+				{
+					name: "GX 650 Lords 🏖",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+				{
+					name: "Moon Gatekeepers",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
+			],
 			/*
 				{
 					name: "AFS1000 🔱",
@@ -182,7 +227,7 @@ export const usePortfolios = defineStore("Portfolios", {
 	actions: {
 		// Fill empty portfolio list with an API call
 		async getAllPortfolios() {
-			console.log("getAllPortfolios called")
+			console.log("getAllPortfolios called");
 			try {
 				this.allPortfolios = await getLeaderBoardDataForTable();
 			} catch (error) {
@@ -192,7 +237,7 @@ export const usePortfolios = defineStore("Portfolios", {
 
 		async getMyPortfolios() {
 			try {
-				console.log("getMyPortfolios called")
+				console.log("getMyPortfolios called");
 				this.myPortfolios = await getMyPortfoliosDataForTable();
 			} catch (error) {
 				console.log(error);
@@ -200,7 +245,7 @@ export const usePortfolios = defineStore("Portfolios", {
 		},
 
 		doSelectPortfolio(val) {
-			//console.log("doSelectPortfolio called with val:"+JSON.stringify(val,null,2))
+			console.log("doSelectPortfolio called with val:"+JSON.stringify(val,null,2))
 			this.selectedPortfolio = val;
 			this.activeHeader = "right";
 			updateSelectedWallet(val.prosperoWalletAddress)
@@ -245,6 +290,14 @@ export const usePortfolios = defineStore("Portfolios", {
 				d90: 0,
 				y1: 0,
 			};
+		},
+
+		goBack() {
+			this.tableView = true;
+			this.activePortfolioType = "All Portfolios";
+			this.activeMode = "join";
+			this.activeHeader = "left";
+			this.reset();
 		},
 
 		updateActiveOverview(asset) {

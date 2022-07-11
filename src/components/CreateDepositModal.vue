@@ -24,8 +24,7 @@ const props = defineProps({
 
 async function createDepositAction() {
 	console.log("Opened Create Deposit Action");
-	
-	portfolioStore.depositDialog = true;//THIS LINE OPENS MODAL BUT MAKES MESTAMASK NOT OPEN AUTOMATICALLY
+	portfolioStore.depositDialog = true;
 	
 }
 </script>

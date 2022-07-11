@@ -10,7 +10,11 @@
 			<p class="text-[#C3C7CD] text-[14px]">{{ props.desc }}</p>
 		</div>
 
-		<img :src="props.icon" alt="" />
+		<img
+			:src="props.icon"
+			alt=""
+			class="w-[150px] max-h-[90%] object-contain"
+		/>
 
 		<img src="https://i.postimg.cc/L8298gb5/image.png" alt="" />
 	</button>
