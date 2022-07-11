@@ -981,7 +981,7 @@ async function doWithdraw() {
 	//to do - add tokens swapping into
 	try {
 		console.log("do ")
-		const res = await withdraw([], amount);
+		const res = await withdraw([], amount.value);
 		console.log(res);
 		if (res.success){
 			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;

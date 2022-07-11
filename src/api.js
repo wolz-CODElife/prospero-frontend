@@ -1075,7 +1075,12 @@ async function updateHistoryChartsDataObject(walletAddress, dataForHistoryChart,
     dataForHistoryChart[walletAddress].push({date:thisDate, profit: profit, value:totalValue, usdInvested: lastUsdInvested})
   }
 }
+
+//withdraw - kachi
+//tokenSwappingInto is an array of addresses swapping into, can only be of length 1 or 0.  So if you are 
+//not swapping into any tokens, just have an empty array - []
 async function withdraw(tokenSwappingInto, amountToWithdraw){
+  console.log("withdraw called:"+tokenSwappingInto+" amountToWithdraw:"+amountToWithdraw)
   try{
     var valueOfUsersPortfolioBefore = await getValueOfUsersPortfolio(selectedProsperoWalletAddress, EOAAddress, false)
     console.log('valueOfUsersPortfolio before:'+valueOfUsersPortfolioBefore);
@@ -1159,6 +1164,10 @@ async function withdraw(tokenSwappingInto, amountToWithdraw){
     return {success:false, error:e}
   }
 }
+
+//for manage portfolio (rebalanceing) - kachi
+//tokenAddressesToRemix is an array of string token addresses
+//percentages is an array of percentages allocations [33, 67]
 async function rebalance(percentages, tokenAddressesToRemix){
   console.log("rebalance percentagesIn:"+percentages+" tokenAddressesToRemix:"+tokenAddressesToRemix)
   var thisWalletsObjBefore = await getValueOfBalancesOfTokensInPortfolioForUser(null, EOAAddress, selectedProsperoWalletAddress)
