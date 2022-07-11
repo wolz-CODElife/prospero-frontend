@@ -12,7 +12,7 @@
 						<span v-if="portfolioStore.selectedPortfolio.name">
 							{{ portfolioStore.selectedPortfolio.name }}
 						</span>
-						<span class="text-white text-[14px]" v-else
+						<span class="text-white text-[14px] uppercase" v-else
 							>Select a portfolio</span
 						>
 						<img

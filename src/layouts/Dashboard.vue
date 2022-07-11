@@ -32,7 +32,7 @@
 import { ref, computed, onBeforeMount, onMounted } from "vue";
 import { updateUIStatus } from "@/api";
 import Sidebar from "./dashboard/Sidebar.vue";
-import DashHeader from "./dashboard/DashHeader.vue";
+import DashHeader from "./dashboard/header/DashHeader.vue";
 import DashMain from "./dashboard/DashMain.vue";
 import JoinDepositModal from "@/components/JoinDepositModal.vue";
 import CreateDepositModal from "@/components/CreateDepositModal.vue";
