@@ -1,7 +1,7 @@
 <template>
-	<div class="grid grid-cols-[300px_1fr] gap-0 max-h-screen">
+	<div class="grid grid-cols-[300px_1fr] gap-0">
 		<Sidebar class="w-[300px]" />
-		<main class="py-[14px] px-[28px]">
+		<main class="z-10 bg-[#2D3035] p-[28px] relative">
 			<JoinDepositModal
 				v-if="joinView"
 				@go-back="goBack"
@@ -19,6 +19,7 @@
 
 				<DashMain
 					@do-join="doJoin"
+					@do-justDeposit="doJustDeposit"
 					@do-create="doCreate"
 					:disabled="smDisabled"
 				/>
@@ -29,7 +30,7 @@
 
 <script setup>
 import { ref, computed, onBeforeMount, onMounted } from "vue";
-import { joinPortfolio, createPortfolio, deposit } from "@/api";
+import { updateUIStatus } from "@/api";
 import Sidebar from "./dashboard/Sidebar.vue";
 import DashHeader from "./dashboard/header/DashHeader.vue";
 import DashMain from "./dashboard/DashMain.vue";
@@ -67,26 +68,20 @@ const createView = ref(false);
 const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 
 function doJoin() {
+	console.log("doJoin function caing - dashboard");
+	//updateUIStatus(2)
 	joinView.value = true;
-	//console.log("doJoin called");
-	//(async () => {
-	//	var status = await joinPortfolio();
-	//	if (!status.success) {
-	//		console.log(status.error);
-	//		//error code here
-	//	}
-	//})();
+}
+
+function doJustDeposit() {
+	console.log("doJuseDeposit function caing updateUIStatus(3)");
+	updateUIStatus(3);
+	joinView.value = true;
 }
 
 function doCreate() {
-	console.log("CREATE..");
-	(async () => {
-		var status = await createPortfolio("Created wallet name here", 20);
-		if (!status.success) {
-			console.log(status.error);
-			//error code here
-		}
-	})();
+	console.log("doCreate function caing updateUIStatus(1)");
+	updateUIStatus(1);
 	createView.value = true;
 }
 
@@ -96,7 +91,7 @@ function goBack() {
 	} else {
 		portfolioStore.activeMode = "create";
 	}
-	portfolioStore.goBack();
+	portfolioStore.reset();
 	joinView.value = false;
 	createView.value = false;
 }
@@ -106,7 +101,7 @@ function redirect() {
 		portfolioStore.activeMode = "join";
 		portfolioStore.activePortfolioType = "My Portfolios";
 		// portfolioStore.myPortfolios.push()
-		portfolioStore.goBack();
+		portfolioStore.reset();
 	} else {
 		// todo: populate my portfolios array with this new deposit
 		// - if it's a new portfolio you're creating i.e first deposit,
@@ -126,29 +121,9 @@ function redirect() {
 			d90: 0,
 			y1: 0,
 		};
-		portfolioStore.myPortfolios.push({
-			...portfolioStore.selectedPortfolio,
-			created: true,
-		});
+		portfolioStore.createdPortfolios.push(portfolioStore.selectedPortfolio);
 	}
 	joinView.value = false;
 	createView.value = false;
 }
 </script>
-
-<style>
-@font-face {
-	font-family: "Neurial Grotesk", sans-serif;
-	src: url(@/assets/fonts/NeurialGrotesk-Regular.otf) format("opentype");
-}
-
-body {
-	font-family: "Neurial Grotesk";
-}
-
-main {
-	background: #1f2127 url(https://i.postimg.cc/bwgqP5RR/Backgd.png) no-repeat
-		right bottom;
-	background-size: cover;
-}
-</style>

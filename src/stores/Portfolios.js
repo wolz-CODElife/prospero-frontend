@@ -1,11 +1,8 @@
 import { defineStore } from "pinia";
 import {
 	getLeaderBoardDataForTable,
-	updateActiveLeaderboardRow,
-	createPortfolio,
-	getBalancesInEoa,
-	deposit,
 	getMyPortfoliosDataForTable,
+	updateSelectedWallet
 } from "@/api";
 
 export const usePortfolios = defineStore("Portfolios", {
@@ -199,10 +196,10 @@ export const usePortfolios = defineStore("Portfolios", {
 		},
 
 		doSelectPortfolio(val) {
-			// todo: on all portfolios, filter myPortfolios, and if you find this portfolio - val,
-			// disable join button, (maybe show deposit instead)
+			console.log("doSelectPortfolio called with val:"+JSON.stringify(val,null,2))
 			this.selectedPortfolio = val;
 			this.activeHeader = "right";
+			updateSelectedWallet(val.prosperoWalletAddress)
 		},
 
 		toggleActiveHeader() {
