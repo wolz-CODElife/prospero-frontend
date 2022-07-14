@@ -11,9 +11,7 @@
 import Sidebar from "./dashboard/Sidebar.vue";
 
 // Route protection
-// onBeforeMount(() => {
-// 	if (!JSON.parse(localStorage.getItem("userState")).status) {
-// 		window.location.replace("/");
-// 	}
-// });
+ onMount(() => {
+ 	console.log("MANAGE...");
+ });
 </script>

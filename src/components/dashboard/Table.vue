@@ -34,7 +34,7 @@
 						v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
 					>
 						<button
-							@click="$emit('doJoin')"
+							@click="$emit('doJoin'), updateUIStatusAPICaller(2)"
 							class="btn btn-primary w-[125px]"
 							:class="
 								disabled
@@ -60,7 +60,7 @@
 					<!-- Deposit / withdraw  -->
 					<div class="flex items-center gap-[12px]" v-else>
 						<button
-							@click="$emit('doJoin')"
+							@click="$emit('doJoin'), updateUIStatusAPICaller(3)"
 							class="btn btn-primary w-[125px]"
 							:class="
 								disabled
@@ -290,7 +290,7 @@
 
 							<!-- Open Deposit Modal  -->
 							<button
-								@click="$emit('doCreate'), assignName()"
+								@click="$emit('doCreate'), assignName(), updateNameAndFeeApi()"
 								class="btn btn-primary"
 								:class="
 									disabledDepToPortfolio
@@ -824,8 +824,9 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
+import { withdraw, updateNewWalletVariables, updateUIStatus, getTokenListForManageUI} from "@/api";
 import Modal from "../Modal.vue";
 import WithdrawalCard from "./WithdrawalCard.vue";
 import WcOverview from "./WcOverview.vue";
@@ -865,8 +866,8 @@ const wcTwo = ref({
 	desc: "You are withdrawing an even amount of portfolio tokens directly to your wallet.",
 });
 
-const tokenList = ref([
-	{
+const tokenList = ref([]);
+/*	{
 		name: " Test",
 		price: 19,
 		mc: 340,
@@ -886,7 +887,8 @@ const tokenList = ref([
 		d90: 30,
 		y1: 120,
 	},
-]);
+]);*/
+
 
 const disabled = ref(true);
 
@@ -920,6 +922,25 @@ const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
 
+
+function getTokenListForManage() {
+	console.log("getTokenListForManage");
+ 	try {
+ 		tokenList.value = getTokenListForManageUI();
+ 		console.log("getTokenListForManage token list is:", tokenList.value);
+ 	} catch (error) {
+ 		console.log(error);
+ 	}
+ }
+  //async function getTokenList() {
+ //	try {
+ //		tokenList.value = await getWithdrawTableData()();
+ //		//console.log("token list is:", tokenList.value);
+ //	} catch (error) {
+ //		console.log(error);
+ //	}
+ //}
+
 const disableWithdraw = computed(() => {
 	if (swap.value) {
 		!amount.value || !singleToken.value;
@@ -946,8 +967,33 @@ const remAllocation = computed(() => {
 	return 100 - totalAllocation.value;
 });
 
-function doWithdraw() {
-	// todo: add api call
+function updateNameAndFeeApi(){
+	console.log("updateNameAndFeeApi portfolioName:"+portfolioName.value+" fundFee:"+fundFee.value);	
+	updateNewWalletVariables(portfolioName.value, fundFee.value);
+ }
+ function updateUIStatusAPICaller(uiType){
+	console.log("updateUIStatusAPICaller with type:"+uiType);
+	updateUIStatus(uiType);
+ }
+
+
+async function doWithdraw() {
+	//to do - add tokens swapping into
+	try {
+		console.log("do ")
+		const res = await withdraw([], amount.value);
+		console.log(res);
+		if (res.success){
+			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
+			console.log("usdAmountOfGas to show in modal:"+usdAmountOfGas);
+		}else{
+			error.value = true;
+			console.log(success.error);
+		}
+	} catch (error) {
+		error.value = true;
+		console.log(error);
+	}
 	firstView.value = false;
 	loading.value = false;
 	error.value = false;
