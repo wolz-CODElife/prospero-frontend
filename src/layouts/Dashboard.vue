@@ -1,7 +1,7 @@
 <template>
 	<div class="grid grid-cols-[300px_1fr] gap-0">
 		<Sidebar class="w-[300px]" />
-		<main class="z-10 bg-[#2D3035] p-[28px] relative">
+		<main class="z-10 bg-[#2D3035] p-[28px] max-h-[100vh] relative">
 			<JoinDepositModal
 				v-if="joinView"
 				@go-back="goBack"
@@ -14,7 +14,7 @@
 				@redirect="redirect"
 			/>
 
-			<div v-else>
+			<div v-else class="max-h-[calc(100vh-56px)]">
 				<DashHeader />
 
 				<DashMain
@@ -47,18 +47,18 @@ onBeforeMount(async () => {
 		window.location.replace("/");
 	}
 	// todo: optimize nested try blocks
-	try {
-		console.log("calling initializeAPI");
-		await initializeApi();
-		try {
-			portfolioStore.getAllPortfolios();
-			portfolioStore.getMyPortfolios();
-		} catch (error) {
-			console.log("get all portfolios error", error);
-		}
-	} catch (error) {
-		console.log("init error", error);
-	}
+	//  try {
+	// 	console.log("calling initializeAPI");
+	// await initializeApi();
+	// try {
+	// 	portfolioStore.getAllPortfolios();
+	// 	portfolioStore.getMyPortfolios();
+	// } catch (error) {
+	// 	console.log("get all portfolios error", error);
+	// }
+	//  } catch (error) {
+	//  	console.log("init error", error);
+	//  }
 });
 
 const joinView = ref(false);

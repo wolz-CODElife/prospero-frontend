@@ -2064,13 +2064,13 @@ async function updatePrices(){
         }
       }
     }catch(e){
-      console.log("updatePricesNew exception1:"+e);
-      alert('Could not get prices from ProsperoPrices, please reload page :'+e)
+      // console.log("updatePricesNew exception1:"+e);
+      // alert('Could not get prices from ProsperoPrices, please reload page :'+e)
       return {success:false, error:'Could not get prices from ProsperoPrices, please reload page :'+e}
     }
   }catch(e){
-    console.log("updatePricesNew exception2:"+address)
-    alert('Could not get prices from coingecko, please reload page :'+e)
+    // console.log("updatePricesNew exception2:"+address)
+    // alert('Could not get prices from coingecko, please reload page :'+e)
     return {success:false, error:'Could not get prices from ProsperoPrices, please reload page :'+e}
   }
   return {success:true}
