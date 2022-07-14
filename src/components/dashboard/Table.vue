@@ -88,6 +88,7 @@
 				</div>
 
 				<!-- All Portfolios / My Portfolios Tables -->
+				<!-- todo: pagination and search  -->
 				<div class="my-[20px]">
 					<table class="table-auto w-full">
 						<thead>
@@ -290,7 +291,11 @@
 
 							<!-- Open Deposit Modal  -->
 							<button
-								@click="$emit('doCreate'), assignName(), updateNameAndFeeApi()"
+								@click="
+									$emit('doCreate'),
+										assignName(),
+										updateNameAndFeeApi()
+								"
 								class="btn btn-primary"
 								:class="
 									disabledDepToPortfolio
@@ -306,7 +311,7 @@
 
 					<!-- Manage Portfolio  -->
 					<div v-else>
-						<Select />
+						<Select placeholder="Select a portfolio to manage" />
 						<!-- select area  -->
 					</div>
 
@@ -314,12 +319,7 @@
 					<div v-if="!portfolioStore.firstCreateView">
 						<div class="flex items-center gap-[28px] p-[10px]">
 							<!-- + Add new token-->
-							<button
-								class="button text-[#00FF00] uppercase mr-auto"
-								@click="$emit('doCreate')"
-							>
-								+ Add new token
-							</button>
+							<Select placeholder="Search or select token" />
 
 							<!-- Change Fund fee -->
 							<div class="flex items-center gap-[10px]">
@@ -465,17 +465,12 @@
 
 			<!-- Manage Portfolio  -->
 			<div>
-				<Select />
+				<Select placeholder="Select a portfolio to manage" />
 				<!-- Allocation view  -->
 				<div>
 					<div class="flex items-center gap-[28px] p-[10px]">
 						<!-- + Add new token-->
-						<button
-							class="button text-[#00FF00] uppercase mr-auto"
-							@click="$emit('doCreate')"
-						>
-							+ Add new token
-						</button>
+						<Select placeholder="Search or select token" />
 
 						<!-- Change Fund fee -->
 						<div class="flex items-center gap-[10px]">
@@ -737,7 +732,7 @@
 		</div>
 	</Modal>
 
-	<!-- Direct to Wallet Modal -->
+	<!-- Withdrawal Modal -->
 	<Modal v-if="direct" @close="closeDirectModal()">
 		<div v-if="firstView" class="mx-[20px] my-[16px]">
 			<wc-overview />
@@ -826,13 +821,19 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
-import { withdraw, updateNewWalletVariables, updateUIStatus, getTokenListForManageUI} from "@/api";
+import {
+	withdraw,
+	updateNewWalletVariables,
+	updateUIStatus,
+	getTokenListForManageUI,
+} from "@/api";
 import Modal from "../Modal.vue";
 import WithdrawalCard from "./WithdrawalCard.vue";
 import WcOverview from "./WcOverview.vue";
 // import Filter from "../manage/Filter.vue";
 import { useRouter } from "vue-router";
 import Select from "../manage/Select.vue";
+import AddTokenBtn from "./AddTokenBtn.vue";
 
 const { currentRoute } = useRouter();
 
@@ -847,11 +848,11 @@ const portfolioStore = usePortfolios();
 // })
 
 const filteredAllPortfolios = computed(() =>
-	portfolioStore.allPortfolios.slice(0, 4)
+	portfolioStore.allPortfolios.slice(-4).reverse()
 );
 
 const filteredMyPortfolios = computed(() =>
-	portfolioStore.myPortfolios.slice(0, 4)
+	portfolioStore.myPortfolios.slice(-4).reverse()
 );
 
 const portfolioToShow = ref("");
@@ -889,7 +890,6 @@ const tokenList = ref([]);
 	},
 ]);*/
 
-
 const disabled = ref(true);
 
 const loading = ref(false);
@@ -922,24 +922,23 @@ const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
 
-
 function getTokenListForManage() {
 	console.log("getTokenListForManage");
- 	try {
- 		tokenList.value = getTokenListForManageUI();
- 		console.log("getTokenListForManage token list is:", tokenList.value);
- 	} catch (error) {
- 		console.log(error);
- 	}
- }
-  //async function getTokenList() {
- //	try {
- //		tokenList.value = await getWithdrawTableData()();
- //		//console.log("token list is:", tokenList.value);
- //	} catch (error) {
- //		console.log(error);
- //	}
- //}
+	try {
+		tokenList.value = getTokenListForManageUI();
+		console.log("getTokenListForManage token list is:", tokenList.value);
+	} catch (error) {
+		console.log(error);
+	}
+}
+//async function getTokenList() {
+//	try {
+//		tokenList.value = await getWithdrawTableData()();
+//		//console.log("token list is:", tokenList.value);
+//	} catch (error) {
+//		console.log(error);
+//	}
+//}
 
 const disableWithdraw = computed(() => {
 	if (swap.value) {
@@ -967,26 +966,30 @@ const remAllocation = computed(() => {
 	return 100 - totalAllocation.value;
 });
 
-function updateNameAndFeeApi(){
-	console.log("updateNameAndFeeApi portfolioName:"+portfolioName.value+" fundFee:"+fundFee.value);	
+function updateNameAndFeeApi() {
+	console.log(
+		"updateNameAndFeeApi portfolioName:" +
+			portfolioName.value +
+			" fundFee:" +
+			fundFee.value
+	);
 	updateNewWalletVariables(portfolioName.value, fundFee.value);
- }
- function updateUIStatusAPICaller(uiType){
-	console.log("updateUIStatusAPICaller with type:"+uiType);
+}
+function updateUIStatusAPICaller(uiType) {
+	console.log("updateUIStatusAPICaller with type:" + uiType);
 	updateUIStatus(uiType);
- }
-
+}
 
 async function doWithdraw() {
 	//to do - add tokens swapping into
 	try {
-		console.log("do ")
+		console.log("do ");
 		const res = await withdraw([], amount.value);
 		console.log(res);
-		if (res.success){
+		if (res.success) {
 			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
-			console.log("usdAmountOfGas to show in modal:"+usdAmountOfGas);
-		}else{
+			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
+		} else {
 			error.value = true;
 			console.log(success.error);
 		}

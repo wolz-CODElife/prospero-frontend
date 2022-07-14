@@ -13,8 +13,10 @@
 							{{ portfolioStore.selectedPortfolio.name }}
 						</span>
 						<span class="text-white text-[14px] uppercase" v-else
-							>Select a portfolio</span
-						>
+							><span class="mr-[18px]" v-if="search"
+								><img src="@/assets/img/Search.svg" alt="" /></span
+							><span>{{ placeholder }}</span>
+						</span>
 						<img
 							src="@/assets/img/left-angle.svg"
 							alt=""
@@ -26,6 +28,7 @@
 					<ul
 						v-if="open"
 						class="absolute bg-[#2D3035] mt-[8px] py-[4px] cursor-pointer w-full rounded shadow"
+						:class="dropdownClass"
 					>
 						<li
 							v-for="portfolio in portfolioStore.myPortfolios"
@@ -53,6 +56,18 @@ import { ref } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
 
 const portfolioStore = usePortfolios();
+
+defineProps({
+	placeholder: {
+		type: String,
+		default: "Select",
+	},
+	search: {
+		type: Boolean,
+		default: true,
+	},
+	dropdownClass: String,
+});
 
 const open = ref(false);
 
