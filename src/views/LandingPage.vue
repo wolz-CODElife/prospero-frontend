@@ -5,7 +5,6 @@
 		>
 	</div>
 
-	<!-- <AppAlert type="error"><p class="slot">Error message here</p></AppAlert> -->
 	<div class="bg-landing w-full h-full text-white pb-[60px] fixed">
 		<!-- Nav  -->
 		<nav class="flex items-center justify-end gap-16 pt-[24px] pr-28">
@@ -30,7 +29,7 @@
 			/>
 
 			<!-- Hero -->
-			<Hero tagline="Profits To The People" @open="toggleWallet" />
+			<Hero tagline="Profits To The People" @open="toggleWallet()" />
 		</div>
 
 		<!-- Connect WalletModal  -->
@@ -105,8 +104,6 @@ const err = ref({
 	type: "",
 });
 
-const isLoggedIn = ref;
-
 function toggleWallet() {
 	walletConnectModal.value = !walletConnectModal.value;
 }
@@ -137,6 +134,7 @@ async function connectMetaMaskWallet() {
 		};
 	}
 }
+
 async function connectCoin98() {
 	if (window.coin98 || window.ethereum?.isCoin98) {
 		const accounts = await ethereum.request({
@@ -178,6 +176,7 @@ async function useWalletConnect() {
 
 <style>
 .bg-landing {
-	background: #000 url("../assets/img/bg-landing.png") repeat;
+	background: #000 url("../assets/img/bg-landing.png") no-repeat;
+	background-size: cover;
 }
 </style>
