@@ -2,7 +2,7 @@
 	<div>
 		<div class="p-[10px]">
 			<div class="p-[10px] bg-black w-max">
-				<div class="w-[250px] relative">
+				<div class="w-[330px] relative">
 					<div
 						@click="toggleDropdown"
 						class="bg-[#2D3035] text-white text-[14px] py-[8px] shadow rounded flex items-center justify-between gap-[16px] cursor-pointer px-[15px]"
@@ -10,7 +10,7 @@
 						<span v-if="portfolioStore.selectedPortfolio.name">
 							{{ portfolioStore.selectedPortfolio.name }}
 						</span>
-						<span class="text-white text-[14px] uppercase" v-else
+						<span class="text-white text-[14px]" v-else
 							>{{ placeholder }}
 						</span>
 						<img
@@ -34,7 +34,7 @@ const portfolioStore = usePortfolios();
 defineProps({
 	placeholder: {
 		type: String,
-		default: "Select",
+		default: "Select a portfolio to manage",
 	},
 });
 

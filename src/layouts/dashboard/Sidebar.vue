@@ -20,7 +20,7 @@
 						QUARTERLY PERFORMANCE BONUS POOL
 					</h1>
 
-					<h2 class="text-[#54AC68] text-[24px] my-[20px]">$50,060.19</h2>
+					<h2 class="text-[#54AC68] text-[24px] my-[20px]">$0.00</h2>
 
 					<div class="flex justify-center">
 						<div class="flex" v-for="item in countdown" :key="item">
@@ -134,15 +134,15 @@ const navs = ref([
 
 const countdown = ref([
 	{
-		figure: "60",
+		figure: "00",
 		unit: "days",
 	},
 	{
-		figure: "15",
+		figure: "00",
 		unit: "hrs",
 	},
 	{
-		figure: "38",
+		figure: "00",
 		unit: "mins",
 	},
 ]);

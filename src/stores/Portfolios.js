@@ -113,6 +113,8 @@ export const usePortfolios = defineStore("Portfolios", {
 				y1: 0,
 			},
 
+			allocationList: [],
+
 			overview: [
 				{
 					asset: {

@@ -24,44 +24,20 @@
 			class="w-full absolute z-50 top-[100%] bg-[#191A20] max-h-[200px] overflow-y-auto"
 			v-if="open"
 		>
-			<div
-				class="flex items-center justify-between bg-[#2D3035] p-[10px_20px] mb-[2px]"
-			>
-				<p class="flex text-white">
-					<img
-						src="@/assets/img/twitter.svg"
-						alt=""
-						class="w-[30px] h-[30px] mr-[10px]"
-					/>
-					BTC
-				</p>
-				<button class="text-[#005A57]">ADD</button>
-			</div>
-			<div
-				class="flex items-center justify-between bg-[#2D3035] p-[10px_20px] mb-[2px]"
-			>
-				<p class="flex text-white">
-					<img
-						src="@/assets/img/twitter.svg"
-						alt=""
-						class="w-[30px] h-[30px] mr-[10px]"
-					/>
-					BTC
-				</p>
-				<button class="text-[#005A57]">ADD</button>
-			</div>
-			<div
-				class="flex items-center justify-between bg-[#2D3035] p-[10px_20px] mb-[2px]"
-			>
-				<p class="flex text-white">
-					<img
-						src="@/assets/img/twitter.svg"
-						alt=""
-						class="w-[30px] h-[30px] mr-[10px]"
-					/>
-					BTC
-				</p>
-				<button class="text-[#005A57]">ADD</button>
+			<div v-for="token in tokenList">
+				<div
+					class="flex items-center justify-between bg-[#2D3035] p-[10px_20px] mb-[2px]"
+				>
+					<p class="flex text-white">
+						<img
+							:src="token.icon"
+							alt=""
+							class="w-[30px] h-[30px] mr-[10px]"
+						/>
+						{{ token.name }}
+					</p>
+					<button class="text-[#005A57]" @click="add(token)">ADD</button>
+				</div>
 			</div>
 		</div>
 	</div>
@@ -81,9 +57,24 @@ defineProps({
 });
 
 const open = ref(false);
-const TokenList = ref([]);
+const tokenList = ref([
+	{
+		name: "BTC",
+		allocation: 0,
+		icon: "https://i.postimg.cc/MGnDWTSy/image.png",
+	},
+	{
+		name: "AVAX",
+		allocation: 0,
+		icon: "https://i.postimg.cc/br1T18qh/image.png",
+	},
+]);
 
 function toggleDropdown() {
 	open.value = !open.value;
+}
+
+function add(item) {
+	portfolioStore.allocationList.push(item);
 }
 </script>
