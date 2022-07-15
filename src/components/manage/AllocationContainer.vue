@@ -3,7 +3,7 @@
 		<hr class="border-[#2D3035]" />
 		<SelectPortfolio />
 		<div class="flex items-center gap-[28px] p-[10px]">
-			<SelectPortfolio />
+			<SelectToken />
 			<!-- Change Fund fee -->
 			<div class="flex items-center gap-[10px]">
 				<label for="" class="uppercase text-white text-[12px]"
@@ -19,7 +19,7 @@
 			</div>
 
 			<!-- Accepting new investors -->
-			<div class="flex items-center gap-[10px]">
+			<div class="flex items-center gap-[10px] bg-[#005A57] p-[5px_10px]">
 				<label for="" class="uppercase text-white text-[12px]"
 					>Accepting new investors</label
 				>
