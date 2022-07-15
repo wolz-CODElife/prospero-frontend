@@ -65,7 +65,7 @@
 							type="number"
 							aria-label="usd amount"
 							v-model.lazy="token.usdAmountEnteredByUser"
-							@change="add($event.target.value, token.name)"
+							@keyup="add($event.target.value, token.name)"
 						/>
 					</td>
 				</tr>
@@ -97,16 +97,12 @@
 						? 'opacity-50 cursor-text'
 						: 'opacity-1 cursor-pointer'
 				"
-				
 			>
 				Deposit
 			</button>
 		</div>
 
-		<Modal
-			v-if="portfolioStore.depositDialog"
-			@close="portfolioStore.depositDialog = false"
-		>
+		<Modal v-if="portfolioStore.depositDialog" @close="$emit('goBack')">
 			<!--  Approve Required  -->
 			<div
 				v-if="firstView"
@@ -168,7 +164,6 @@
 						$2.24
 					</p>
 
-					<!-- todo: make text dynamic  -->
 					<button
 						class="btn btn-primary uppercase w-full"
 						@click="$emit('redirect')"
@@ -182,7 +177,7 @@
 </template>
 
 <script setup>
-import { getBalancesInEoa, handleDepositType} from "@/api";
+import { getBalancesInEoa, handleDepositType } from "@/api";
 import { onMounted, computed, ref } from "vue";
 import Modal from "../Modal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
@@ -221,45 +216,48 @@ const tokenList = ref([]);
 ]);
 */
 
- onMounted(() => {
- 	getTokenList();
- });
+onMounted(() => {
+	getTokenList();
+});
 
- async function getTokenList() {
- 	try {
- 		tokenList.value = await getBalancesInEoa();
- 	} catch (error) {
- 		console.log(error);
- 	}
- }
- function enableDeposit(f){
-
- }
-
-
+function closeModal() {
+	portfolioStore.depositDialog = false;
+	portfolioStore.goBack();
+}
+async function getTokenList() {
+	try {
+		tokenList.value = await getBalancesInEoa();
+	} catch (error) {
+		console.log(error);
+	}
+}
+function enableDeposit(f) {}
 
 async function depositToPortfolio() {
 	firstView.value = false;
-	
-		console.log("depositToPortfolio called");
-		try {
-	 	var res = await handleDepositType();
-		if (res.success){
-			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
-			console.log("usdAmountOfGas to show in modal:"+usdAmountOfGas);
-		}else{
-			console.log("ERROR - 1");
-	 		console.log(res.error);
-	 		//error code here
-	 	}
-		} catch (error) {
-			console.log("ERROR - 2");
-			error.value = true;
-			console.log(error);
-		}
-		console.log("done");
-		
+	loading.value = true;
 
+	console.log("depositToPortfolio called");
+	try {
+		let res = await handleDepositType();
+
+		if (res.success) {
+			let usdAmountOfGas = res.gasUsed.usdAmountOfGas;
+			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
+			loading.value = false;
+		} else {
+			loading.value = false;
+			error.value = true;
+			// console.log("ERROR - 1");
+			// console.log(res.error);
+			//error code here
+		}
+	} catch (err) {
+		loading.value = false;
+		error.value = true;
+		console.log(err);
+	}
+	console.log("done");
 }
 
 function add(amt, name) {

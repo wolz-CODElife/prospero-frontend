@@ -88,9 +88,9 @@
 				</div>
 
 				<!-- All Portfolios / My Portfolios Tables -->
-				<!-- todo: pagination and search  -->
-				<div class="my-[20px]">
-					<table class="table-auto w-full">
+				<!-- todo: componentize pagination and search  -->
+				<div class="min-h-[220px]">
+					<table class="table-auto w-full my-[20px]">
 						<thead>
 							<tr
 								class="text-[#868C9D] text-left border-b border-b-[#2D3035] py-[10px] px-[30px]"
@@ -169,7 +169,7 @@
 							<!-- !empty -->
 							<!-- v-if="portfolioStore.filteredMyPortfolios.length > 0" -->
 							<tr
-								v-for="portfolio in filteredMyPortfolios"
+								v-for="portfolio in portfolioStore.myPortfolios"
 								key="portfolio"
 								@click="
 									portfolioStore.doSelectPortfolio(portfolio),
@@ -213,10 +213,81 @@
 						</td> -->
 						</tbody>
 					</table>
+				</div>
 
-					<!-- Search  -->
+				<!-- Bottom -->
+				<div class="grid grid-cols-12 px-[20px] my-[25px]">
+					<!-- Search -->
+					<div class="col-span-5">
+						<div
+							class="bg-black text-white text-[16px] border border-[#2D3035] focus:outline-none py-[12px] pl-[28px] pr-[12px] flex items-center gap-x-[24px]"
+						>
+							<img src="@/assets/img/Search.svg" alt="" />
+
+							<input
+								type="text"
+								placeholder="Search by name"
+								aria-label="Search by name"
+								@keyup="updateSearchedPortfolios($event)"
+								v-model="searchQuery"
+								class="outline-none bg-black"
+							/>
+
+							<button
+								v-show="searchQuery !== ''"
+								@click="clearSearch"
+								class="ml-auto"
+							>
+								<img src="@/assets/img/close.svg" alt="" />
+							</button>
+						</div>
+					</div>
 
 					<!-- Pagination  -->
+					<div class="col-span-6 col-end-13">
+						<div class="flex justify-end items-center gap-[15px]">
+							<span class="text-[#C3C7CD] text-[14px]">Page</span>
+
+							<!-- Current page  -->
+							<input
+								type="number"
+								@change="updateShowingPortfolios"
+								aria-label="current page"
+								:max="totalLeaderboardPages"
+								v-model="currentPage"
+								class="py-[4px] pl-[12px] w-[55px] bg-black text-white text-[16px] border border-[#003D3B] focus:outline-none"
+							/>
+
+							<!-- Total pages count  -->
+							<span class="text-[#C3C7CD] text-[14px]"
+								>of
+								<span class="ml-[10px]">
+									{{ totalLeaderboardPages }}</span
+								></span
+							>
+
+							<!-- Prev & Next  -->
+							<div class="flex gap-0">
+								<button
+									class="px-[14px] bg-[#005A57]"
+									@click="prevPage"
+								>
+									<img src="@/assets/img/left-angle.svg" alt="" />
+								</button>
+
+								<button
+									class="px-[14px] bg-[#005A57]"
+									@click="nextPage"
+								>
+									<img
+										src="@/assets/img/left-angle.svg"
+										alt=""
+										class="transform rotate-180"
+									/>
+								</button>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 
@@ -244,7 +315,6 @@
 				<!-- Create mode  -->
 				<div v-if="portfolioStore.activeMode === 'create'">
 					<!-- Top  -->
-
 					<!-- Create view  -->
 					<div v-if="portfolioStore.firstCreateView" class="">
 						<!-- Create new portfolio -->
@@ -311,126 +381,14 @@
 
 					<!-- Manage Portfolio  -->
 					<div v-else>
-						<Select placeholder="Select a portfolio to manage" />
+						<AllocationContainer />
 						<!-- select area  -->
 					</div>
 
 					<!-- Allocation view on redirect -->
 					<div v-if="!portfolioStore.firstCreateView">
-						<div class="flex items-center gap-[28px] p-[10px]">
-							<!-- + Add new token-->
-							<Select placeholder="Search or select token" />
-
-							<!-- Change Fund fee -->
-							<div class="flex items-center gap-[10px]">
-								<label for="" class="uppercase text-white text-[12px]"
-									>Fund fee %</label
-								>
-								<input
-									type="number"
-									name=""
-									id=""
-									v-model.lazy="fundFee"
-									class="py-[4px] pl-[12px] w-[55px] bg-black text-white text-[16px] border border-[#003D3B] focus:outline-none"
-								/>
-							</div>
-
-							<!-- Accepting new investors ? -->
-							<div class="flex items-center gap-[10px]">
-								<label for="" class="uppercase text-white text-[12px]"
-									>Accepting new investors</label
-								>
-								<div class="switch">
-									<input type="checkbox" aria-label="djdn" checked />
-									<span class="slider round"></span>
-								</div>
-							</div>
-						</div>
-
-						<hr class="border-[#2D3035]" />
-
-						<table class="table-auto w-full mb-auto">
-							<thead>
-								<tr
-									class="token text-[#868C9D] text-left border-b border-b-[#2D3035] px-[30px]"
-								>
-									<!-- <th></th> -->
-									<th class="pl-[10px]">ALLOCATION</th>
-									<th>TOKEN</th>
-									<th>PRICE</th>
-									<th class="border-r border-r-[#2D3035]">MC</th>
-									<th>7D%</th>
-									<th>30D%</th>
-									<th>90D%</th>
-									<th>1YR%</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr
-									class="token text-left mx-[28px] border-b border-b-[#2D3035] text-white"
-									v-for="(token, i) in tokenList"
-									:key="i"
-								>
-									<td class="flex items-center gap-[20px] pl-[10px]">
-										<!-- Delete token  -->
-										<button>
-											<img src="@/assets/img/delete.svg" alt="" />
-										</button>
-
-										<!-- Input allocation  -->
-										<input
-											type="number"
-											name=""
-											id=""
-											v-model.lazy="token.allocation"
-											@keyup="
-												newList($event.target.value, token.name)
-											"
-											class="py-[4px] pl-[12px] w-[55px] bg-black text-white text-[16px] border border-[#003D3B] focus:outline-none"
-										/>
-									</td>
-									<td>{{ token.name }}</td>
-									<td>${{ parseFloat(token.price) }}</td>
-									<td class="border-r border-r-[#2D3035]">
-										${{ parseFloat(token.mc) }}M
-									</td>
-									<td>{{ token.d7 }}%</td>
-									<td>{{ token.d30 }}%</td>
-									<td>{{ token.d90 }}%</td>
-									<td>{{ token.y1 }}%</td>
-								</tr>
-							</tbody>
-						</table>
-						<!-- Save allocation -->
-						<button
-							v-if="!success"
-							@click="openSaveAllocationModal"
-							class="btn btn-primary uppercase w-full mt-[50px]"
-							:class="
-								disableSaveAllocation
-									? 'opacity-50 cursor-text '
-									: 'opacity-1 cursor-pointer hover:bg-transparent'
-							"
-							:disabled="disableSaveAllocation"
-						>
-							{{ totalAllocation }}% -
-							<span v-if="!disableSaveAllocation"
-								>Click here to save allocation</span
-							>
-							<span v-else
-								>Need {{ remAllocation }}% more allocation</span
-							>
-						</button>
-
-						<!-- Saved display  -->
-						<button
-							v-else
-							disabled
-							class="btn btn-primary uppercase w-full mt-[32px]"
-						>
-							100% - Allocation saved!
-						</button>
-					</div>
+            <AllocationContainer />
+          </div>
 				</div>
 
 				<!-- Withdraw mode  -->
@@ -465,12 +423,12 @@
 
 			<!-- Manage Portfolio  -->
 			<div>
-				<Select placeholder="Select a portfolio to manage" />
+				<SelectPortfolio placeholder="Select a portfolio to manage" />
 				<!-- Allocation view  -->
 				<div>
 					<div class="flex items-center gap-[28px] p-[10px]">
 						<!-- + Add new token-->
-						<Select placeholder="Search or select token" />
+						<!-- <Select placeholder="Search or select token" /> -->
 
 						<!-- Change Fund fee -->
 						<div class="flex items-center gap-[10px]">
@@ -832,8 +790,9 @@ import WithdrawalCard from "./WithdrawalCard.vue";
 import WcOverview from "./WcOverview.vue";
 // import Filter from "../manage/Filter.vue";
 import { useRouter } from "vue-router";
-import Select from "../manage/Select.vue";
+import SelectPortfolio from "../manage/SelectPortfolio.vue";
 import AddTokenBtn from "./AddTokenBtn.vue";
+import AllocationContainer from "../manage/AllocationContainer.vue";
 
 const { currentRoute } = useRouter();
 
@@ -847,13 +806,13 @@ const portfolioStore = usePortfolios();
 
 // })
 
-const filteredAllPortfolios = computed(() =>
-	portfolioStore.allPortfolios.slice(-4).reverse()
-);
+// const filteredAllPortfolios = computed(() =>
+// 	portfolioStore.allPortfolios.slice(-4).reverse()
+// );
 
-const filteredMyPortfolios = computed(() =>
-	portfolioStore.myPortfolios.slice(-4).reverse()
-);
+// const filteredMyPortfolios = computed(() =>
+// 	portfolioStore.myPortfolios.slice(-4).reverse()
+// );
 
 const portfolioToShow = ref("");
 
@@ -914,13 +873,44 @@ const amount = ref("");
 
 const singleToken = ref("");
 
+const searchQuery = ref("");
+
 const tabs = ref(["All Portfolios", "My Portfolios"]);
 
 const placeholder = ref(25);
 
+const currentPage = ref(1);
+
+const filteredAllPortfolios = ref([]);
+
 const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
+
+onMounted(() => {
+	filteredAllPortfolios.value = portfolioStore.allPortfolios
+		.slice(-4)
+		.reverse();
+	// return filteredAllPortfolios;
+});
+
+const totalLeaderboardPages = computed(
+	() => portfolioStore.allPortfolios.length / 4
+);
+
+function clearSearch() {
+	searchQuery.value = "";
+}
+function updateSearchedPortfolios(event) {
+	const term = event.target.value;
+	console.log(term);
+	filteredAllPortfolios.value = portfolioStore.allPortfolios
+		.filter((portfolio) =>
+			portfolio.name?.toLowerCase().includes(term.toLowerCase())
+		)
+		.slice(-4)
+		.reverse();
+}
 
 function getTokenListForManage() {
 	console.log("getTokenListForManage");
@@ -929,6 +919,31 @@ function getTokenListForManage() {
 		console.log("getTokenListForManage token list is:", tokenList.value);
 	} catch (error) {
 		console.log(error);
+	}
+}
+function updateShowingPortfolios() {
+	if (currentPage.value > 1) {
+		filteredAllPortfolios.value = portfolioStore.allPortfolios
+			.slice(-(currentPage.value * 4), -(currentPage.value * 4 - 4))
+			.reverse();
+	} else {
+		filteredAllPortfolios.value = portfolioStore.allPortfolios
+			.slice(-4)
+			.reverse();
+	}
+}
+
+function nextPage() {
+	if (currentPage.value < totalLeaderboardPages.value) {
+		currentPage.value += 1;
+		updateShowingPortfolios();
+	}
+}
+
+function prevPage() {
+	if (currentPage.value > 1) {
+		currentPage.value -= 1;
+		updateShowingPortfolios();
 	}
 }
 //async function getTokenList() {

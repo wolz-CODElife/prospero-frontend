@@ -44,21 +44,24 @@ const portfolioStore = usePortfolios();
 // Route protection
 onBeforeMount(async () => {
 	if (!JSON.parse(localStorage.getItem("userState")).status) {
+		// todo: change this to router replace
 		window.location.replace("/");
+	} else {
+		// todo: optimize nested try blocks
+		try {
+			console.log("calling initializeAPI");
+			await initializeApi();
+
+			try {
+				portfolioStore.getAllPortfolios();
+				portfolioStore.getMyPortfolios();
+			} catch (error) {
+				console.log("get all portfolios error", error);
+			}
+		} catch (error) {
+			console.log("init error", error);
+		}
 	}
-	// todo: optimize nested try blocks
-	//  try {
-	// 	console.log("calling initializeAPI");
-	// await initializeApi();
-	// try {
-	// 	portfolioStore.getAllPortfolios();
-	// 	portfolioStore.getMyPortfolios();
-	// } catch (error) {
-	// 	console.log("get all portfolios error", error);
-	// }
-	//  } catch (error) {
-	//  	console.log("init error", error);
-	//  }
 });
 
 const joinView = ref(false);

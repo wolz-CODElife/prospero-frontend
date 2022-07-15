@@ -1,9 +1,9 @@
 import { defineStore } from "pinia";
-// import {
-// 	getLeaderBoardDataForTable,
-// 	getMyPortfoliosDataForTable,
-// 	updateSelectedWallet,
-// } from "@/api";
+import {
+	getLeaderBoardDataForTable,
+	getMyPortfoliosDataForTable,
+	updateSelectedWallet,
+} from "@/api";
 
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
@@ -45,27 +45,27 @@ export const usePortfolios = defineStore("Portfolios", {
 				// 	y1: 60,
 				// 	created: false,
 				// },
-				// {
-				// 	name: "Moon Gatekeepers",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: false,
-				// },
+				{
+					name: "Moon Gatekeepers",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: false,
+				},
 			],
 
 			myPortfolios: [
-				// {
-				// 	name: "New User",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: true,
-				// },
+				{
+					name: "New User",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+					created: true,
+				},
 				// {
 				// 	name: "Harry Mcguire",
 				// 	fee: 2.6,
@@ -177,23 +177,23 @@ export const usePortfolios = defineStore("Portfolios", {
 
 	actions: {
 		// Fill empty portfolio list with an API call
-		// async getAllPortfolios() {
-		// 	console.log("getAllPortfolios called");
-		// 	try {
-		// 		this.allPortfolios = await getLeaderBoardDataForTable();
-		// 	} catch (error) {
-		// 		console.log(error);
-		// 	}
-		// },
+		async getAllPortfolios() {
+			console.log("getAllPortfolios called");
+			try {
+				this.allPortfolios = await getLeaderBoardDataForTable();
+			} catch (error) {
+				console.log(error);
+			}
+		},
 
-		// async getMyPortfolios() {
-		// 	try {
-		// 		console.log("getMyPortfolios called");
-		// 		this.myPortfolios = await getMyPortfoliosDataForTable();
-		// 	} catch (error) {
-		// 		console.log(error);
-		// 	}
-		// },
+		async getMyPortfolios() {
+			try {
+				console.log("getMyPortfolios called");
+				this.myPortfolios = await getMyPortfoliosDataForTable();
+			} catch (error) {
+				console.log(error);
+			}
+		},
 
 		doSelectPortfolio(val) {
 			console.log(
@@ -201,7 +201,7 @@ export const usePortfolios = defineStore("Portfolios", {
 			);
 			this.selectedPortfolio = val;
 			this.activeHeader = "right";
-			// updateSelectedWallet(val.prosperoWalletAddress);
+			updateSelectedWallet(val.prosperoWalletAddress);
 		},
 
 		toggleActiveHeader() {
