@@ -70,7 +70,7 @@
 					</td>
 				</tr>
 			</tbody>
-			<tfoot class="bg-[#2D3035] text-white py-[14px] px-[22px]">
+			<tfoot class="bg-[#2D3035] text-white px-[22px]">
 				<tr class="px-[20px]">
 					<td colspan="2" class="pl-[32px]">TOTAL</td>
 					<td>${{ totalAvailable }}</td>
@@ -90,8 +90,9 @@
 
 			<!-- Deposit  -->
 			<button
-				@click="$emit('depositAction'), (firstView = true)"
+				@click="firstView = true"
 				class="basis-1/2 btn btn-primary"
+				:disabled="disableDeposit"
 				:class="
 					disableDeposit
 						? 'opacity-50 cursor-text'
@@ -102,10 +103,11 @@
 			</button>
 		</div>
 	</div>
-	<Modal v-if="portfolioStore.depositDialog" @close="$emit('goBack')">
+	<!-- @close="$emit('goBack'), closeViews()" -->
+
+	<Modal @close="closeViews" v-if="firstView">
 		<!--  Approve Required  -->
 		<div
-			v-if="firstView"
 			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
 		>
 			<img src="@/assets/img/caution.svg" alt="" class="w-[62px] h-[62px]" />
@@ -121,52 +123,49 @@
 				Okay
 			</button>
 		</div>
+	</Modal>
 
-		<div v-else-if="secondView">
-			<!-- Loading  -->
-			<div
-				v-if="loading"
-				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+	<Modal @close="closeViews" v-if="secondView">
+		<!-- Loading  -->
+		<div
+			v-if="loading"
+			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+		>
+			<h1 class="text-[20px] text-center uppercase">Loading...</h1>
+		</div>
+
+		<!-- Error  -->
+		<div
+			v-else-if="error"
+			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+		>
+			<h1 class="text-[20px] text-center uppercase">Deposit Unsucessful</h1>
+		</div>
+
+		<!-- Successful -->
+		<div
+			v-else
+			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+		>
+			<img
+				src="https://i.postimg.cc/Y2vdsnZW/image.png"
+				alt=""
+				class="max-w-[65%]"
+			/>
+			<h1 class="text-[20px] uppercase">Deposit Successful</h1>
+
+			<!-- todo: replace these with real values  -->
+			<p class="text-[16px]">
+				$20.00 has been sent to AFS1000 🔱. Wait a few moments for the
+				tokens to transfer and reflect in your portfolio tab. Gas used $2.24
+			</p>
+
+			<button
+				class="btn btn-primary uppercase w-full"
+				@click="$emit('redirect')"
 			>
-				<h1 class="text-[20px] text-center uppercase">Loading...</h1>
-			</div>
-
-			<!-- Error  -->
-			<div
-				v-else-if="error"
-				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-			>
-				<h1 class="text-[20px] text-center uppercase">
-					Deposit Unsucessful
-				</h1>
-			</div>
-
-			<!-- Successful -->
-			<div
-				v-else
-				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-			>
-				<img
-					src="https://i.postimg.cc/Y2vdsnZW/image.png"
-					alt=""
-					class="max-w-[65%]"
-				/>
-				<h1 class="text-[20px] uppercase">Deposit Successful</h1>
-
-				<!-- todo: replace these with real values  -->
-				<p class="text-[16px]">
-					$20.00 has been sent to AFS1000 🔱. Wait a few moments for the
-					tokens to transfer and reflect in your portfolio tab. Gas used
-					$2.24
-				</p>
-
-				<button
-					class="btn btn-primary uppercase w-full"
-					@click="$emit('redirect')"
-				>
-					Take me to my portfolios
-				</button>
-			</div>
+				Take me to my portfolios
+			</button>
 		</div>
 	</Modal>
 </template>
@@ -185,35 +184,11 @@ const error = ref(false);
 
 const success = ref(false);
 
-const firstView = ref(true);
+const firstView = ref(false);
 
 const secondView = ref(false);
 
 const tokenList = ref([]);
-/*
-	{
-		name: "Wrapped Test",
-		price: 12,
-		available: 34,
-		icon: "https://raw.githubusercontent.com/ava-labs/avalanche-bridge-resources/main/tokens/WBTC/logo.png",
-		usdAmountEnteredByUser: 0,
-	},
-	{
-		name: " Test",
-		price: 19,
-		available: 34,
-		icon: "https://raw.githubusercontent.com/ava-labs/avalanche-bridge-resources/main/tokens/WBTC/logo.png",
-		usdAmountEnteredByUser: 0,
-	},
-	{
-		name: "Wrapped ",
-		price: 120,
-		available: 34,
-		icon: "https://raw.githubusercontent.com/ava-labs/avalanche-bridge-resources/main/tokens/WBTC/logo.png",
-		usdAmountEnteredByUser: 0,
-	},
-]);
-*/
 
 onMounted(() => {
 	getTokenList();
@@ -222,6 +197,11 @@ onMounted(() => {
 function toggleView() {
 	firstView.value = false;
 	secondView.value = true;
+}
+
+function closeViews() {
+	firstView.value = false;
+	secondView.value = false;
 }
 
 function closeModal() {
@@ -239,12 +219,12 @@ function enableDeposit(f) {}
 
 async function depositToPortfolio() {
 	firstView.value = false;
+	secondView.value = true;
 	loading.value = true;
 
 	console.log("depositToPortfolio called");
 	try {
 		let res = await handleDepositType();
-
 		let usdAmountOfGas = res.gasUsed.usdAmountOfGas;
 		console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
 		loading.value = false;
@@ -284,7 +264,7 @@ function slice(str, total, start) {
 	return str.slice(0, start) + "...";
 }
 
-const disableDeposit = computed(() => totalAvailable.value <= 0);
+const disableDeposit = computed(() => totalAmtToDeposit.value <= 0);
 
 const totalAvailable = computed(() => {
 	return tokenList.value.reduce((accumulator, currentValue) => {
@@ -297,4 +277,8 @@ const totalAvailable = computed(() => {
 });
 </script>
 
-<style lang="postcss"></style>
+<style lang="postcss" scoped>
+tfoot td {
+	@apply py-[14px];
+}
+</style>

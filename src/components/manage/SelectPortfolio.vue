@@ -1,27 +1,20 @@
 <template>
-	<div>
-		<div class="p-[10px]">
-			<div class="p-[10px] bg-black w-max">
-				<div class="w-[330px] relative">
-					<div
-						@click="toggleDropdown"
-						class="bg-[#2D3035] text-white text-[14px] py-[8px] shadow rounded flex items-center justify-between gap-[16px] cursor-pointer px-[15px]"
-					>
-						<span v-if="portfolioStore.selectedPortfolio.name">
-							{{ portfolioStore.selectedPortfolio.name }}
-						</span>
-						<span class="text-white text-[14px]" v-else
-							>{{ placeholder }}
-						</span>
-						<img
-							src="@/assets/img/left-angle.svg"
-							alt=""
-							class="fill-[#868C9D] -rotate-90"
-						/>
-					</div>
-				</div>
-			</div>
-		</div>
+	<div class="p-[10px]">
+		<select
+			v-model="portfolioStore.selectedManagePortfolio"
+			class="bg-[#2D3035] text-white text-[14px] py-[8px] px-[15px] uppercase w-[330px] focus:outline-none"
+		>
+			<option disabled selected :value="{}" class="uppercase">
+				Select a portfolio to manage
+			</option>
+			<option
+				v-for="(portfolio, i) in portfolioStore.createdPortfolios"
+				:key="i"
+				:value="portfolio"
+			>
+				{{ portfolio.name }}
+			</option>
+		</select>
 	</div>
 </template>
 

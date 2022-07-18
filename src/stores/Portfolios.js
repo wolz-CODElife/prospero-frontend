@@ -199,6 +199,35 @@ export const usePortfolios = defineStore("Portfolios", {
 			confirmDeposit: false,
 
 			depositDisabled: true,
+
+			createdPortfolios: [
+				{
+					name: "AFS1000 🔱",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+				},
+				{
+					name: " 🌈 Lulu Nation Fans",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+				},
+				{
+					name: "GX 650 Lords 🏖",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+				},
+			],
+
+			selectedManagePortfolio: {},
 		};
 	},
 
@@ -285,44 +314,14 @@ export const usePortfolios = defineStore("Portfolios", {
 				(item) => item.asset.name === asset
 			);
 		},
-
-		// function showCreate() {
-		// 	tableView.value = false;
-		// 	(async () => {
-		// 		var status = await createPortfolio("Name Of Wallet Goes Here");
-		// 		if (!status.success) {
-		// 			console.log(status.error);
-		// 			//error code here
-		// 		} else {
-		// 			if (status.prosperoWalletAddressCreated != null) {
-		// 				console.log(
-		// 					"new prosperoWalletAddressCreated:" +
-		// 						status.prosperoWalletAddressCreated
-		// 				);
-		// 			} else {
-		// 				console.log(
-		// 					"no new prosperoWalletAddressCreated from tx returned from created but created successfully, wait for finished method event to fire."
-		// 				);
-		// 			}
-		// 		}
-		//   })();
-
-		//   function doSelect(val) {
-		// 	selectedPortfolioId.value = val;
-		// 	activeRow.value = val;
-		// 	console.log(activeRow.value);
-		// 	updateActiveLeaderboardRow(val);
-		// 	disabled.value = false;
-		// 	console.log("disabled is", disabled.value);
-		// }
 	},
 
 	getters: {
-		createdPortfolios(state) {
-			return state.myPortfolios.filter(
-				(portfolio) => portfolio.created === true
-			);
-		},
+		// createdPortfolios(state) {
+		// 	return state.myPortfolios.filter(
+		// 		(portfolio) => portfolio.created === true
+		// 	);
+		// },
 
 		joinedPortfolios(state) {
 			return state.myPortfolios.filter(

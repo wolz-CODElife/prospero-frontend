@@ -13,19 +13,26 @@
 					type="number"
 					name=""
 					id=""
-					v-model.lazy="fundFee"
+					v-model="fundFee"
 					class="py-[4px] pl-[12px] w-[55px] bg-black text-white text-[16px] border border-[#003D3B] focus:outline-none"
 				/>
 			</div>
 
 			<!-- Accepting new investors -->
-			<div class="flex gap-[10px] items-center bg-[#005A57] p-[5px_10px]">
-				<label for="" class="uppercase text-white text-[12px]"
+			<div
+				class="flex gap-[12px] items-center p-[5px_10px] text-white"
+				:class="switchChecked ? 'bg-[#005A57]' : 'bg-[#2D3035]'"
+			>
+				<label for="" class="uppercase text-[12px]"
 					>Accepting <br />
 					new investors</label
 				>
 				<div class="switch">
-					<input type="checkbox" aria-label="djdn" checked />
+					<input
+						type="checkbox"
+						aria-label="djdn"
+						:checked="switchChecked"
+					/>
 					<span class="slider round"></span>
 				</div>
 			</div>
@@ -181,7 +188,11 @@ const error = ref(false);
 
 const success = ref(false);
 
+const switchChecked = ref(true);
+
 const saveAllocationModal = ref(false);
+
+const fundFee = ref(1.5);
 
 const disableSaveAllocation = computed(
 	() => totalAllocation.value < 100 || totalAllocation.value > 100
