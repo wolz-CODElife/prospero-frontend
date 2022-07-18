@@ -33,7 +33,7 @@
 							class="text-[#868C9D] text-center text-[14px] uppercase"
 							v-if="portfolioStore.myPortfolios.length === 0"
 						>
-							Join a portfolio first
+							Join or create a portfolio first
 						</h2>
 
 						<h2

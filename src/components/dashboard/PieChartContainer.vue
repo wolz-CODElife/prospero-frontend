@@ -14,8 +14,8 @@
 
 			<!-- Directions  -->
 			<DashDir
-				empty-selected-card-classes="h-full flex flex-col gap-y-[24px] justify-center items-center"
-				arrow-class="-rotate-45 mx-auto mt-[26px]"
+				empty-selected-card-classes="h-full flex flex-col gap-y-[14px] justify-center items-center"
+				arrow-class="-rotate-45"
 			>
 				<template #selectedPortfolioDisplay>
 					<p class="text-center text-white">Insert token charts here</p>

@@ -95,7 +95,7 @@
 
 			<!-- Right side of header  -->
 			<div
-				class="col-span-4 bg-black border py-[20px]"
+				class="col-span-4 bg-black border py-[30px]"
 				:class="[
 					portfolioStore.activeHeader === 'left'
 						? 'border-black border-b-white'

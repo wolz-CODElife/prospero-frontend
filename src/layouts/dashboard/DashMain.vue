@@ -1,9 +1,11 @@
 <template>
-	<div class="pt-[10px] border border-t-0 border-b-0 border-white w-full"></div>
-	<div class="border border-t-0 border-white max-h-[calc(100vh-246px)] overflow-y-auto">
-		<div
-			class="w-full grid grid-cols-12 gap-[10px]"
-		>
+	<div
+		class="pt-[10px] border border-t-0 border-b-0 border-white w-full"
+	></div>
+	<div
+		class="border border-t-0 border-white max-h-[calc(100vh-246px)] overflow-y-auto"
+	>
+		<div class="w-full grid grid-cols-12 gap-[10px]">
 			<div class="col-span-4 grid grid-rows-5 gap-y-[10px]">
 				<!-- Pie chart  -->
 				<PieChartContainer class="" />

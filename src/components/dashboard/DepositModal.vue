@@ -90,7 +90,7 @@
 
 			<!-- Deposit  -->
 			<button
-				@click="$emit('depositAction')"
+				@click="$emit('depositAction'), (firstView = true)"
 				class="basis-1/2 btn btn-primary"
 				:class="
 					disableDeposit
@@ -101,79 +101,74 @@
 				Deposit
 			</button>
 		</div>
+	</div>
+	<Modal v-if="portfolioStore.depositDialog" @close="$emit('goBack')">
+		<!--  Approve Required  -->
+		<div
+			v-if="firstView"
+			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+		>
+			<img src="@/assets/img/caution.svg" alt="" class="w-[62px] h-[62px]" />
+			<h1 class="text-[20px] uppercase">Approve required</h1>
+			<p class="text-[16px]">
+				Before you can use Prospero, you need to approve the tokens to be
+				transferred.
+			</p>
+			<button
+				class="btn btn-primary w-full"
+				@click="depositToPortfolio(), toggleView"
+			>
+				Okay
+			</button>
+		</div>
 
-		<Modal v-if="portfolioStore.depositDialog" @close="$emit('goBack')">
-			<!--  Approve Required  -->
+		<div v-else-if="secondView">
+			<!-- Loading  -->
 			<div
-				v-if="firstView"
+				v-if="loading"
+				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+			>
+				<h1 class="text-[20px] text-center uppercase">Loading...</h1>
+			</div>
+
+			<!-- Error  -->
+			<div
+				v-else-if="error"
+				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+			>
+				<h1 class="text-[20px] text-center uppercase">
+					Deposit Unsucessful
+				</h1>
+			</div>
+
+			<!-- Successful -->
+			<div
+				v-else
 				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
 			>
 				<img
-					src="@/assets/img/caution.svg"
+					src="https://i.postimg.cc/Y2vdsnZW/image.png"
 					alt=""
-					class="w-[62px] h-[62px]"
+					class="max-w-[65%]"
 				/>
-				<h1 class="text-[20px] uppercase">Approve required</h1>
+				<h1 class="text-[20px] uppercase">Deposit Successful</h1>
+
+				<!-- todo: replace these with real values  -->
 				<p class="text-[16px]">
-					Before you can use Prospero, you need to approve the tokens to be
-					transferred.
+					$20.00 has been sent to AFS1000 🔱. Wait a few moments for the
+					tokens to transfer and reflect in your portfolio tab. Gas used
+					$2.24
 				</p>
+
 				<button
-					class="btn btn-primary w-full"
-					@click="depositToPortfolio()"
+					class="btn btn-primary uppercase w-full"
+					@click="$emit('redirect')"
 				>
-					Okay
+					Take me to my portfolios
 				</button>
 			</div>
-
-			<div v-else>
-				<!-- Loading  -->
-				<div
-					v-if="loading"
-					class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-				>
-					<h1 class="text-[20px] text-center uppercase">Loading...</h1>
-				</div>
-
-				<!-- Error  -->
-				<div
-					v-else-if="error"
-					class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-				>
-					<h1 class="text-[20px] text-center uppercase">
-						Deposit Unsucessful
-					</h1>
-				</div>
-
-				<!-- Successful -->
-				<div
-					v-else
-					class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-				>
-					<img
-						src="https://i.postimg.cc/Y2vdsnZW/image.png"
-						alt=""
-						class="max-w-[65%]"
-					/>
-					<h1 class="text-[20px] uppercase">Deposit Successful</h1>
-
-					<!-- todo: replace these with real values  -->
-					<p class="text-[16px]">
-						$20.00 has been sent to AFS1000 🔱. Wait a few moments for the
-						tokens to transfer and reflect in your portfolio tab. Gas used
-						$2.24
-					</p>
-
-					<button
-						class="btn btn-primary uppercase w-full"
-						@click="$emit('redirect')"
-					>
-						Take me to my portfolios
-					</button>
-				</div>
-			</div>
-		</Modal>
-	</div>
+		</div>
+	</Modal>
 </template>
 
 <script setup>
@@ -188,7 +183,11 @@ const loading = ref(false);
 
 const error = ref(false);
 
+const success = ref(false);
+
 const firstView = ref(true);
+
+const secondView = ref(false);
 
 const tokenList = ref([]);
 /*
@@ -220,6 +219,11 @@ onMounted(() => {
 	getTokenList();
 });
 
+function toggleView() {
+	firstView.value = false;
+	secondView.value = true;
+}
+
 function closeModal() {
 	portfolioStore.depositDialog = false;
 	portfolioStore.goBack();
@@ -241,17 +245,9 @@ async function depositToPortfolio() {
 	try {
 		let res = await handleDepositType();
 
-		if (res.success) {
-			let usdAmountOfGas = res.gasUsed.usdAmountOfGas;
-			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
-			loading.value = false;
-		} else {
-			loading.value = false;
-			error.value = true;
-			// console.log("ERROR - 1");
-			// console.log(res.error);
-			//error code here
-		}
+		let usdAmountOfGas = res.gasUsed.usdAmountOfGas;
+		console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
+		loading.value = false;
 	} catch (err) {
 		loading.value = false;
 		error.value = true;

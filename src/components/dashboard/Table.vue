@@ -33,8 +33,9 @@
 						class="flex items-center gap-[12px]"
 						v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
 					>
+						<!-- updateUIStatusAPICaller(2) -->
 						<button
-							@click="$emit('doJoin'), updateUIStatusAPICaller(2)"
+							@click="$emit('doJoin')"
 							class="btn btn-primary w-[125px]"
 							:class="
 								disabled
@@ -90,6 +91,7 @@
 				<!-- All Portfolios / My Portfolios Tables -->
 				<!-- todo: componentize pagination and search  -->
 				<div class="min-h-[220px]">
+					<!-- todo: component? -->
 					<table class="table-auto w-full my-[20px]">
 						<thead>
 							<tr
@@ -428,51 +430,6 @@
 		</div>
 	</div>
 
-	<!-- saveAllocationModal -->
-	<Modal v-if="saveAllocationModal" @close="closeAllocationModal()">
-		<!-- Loading  -->
-		<div
-			v-if="loading"
-			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-		>
-			<h1 class="text-[20px] text-center uppercase">Loading...</h1>
-		</div>
-
-		<!-- Error  -->
-		<div
-			v-else-if="error"
-			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-		>
-			<h1 class="text-[20px] text-center uppercase">
-				Unable to save allocation
-			</h1>
-		</div>
-
-		<!-- Successful -->
-		<div
-			v-else
-			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-		>
-			<img
-				src="https://i.postimg.cc/Y2vdsnZW/image.png"
-				alt=""
-				class="max-w-[65%]"
-			/>
-			<h1 class="text-[20px] uppercase">You're All set!</h1>
-
-			<p class="text-[16px]">
-				Your porfolio allocation was successfully saved.
-			</p>
-
-			<button
-				@click="closeAllocationModal"
-				class="btn btn-primary uppercase mx-auto"
-			>
-				Thanks
-			</button>
-		</div>
-	</Modal>
-
 	<!-- swap Modal -->
 	<Modal v-if="swap" @close="closeSwapModal()">
 		<div v-if="firstView" class="mx-[20px] my-[16px]">
@@ -645,7 +602,7 @@
 					class="max-w-[65%]"
 				/>
 				<h1 class="text-[20px] uppercase">withdrawal successful!</h1>
-
+				todo:
 				<p class="text-[16px]">
 					$10.00 has been sent to you. Wait a few moments for the tokens to
 					transfer and reflect in your wallet. Gas used $2.24
@@ -674,10 +631,7 @@ import {
 import Modal from "../Modal.vue";
 import WithdrawalCard from "./WithdrawalCard.vue";
 import WcOverview from "./WcOverview.vue";
-// import Filter from "../manage/Filter.vue";
 import { useRouter } from "vue-router";
-import SelectPortfolio from "../manage/SelectPortfolio.vue";
-import AddTokenBtn from "./AddTokenBtn.vue";
 import AllocationContainer from "../manage/AllocationContainer.vue";
 
 const { currentRoute } = useRouter();
@@ -687,18 +641,6 @@ const path = computed(() => {
 });
 
 const portfolioStore = usePortfolios();
-
-// onMounted(() => {
-
-// })
-
-// const filteredAllPortfolios = computed(() =>
-// 	portfolioStore.allPortfolios.slice(-4).reverse()
-// );
-
-// const filteredMyPortfolios = computed(() =>
-// 	portfolioStore.myPortfolios.slice(-4).reverse()
-// );
 
 const portfolioToShow = ref("");
 
@@ -713,27 +655,6 @@ const wcTwo = ref({
 });
 
 const tokenList = ref([]);
-/*	{
-		name: " Test",
-		price: 19,
-		mc: 340,
-		allocation: 33,
-		d7: 10,
-		d30: 20,
-		d90: 30,
-		y1: 120,
-	},
-	{
-		name: "KBTC ",
-		price: 120,
-		mc: 340,
-		allocation: 33,
-		d7: 10,
-		d30: 20,
-		d90: 30,
-		y1: 120,
-	},
-]);*/
 
 const disabled = ref(true);
 
@@ -742,8 +663,6 @@ const loading = ref(false);
 const error = ref(false);
 
 const success = ref(false);
-
-const saveAllocationModal = ref(false);
 
 const swap = ref(false);
 
@@ -780,9 +699,13 @@ onMounted(() => {
 	// return filteredAllPortfolios;
 });
 
-const totalLeaderboardPages = computed(
-	() => portfolioStore.allPortfolios.length / 4
-);
+const totalLeaderboardPages = computed(() => {
+	if (portfolioStore.allPortfolios.length / 4 < 1) {
+		return 1;
+	} else {
+		return portfolioStore.allPortfolios.length / 4;
+	}
+});
 
 function clearSearch() {
 	searchQuery.value = "";
@@ -847,24 +770,6 @@ const disableWithdraw = computed(() => {
 	} else {
 		!amount.value;
 	}
-});
-
-const disableSaveAllocation = computed(
-	() => totalAllocation.value < 100 || totalAllocation.value > 100
-);
-
-const totalAllocation = computed(() => {
-	return tokenList.value.reduce((accumulator, currentValue) => {
-		if (!(parseFloat(currentValue.allocation) > 0)) {
-			return accumulator + 0;
-		} else {
-			return accumulator + parseFloat(currentValue.allocation);
-		}
-	}, 0);
-});
-
-const remAllocation = computed(() => {
-	return 100 - totalAllocation.value;
 });
 
 function updateNameAndFeeApi() {
@@ -935,29 +840,12 @@ function openSaveAllocationModal() {
 	success.value = true;
 }
 
-function newList(amt, name) {
-	let newTokenList = tokenList.value.map((token) => {
-		if (token.name === name) {
-			token = { ...token, allocation: parseFloat(amt) };
-		}
-		return token;
-	});
-
-	tokenList.value = newTokenList;
-
-	console.log(tokenList.value);
-}
-
 function toggleDisabled() {
 	disabled.value = false;
 }
 
 function assignName() {
 	portfolioStore.selectedPortfolio.name = portfolioName.value;
-}
-
-function closeAllocationModal() {
-	saveAllocationModal.value = false;
 }
 
 function showWithdraw() {
