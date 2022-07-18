@@ -70,7 +70,7 @@
 					</td>
 				</tr>
 			</tbody>
-			<tfoot class="bg-[#2D3035] text-white py-[14px] px-[22px]">
+			<tfoot class="bg-[#2D3035] text-white px-[22px]">
 				<tr class="px-[20px]">
 					<td colspan="2" class="pl-[32px]">TOTAL</td>
 					<td>${{ totalAvailable }}</td>
@@ -105,7 +105,7 @@
 	</div>
 	<!-- @close="$emit('goBack'), closeViews()" -->
 
-	<Modal @close="$emit('goBack')" v-if="firstView">
+	<Modal @close="closeViews" v-if="firstView">
 		<!--  Approve Required  -->
 		<div
 			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
@@ -125,7 +125,7 @@
 		</div>
 	</Modal>
 
-	<Modal @close="$emit('goBack')" v-if="secondView">
+	<Modal @close="closeViews" v-if="secondView">
 		<!-- Loading  -->
 		<div
 			v-if="loading"
@@ -219,12 +219,12 @@ function enableDeposit(f) {}
 
 async function depositToPortfolio() {
 	firstView.value = false;
+	secondView.value = true;
 	loading.value = true;
 
 	console.log("depositToPortfolio called");
 	try {
 		let res = await handleDepositType();
-
 		let usdAmountOfGas = res.gasUsed.usdAmountOfGas;
 		console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
 		loading.value = false;
@@ -277,4 +277,8 @@ const totalAvailable = computed(() => {
 });
 </script>
 
-<style lang="postcss"></style>
+<style lang="postcss" scoped>
+tfoot td {
+	@apply py-[14px];
+}
+</style>
