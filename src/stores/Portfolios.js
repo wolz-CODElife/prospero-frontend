@@ -2,49 +2,49 @@ import { defineStore } from "pinia";
 import {
 	getLeaderBoardDataForTable,
 	getMyPortfoliosDataForTable,
-	updateSelectedWallet
+	updateSelectedWallet,
 } from "@/api";
 
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
 		return {
 			allPortfolios: [
-				{
-					name: "AFS1000 🔱",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: true,
-				},
-				{
-					name: "Harry Mcguire",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: false,
-				},
-				{
-					name: " 🌈 Lulu Nation Fans",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: false,
-				},
-				{
-					name: "GX 650 Lords 🏖",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: false,
-				},
+				// {
+				// 	name: "AFS1000 🔱",
+				// 	fee: 2.6,
+				// 	d7: 8,
+				// 	d30: 12,
+				// 	d90: 34,
+				// 	y1: 60,
+				// 	created: true,
+				// },
+				// {
+				// 	name: "Harry Mcguire",
+				// 	fee: 2.6,
+				// 	d7: 8,
+				// 	d30: 12,
+				// 	d90: 34,
+				// 	y1: 60,
+				// 	created: false,
+				// },
+				// {
+				// 	name: " 🌈 Lulu Nation Fans",
+				// 	fee: 2.6,
+				// 	d7: 8,
+				// 	d30: 12,
+				// 	d90: 34,
+				// 	y1: 60,
+				// 	created: false,
+				// },
+				// {
+				// 	name: "GX 650 Lords 🏖",
+				// 	fee: 2.6,
+				// 	d7: 8,
+				// 	d30: 12,
+				// 	d90: 34,
+				// 	y1: 60,
+				// 	created: false,
+				// },
 				{
 					name: "Moon Gatekeepers",
 					fee: 2.6,
@@ -66,42 +66,42 @@ export const usePortfolios = defineStore("Portfolios", {
 					y1: 60,
 					created: true,
 				},
-				{
-					name: "Harry Mcguire",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: true,
-				},
-				{
-					name: " 🌈 Lulu Nation Fans",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: true,
-				},
-				{
-					name: "GX 650 Lords 🏖",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: true,
-				},
-				{
-					name: "Moon Gatekeepers",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: true,
-				},
+				// {
+				// 	name: "Harry Mcguire",
+				// 	fee: 2.6,
+				// 	d7: 8,
+				// 	d30: 12,
+				// 	d90: 34,
+				// 	y1: 60,
+				// 	created: true,
+				// },
+				// {
+				// 	name: " 🌈 Lulu Nation Fans",
+				// 	fee: 2.6,
+				// 	d7: 8,
+				// 	d30: 12,
+				// 	d90: 34,
+				// 	y1: 60,
+				// 	created: true,
+				// },
+				// {
+				// 	name: "GX 650 Lords 🏖",
+				// 	fee: 2.6,
+				// 	d7: 8,
+				// 	d30: 12,
+				// 	d90: 34,
+				// 	y1: 60,
+				// 	created: true,
+				// },
+				// {
+				// 	name: "Moon Gatekeepers",
+				// 	fee: 2.6,
+				// 	d7: 8,
+				// 	d30: 12,
+				// 	d90: 34,
+				// 	y1: 60,
+				// 	created: true,
+				// },
 			],
 
 			selectedPortfolio: {
@@ -113,16 +113,43 @@ export const usePortfolios = defineStore("Portfolios", {
 				y1: 0,
 			},
 
+			allocationList: [],
+
+			tokenList: [
+				{
+					name: "BTC",
+					allocation: 0,
+					price: 120,
+					mc: 340,
+					d7: 10,
+					d30: 20,
+					d90: 30,
+					y1: 120,
+					icon: "https://i.postimg.cc/MGnDWTSy/image.png",
+				},
+				{
+					name: "AVAX",
+					allocation: 0,
+					price: 10,
+					mc: 34,
+					d7: 1,
+					d30: 2,
+					d90: 3,
+					y1: 12,
+					icon: "https://i.postimg.cc/br1T18qh/image.png",
+				},
+			],
+
 			overview: [
 				{
 					asset: {
 						name: "USD",
 						icon: "https://i.postimg.cc/Mpmky9Ms/image.png",
 					},
-					holdings: "1000.0",
-					roi: { value: "0.0", percent: 0 },
-					deposits: "40.0",
-					withdrawals: "0.0",
+					holdings: "1000.00",
+					roi: { value: "0.00", percent: 0 },
+					deposits: "40.00",
+					withdrawals: "0.00",
 				},
 				{
 					asset: {
@@ -151,10 +178,10 @@ export const usePortfolios = defineStore("Portfolios", {
 					name: "USD",
 					icon: "https://i.postimg.cc/Mpmky9Ms/image.png",
 				},
-				holdings: "1000.0",
-				roi: { value: "0.0", percent: 0 },
-				deposits: "40.0",
-				withdrawals: "0.0",
+				holdings: "1000.00",
+				roi: { value: "0.00", percent: 0 },
+				deposits: "40.00",
+				withdrawals: "0.00",
 			},
 
 			activeHeader: "left",
@@ -196,10 +223,12 @@ export const usePortfolios = defineStore("Portfolios", {
 		},
 
 		doSelectPortfolio(val) {
-			console.log("doSelectPortfolio called with val:"+JSON.stringify(val,null,2))
+			console.log(
+				"doSelectPortfolio called with val:" + JSON.stringify(val, null, 2)
+			);
 			this.selectedPortfolio = val;
 			this.activeHeader = "right";
-			updateSelectedWallet(val.prosperoWalletAddress)
+			updateSelectedWallet(val.prosperoWalletAddress);
 		},
 
 		toggleActiveHeader() {

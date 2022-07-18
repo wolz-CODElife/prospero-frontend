@@ -33,8 +33,9 @@
 						class="flex items-center gap-[12px]"
 						v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
 					>
+						<!-- updateUIStatusAPICaller(2) -->
 						<button
-							@click="$emit('doJoin'), updateUIStatusAPICaller(2)"
+							@click="$emit('doJoin')"
 							class="btn btn-primary w-[125px]"
 							:class="
 								disabled
@@ -88,8 +89,10 @@
 				</div>
 
 				<!-- All Portfolios / My Portfolios Tables -->
-				<div class="my-[20px]">
-					<table class="table-auto w-full">
+				<!-- todo: componentize pagination and search  -->
+				<div class="min-h-[220px]">
+					<!-- todo: component? -->
+					<table class="table-auto w-full my-[20px]">
 						<thead>
 							<tr
 								class="text-[#868C9D] text-left border-b border-b-[#2D3035] py-[10px] px-[30px]"
@@ -168,7 +171,7 @@
 							<!-- !empty -->
 							<!-- v-if="portfolioStore.filteredMyPortfolios.length > 0" -->
 							<tr
-								v-for="portfolio in filteredMyPortfolios"
+								v-for="portfolio in portfolioStore.myPortfolios"
 								key="portfolio"
 								@click="
 									portfolioStore.doSelectPortfolio(portfolio),
@@ -212,10 +215,81 @@
 						</td> -->
 						</tbody>
 					</table>
+				</div>
 
-					<!-- Search  -->
+				<!-- Bottom -->
+				<div class="grid grid-cols-12 px-[20px] my-[25px]">
+					<!-- Search -->
+					<div class="col-span-5">
+						<div
+							class="bg-black text-white text-[16px] border border-[#2D3035] focus:outline-none py-[12px] pl-[28px] pr-[12px] flex items-center gap-x-[24px]"
+						>
+							<img src="@/assets/img/Search.svg" alt="" />
+
+							<input
+								type="text"
+								placeholder="Search by name"
+								aria-label="Search by name"
+								@keyup="updateSearchedPortfolios($event)"
+								v-model="searchQuery"
+								class="outline-none bg-black"
+							/>
+
+							<button
+								v-show="searchQuery !== ''"
+								@click="clearSearch"
+								class="ml-auto"
+							>
+								<img src="@/assets/img/close.svg" alt="" />
+							</button>
+						</div>
+					</div>
 
 					<!-- Pagination  -->
+					<div class="col-span-6 col-end-13">
+						<div class="flex justify-end items-center gap-[15px]">
+							<span class="text-[#C3C7CD] text-[14px]">Page</span>
+
+							<!-- Current page  -->
+							<input
+								type="number"
+								@change="updateShowingPortfolios"
+								aria-label="current page"
+								:max="totalLeaderboardPages"
+								v-model="currentPage"
+								class="py-[4px] pl-[12px] w-[55px] bg-black text-white text-[16px] border border-[#003D3B] focus:outline-none"
+							/>
+
+							<!-- Total pages count  -->
+							<span class="text-[#C3C7CD] text-[14px]"
+								>of
+								<span class="ml-[10px]">
+									{{ totalLeaderboardPages }}</span
+								></span
+							>
+
+							<!-- Prev & Next  -->
+							<div class="flex gap-0">
+								<button
+									class="px-[14px] bg-[#005A57]"
+									@click="prevPage"
+								>
+									<img src="@/assets/img/left-angle.svg" alt="" />
+								</button>
+
+								<button
+									class="px-[14px] bg-[#005A57]"
+									@click="nextPage"
+								>
+									<img
+										src="@/assets/img/left-angle.svg"
+										alt=""
+										class="transform rotate-180"
+									/>
+								</button>
+							</div>
+						</div>
+					</div>
 				</div>
 			</div>
 
@@ -243,7 +317,6 @@
 				<!-- Create mode  -->
 				<div v-if="portfolioStore.activeMode === 'create'">
 					<!-- Top  -->
-
 					<!-- Create view  -->
 					<div v-if="portfolioStore.firstCreateView" class="">
 						<!-- Create new portfolio -->
@@ -290,7 +363,11 @@
 
 							<!-- Open Deposit Modal  -->
 							<button
-								@click="$emit('doCreate'), assignName(), updateNameAndFeeApi()"
+								@click="
+									$emit('doCreate'),
+										assignName(),
+										updateNameAndFeeApi()
+								"
 								class="btn btn-primary"
 								:class="
 									disabledDepToPortfolio
@@ -306,130 +383,13 @@
 
 					<!-- Manage Portfolio  -->
 					<div v-else>
-						<Select />
+						<AllocationContainer />
 						<!-- select area  -->
 					</div>
 
 					<!-- Allocation view on redirect -->
 					<div v-if="!portfolioStore.firstCreateView">
-						<div class="flex items-center gap-[28px] p-[10px]">
-							<!-- + Add new token-->
-							<button
-								class="button text-[#00FF00] uppercase mr-auto"
-								@click="$emit('doCreate')"
-							>
-								+ Add new token
-							</button>
-
-							<!-- Change Fund fee -->
-							<div class="flex items-center gap-[10px]">
-								<label for="" class="uppercase text-white text-[12px]"
-									>Fund fee %</label
-								>
-								<input
-									type="number"
-									name=""
-									id=""
-									v-model.lazy="fundFee"
-									class="py-[4px] pl-[12px] w-[55px] bg-black text-white text-[16px] border border-[#003D3B] focus:outline-none"
-								/>
-							</div>
-
-							<!-- Accepting new investors ? -->
-							<div class="flex items-center gap-[10px]">
-								<label for="" class="uppercase text-white text-[12px]"
-									>Accepting new investors</label
-								>
-								<div class="switch">
-									<input type="checkbox" aria-label="djdn" checked />
-									<span class="slider round"></span>
-								</div>
-							</div>
-						</div>
-
-						<hr class="border-[#2D3035]" />
-
-						<table class="table-auto w-full mb-auto">
-							<thead>
-								<tr
-									class="token text-[#868C9D] text-left border-b border-b-[#2D3035] px-[30px]"
-								>
-									<!-- <th></th> -->
-									<th class="pl-[10px]">ALLOCATION</th>
-									<th>TOKEN</th>
-									<th>PRICE</th>
-									<th class="border-r border-r-[#2D3035]">MC</th>
-									<th>7D%</th>
-									<th>30D%</th>
-									<th>90D%</th>
-									<th>1YR%</th>
-								</tr>
-							</thead>
-							<tbody>
-								<tr
-									class="token text-left mx-[28px] border-b border-b-[#2D3035] text-white"
-									v-for="(token, i) in tokenList"
-									:key="i"
-								>
-									<td class="flex items-center gap-[20px] pl-[10px]">
-										<!-- Delete token  -->
-										<button>
-											<img src="@/assets/img/delete.svg" alt="" />
-										</button>
-
-										<!-- Input allocation  -->
-										<input
-											type="number"
-											name=""
-											id=""
-											v-model.lazy="token.allocation"
-											@keyup="
-												newList($event.target.value, token.name)
-											"
-											class="py-[4px] pl-[12px] w-[55px] bg-black text-white text-[16px] border border-[#003D3B] focus:outline-none"
-										/>
-									</td>
-									<td>{{ token.name }}</td>
-									<td>${{ parseFloat(token.price) }}</td>
-									<td class="border-r border-r-[#2D3035]">
-										${{ parseFloat(token.mc) }}M
-									</td>
-									<td>{{ token.d7 }}%</td>
-									<td>{{ token.d30 }}%</td>
-									<td>{{ token.d90 }}%</td>
-									<td>{{ token.y1 }}%</td>
-								</tr>
-							</tbody>
-						</table>
-						<!-- Save allocation -->
-						<button
-							v-if="!success"
-							@click="openSaveAllocationModal"
-							class="btn btn-primary uppercase w-full mt-[50px]"
-							:class="
-								disableSaveAllocation
-									? 'opacity-50 cursor-text '
-									: 'opacity-1 cursor-pointer hover:bg-transparent'
-							"
-							:disabled="disableSaveAllocation"
-						>
-							{{ totalAllocation }}% -
-							<span v-if="!disableSaveAllocation"
-								>Click here to save allocation</span
-							>
-							<span v-else
-								>Need {{ remAllocation }}% more allocation</span
-							>
-						</button>
-
-						<!-- Saved display  -->
-						<button
-							v-else
-							disabled
-							class="btn btn-primary uppercase w-full mt-[32px]"
-						>
-							100% - Allocation saved!
-						</button>
+						<AllocationContainer />
 					</div>
 				</div>
 
@@ -465,174 +425,10 @@
 
 			<!-- Manage Portfolio  -->
 			<div>
-				<Select />
-				<!-- Allocation view  -->
-				<div>
-					<div class="flex items-center gap-[28px] p-[10px]">
-						<!-- + Add new token-->
-						<button
-							class="button text-[#00FF00] uppercase mr-auto"
-							@click="$emit('doCreate')"
-						>
-							+ Add new token
-						</button>
-
-						<!-- Change Fund fee -->
-						<div class="flex items-center gap-[10px]">
-							<label for="" class="uppercase text-white text-[12px]"
-								>Fund fee %</label
-							>
-							<input
-								type="number"
-								name=""
-								id=""
-								v-model.lazy="fundFee"
-								class="py-[4px] pl-[12px] w-[55px] bg-black text-white text-[16px] border border-[#003D3B] focus:outline-none"
-							/>
-						</div>
-
-						<!-- Accepting new investors ? -->
-						<div class="flex items-center gap-[10px]">
-							<label for="" class="uppercase text-white text-[12px]"
-								>Accepting new investors</label
-							>
-							<div class="switch">
-								<input type="checkbox" aria-label="djdn" checked />
-								<span class="slider round"></span>
-							</div>
-						</div>
-					</div>
-
-					<hr class="border-[#2D3035]" />
-
-					<table class="table-auto w-full">
-						<thead>
-							<tr
-								class="token text-[#868C9D] text-left border-b border-b-[#2D3035] py-[10px] px-[30px]"
-							>
-								<!-- <th></th> -->
-								<th class="pl-[10px]">ALLOCATION</th>
-								<th>TOKEN</th>
-								<th>PRICE</th>
-								<th class="border-r border-r-[#2D3035]">MC</th>
-								<th>7D%</th>
-								<th>30D%</th>
-								<th>90D%</th>
-								<th>1YR%</th>
-							</tr>
-						</thead>
-
-						<tbody>
-							<tr
-								class="token text-left mx-[28px] border-b border-b-[#2D3035] text-white"
-								v-for="(token, i) in tokenList"
-								:key="i"
-							>
-								<td class="flex items-center gap-[20px] pl-[10px]">
-									<!-- Delete token  -->
-									<button>
-										<img src="@/assets/img/delete.svg" alt="" />
-									</button>
-
-									<!-- Input allocation  -->
-									<input
-										type="number"
-										name=""
-										id=""
-										v-model.lazy="token.allocation"
-										@keyup="newList($event.target.value, token.name)"
-										class="py-[4px] pl-[12px] w-[55px] bg-black text-white text-[16px] border border-[#003D3B] focus:outline-none"
-									/>
-								</td>
-								<td>{{ token.name }}</td>
-								<td>${{ parseFloat(token.price) }}</td>
-								<td class="border-r border-r-[#2D3035]">
-									${{ parseFloat(token.mc) }}M
-								</td>
-								<td>{{ token.d7 }}%</td>
-								<td>{{ token.d30 }}%</td>
-								<td>{{ token.d90 }}%</td>
-								<td>{{ token.y1 }}%</td>
-							</tr>
-						</tbody>
-					</table>
-
-					<!-- Save allocation -->
-					<button
-						v-if="!success"
-						@click="openSaveAllocationModal"
-						class="btn btn-primary uppercase w-full mt-[32px]"
-						:class="
-							disableSaveAllocation
-								? 'opacity-50 cursor-text '
-								: 'opacity-1 cursor-pointer hover:bg-transparent'
-						"
-						:disabled="disableSaveAllocation"
-					>
-						{{ totalAllocation }}% -
-						<span v-if="!disableSaveAllocation"
-							>Click here to save allocation</span
-						>
-						<span v-else>Need {{ remAllocation }}% more allocation</span>
-					</button>
-
-					<!-- Saved display  -->
-					<button
-						v-else
-						disabled
-						class="btn btn-primary uppercase w-full mt-[32px]"
-					>
-						100% - Allocation saved!
-					</button>
-				</div>
+				<AllocationContainer />
 			</div>
 		</div>
 	</div>
-
-	<!-- saveAllocationModal -->
-	<Modal v-if="saveAllocationModal" @close="closeAllocationModal()">
-		<!-- Loading  -->
-		<div
-			v-if="loading"
-			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-		>
-			<h1 class="text-[20px] text-center uppercase">Loading...</h1>
-		</div>
-
-		<!-- Error  -->
-		<div
-			v-else-if="error"
-			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-		>
-			<h1 class="text-[20px] text-center uppercase">
-				Unable to save allocation
-			</h1>
-		</div>
-
-		<!-- Successful -->
-		<div
-			v-else
-			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-		>
-			<img
-				src="https://i.postimg.cc/Y2vdsnZW/image.png"
-				alt=""
-				class="max-w-[65%]"
-			/>
-			<h1 class="text-[20px] uppercase">You're All set!</h1>
-
-			<p class="text-[16px]">
-				Your porfolio allocation was successfully saved.
-			</p>
-
-			<button
-				@click="closeAllocationModal"
-				class="btn btn-primary uppercase mx-auto"
-			>
-				Thanks
-			</button>
-		</div>
-	</Modal>
 
 	<!-- swap Modal -->
 	<Modal v-if="swap" @close="closeSwapModal()">
@@ -737,7 +533,7 @@
 		</div>
 	</Modal>
 
-	<!-- Direct to Wallet Modal -->
+	<!-- Withdrawal Modal -->
 	<Modal v-if="direct" @close="closeDirectModal()">
 		<div v-if="firstView" class="mx-[20px] my-[16px]">
 			<wc-overview />
@@ -806,7 +602,7 @@
 					class="max-w-[65%]"
 				/>
 				<h1 class="text-[20px] uppercase">withdrawal successful!</h1>
-
+				todo:
 				<p class="text-[16px]">
 					$10.00 has been sent to you. Wait a few moments for the tokens to
 					transfer and reflect in your wallet. Gas used $2.24
@@ -826,13 +622,17 @@
 <script setup>
 import { ref, computed, watch, onMounted } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
-import { withdraw, updateNewWalletVariables, updateUIStatus, getTokenListForManageUI} from "@/api";
+import {
+	withdraw,
+	updateNewWalletVariables,
+	updateUIStatus,
+	getTokenListForManageUI,
+} from "@/api";
 import Modal from "../Modal.vue";
 import WithdrawalCard from "./WithdrawalCard.vue";
 import WcOverview from "./WcOverview.vue";
-// import Filter from "../manage/Filter.vue";
 import { useRouter } from "vue-router";
-import Select from "../manage/Select.vue";
+import AllocationContainer from "../manage/AllocationContainer.vue";
 
 const { currentRoute } = useRouter();
 
@@ -841,18 +641,6 @@ const path = computed(() => {
 });
 
 const portfolioStore = usePortfolios();
-
-// onMounted(() => {
-
-// })
-
-const filteredAllPortfolios = computed(() =>
-	portfolioStore.allPortfolios.slice(0, 4)
-);
-
-const filteredMyPortfolios = computed(() =>
-	portfolioStore.myPortfolios.slice(0, 4)
-);
 
 const portfolioToShow = ref("");
 
@@ -867,28 +655,6 @@ const wcTwo = ref({
 });
 
 const tokenList = ref([]);
-/*	{
-		name: " Test",
-		price: 19,
-		mc: 340,
-		allocation: 33,
-		d7: 10,
-		d30: 20,
-		d90: 30,
-		y1: 120,
-	},
-	{
-		name: "KBTC ",
-		price: 120,
-		mc: 340,
-		allocation: 33,
-		d7: 10,
-		d30: 20,
-		d90: 30,
-		y1: 120,
-	},
-]);*/
-
 
 const disabled = ref(true);
 
@@ -897,8 +663,6 @@ const loading = ref(false);
 const error = ref(false);
 
 const success = ref(false);
-
-const saveAllocationModal = ref(false);
 
 const swap = ref(false);
 
@@ -914,32 +678,91 @@ const amount = ref("");
 
 const singleToken = ref("");
 
+const searchQuery = ref("");
+
 const tabs = ref(["All Portfolios", "My Portfolios"]);
 
 const placeholder = ref(25);
+
+const currentPage = ref(1);
+
+const filteredAllPortfolios = ref([]);
 
 const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
 
+onMounted(() => {
+	filteredAllPortfolios.value = portfolioStore.allPortfolios
+		.slice(-4)
+		.reverse();
+	// return filteredAllPortfolios;
+});
+
+const totalLeaderboardPages = computed(() => {
+	if (portfolioStore.allPortfolios.length / 4 < 1) {
+		return 1;
+	} else {
+		return portfolioStore.allPortfolios.length / 4;
+	}
+});
+
+function clearSearch() {
+	searchQuery.value = "";
+}
+function updateSearchedPortfolios(event) {
+	const term = event.target.value;
+	console.log(term);
+	filteredAllPortfolios.value = portfolioStore.allPortfolios
+		.filter((portfolio) =>
+			portfolio.name?.toLowerCase().includes(term.toLowerCase())
+		)
+		.slice(-4)
+		.reverse();
+}
 
 function getTokenListForManage() {
 	console.log("getTokenListForManage");
- 	try {
- 		tokenList.value = getTokenListForManageUI();
- 		console.log("getTokenListForManage token list is:", tokenList.value);
- 	} catch (error) {
- 		console.log(error);
- 	}
- }
-  //async function getTokenList() {
- //	try {
- //		tokenList.value = await getWithdrawTableData()();
- //		//console.log("token list is:", tokenList.value);
- //	} catch (error) {
- //		console.log(error);
- //	}
- //}
+	try {
+		tokenList.value = getTokenListForManageUI();
+		console.log("getTokenListForManage token list is:", tokenList.value);
+	} catch (error) {
+		console.log(error);
+	}
+}
+function updateShowingPortfolios() {
+	if (currentPage.value > 1) {
+		filteredAllPortfolios.value = portfolioStore.allPortfolios
+			.slice(-(currentPage.value * 4), -(currentPage.value * 4 - 4))
+			.reverse();
+	} else {
+		filteredAllPortfolios.value = portfolioStore.allPortfolios
+			.slice(-4)
+			.reverse();
+	}
+}
+
+function nextPage() {
+	if (currentPage.value < totalLeaderboardPages.value) {
+		currentPage.value += 1;
+		updateShowingPortfolios();
+	}
+}
+
+function prevPage() {
+	if (currentPage.value > 1) {
+		currentPage.value -= 1;
+		updateShowingPortfolios();
+	}
+}
+//async function getTokenList() {
+//	try {
+//		tokenList.value = await getWithdrawTableData()();
+//		//console.log("token list is:", tokenList.value);
+//	} catch (error) {
+//		console.log(error);
+//	}
+//}
 
 const disableWithdraw = computed(() => {
 	if (swap.value) {
@@ -949,44 +772,30 @@ const disableWithdraw = computed(() => {
 	}
 });
 
-const disableSaveAllocation = computed(
-	() => totalAllocation.value < 100 || totalAllocation.value > 100
-);
-
-const totalAllocation = computed(() => {
-	return tokenList.value.reduce((accumulator, currentValue) => {
-		if (!(parseFloat(currentValue.allocation) > 0)) {
-			return accumulator + 0;
-		} else {
-			return accumulator + parseFloat(currentValue.allocation);
-		}
-	}, 0);
-});
-
-const remAllocation = computed(() => {
-	return 100 - totalAllocation.value;
-});
-
-function updateNameAndFeeApi(){
-	console.log("updateNameAndFeeApi portfolioName:"+portfolioName.value+" fundFee:"+fundFee.value);	
+function updateNameAndFeeApi() {
+	console.log(
+		"updateNameAndFeeApi portfolioName:" +
+			portfolioName.value +
+			" fundFee:" +
+			fundFee.value
+	);
 	updateNewWalletVariables(portfolioName.value, fundFee.value);
- }
- function updateUIStatusAPICaller(uiType){
-	console.log("updateUIStatusAPICaller with type:"+uiType);
+}
+function updateUIStatusAPICaller(uiType) {
+	console.log("updateUIStatusAPICaller with type:" + uiType);
 	updateUIStatus(uiType);
- }
-
+}
 
 async function doWithdraw() {
 	//to do - add tokens swapping into
 	try {
-		console.log("do ")
+		console.log("do ");
 		const res = await withdraw([], amount.value);
 		console.log(res);
-		if (res.success){
+		if (res.success) {
 			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
-			console.log("usdAmountOfGas to show in modal:"+usdAmountOfGas);
-		}else{
+			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
+		} else {
 			error.value = true;
 			console.log(success.error);
 		}
@@ -1031,29 +840,12 @@ function openSaveAllocationModal() {
 	success.value = true;
 }
 
-function newList(amt, name) {
-	let newTokenList = tokenList.value.map((token) => {
-		if (token.name === name) {
-			token = { ...token, allocation: parseFloat(amt) };
-		}
-		return token;
-	});
-
-	tokenList.value = newTokenList;
-
-	console.log(tokenList.value);
-}
-
 function toggleDisabled() {
 	disabled.value = false;
 }
 
 function assignName() {
 	portfolioStore.selectedPortfolio.name = portfolioName.value;
-}
-
-function closeAllocationModal() {
-	saveAllocationModal.value = false;
 }
 
 function showWithdraw() {
@@ -1078,65 +870,5 @@ th {
 td:not(:first-child),
 th:not(:first-child) {
 	@apply px-[14px];
-}
-
-.switch {
-	position: relative;
-	display: inline-block;
-	width: 60px;
-	height: 34px;
-}
-
-.switch input {
-	opacity: 0;
-	width: 0;
-	height: 0;
-}
-
-.slider {
-	position: absolute;
-	cursor: pointer;
-	top: 0;
-	left: 0;
-	right: 0;
-	bottom: 0;
-	background-color: #ccc;
-	-webkit-transition: 0.4s;
-	transition: 0.4s;
-}
-
-.slider:before {
-	position: absolute;
-	content: "";
-	height: 26px;
-	width: 26px;
-	left: 4px;
-	bottom: 4px;
-	background-color: white;
-	-webkit-transition: 0.4s;
-	transition: 0.4s;
-}
-
-input:checked + .slider {
-	background-color: #04ce04;
-}
-
-input:focus + .slider {
-	box-shadow: 0 0 1px #04ce04;
-}
-
-input:checked + .slider:before {
-	-webkit-transform: translateX(26px);
-	-ms-transform: translateX(26px);
-	transform: translateX(26px);
-}
-
-/* Rounded sliders */
-.slider.round {
-	border-radius: 34px;
-}
-
-.slider.round:before {
-	border-radius: 50%;
 }
 </style>

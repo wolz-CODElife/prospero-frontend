@@ -65,7 +65,7 @@
 							type="number"
 							aria-label="usd amount"
 							v-model.lazy="token.usdAmountEnteredByUser"
-							@change="add($event.target.value, token.name)"
+							@keyup="add($event.target.value, token.name)"
 						/>
 					</td>
 				</tr>
@@ -90,99 +90,89 @@
 
 			<!-- Deposit  -->
 			<button
-				@click="$emit('depositAction')"
+				@click="$emit('depositAction'), (firstView = true)"
 				class="basis-1/2 btn btn-primary"
 				:class="
 					disableDeposit
 						? 'opacity-50 cursor-text'
 						: 'opacity-1 cursor-pointer'
 				"
-				
 			>
 				Deposit
 			</button>
 		</div>
-
-		<Modal
-			v-if="portfolioStore.depositDialog"
-			@close="portfolioStore.depositDialog = false"
+	</div>
+	<Modal v-if="portfolioStore.depositDialog" @close="$emit('goBack')">
+		<!--  Approve Required  -->
+		<div
+			v-if="firstView"
+			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
 		>
-			<!--  Approve Required  -->
+			<img src="@/assets/img/caution.svg" alt="" class="w-[62px] h-[62px]" />
+			<h1 class="text-[20px] uppercase">Approve required</h1>
+			<p class="text-[16px]">
+				Before you can use Prospero, you need to approve the tokens to be
+				transferred.
+			</p>
+			<button
+				class="btn btn-primary w-full"
+				@click="depositToPortfolio(), toggleView"
+			>
+				Okay
+			</button>
+		</div>
+
+		<div v-else-if="secondView">
+			<!-- Loading  -->
 			<div
-				v-if="firstView"
+				v-if="loading"
+				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+			>
+				<h1 class="text-[20px] text-center uppercase">Loading...</h1>
+			</div>
+
+			<!-- Error  -->
+			<div
+				v-else-if="error"
+				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+			>
+				<h1 class="text-[20px] text-center uppercase">
+					Deposit Unsucessful
+				</h1>
+			</div>
+
+			<!-- Successful -->
+			<div
+				v-else
 				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
 			>
 				<img
-					src="@/assets/img/caution.svg"
+					src="https://i.postimg.cc/Y2vdsnZW/image.png"
 					alt=""
-					class="w-[62px] h-[62px]"
+					class="max-w-[65%]"
 				/>
-				<h1 class="text-[20px] uppercase">Approve required</h1>
+				<h1 class="text-[20px] uppercase">Deposit Successful</h1>
+
+				<!-- todo: replace these with real values  -->
 				<p class="text-[16px]">
-					Before you can use Prospero, you need to approve the tokens to be
-					transferred.
+					$20.00 has been sent to AFS1000 🔱. Wait a few moments for the
+					tokens to transfer and reflect in your portfolio tab. Gas used
+					$2.24
 				</p>
+
 				<button
-					class="btn btn-primary w-full"
-					@click="depositToPortfolio()"
+					class="btn btn-primary uppercase w-full"
+					@click="$emit('redirect')"
 				>
-					Okay
+					Take me to my portfolios
 				</button>
 			</div>
-
-			<div v-else>
-				<!-- Loading  -->
-				<div
-					v-if="loading"
-					class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-				>
-					<h1 class="text-[20px] text-center uppercase">Loading...</h1>
-				</div>
-
-				<!-- Error  -->
-				<div
-					v-else-if="error"
-					class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-				>
-					<h1 class="text-[20px] text-center uppercase">
-						Deposit Unsucessful
-					</h1>
-				</div>
-
-				<!-- Successful -->
-				<div
-					v-else
-					class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-				>
-					<img
-						src="https://i.postimg.cc/Y2vdsnZW/image.png"
-						alt=""
-						class="max-w-[65%]"
-					/>
-					<h1 class="text-[20px] uppercase">Deposit Successful</h1>
-
-					<!-- todo: replace these with real values  -->
-					<p class="text-[16px]">
-						$20.00 has been sent to AFS1000 🔱. Wait a few moments for the
-						tokens to transfer and reflect in your portfolio tab. Gas used
-						$2.24
-					</p>
-
-					<!-- todo: make text dynamic  -->
-					<button
-						class="btn btn-primary uppercase w-full"
-						@click="$emit('redirect')"
-					>
-						Take me to my portfolios
-					</button>
-				</div>
-			</div>
-		</Modal>
-	</div>
+		</div>
+	</Modal>
 </template>
 
 <script setup>
-import { getBalancesInEoa, handleDepositType} from "@/api";
+import { getBalancesInEoa, handleDepositType } from "@/api";
 import { onMounted, computed, ref } from "vue";
 import Modal from "../Modal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
@@ -193,7 +183,11 @@ const loading = ref(false);
 
 const error = ref(false);
 
+const success = ref(false);
+
 const firstView = ref(true);
+
+const secondView = ref(false);
 
 const tokenList = ref([]);
 /*
@@ -221,45 +215,45 @@ const tokenList = ref([]);
 ]);
 */
 
- onMounted(() => {
- 	getTokenList();
- });
+onMounted(() => {
+	getTokenList();
+});
 
- async function getTokenList() {
- 	try {
- 		tokenList.value = await getBalancesInEoa();
- 	} catch (error) {
- 		console.log(error);
- 	}
- }
- function enableDeposit(f){
+function toggleView() {
+	firstView.value = false;
+	secondView.value = true;
+}
 
- }
-
-
+function closeModal() {
+	portfolioStore.depositDialog = false;
+	portfolioStore.goBack();
+}
+async function getTokenList() {
+	try {
+		tokenList.value = await getBalancesInEoa();
+	} catch (error) {
+		console.log(error);
+	}
+}
+function enableDeposit(f) {}
 
 async function depositToPortfolio() {
 	firstView.value = false;
-	
-		console.log("depositToPortfolio called");
-		try {
-	 	var res = await handleDepositType();
-		if (res.success){
-			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
-			console.log("usdAmountOfGas to show in modal:"+usdAmountOfGas);
-		}else{
-			console.log("ERROR - 1");
-	 		console.log(res.error);
-	 		//error code here
-	 	}
-		} catch (error) {
-			console.log("ERROR - 2");
-			error.value = true;
-			console.log(error);
-		}
-		console.log("done");
-		
+	loading.value = true;
 
+	console.log("depositToPortfolio called");
+	try {
+		let res = await handleDepositType();
+
+		let usdAmountOfGas = res.gasUsed.usdAmountOfGas;
+		console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
+		loading.value = false;
+	} catch (err) {
+		loading.value = false;
+		error.value = true;
+		console.log(err);
+	}
+	console.log("done");
 }
 
 function add(amt, name) {

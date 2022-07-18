@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<div class="grid grid-cols-12 h-full text-[#868C9D] bg-black">
+		<div class="grid grid-cols-12 h-[190px] text-[#868C9D] bg-black">
 			<!-- Left side of header  -->
 			<div
 				class="col-span-8 bg-black pl-[30px] py-[10px] border"
@@ -95,7 +95,7 @@
 
 			<!-- Right side of header  -->
 			<div
-				class="col-span-4 bg-black border py-[20px]"
+				class="col-span-4 bg-black border py-[30px]"
 				:class="[
 					portfolioStore.activeHeader === 'left'
 						? 'border-black border-b-white'

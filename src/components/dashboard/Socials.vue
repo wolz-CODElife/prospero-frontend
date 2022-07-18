@@ -1,7 +1,23 @@
 <template>
 	<div class="row-span-1 bg-[#191A20] py-[20px]">
-		<!-- Top -->
-		<SocialsDirection />
+		<!-- Directions  -->
+		<DashDir
+			empty-selected-card-classes="h-full flex gap-[24px] justify-center items-center"
+			arrow-class="-rotate-90"
+		>
+			<template #selectedPortfolioDisplay>
+				<h2
+					class="text-[#868C9D] text-[14px] text-center uppercase"
+					v-if="portfolioStore.selectedPortfolio.name"
+				>
+					<span
+						v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
+						>Follow</span
+					>
+					{{ portfolioStore.selectedPortfolio.name }} Community
+				</h2>
+			</template>
+		</DashDir>
 
 		<hr class="my-[12px] border-[#2D3035]" />
 
@@ -40,6 +56,7 @@
 <script setup>
 import SocialsDirection from "./SocialsDirection.vue";
 import { usePortfolios } from "@/stores/Portfolios";
+import DashDir from "@/layouts/dashboard/DashDir.vue";
 
 // Store
 const portfolioStore = usePortfolios();

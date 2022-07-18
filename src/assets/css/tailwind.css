@@ -11,6 +11,10 @@
 		src: url(@/assets/fonts/NeurialGrotesk-Regular.otf) format("opentype");
 	}
 
+	html {
+		font-size: 100%;
+	}
+
 	body {
 		font-family: "Neurial Grotesk";
 	}
