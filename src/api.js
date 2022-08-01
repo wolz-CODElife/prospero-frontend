@@ -633,6 +633,9 @@ async function updateUIFieldValuesLeaderboard() {
 	var profitsPercentage = portfolio.profitPercentage;
 	//to do - update Ui
 }
+function updateApiTokenList(newTokenList){
+  balancesInEoa=newTokenList;
+}
 async function updateAmount(amount, tokenAddress) {
 	console.log(
 		"updateAmount called with amount:" +
@@ -1580,24 +1583,24 @@ async function deposit() {
 	var foundOneAmtAboveZero = false;
 	for (var i = 0; i < balancesInEoa.length; i++) {
 		var thisDepositingObj = balancesInEoa[i];
-		//console.log('thisDepositingObj:'+JSON.stringify(thisDepositingObj,null,2))
+		console.log('thisDepositingObj:'+JSON.stringify(thisDepositingObj,null,2))
 		var usdAmountEnteredByUser = thisDepositingObj["usdAmountEnteredByUser"];
 		usdAmountEnteredByUser = Number(usdAmountEnteredByUser);
 		if (usdAmountEnteredByUser > 0) {
-			//console.log('thisDepositingObj.name:'+thisDepositingObj.name)
+			console.log('thisDepositingObj.name:'+thisDepositingObj.name)
 			//var weiAmount = await getWeiAmount(usdAmountEnteredByUser, thisDepositingObj.address)
 			var amountInEth = usdAmountEnteredByUser / thisDepositingObj.price;
 			amountInEth = amountInEth.toFixed(16);
-			//console.log('amountInEth:'+amountInEth)
+			console.log('amountInEth:'+amountInEth)
 			var weiAmt = web3.utils.toWei(amountInEth + "", "ether");
-			//console.log('weiAmt1:'+weiAmt)
+			console.log('weiAmt1:'+weiAmt)
 			weiAmt = await updateBalanceFromEighteenDecimalsIfNeeded(
 				weiAmt,
 				thisDepositingObj.address
 			);
-			//console.log('weiAmt2:'+weiAmt)
+			console.log('weiAmt2:'+weiAmt)
 			if (thisDepositingObj.name == NativeTokenName) {
-				//  console.log("WEI:"+thisDepositingObj.weiDepositing)
+				  console.log("WEI:"+thisDepositingObj.weiDepositing)
 				avaxValue = weiAmt + "";
 			} else {
 				tokens.push(thisDepositingObj.address);
@@ -1734,6 +1737,7 @@ async function depositContract(
 	}
 	return { success: true, gasUsed: gasUsed };
 }
+
 async function calculateGasEstimate(gasEstimate, gasPriceToUse) {
 	////console.log'calculateGasEstimate')
 	//console.log("gasEstimate:"+gasEstimate)
@@ -1747,13 +1751,15 @@ async function calculateGasEstimate(gasEstimate, gasPriceToUse) {
 	//feeHex = serverResponse.result
 	//eth_baseFee = parseInt(feeHex,16)
 	////console.log'eth_baseFee:'+eth_baseFee)
+ 
 	//GAS_PRICE=eth_baseFee;
 	//console.log("GAS_PRICE NOW:"+GAS_PRICE)
 	var estimatedGasCostWei = estimatedGasBigNumber.multipliedBy(GAS_PRICE + "");
-	//console.log("Estimate calculateGasEstimate wei:"+estimatedGasCostWei)
+	console.log("Estimate calculateGasEstimate wei:"+estimatedGasCostWei)
 	var estimatedCostInEth = ethers.utils.formatEther(estimatedGasCostWei + "");
+  console.log("AVAX PRICE:"+avaxPrice)
 	var usdAmountOfGas = avaxPrice * estimatedCostInEth;
-	//console.log("Estimate calculateGasEstimate eth:"+estimatedCostInEth)
+	console.log("Estimate calculateGasEstimate eth:"+estimatedCostInEth)
 	return {
 		estimatedGasCostWei: estimatedGasCostWei,
 		estimatedCostInEth: estimatedCostInEth,
@@ -2523,6 +2529,7 @@ async function updatePrices() {
 				//console.log("wavaxLowerC  :"+wavaxLowerC)
 
 				if (lowerCaseCAdd == wavaxLowerC) {
+          console.log('setting avax price');
 					avaxPrice = prosperoPrice;
 				}
 			}
@@ -3072,4 +3079,5 @@ export {
 	updateNewWalletVariables,
 	handleDepositType,
 	getTokenListForManageUI,
+  updateApiTokenList
 };

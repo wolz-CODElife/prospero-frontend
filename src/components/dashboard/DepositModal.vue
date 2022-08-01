@@ -171,7 +171,7 @@
 </template>
 
 <script setup>
-import { getBalancesInEoa, handleDepositType } from "@/api";
+import { getBalancesInEoa, handleDepositType, updateApiTokenList } from "@/api";
 import { onMounted, computed, ref } from "vue";
 import Modal from "../Modal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
@@ -214,6 +214,7 @@ async function getTokenList() {
 	} catch (error) {
 		console.log(error);
 	}
+	
 }
 function enableDeposit(f) {}
 
@@ -225,8 +226,14 @@ async function depositToPortfolio() {
 	console.log("depositToPortfolio called");
 	try {
 		let res = await handleDepositType();
-		let usdAmountOfGas = res.gasUsed.usdAmountOfGas;
-		console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
+		//console.log("res:"+JSON.stringify(res))
+		if (!res.success){
+			error.value = true;
+			console.log(res.error);
+		}else{
+			let usdAmountOfGas = res.gasUsed.usdAmountOfGas;
+			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
+		}
 		loading.value = false;
 	} catch (err) {
 		loading.value = false;
@@ -236,13 +243,16 @@ async function depositToPortfolio() {
 	console.log("done");
 }
 
-function add(amt, name) {
+async function add(amt, name) {
 	let newTokenList = tokenList.value.map((token) => {
 		if (token.name === name) {
 			token = { ...token, usdAmountEnteredByUser: parseFloat(amt) };
+			console.log("TOKEN:"+JSON.stringify(token,null,2))
 		}
 		return token;
 	});
+	updateApiTokenList(newTokenList);
+
 
 	tokenList.value = newTokenList;
 
