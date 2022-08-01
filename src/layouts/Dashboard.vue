@@ -72,7 +72,7 @@ const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 
 function doJoin() {
 	console.log("doJoin function caing - dashboard");
-	//updateUIStatus(2)
+	updateUIStatus(2)
 	joinView.value = true;
 }
 
