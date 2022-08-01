@@ -2022,6 +2022,7 @@ async function initLeaderBoardTableObject() {
 	return { success: true };
 }
 async function getLeaderBoardDataForTable() {
+  console.log("leaderBoardUITableObject:"+JSON.stringify(leaderBoardUITableObject,null,2))
 	return leaderBoardUITableObject;
 }
 
@@ -2357,27 +2358,41 @@ async function initializeApi() {
 }
 
 async function initializeDataObjects() {
+  console.log('gettingGraphData');
 	var status = await getGraphData();
 	if (!status.success) {
 		console.error("error getGraphData: " + status.error);
 		return status;
 	}
+  console.log('getBlockNumber');
+
 	blockNumWhenWebAppLaunched = await web3.eth.getBlockNumber();
 	//await initNewEventListener();
+  console.log('calling updatePrices');
 
 	status = await updatePrices();
+  console.log('got prices');
+
 	if (!status.success) {
 		console.error("error updatePrices: " + status.error);
 		return status;
 	}
 	status = await initLeaderBoardTableObject();
+  console.log('got leaderBoardTableObject');
+
 	if (!status.success) {
 		console.error("error initLeaderBoardTableObject: " + status.error);
 		return status;
 	}
 	await createMyWalletsDataAndUIObject();
+  console.log('called createMyWalletsDataAndUIObject ');
+
 	var port = await getMyWallet();
+  console.log('called getMyWallets');
+
 	await getHistoricalPricesUpdateChartsData();
+  console.log('called getHistoricalPricesUpdateChartsData');
+
 	//await getBalancesInEoa();
 	return { success: true };
 }
@@ -2393,6 +2408,7 @@ async function initializeBlockchainConnection() {
 			error: "Do you have multiple wallets installed?",
 		};
 	}
+  //console.log('got provider')
 	if (provider) {
 		try {
 			var accounts = await window.ethereum.request({
@@ -2425,10 +2441,11 @@ async function initializeBlockchainConnection() {
 	}
 	//udates selectedProsperoWalletAddres to last wallet on init
 	//getMyWallet();
+  //console.log('set eoaAddress')
 	ethersProvider = await new ethers.providers.Web3Provider(window.ethereum);
 	ethersSigner = ethersProvider.getSigner();
 	web3 = new Web3(window.ethereum);
-	console.log("Web3 version", web3.version);
+	//console.log("got Web3 version", web3.version);
 
 	ethereum.on("accountsChanged", (accounts) => {
 		console.error("Accounts changed -- reloading....");

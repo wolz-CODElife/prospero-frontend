@@ -53,8 +53,8 @@ onBeforeMount(async () => {
 			await initializeApi();
 
 			try {
-				portfolioStore.getAllPortfolios();
-				portfolioStore.getMyPortfolios();
+				await portfolioStore.getAllPortfolios();
+				await portfolioStore.getMyPortfolios();
 			} catch (error) {
 				console.log("get all portfolios error", error);
 			}
