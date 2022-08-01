@@ -1843,7 +1843,7 @@ async function approveDepositing(
 async function getBalancesInEoa() {
 	console.log("getBalancesInEoa");
 
-	balancesInEoa = [];
+	let thisBalancesInEoa = [];
 	var totalValue = 0;
 	var nativeTokenObj;
 	for (var k = 0; k < tokenArray.length; k++) {
@@ -1875,7 +1875,7 @@ async function getBalancesInEoa() {
 			isNativeToken: false,
 		};
 		//console.log("BAL OBJ:"+JSON.stringify(obj,null,2))
-		balancesInEoa.push(obj);
+		thisBalancesInEoa.push(obj);
 	}
 	//NATIVE TOKEN, doesn't work with subnet yet
 	/*
@@ -1907,7 +1907,8 @@ if (!isSubnet){
 }
 */
 	//console.log("balancesInEoa:"+JSON.stringify(balancesInEoa,null,2))
-	return balancesInEoa;
+  balancesInEoa = thisBalancesInEoa
+	return thisBalancesInEoa;
 }
 
 function updateSelectedWallet(prosperoWalletAddress) {
