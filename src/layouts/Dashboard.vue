@@ -43,6 +43,8 @@ const portfolioStore = usePortfolios();
 
 // Route protection
 onBeforeMount(async () => {
+	 (async () => {
+
 	if (!JSON.parse(localStorage.getItem("userState")).status) {
 		// todo: change this to router replace
 		window.location.replace("/");
@@ -62,6 +64,7 @@ onBeforeMount(async () => {
 			console.log("init error", error);
 		}
 	}
+	 })()
 });
 
 const joinView = ref(false);
