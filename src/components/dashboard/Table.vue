@@ -122,8 +122,9 @@
 								"
 								class="text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white hover:bg-[#003D3B]"
 								:class="[
-									portfolioStore.selectedPortfolio.name ===
-									portfolio.name
+									portfolioStore.selectedPortfolio
+										.prosperoWalletAddress ===
+									portfolio.prosperoWalletAddress
 										? 'bg-[#003D3B] '
 										: 'bg-transparent',
 								]"
@@ -131,8 +132,8 @@
 								<td class="ml-[20px] pl-[20px]">
 									<input
 										type="radio"
-										:name="portfolio.name"
-										:id="portfolio.name"
+										:name="portfolio.prosperoWalletAddress"
+										:id="portfolio.prosperoWalletAddress"
 										@onchange="
 											portfolioStore.doSelectPortfolio(portfolio),
 												toggleDisabled()
@@ -680,7 +681,7 @@ const totalLeaderboardPages = computed(() => {
 	if (portfolioStore.allPortfolios.length / 4 < 1) {
 		return 1;
 	} else {
-		return portfolioStore.allPortfolios.length / 4;
+		return Math.ceil(portfolioStore.allPortfolios.length / 4);
 	}
 });
 
