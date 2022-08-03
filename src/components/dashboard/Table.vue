@@ -118,7 +118,7 @@
 								key="portfolio"
 								@click="
 									portfolioStore.doSelectPortfolio(portfolio),
-										toggleDisabled()
+										toggleDisabledJoin()
 								"
 								class="text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white hover:bg-[#003D3B]"
 								:class="[
@@ -136,7 +136,7 @@
 										:id="portfolio.prosperoWalletAddress"
 										@onchange="
 											portfolioStore.doSelectPortfolio(portfolio),
-												toggleDisabled()
+												toggleDisabledJoin()
 										"
 									/>
 								</td>
@@ -820,6 +820,23 @@ function openSaveAllocationModal() {
 
 function toggleDisabled() {
 	disabled.value = false;
+}
+
+function toggleDisabledJoin() {
+	if (
+		portfolioStore.myPortfolios.some(
+			(selected) =>
+				selected.prosperoWalletAddress ===
+				portfolioStore.selectedPortfolio.prosperoWalletAddress
+		)
+	) {
+		disabled.value = true;
+		setTimeout(() => {
+			alert("You've already joined ", portfolioStore.selectedPortfolio.name);
+		}, 500);
+	} else {
+		disabled.value = false;
+	}
 }
 
 function assignName() {
