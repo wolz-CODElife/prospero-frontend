@@ -240,6 +240,7 @@ export const usePortfolios = defineStore("Portfolios", {
 			} catch (error) {
 				console.log(error);
 			}
+			console.log("this.allPortfolios:"+JSON.stringify(this.allPortfolios,null,2))
 		},
 
 		async getMyPortfolios() {

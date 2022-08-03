@@ -43,6 +43,8 @@ const portfolioStore = usePortfolios();
 
 // Route protection
 onBeforeMount(async () => {
+	 (async () => {
+
 	if (!JSON.parse(localStorage.getItem("userState")).status) {
 		// todo: change this to router replace
 		window.location.replace("/");
@@ -53,8 +55,8 @@ onBeforeMount(async () => {
 			await initializeApi();
 
 			try {
-				portfolioStore.getAllPortfolios();
-				portfolioStore.getMyPortfolios();
+				await portfolioStore.getAllPortfolios();
+				await portfolioStore.getMyPortfolios();
 			} catch (error) {
 				console.log("get all portfolios error", error);
 			}
@@ -62,6 +64,7 @@ onBeforeMount(async () => {
 			console.log("init error", error);
 		}
 	}
+	 })()
 });
 
 const joinView = ref(false);
@@ -72,7 +75,7 @@ const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 
 function doJoin() {
 	console.log("doJoin function caing - dashboard");
-	//updateUIStatus(2)
+	updateUIStatus(2)
 	joinView.value = true;
 }
 
