@@ -2,7 +2,7 @@
 	<aside class="z-[9999] fixed lg:static">
 		<div class="h-screen w-[300px]">
 			<div
-				class="fixed w-[inherit] h-[inherit] bg-black py-[40px] px-[40px]"
+				class="fixed w-[inherit] h-[inherit] bg-black pt-[30px] px-[40px]"
 			>
 				<!-- logo -->
 				<img
@@ -13,14 +13,14 @@
 
 				<!-- QUARTERLY PERFORMANCE BONUS POOL -->
 				<div
-					class="text-center w-[220px] bg-pool mb-[40px] py-[16px] px-[28px] bg-[url('https://i.postimg.cc/mgjp5LvY/image.png')]"
+					class="text-center w-[220px] bg-pool mb-[30px] py-[10px] px-[28px] bg-[url('https://i.postimg.cc/mgjp5LvY/image.png')]"
 					v-if="path === 'manage'"
 				>
 					<h1 class="text-white uppercase text-[12px]">
 						QUARTERLY PERFORMANCE BONUS POOL
 					</h1>
 
-					<h2 class="text-[#54AC68] text-[24px] my-[20px]">$0.00</h2>
+					<h2 class="text-[#54AC68] text-[24px] my-[16px]">$0.00</h2>
 
 					<div class="flex justify-center">
 						<div class="flex" v-for="item in countdown" :key="item">
@@ -51,7 +51,7 @@
 				<div class="bg-[#2D3035] my-[40px] h-[1px]" />
 
 				<!-- Navs -->
-				<ul class="flex flex-col gap-y-[28px] mt-[40px]">
+				<ul class="flex flex-col gap-y-[20px] mt-[30px]">
 					<li
 						v-for="(nav, i) in navs"
 						:key="i"

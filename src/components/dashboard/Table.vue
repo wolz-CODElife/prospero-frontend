@@ -113,9 +113,6 @@
 								portfolioStore.activePortfolioType === 'All Portfolios'
 							"
 						>
-							<!-- !empty  -->
-							<!-- v-if="portfolioStore.filteredAllPortfolios.length > 0" -->
-
 							<tr
 								v-for="portfolio in filteredAllPortfolios"
 								key="portfolio"
@@ -125,8 +122,9 @@
 								"
 								class="text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white hover:bg-[#003D3B]"
 								:class="[
-									portfolioStore.selectedPortfolio.name ===
-									portfolio.name
+									portfolioStore.selectedPortfolio
+										.prosperoWalletAddress ===
+									portfolio.prosperoWalletAddress
 										? 'bg-[#003D3B] '
 										: 'bg-transparent',
 								]"
@@ -134,8 +132,8 @@
 								<td class="ml-[20px] pl-[20px]">
 									<input
 										type="radio"
-										:name="portfolio.name"
-										:id="portfolio.name"
+										:name="portfolio.prosperoWalletAddress"
+										:id="portfolio.prosperoWalletAddress"
 										@onchange="
 											portfolioStore.doSelectPortfolio(portfolio),
 												toggleDisabled()
@@ -304,21 +302,12 @@
 						<img src="@/assets/img/direction.svg" alt="" />
 						<span> Go Back </span>
 					</button>
-
-					<!-- <button
-					v-if="path === 'manager'"
-					class="button text-[#00FF00] uppercase mb-[16px]"
-					@click="portfolioStore.goBack()"
-				>
-					Manage Portfolio
-				</button> -->
 				</div>
 
 				<!-- Create mode  -->
 				<div v-if="portfolioStore.activeMode === 'create'">
-					<!-- Top  -->
-					<!-- Create view  -->
-					<div v-if="portfolioStore.firstCreateView" class="">
+					<!-- Top - Create view  -->
+					<div v-if="portfolioStore.firstCreateView">
 						<!-- Create new portfolio -->
 						<h4
 							class="text-[16px] text-center uppercase text-white mt-[40px] mb-[28px]"
@@ -381,21 +370,13 @@
 						</div>
 					</div>
 
-					<!-- Manage Portfolio  -->
-					<div v-else>
-						<AllocationContainer />
-						<!-- select area  -->
-					</div>
-
-					<!-- Allocation view on redirect -->
-					<div v-if="!portfolioStore.firstCreateView">
-						<AllocationContainer />
-					</div>
+					<!-- Allocation view on redirect  -->
+					<AllocationContainer v-else />
 				</div>
 
 				<!-- Withdraw mode  -->
 				<div
-					v-else-if="portfolioStore.activeMode === 'withdraw'"
+					v-if="portfolioStore.activeMode === 'withdraw'"
 					class="px-[20px]"
 				>
 					<withdrawal-card
@@ -417,16 +398,12 @@
 		<!-- This is the view of the 'Table' section of Prospero when the route is on /manage  -->
 		<div v-else-if="path === 'manage'">
 			<!-- Go back-->
-			<div class="px-[10px]">
-				<button class="button text-[#00FF00] uppercase mb-[16px]">
-					Manage Portfolio
-				</button>
-			</div>
+			<h3 class="text-[#00FF00] uppercase mb-[16px] mx-[10px]">
+				Manage Portfolio
+			</h3>
 
 			<!-- Manage Portfolio  -->
-			<div>
-				<AllocationContainer />
-			</div>
+			<AllocationContainer />
 		</div>
 	</div>
 
@@ -518,6 +495,7 @@
 				/>
 				<h1 class="text-[20px] uppercase">withdrawal successful!</h1>
 
+				<!-- todo: replace this w real values -->
 				<p class="text-[16px]">
 					$10.00 has been sent to you. Wait a few moments for the tokens to
 					transfer and reflect in your wallet. Gas used $2.24
@@ -703,7 +681,7 @@ const totalLeaderboardPages = computed(() => {
 	if (portfolioStore.allPortfolios.length / 4 < 1) {
 		return 1;
 	} else {
-		return portfolioStore.allPortfolios.length / 4;
+		return Math.ceil(portfolioStore.allPortfolios.length / 4);
 	}
 });
 

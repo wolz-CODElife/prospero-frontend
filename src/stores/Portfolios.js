@@ -45,15 +45,15 @@ export const usePortfolios = defineStore("Portfolios", {
 				// 	y1: 60,
 				// 	created: false,
 				// },
-				{
-					name: "Moon Gatekeepers",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: false,
-				},
+				// {
+				// 	name: "Moon Gatekeepers",
+				// 	fee: 2.6,
+				// 	d7: 8,
+				// 	d30: 12,
+				// 	d90: 34,
+				// 	y1: 60,
+				// 	created: false,
+				// },
 			],
 
 			myPortfolios: [
