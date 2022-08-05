@@ -33,7 +33,6 @@
 						class="flex items-center gap-[12px]"
 						v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
 					>
-						<!-- updateUIStatusAPICaller(2) -->
 						<button
 							@click="$emit('doJoin')"
 							class="btn btn-primary w-[125px]"
@@ -92,7 +91,11 @@
 				<!-- todo: componentize pagination and search  -->
 				<div class="min-h-[220px]">
 					<!-- todo: component? -->
-					<table class="table-auto w-full my-[20px]">
+					<!-- All Portfolios -->
+					<table
+						class="table-auto w-full my-[20px]"
+						v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
+					>
 						<thead>
 							<tr
 								class="text-[#868C9D] text-left border-b border-b-[#2D3035] py-[10px] px-[30px]"
@@ -107,12 +110,7 @@
 							</tr>
 						</thead>
 
-						<!-- All Portfolios -->
-						<tbody
-							v-if="
-								portfolioStore.activePortfolioType === 'All Portfolios'
-							"
-						>
+						<tbody>
 							<tr
 								v-for="portfolio in filteredAllPortfolios"
 								key="portfolio"
@@ -158,16 +156,27 @@
 							Join or create a portfolio to deposit or withdraw
 						</td> -->
 						</tbody>
+					</table>
 
-						<!-- My Portfolios  -->
-						<tbody
-							class="w-full"
-							v-if="
-								portfolioStore.activePortfolioType === 'My Portfolios'
-							"
-						>
-							<!-- !empty -->
-							<!-- v-if="portfolioStore.filteredMyPortfolios.length > 0" -->
+					<!-- My Portfolios  -->
+					<table
+						class="table-auto w-full my-[20px]"
+						v-if="portfolioStore.activePortfolioType === 'My Portfolios'"
+					>
+						<thead>
+							<tr
+								class="text-[#868C9D] text-left border-b border-b-[#2D3035] py-[10px] px-[30px]"
+							>
+								<th class="pl-[20px]">SELECT</th>
+								<th>NAME</th>
+								<th class="border-r border-r-[#2D3035]">FEE</th>
+								<th class="pl-[20px]">7D%</th>
+								<th>30D%</th>
+								<th>90D%</th>
+								<th class="pr-[30px]">1YR%</th>
+							</tr>
+						</thead>
+						<tbody class="w-full">
 							<tr
 								v-for="portfolio in portfolioStore.myPortfolios"
 								key="portfolio"
@@ -216,7 +225,10 @@
 				</div>
 
 				<!-- Bottom -->
-				<div class="grid grid-cols-12 px-[20px] my-[25px]">
+				<div
+					class="grid grid-cols-12 px-[20px] my-[25px]"
+					v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
+				>
 					<!-- Search -->
 					<div class="col-span-5">
 						<div
@@ -670,12 +682,15 @@ const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
 
-onMounted(() => {
-	filteredAllPortfolios.value = portfolioStore.allPortfolios
-		.slice(-4)
-		.reverse();
-	// return filteredAllPortfolios;
-});
+watch(
+	() => portfolioStore.allPortfolios,
+	() => {
+		filteredAllPortfolios.value = portfolioStore.allPortfolios
+			.slice(-4)
+			.reverse();
+		// return filteredAllPortfolios;
+	}
+);
 
 const totalLeaderboardPages = computed(() => {
 	if (portfolioStore.allPortfolios.length / 4 < 1) {
@@ -813,10 +828,10 @@ function reset() {
 	singleToken.value = "";
 }
 
-function openSaveAllocationModal() {
-	saveAllocationModal.value = true;
-	success.value = true;
-}
+// function openSaveAllocationModal() {
+// 	saveAllocationModal.value = true;
+// 	success.value = true;
+// }
 
 function toggleDisabled() {
 	disabled.value = false;
