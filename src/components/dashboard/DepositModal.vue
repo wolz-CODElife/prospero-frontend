@@ -65,12 +65,12 @@
 							type="number"
 							aria-label="usd amount"
 							v-model.lazy="token.usdAmountEnteredByUser"
-							@change="add($event.target.value, token.name)"
+							@keyup="add($event.target.value, token.name)"
 						/>
 					</td>
 				</tr>
 			</tbody>
-			<tfoot class="bg-[#2D3035] text-white py-[14px] px-[22px]">
+			<tfoot class="bg-[#2D3035] text-white px-[22px]">
 				<tr class="px-[20px]">
 					<td colspan="2" class="pl-[32px]">TOTAL</td>
 					<td>${{ totalAvailable }}</td>
@@ -90,99 +90,88 @@
 
 			<!-- Deposit  -->
 			<button
-				@click="$emit('depositAction')"
+				@click="firstView = true"
 				class="basis-1/2 btn btn-primary"
+				:disabled="disableDeposit"
 				:class="
 					disableDeposit
 						? 'opacity-50 cursor-text'
 						: 'opacity-1 cursor-pointer'
 				"
-				
 			>
 				Deposit
 			</button>
 		</div>
-
-		<Modal
-			v-if="portfolioStore.depositDialog"
-			@close="portfolioStore.depositDialog = false"
-		>
-			<!--  Approve Required  -->
-			<div
-				v-if="firstView"
-				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-			>
-				<img
-					src="@/assets/img/caution.svg"
-					alt=""
-					class="w-[62px] h-[62px]"
-				/>
-				<h1 class="text-[20px] uppercase">Approve required</h1>
-				<p class="text-[16px]">
-					Before you can use Prospero, you need to approve the tokens to be
-					transferred.
-				</p>
-				<button
-					class="btn btn-primary w-full"
-					@click="depositToPortfolio()"
-				>
-					Okay
-				</button>
-			</div>
-
-			<div v-else>
-				<!-- Loading  -->
-				<div
-					v-if="loading"
-					class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-				>
-					<h1 class="text-[20px] text-center uppercase">Loading...</h1>
-				</div>
-
-				<!-- Error  -->
-				<div
-					v-else-if="error"
-					class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-				>
-					<h1 class="text-[20px] text-center uppercase">
-						Deposit Unsucessful
-					</h1>
-				</div>
-
-				<!-- Successful -->
-				<div
-					v-else
-					class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-				>
-					<img
-						src="https://i.postimg.cc/Y2vdsnZW/image.png"
-						alt=""
-						class="max-w-[65%]"
-					/>
-					<h1 class="text-[20px] uppercase">Deposit Successful</h1>
-
-					<!-- todo: replace these with real values  -->
-					<p class="text-[16px]">
-						$20.00 has been sent to AFS1000 🔱. Wait a few moments for the
-						tokens to transfer and reflect in your portfolio tab. Gas used
-						$2.24
-					</p>
-
-					<!-- todo: make text dynamic  -->
-					<button
-						class="btn btn-primary uppercase w-full"
-						@click="$emit('redirect')"
-					>
-						Take me to my portfolios
-					</button>
-				</div>
-			</div>
-		</Modal>
 	</div>
+	<!-- @close="$emit('goBack'), closeViews()" -->
+
+	<Modal @close="closeViews" v-if="firstView">
+		<!--  Approve Required  -->
+		<div
+			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+		>
+			<img src="@/assets/img/caution.svg" alt="" class="w-[62px] h-[62px]" />
+			<h1 class="text-[20px] uppercase">Approve required</h1>
+			<p class="text-[16px]">
+				Before you can use Prospero, you need to approve the tokens to be
+				transferred.
+			</p>
+			<button
+				class="btn btn-primary w-full"
+				@click="depositToPortfolio(), toggleView"
+			>
+				Okay
+			</button>
+		</div>
+	</Modal>
+
+	<Modal @close="closeViews" v-if="secondView">
+		<!-- Loading  -->
+		<div
+			v-if="loading"
+			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+		>
+			<h1 class="text-[20px] text-center uppercase">Loading...</h1>
+		</div>
+
+		<!-- Error  -->
+		<div
+			v-else-if="error"
+			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+		>
+			<h1 class="text-[20px] text-center uppercase">Deposit Unsucessful</h1>
+		</div>
+
+		<!-- Successful -->
+		<div
+			v-else
+			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
+		>
+			<img
+				src="https://i.postimg.cc/Y2vdsnZW/image.png"
+				alt=""
+				class="max-w-[65%]"
+			/>
+			<h1 class="text-[20px] uppercase">Deposit Successful</h1>
+
+			<!-- todo: replace these with real values  -->
+			<p class="text-[16px]">
+				$20.00 has been sent to AFS1000 🔱. Wait a few moments for the
+				tokens to transfer and reflect in your portfolio tab. Gas used $2.24
+			</p>
+
+			<button
+				class="btn btn-primary uppercase w-full"
+				@click="$emit('redirect')"
+			>
+				Take me to my portfolios
+			</button>
+		</div>
+	</Modal>
 </template>
 
 <script setup>
-import { getBalancesInEoa, handleDepositType} from "@/api";
+import { getBalancesInEoa, handleDepositType, updateApiTokenList } from "@/api";
 import { onMounted, computed, ref } from "vue";
 import Modal from "../Modal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
@@ -193,82 +182,77 @@ const loading = ref(false);
 
 const error = ref(false);
 
-const firstView = ref(true);
+const success = ref(false);
+
+const firstView = ref(false);
+
+const secondView = ref(false);
 
 const tokenList = ref([]);
-/*
-	{
-		name: "Wrapped Test",
-		price: 12,
-		available: 34,
-		icon: "https://raw.githubusercontent.com/ava-labs/avalanche-bridge-resources/main/tokens/WBTC/logo.png",
-		usdAmountEnteredByUser: 0,
-	},
-	{
-		name: " Test",
-		price: 19,
-		available: 34,
-		icon: "https://raw.githubusercontent.com/ava-labs/avalanche-bridge-resources/main/tokens/WBTC/logo.png",
-		usdAmountEnteredByUser: 0,
-	},
-	{
-		name: "Wrapped ",
-		price: 120,
-		available: 34,
-		icon: "https://raw.githubusercontent.com/ava-labs/avalanche-bridge-resources/main/tokens/WBTC/logo.png",
-		usdAmountEnteredByUser: 0,
-	},
-]);
-*/
 
- onMounted(() => {
- 	getTokenList();
- });
+onMounted(() => {
+	getTokenList();
+});
 
- async function getTokenList() {
- 	try {
- 		tokenList.value = await getBalancesInEoa();
- 	} catch (error) {
- 		console.log(error);
- 	}
- }
- function enableDeposit(f){
+function toggleView() {
+	firstView.value = false;
+	secondView.value = true;
+}
 
- }
+function closeViews() {
+	firstView.value = false;
+	secondView.value = false;
+}
 
-
+function closeModal() {
+	portfolioStore.depositDialog = false;
+	portfolioStore.goBack();
+}
+async function getTokenList() {
+	try {
+		tokenList.value = await getBalancesInEoa();
+	} catch (error) {
+		console.log(error);
+	}
+	
+}
+function enableDeposit(f) {}
 
 async function depositToPortfolio() {
 	firstView.value = false;
-	
-		console.log("depositToPortfolio called");
-		try {
-	 	var res = await handleDepositType();
-		if (res.success){
-			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
-			console.log("usdAmountOfGas to show in modal:"+usdAmountOfGas);
-		}else{
-			console.log("ERROR - 1");
-	 		console.log(res.error);
-	 		//error code here
-	 	}
-		} catch (error) {
-			console.log("ERROR - 2");
-			error.value = true;
-			console.log(error);
-		}
-		console.log("done");
-		
+	secondView.value = true;
+	loading.value = true;
 
+	console.log("depositToPortfolio called");
+	try {
+		let res = await handleDepositType();
+		//console.log("res:"+JSON.stringify(res))
+		if (!res.success){
+			error.value = true;
+			console.log(res.error);
+		}else{
+			let usdAmountOfGas = res.gasUsed.usdAmountOfGas;
+			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
+		}
+		loading.value = false;
+	} catch (err) {
+		loading.value = false;
+		error.value = true;
+		console.log(err);
+	}
+	console.log("done");
 }
 
-function add(amt, name) {
+async function add(amt, name) {
 	let newTokenList = tokenList.value.map((token) => {
 		if (token.name === name) {
 			token = { ...token, usdAmountEnteredByUser: parseFloat(amt) };
+			console.log("TOKEN:"+JSON.stringify(token,null,2))
 		}
 		return token;
 	});
+	updateApiTokenList(newTokenList);
+
 
 	tokenList.value = newTokenList;
 
@@ -290,7 +274,7 @@ function slice(str, total, start) {
 	return str.slice(0, start) + "...";
 }
 
-const disableDeposit = computed(() => totalAvailable.value <= 0);
+const disableDeposit = computed(() => totalAmtToDeposit.value <= 0);
 
 const totalAvailable = computed(() => {
 	return tokenList.value.reduce((accumulator, currentValue) => {
@@ -303,4 +287,8 @@ const totalAvailable = computed(() => {
 });
 </script>
 
-<style lang="postcss"></style>
+<style lang="postcss" scoped>
+tfoot td {
+	@apply py-[14px];
+}
+</style>

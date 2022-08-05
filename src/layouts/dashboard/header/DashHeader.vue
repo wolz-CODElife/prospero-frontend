@@ -47,7 +47,7 @@
 							My holdings
 						</h2>
 						<h3 class="text-white text-[24px]">
-							${{ portfolioStore.activeOverview?.holdings }}
+							${{ getMyHoldings() }}
 						</h3>
 						<hr class="my-[12px] border-[#2D3035]" />
 						<h2 class="text-[#868C9D] text-[14px]">ROI</h2>
@@ -95,7 +95,7 @@
 
 			<!-- Right side of header  -->
 			<div
-				class="col-span-4 bg-black border py-[20px]"
+				class="col-span-4 bg-black border py-[30px]"
 				:class="[
 					portfolioStore.activeHeader === 'left'
 						? 'border-black border-b-white'
@@ -113,4 +113,32 @@ import { usePortfolios } from "@/stores/Portfolios";
 import RightHeader from "../header/RightHeader.vue";
 
 const portfolioStore = usePortfolios();
+calculateTotals();
+var myHoldings = 0;
+function calculateTotals(){
+	console.log('calculateTotals');
+	var myPortfolios = portfolioStore.myPortfolios
+	
+	console.log("portfolioStore:"+JSON.stringify(portfolioStore,null,2));
+	myHoldings =0;
+	var deposits = 0;
+	var withdrawals = 0;
+	var roiTotal = 0;
+	for(var i=0;i<myPortfolios.length;i++){
+		var thisPortObj = myPortfolios[i];
+		var portfolioObject = thisPortObj['portfolioObject'];
+		if (portfolioObject!=undefined){
+		console.log("portfolioObject:"+JSON.stringify(portfolioObject,null,2))
+		myHoldings = myHoldings + portfolioObject.totalValue;
+		deposits = deposits + portfolioObject.totalUsd;
+		//withdrawals = withdrawa
+		roiTotal = roiTotal + portfolioObject.profit;
+		console.log("myHoldings:"+myHoldings)
+		}
+	}
+}
+function getMyHoldings(){
+	console.log("getMyHoldings")
+	return myHoldings;
+}
 </script>

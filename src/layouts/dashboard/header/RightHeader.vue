@@ -1,6 +1,6 @@
 <template>
 	<DashDir
-		empty-selected-card-classes="h-full flex flex-col gap-y-[24px] justify-center items-center"
+		empty-selected-card-classes="h-full flex flex-col gap-y-[24px] mt-[24px] justify-center items-center"
 		arrow-class="none"
 	>
 		<template #selectedPortfolioDisplay>

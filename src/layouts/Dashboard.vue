@@ -37,28 +37,34 @@ import DashMain from "./dashboard/DashMain.vue";
 import JoinDepositModal from "@/components/JoinDepositModal.vue";
 import CreateDepositModal from "@/components/CreateDepositModal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
-import { initializeApi,  rebalance } from "@/api";
+import { initializeApi, rebalance } from "@/api";
 
 const portfolioStore = usePortfolios();
 
 // Route protection
 onBeforeMount(async () => {
+	 (async () => {
+
 	if (!JSON.parse(localStorage.getItem("userState")).status) {
+		// todo: change this to router replace
 		window.location.replace("/");
+	} else {
+		// todo: optimize nested try blocks
+		try {
+			console.log("calling initializeAPI");
+			await initializeApi();
+
+			try {
+				await portfolioStore.getAllPortfolios();
+				await portfolioStore.getMyPortfolios();
+			} catch (error) {
+				console.log("get all portfolios error", error);
+			}
+		} catch (error) {
+			console.log("init error", error);
+		}
 	}
-	// todo: optimize nested try blocks÷
-	//  try {
-	// 	console.log("calling initializeAPI");
-	//  	await initializeApi();
-	//  	try {
-	//  		portfolioStore.getAllPortfolios();
-	// 		portfolioStore.getMyPortfolios();
-	//  	} catch (error) {
-	//  		console.log("get all portfolios error", error);
-	//  	}
-	//  } catch (error) {
-	//  	console.log("init error", error);
-	//  }
+	 })()
 });
 
 const joinView = ref(false);
@@ -68,23 +74,22 @@ const createView = ref(false);
 const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 
 function doJoin() {
-	console.log('doJoin function caing - dashboard')
-	//updateUIStatus(2)
+	console.log("doJoin function caing - dashboard");
+	updateUIStatus(2)
 	joinView.value = true;
 }
 
 function doJustDeposit() {
-	console.log('doJuseDeposit function caing updateUIStatus(3)')
-	updateUIStatus(3)
+	console.log("doJuseDeposit function caing updateUIStatus(3)");
+	updateUIStatus(3);
 	joinView.value = true;
 }
 
 function doCreate() {
-	console.log('doCreate function caing updateUIStatus(1)')
-	updateUIStatus(1)
+	console.log("doCreate function caing updateUIStatus(1)");
+	updateUIStatus(1);
 	createView.value = true;
 }
-
 
 function goBack() {
 	if (joinView.value) {

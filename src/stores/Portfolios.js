@@ -2,116 +2,44 @@ import { defineStore } from "pinia";
 import {
 	getLeaderBoardDataForTable,
 	getMyPortfoliosDataForTable,
-	updateSelectedWallet
+	updateSelectedWallet,
 } from "@/api";
 
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
 		return {
-			allPortfolios: [
-				// {
-				// 	name: "AFS1000 🔱",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: true,
-				// },
-				// {
-				// 	name: "Harry Mcguire",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: false,
-				// },
-				// {
-				// 	name: " 🌈 Lulu Nation Fans",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: false,
-				// },
-				// {
-				// 	name: "GX 650 Lords 🏖",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: false,
-				// },
-				// {
-				// 	name: "Moon Gatekeepers",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: false,
-				// },
-			],
+			allPortfolios: [],
 
-			myPortfolios: [
-				// {
-				// 	name: "New User",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: true,
-				// },
-				// {
-				// 	name: "Harry Mcguire",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: true,
-				// },
-				// {
-				// 	name: " 🌈 Lulu Nation Fans",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: true,
-				// },
-				// {
-				// 	name: "GX 650 Lords 🏖",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: true,
-				// },
-				// {
-				// 	name: "Moon Gatekeepers",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: true,
-				// },
-			],
+			myPortfolios: [],
 
-			selectedPortfolio: {
-				name: "",
-				fee: 0,
-				d7: 0,
-				d30: 0,
-				d90: 0,
-				y1: 0,
-			},
+			selectedPortfolio: {},
+
+			allocationList: [],
+
+			tokenList: [
+				{
+					name: "BTC",
+					allocation: 0,
+					price: 120,
+					mc: 340,
+					d7: 10,
+					d30: 20,
+					d90: 30,
+					y1: 120,
+					icon: "https://i.postimg.cc/MGnDWTSy/image.png",
+				},
+				{
+					name: "AVAX",
+					allocation: 0,
+					price: 10,
+					mc: 34,
+					d7: 1,
+					d30: 2,
+					d90: 3,
+					y1: 12,
+					icon: "https://i.postimg.cc/br1T18qh/image.png",
+				},
+			],
 
 			overview: [
 				{
@@ -119,10 +47,10 @@ export const usePortfolios = defineStore("Portfolios", {
 						name: "USD",
 						icon: "https://i.postimg.cc/Mpmky9Ms/image.png",
 					},
-					holdings: "1000.0",
-					roi: { value: "0.0", percent: 0 },
-					deposits: "40.0",
-					withdrawals: "0.0",
+					holdings: "1000.00",
+					roi: { value: "0.00", percent: 0 },
+					deposits: "40.00",
+					withdrawals: "0.00",
 				},
 				{
 					asset: {
@@ -151,10 +79,10 @@ export const usePortfolios = defineStore("Portfolios", {
 					name: "USD",
 					icon: "https://i.postimg.cc/Mpmky9Ms/image.png",
 				},
-				holdings: "1000.0",
-				roi: { value: "0.0", percent: 0 },
-				deposits: "40.0",
-				withdrawals: "0.0",
+				holdings: "1000.00",
+				roi: { value: "0.00", percent: 0 },
+				deposits: "40.00",
+				withdrawals: "0.00",
 			},
 
 			activeHeader: "left",
@@ -172,6 +100,35 @@ export const usePortfolios = defineStore("Portfolios", {
 			confirmDeposit: false,
 
 			depositDisabled: true,
+
+			createdPortfolios: [
+				{
+					name: "AFS1000 🔱",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+				},
+				{
+					name: " 🌈 Lulu Nation Fans",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+				},
+				{
+					name: "GX 650 Lords 🏖",
+					fee: 2.6,
+					d7: 8,
+					d30: 12,
+					d90: 34,
+					y1: 60,
+				},
+			],
+
+			selectedManagePortfolio: {},
 		};
 	},
 
@@ -184,6 +141,9 @@ export const usePortfolios = defineStore("Portfolios", {
 			} catch (error) {
 				console.log(error);
 			}
+			console.log(
+				"this.allPortfolios:" + JSON.stringify(this.allPortfolios, null, 2)
+			);
 		},
 
 		async getMyPortfolios() {
@@ -196,10 +156,12 @@ export const usePortfolios = defineStore("Portfolios", {
 		},
 
 		doSelectPortfolio(val) {
-			console.log("doSelectPortfolio called with val:"+JSON.stringify(val,null,2))
+			console.log(
+				"doSelectPortfolio called with val:" + JSON.stringify(val, null, 2)
+			);
 			this.selectedPortfolio = val;
 			this.activeHeader = "right";
-			updateSelectedWallet(val.prosperoWalletAddress)
+			updateSelectedWallet(val.prosperoWalletAddress);
 		},
 
 		toggleActiveHeader() {
@@ -256,44 +218,14 @@ export const usePortfolios = defineStore("Portfolios", {
 				(item) => item.asset.name === asset
 			);
 		},
-
-		// function showCreate() {
-		// 	tableView.value = false;
-		// 	(async () => {
-		// 		var status = await createPortfolio("Name Of Wallet Goes Here");
-		// 		if (!status.success) {
-		// 			console.log(status.error);
-		// 			//error code here
-		// 		} else {
-		// 			if (status.prosperoWalletAddressCreated != null) {
-		// 				console.log(
-		// 					"new prosperoWalletAddressCreated:" +
-		// 						status.prosperoWalletAddressCreated
-		// 				);
-		// 			} else {
-		// 				console.log(
-		// 					"no new prosperoWalletAddressCreated from tx returned from created but created successfully, wait for finished method event to fire."
-		// 				);
-		// 			}
-		// 		}
-		//   })();
-
-		//   function doSelect(val) {
-		// 	selectedPortfolioId.value = val;
-		// 	activeRow.value = val;
-		// 	console.log(activeRow.value);
-		// 	updateActiveLeaderboardRow(val);
-		// 	disabled.value = false;
-		// 	console.log("disabled is", disabled.value);
-		// }
 	},
 
 	getters: {
-		createdPortfolios(state) {
-			return state.myPortfolios.filter(
-				(portfolio) => portfolio.created === true
-			);
-		},
+		// createdPortfolios(state) {
+		// 	return state.myPortfolios.filter(
+		// 		(portfolio) => portfolio.created === true
+		// 	);
+		// },
 
 		joinedPortfolios(state) {
 			return state.myPortfolios.filter(

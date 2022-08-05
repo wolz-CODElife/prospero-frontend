@@ -149,7 +149,7 @@
 				<div class="pl-[30px]">
 					<h2 class="text-[#868C9D] text-[14px]">ROI</h2>
 					<h3 class="text-white text-[16px]">
-						+$0
+						{{ slice(portfolioStore.selectedPortfolio.profitPercentage) }}
 						<span class="text-[14px]">0% <span>^</span></span>
 					</h3>
 				</div>

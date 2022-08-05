@@ -27,7 +27,6 @@
 
 <script>
 import Account from "./layouts/Account.vue";
-import Manager from "./layouts/Manager.vue";
 import Dashboard from "./layouts/Dashboard.vue";
 import Landing from "./layouts/Landing.vue";
 
@@ -37,7 +36,6 @@ import { ref, onBeforeMount, computed } from "vue";
 export default {
 	components: {
 		Account,
-		Manager,
 		Dashboard,
 		Landing,
 	},
