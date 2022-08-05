@@ -46,16 +46,16 @@ onBeforeMount(async () => {
 	if (!JSON.parse(localStorage.getItem("userState")).status) {
 		window.location.replace("/");
 	}
-	// todo: optimize nested try blocks
+	// todo: optimize nested try blocks÷
 	//  try {
 	// 	console.log("calling initializeAPI");
-	 	// await initializeApi();
-	 	// try {
-	 	// 	portfolioStore.getAllPortfolios();
-		// 	portfolioStore.getMyPortfolios();
-	 	// } catch (error) {
-	 	// 	console.log("get all portfolios error", error);
-	 	// }
+	//  	await initializeApi();
+	//  	try {
+	//  		portfolioStore.getAllPortfolios();
+	// 		portfolioStore.getMyPortfolios();
+	//  	} catch (error) {
+	//  		console.log("get all portfolios error", error);
+	//  	}
 	//  } catch (error) {
 	//  	console.log("init error", error);
 	//  }
