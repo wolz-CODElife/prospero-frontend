@@ -190,3 +190,16 @@ function prevPage() {
 	}
 }
 </script>
+
+
+<style lang="postcss" scoped>
+td,
+th {
+	@apply py-[10px];
+}
+
+td:not(:first-child),
+th:not(:first-child) {
+	@apply px-[14px];
+}
+</style>
