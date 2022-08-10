@@ -63,6 +63,7 @@ var blockNumWhenWebAppLaunched = 0;
 var USD_SCALE = 1000000000000000000; //await ProsperoWalletLibConstants.methods.USD_SCALE().call()
 var walletWaitingForEOA = ""; //do not use anymore
 var activePortfolioType = "All Portfolios"; //default
+
 //UI Objects - keys changed and formatted for UI
 var leaderBoardUITableObject;
 var myPortfolioDataForTable;
@@ -432,14 +433,15 @@ async function getChartDataSelectedMyPortfolio() {
 	return dataToReturn;
 }
 function getLeadersPortfolioForAddress(prosperoWalletAddress) {
-  //console.log("LBD:"+JSON.stringify(leaderBoardData,null,2));
+	console.log("getLeadersPortfolioForAddress:"+prosperoWalletAddress)
+  	console.log("LBD:"+JSON.stringify(leaderBoardData,null,2));
 	for (var i = 0; i < leaderBoardData.length; i++) {
 		var thisProsperoWalletAddress =
 			leaderBoardData[i]["prosperoWalletAddress"];
 		thisProsperoWalletAddress = thisProsperoWalletAddress.toLowerCase();
 		prosperoWalletAddress = prosperoWalletAddress.toLowerCase();
-    //console.log("prosperoWalletAddress    :"+prosperoWalletAddress)
-    //console.log("thisProsperoWalletAddress:"+thisProsperoWalletAddress)
+    console.log("prosperoWalletAddress    :"+prosperoWalletAddress)
+    console.log("thisProsperoWalletAddress:"+thisProsperoWalletAddress)
 
 		if (thisProsperoWalletAddress == prosperoWalletAddress) {
 			return leaderBoardData[i];
@@ -865,6 +867,230 @@ async function initNewEventListener() {
 		);
 	}
 }
+
+async function convertGraphDataToLeaderBoardAndMyWalletsData(){
+	console.log("convertGraphDataToLeaderBoardAndMyWalletsData");
+	var leaderBoardDataNew = {};
+	var leaderBoardDataFinal = [];
+	var myWalletsDataFinal = {};
+
+	myPortfolioDataForTable=[];
+	//leaderBoardUITableObject=[];
+	//leaderBoardData=[];
+
+	console.log("graphData.length:"+graphData.length)
+	for (var i = 0; i < graphData.length; i++) {
+		var graphItem = graphData[i];
+		console.log("graphItem:"+JSON.stringify(graphItem,null,2))
+		var thisProsperoWalletAddress = graphItem["addressVars"][2]
+		thisProsperoWalletAddress = thisProsperoWalletAddress.toLowerCase();
+		if (!leaderBoardDataNew.hasOwnProperty(thisProsperoWalletAddress)){
+			leaderBoardDataNew[thisProsperoWalletAddress]=graphItem
+			console.log("adding")
+		}else{
+			console.log('already has.')
+		}
+	}
+	var cntrLB = 0;
+	var cntrMyWallets = 0;
+	var firstWallet = "";
+	for (var key in leaderBoardDataNew) {
+		var leaderBoardDataObject = {}
+		var thisProsperoWalletAddress = key;
+		var thisGraphItem = leaderBoardDataNew[key];
+		var addressVars = thisGraphItem["addressVars"];
+		var tokens = thisGraphItem["tokens"];
+		var tokenBalances = thisGraphItem["balances"]
+		var usersInPortfolio = thisGraphItem["users"]
+		var leaderAddress = addressVars[1];
+		var indexOfLeader = getIndexOfUser(thisGraphItem["users"], leaderAddress);
+		leaderAddress = leaderAddress.toLowerCase();
+		if (indexOfLeader != -1){
+
+		var leadersUsdInvested = thisGraphItem["usdInvested"][indexOfLeader] / USD_SCALE;
+		
+		var indexOfUser = getIndexOfUser(thisGraphItem["users"], EOAAddress);
+		if (indexOfUser == -1){
+			//user not in this portfolio
+		}else{
+			//use IS in this portfolio...to do, add to my wallets.  If user is same as leader, it should be the same object in my 
+			//wallets 
+		}
+		//console.log("leadersValue 1:"+thisGraphItem["usersValues"][indexOfLeader])
+
+		//var leadersValue = thisGraphItem["usersValues"][indexOfLeader] /  USD_SCALE
+		//console.log("leadersValue:"+leadersValue)
+		//var profitLeaderUsd = leadersValue - leadersUsdInvested;
+		var percentageOwnership = thisGraphItem["percentageOwnerships"]
+		var thisPercentage = percentageOwnership[indexOfLeader];
+		console.log("thisPercentage:"+thisPercentage)
+		//thisPercentage = thisPercentage / USD_SCALE;
+		thisPercentage = thisPercentage / 100;
+		console.log("thisPercentage:"+thisPercentage)
+		var portfolioObject = {}
+		var leadersValue = 0;
+		for (var i =0;i<tokens.length;i++){
+			var tokenObj = {};
+			var thisTokenAddress = tokens[i];
+			thisTokenAddress = thisTokenAddress.toLowerCase();
+			tokenObj["balance"] = (tokenBalances[i] * thisPercentage);
+			//right here 
+			var aTokenObject = await getTokenObject_newMine(thisTokenAddress);
+			var usdThisUserThisToken = await getUSDValue_MINE(
+				tokenObj["balance"],
+				thisTokenAddress
+			);
+			usdThisUserThisToken = usdThisUserThisToken * thisPercentage;
+			tokenObj["name"] = aTokenObject["name"]
+			tokenObj["price"] = aTokenObject["price"]
+			tokenObj["usdValue"] = usdThisUserThisToken
+			leadersValue = leadersValue + usdThisUserThisToken;
+			tokenObj["symbol"] = aTokenObject["symbol"]
+			tokenObj["twentyFourHour"] = aTokenObject["twentyFourHour"]
+			tokenObj["image"] = aTokenObject["logoURI"]
+			tokenObj["decimals"] = aTokenObject["decimals"]
+			//tokenObj["percentage"] = usdThisUserThisToken / leadersValue;
+			//tokenObj["usdValue"] 1.6017845582640506,
+			//tokenObj["percentage"] 0.999999999999999,
+			//tokenObj["name"] "Wrapped Eth",
+			//tokenObj["symbol"] "WETH.e",
+			//tokenObj["price"] 1688.14864955,
+			//tokenObj["twentyFourHour"] -70.74646037905265,
+			//tokenObj["image"] "https://raw.githubusercontent.com/ava-labs/bridge-tokens/main/avalanche-tokens/0xf20d962a6c8f70c731bd838a3a388D7d48fA6e15/logo.png"
+			//allTokensInThisPort.push(tokenObj);
+			console.log("TOKEN OBJECT:"+JSON.stringify(tokenObj,null,2))
+			portfolioObject[thisTokenAddress] = tokenObj;
+		}
+		for (var i =0;i<tokens.length;i++){
+			tokenObj["percentage"] = tokenObj["usdValue"] / leadersValue;
+		}
+		/*
+		var walletValues = {}
+			walletValues["ProsperoBeaconFactoryAddress"] = thisProsperoWalletAddress;
+			walletValues["leaderEOA"] = usersInPortfolio[indexOfLeader];
+			walletValues["prosperoPricesAddress"] = "0x3eac8c5D6518D434CB27E12f8b6565ed50B5b992",
+			walletValues["prosperoDataAddress"] = "0x6264915AC05931470C35beccD6847dEB1F5B5fBd",
+			walletValues["prosperoWalletAddress"] = "0xdd9aC527A74cbf673f7d5d37053D0781B654b940",
+			walletValues["walletName"] = "k;;sdksd",
+			walletValues["totalSupply_percentageOwnership"] = "1909888602372440374",
+			walletValues["leaderPercentageFee"] = "200000000000000000",
+			walletValues["prosperoPercentageFeeOfLeader"]= "200000000000000000"
+		*/
+		var profitLeaderUsd = leadersValue - leadersUsdInvested;
+		var profitLeaderPercentage = profitLeaderUsd / leadersUsdInvested;
+		//if (profitLeaderPercentage>0 || profitLeaderPercentage<0){
+		//	profitLeaderPercentage=profitLeaderPercentage.toFixed(2);
+		//	profitLeaderPercentage=Number(profitLeaderPercentage);
+		//}
+		portfolioObject["totalValue"] = leadersValue;
+		portfolioObject["totalUsd"] = leadersUsdInvested;
+		portfolioObject["profit"] = profitLeaderUsd;
+		leaderBoardDataObject["name"] = thisGraphItem["walletName"]
+		leaderBoardDataObject["fee"] = "20%";//TO DO - need to add this
+		leaderBoardDataObject["d7"] = 0;
+		leaderBoardDataObject["d30"] = 0;
+		leaderBoardDataObject["d90"] = 0;
+		leaderBoardDataObject["y1"] = profitLeaderPercentage.toFixed(2);
+		leaderBoardDataObject["prosperoWalletAddress"] = thisProsperoWalletAddress
+		leaderBoardDataObject["portfolioObject"] = portfolioObject;
+		leaderBoardDataObject["profitLeader"] = profitLeaderUsd;
+		leaderBoardDataObject["leaderEOA"] = leaderAddress;
+
+		leaderBoardDataObject["walletName"] = thisGraphItem["walletName"]
+		leaderBoardDataObject["leaderPercentageFee"] = "20%";//TO DO - need to add this
+		leaderBoardDataObject["prosperoPercentageFeeOfLeader"]  = "20%";//TO DO - need to add this
+		leaderBoardDataObject["numberOfTrailers"] = usersInPortfolio.length;
+		leaderBoardDataObject["profitPercentage"] = profitLeaderPercentage;
+		console.log("NEW LB DATA OBJ:"+JSON.stringify(leaderBoardDataObject,null,2))
+		if (usersInPortfolio > 1){
+			if (firstWallet == ""){
+			  firstWallet = thisProsperoWalletAddress;
+			}
+			leaderBoardDataObject["index"] = cntrLB;//TO DO - need to add this
+			cntrLB=cntrLB+1;
+			leaderBoardDataFinal.push(leaderBoardDataObject);
+		}else{
+			console.log('not adding - only leader invested.')
+		}
+		if (indexOfUser==0){
+			//EOA is Leader
+			leaderBoardDataObject['wallet_type'] = "Leader"
+			//leaderBoardDataObject["index"] = cntrMyWallets;//TO DO - need to add this
+			//cntrMyWallets=cntrMyWallets+1;
+			
+		}else if (indexOfUser > 0){
+			//EOA is trailer 
+			leaderBoardDataObject['wallet_type'] = "Trailer"
+			//leaderBoardDataObject["index"] = cntrMyWallets;//TO DO - need to add this
+			//cntrMyWallets=cntrMyWallets+1;
+
+		}else{
+			//EOA is not part of this wallet
+		}
+		if ((indexOfUser > 0) || (indexOfUser == 0)){
+			myWalletsDataFinal[thisProsperoWalletAddress]=leaderBoardDataObject
+			myPortfolioDataForTable.push(leaderBoardDataObject);
+		}
+		}
+	  }
+	  selectedProsperoWalletAddress = firstWallet;
+
+	  myWallets = myWalletsDataFinal;
+	  
+	  leaderBoardUITableObject = leaderBoardDataFinal;
+	  leaderBoardData = leaderBoardDataFinal;
+
+	  console.log("myWalletsDataFinal:"+JSON.stringify(myWalletsDataFinal,null,2))
+	  console.log("leaderBoardDataFinal:"+JSON.stringify(leaderBoardDataFinal,null,2))
+
+		/*
+		"index": 0,
+    "name": "k;;sdksd",
+    "fee": "20%",
+    "d7": 0,
+    "d30": 0,
+    "d90": 0,
+    "y1": 60.17876300118241,
+    "prosperoWalletAddress": "0xdd9ac527a74cbf673f7d5d37053d0781b654b940",
+    "portfolioObject": {
+      "totalValue": 1.6017845582640522,
+      "totalUsd": 0.9999969282522281,
+      "profit": 0.6017876300118241,
+      "0xb82c58c54d03b17063a024851b79105c9367270f": {
+        "usdValue": 1.6017845582640506,
+        "balance": "948840944007525",
+        "percentage": 0.999999999999999,
+        "name": "Wrapped Eth",
+        "symbol": "WETH.e",
+        "price": 1688.14864955,
+        "twentyFourHour": -70.74646037905265,
+        "image": "https://raw.githubusercontent.com/ava-labs/bridge-tokens/main/avalanche-tokens/0xf20d962a6c8f70c731bd838a3a388D7d48fA6e15/logo.png"
+      },
+      "prosperoWalletAddress": "0xdd9ac527a74cbf673f7d5d37053d0781b654b940",
+      "profitLeader": 0.6017876300118241,
+      "walletValues": {
+        "ProsperoBeaconFactoryAddress": "0x377D251772a4FCd2C039C718b14e229364bdC04e",
+        "leaderEOA": "0x071018cb3364C47F407769C267e4B691227402aD",
+        "prosperoPricesAddress": "0x3eac8c5D6518D434CB27E12f8b6565ed50B5b992",
+        "prosperoDataAddress": "0x6264915AC05931470C35beccD6847dEB1F5B5fBd",
+        "prosperoWalletAddress": "0xdd9aC527A74cbf673f7d5d37053D0781B654b940",
+        "walletName": "k;;sdksd",
+        "profilePictureUrl": "",
+        "totalSupply_percentageOwnership": "1909888602372440374",
+        "leaderPercentageFee": "200000000000000000",
+        "prosperoPercentageFeeOfLeader": "200000000000000000"
+      },
+      "walletName": "k;;sdksd",
+      "leaderPercentageFee": "200000000000000000",
+      "prosperoPercentageFeeOfLeader": "200000000000000000",
+      "numberOfTrailers": 2,
+      "profitPercentage": 0.3756982341395628
+    }
+  }
+  */
+
+}
+
 async function getGraphData() {
 	//console.log("getGraphData")
 	var prspUrl = "https://api.thegraph.com/subgraphs/name/lapat/prospero"; // https://thegraph.com/explorer/subgraph/uniswap/uniswap-v2
@@ -917,11 +1143,11 @@ async function getGraphData() {
       }
       `,
 		});
-		//console.log ("Query result: \n", result.data.data.latestBalancesFactories);
+		console.log ("Query result: \n", result.data.data.latestBalancesFactories);
 		graphData = result.data.data.latestBalancesFactories;
 		for (var i = 0; i < graphData.length; i++) {
 			var graphItem = graphData[i];
-			//console.log("graphItem:"+JSON.stringify(graphItem,null,2))
+			console.log("graphItem:"+JSON.stringify(graphItem,null,2))
 		}
 	} catch (err) {
 		console.log("error getGraphData:" + err);
@@ -1172,8 +1398,8 @@ async function getHistoricalPricesUpdateChartsData() {
 			);
 		}
 	}
-	//console.log("leaderBoardDataOverTime :"+JSON.stringify(leaderBoardDataOverTime,null,2))
-	//console.log("myPortfoliosDataOverTime:"+JSON.stringify(myPortfoliosDataOverTime,null,2))
+	console.log("leaderBoardDataOverTime :"+JSON.stringify(leaderBoardDataOverTime,null,2))
+	console.log("myPortfoliosDataOverTime:"+JSON.stringify(myPortfoliosDataOverTime,null,2))
 }
 function getIndexOfUser(arrayOfAddresses, userAddress) {
 	userAddress = userAddress.toLowerCase();
@@ -1232,7 +1458,7 @@ async function updateHistoryChartsDataObject(
 					lastBalancesInPort = thisGraphData["balances"];
 					break;
 				}
-
+				//THIS IS WRONG - USERVALUES IS NOT RIGHT
 				var profit =
 					thisGraphData["usersValues"][indexOfUser] -
 					thisGraphData["usdInvested"][indexOfUser];
@@ -1920,11 +2146,10 @@ function updateSelectedWallet(prosperoWalletAddress) {
 	console.log("updateSelectedWallet called with:" + prosperoWalletAddress);
 	selectedProsperoWalletAddress = prosperoWalletAddress;
   var portfolio = getLeadersPortfolioForAddress(selectedProsperoWalletAddress);
-  var leaderAddress = portfolio.walletValues.leaderEOA;
+  var leaderAddress = portfolio.leaderEOA;
   leaderAddress = leaderAddress.toLowerCase();
   var myEoaAddress = EOAAddress.toLowerCase();
   if (myEoaAddress == leaderAddress){
-    //right here 
    //console.log("updateUIFieldValuesLeaderboard")
     //updateUIFieldValuesLeaderboard();
   }else{
@@ -2072,10 +2297,10 @@ async function createLeaderBoardDataObject() {
 		//console.log('thisLeaderAddress:'+thisLeaderAddress)
 		var walletValues = await getWalletValues(thisLeaderAddress);
 		//console.log('walletValues:'+JSON.stringify(walletValues,null,2))
-		//var leaderEOA = walletValues.leaderEOA
+		//var leaderEOA = leaderEOA
 		var valueOfLeadersPortfolio = await getValueOfUsersPortfolio(
 			thisLeaderAddress,
-			walletValues.leaderEOA
+			leaderEOA
 		);
 		//async function getValueOfUsersPortfolio(prosperoWalletAddress, usersEOA){
 		//console.log('valueOfLeadersPortfolio:'+valueOfLeadersPortfolio)
@@ -2084,7 +2309,7 @@ async function createLeaderBoardDataObject() {
 			thisLeaderAddress
 		);
 		var totalUsdInvestedForLeader = await ProsperoWalletInstance.methods
-			.getTotalUsdInvestedPerUser(walletValues.leaderEOA)
+			.getTotalUsdInvestedPerUser(leaderEOA)
 			.call({
 				from: EOAAddress,
 			});
@@ -2111,7 +2336,7 @@ async function createLeaderBoardDataObject() {
 		var leaderBoardObject =
 			await getValueOfBalancesOfTokensInPortfolioForUser(
 				null,
-				walletValues.leaderEOA,
+				leaderEOA,
 				thisLeaderWalletAddress
 			);
 
@@ -2375,40 +2600,44 @@ async function initializeApi() {
 }
 
 async function initializeDataObjects() {
- //console.log('gettingGraphData');
+ 	console.log('gettingGraphData');
 	var status = await getGraphData();
 	if (!status.success) {
 		console.error("error getGraphData: " + status.error);
 		return status;
 	}
- //console.log('getBlockNumber');
+
+
+ 	console.log('getBlockNumber');
 
 	blockNumWhenWebAppLaunched = await web3.eth.getBlockNumber();
 	//await initNewEventListener();
  //console.log('calling updatePrices');
 
 	status = await updatePrices();
- //console.log('got prices');
-
+ 	console.log('got prices');
+	 console.log('calling convertGraphDataToLeaderBoardAndMyWalletsData');
+	 await convertGraphDataToLeaderBoardAndMyWalletsData()
+	 console.log('done calling convertGraphDataToLeaderBoardAndMyWalletsData');
 	if (!status.success) {
 		console.error("error updatePrices: " + status.error);
 		return status;
 	}
-	status = await initLeaderBoardTableObject();
- //console.log('got leaderBoardTableObject');
+	//status = await initLeaderBoardTableObject();
+ 	//console.log('got leaderBoardTableObject');
 
-	if (!status.success) {
-		console.error("error initLeaderBoardTableObject: " + status.error);
-		return status;
-	}
-	await createMyWalletsDataAndUIObject();
- //console.log('called createMyWalletsDataAndUIObject ');
+	//if (!status.success) {
+	//		console.error("error initLeaderBoardTableObject: " + status.error);
+	//		return status;
+	//}
+	//await createMyWalletsDataAndUIObject();
+ 	//console.log('called createMyWalletsDataAndUIObject ');
 
 	var port = await getMyWallet();
- //console.log('called getMyWallets');
+ 	console.log('called getMyWallet');
 
-	await getHistoricalPricesUpdateChartsData();
- //console.log('called getHistoricalPricesUpdateChartsData');
+	//await getHistoricalPricesUpdateChartsData();
+ 	//console.log('called getHistoricalPricesUpdateChartsData');
 
 	//await getBalancesInEoa();
 	return { success: true };
@@ -2425,7 +2654,7 @@ async function initializeBlockchainConnection() {
 			error: "Do you have multiple wallets installed?",
 		};
 	}
-  //console.log('got provider')
+	console.log('got provider')
 	if (provider) {
 		try {
 			var accounts = await window.ethereum.request({
@@ -2462,7 +2691,7 @@ async function initializeBlockchainConnection() {
 	ethersProvider = await new ethers.providers.Web3Provider(window.ethereum);
 	ethersSigner = ethersProvider.getSigner();
 	web3 = new Web3(window.ethereum);
-	//console.log("got Web3 version", web3.version);
+	console.log("got Web3 version", web3.version);
 
 	ethereum.on("accountsChanged", (accounts) => {
 		console.error("Accounts changed -- reloading....");
@@ -2787,7 +3016,6 @@ async function createMyWalletsDataAndUIObject() {
 
 async function updateMyPortfoliosDataForTable() {
 	console.log("updateMyPortfoliosDataForTable");
-	//right here
 	//console.log("myPortfoliosDataOverTime:"+JSON.stringify(myPortfoliosDataOverTime,null,2))
 	myPortfolioDataForTable = [];
 	var cntr = 0;
