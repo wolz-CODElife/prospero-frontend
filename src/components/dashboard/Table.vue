@@ -225,6 +225,7 @@
 				</div>
 
 				<!-- Bottom -->
+				<!-- Show pagination for All Portfolio -->
 				<div
 					class="grid grid-cols-12 px-[20px] my-[25px]"
 					v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
@@ -301,6 +302,9 @@
 						</div>
 					</div>
 				</div>
+				<!--  -->
+				<!-- Show pagination for My Portfolio -->
+
 			</div>
 
 			<!-- Create / Withdraw View  -->

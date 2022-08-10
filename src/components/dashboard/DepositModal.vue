@@ -57,8 +57,8 @@
 							class="w-[30px] h-[30px] mr-[10px]"
 						/>{{ slice(token.name, 12, 9) }}
 					</td>
-					<td>${{ parseFloat(token.price) }}</td>
-					<td>${{ parseFloat(token.available) }}</td>
+					<td>${{ parseFloat(token.price).toFixed(2) }}</td>
+					<td>${{ parseFloat(token.available).toFixed(2) }}</td>
 					<td class="py-[10px]">
 						<input
 							class="py-[4px] pl-[8px] w-max bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
@@ -131,6 +131,7 @@
 			v-if="loading"
 			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
 		>
+		<!-- TODO:::: Revamp Loader -->
 			<h1 class="text-[20px] text-center uppercase">Loading...</h1>
 		</div>
 
@@ -226,17 +227,22 @@ async function depositToPortfolio() {
 	secondView.value = true;
 
 	console.log("depositToPortfolio called");
+	loading.value = true
 	try {
 		let res = await handleDepositType();
 		//console.log("res:"+JSON.stringify(res))
 		if (!res.success) {
 			error.value = true;
 			console.log(res.error);
+			loading.value = false;
 		} else {
-			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas;
+			usdAmountOfGas.value = parseInt(res.gasUsed.usdAmountOfGas).toFixed(2);
+			// usdAmountOfGas.value = Math.round(res.gasUsed.usdAmountOfGas);
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
+			// TODO::::
+			// Then push selectedPortfiolio to myPortofolio
+			loading.value = false;
 		}
-		loading.value = false;
 	} catch (err) {
 		loading.value = false;
 		error.value = true;
