@@ -88,8 +88,7 @@
 				</div>
 
 				<!-- All Portfolios / My Portfolios Tables -->
-				<TableComponent v-if="portfolioStore.activePortfolioType === 'All Portfolios'" :portfolioList="portfolioStore.allPortfolios" />
-				<TableComponent v-if="portfolioStore.activePortfolioType === 'My Portfolios'" :portfolioList="portfolioStore.myPortfolios" />
+				<TableComponent :portfolioList="portfolioStore.activePortfolioType === 'All Portfolios'?portfolioStore.allPortfolios: portfolioStore.myPortfolios" />
 
 			</div>
 
@@ -459,8 +458,6 @@ const amount = ref("");
 
 const singleToken = ref("");
 
-const searchQuery = ref("");
-
 const tabs = ref(["All Portfolios", "My Portfolios"]);
 
 const placeholder = ref(25);
@@ -469,10 +466,6 @@ const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
 
-
-function clearSearch() {
-	searchQuery.value = "";
-}
 
 function getTokenListForManage() {
 	console.log("getTokenListForManage");

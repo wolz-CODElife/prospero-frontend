@@ -34,41 +34,6 @@
                 </tr>
             </tbody>
         </table>
-
-        <!-- My Portfolios  -->
-        <!-- <table class="table-auto w-full my-[20px]" v-if="portfolioStore.activePortfolioType === 'My Portfolios'" >
-            <thead>
-                <tr class="text-[#868C9D] text-left border-b border-b-[#2D3035] py-[10px] px-[30px]" >
-                    <th class="pl-[20px]">SELECT</th>
-                    <th>NAME</th>
-                    <th class="border-r border-r-[#2D3035]">FEE</th>
-                    <th class="pl-[20px]">7D%</th>
-                    <th>30D%</th>
-                    <th>90D%</th>
-                    <th class="pr-[30px]">1YR%</th>
-                </tr>
-            </thead>
-            <tbody class="w-full">
-                <tr v-for="portfolio in portfolioStore.myPortfolios" key="portfolio" 
-                    @click="portfolioStore.doSelectPortfolio(portfolio), toggleDisabled()"
-                    class="text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white hover:bg-[#003D3B]"
-                    :class="[portfolioStore.selectedPortfolio.prosperoWalletAddress === portfolio.prosperoWalletAddress
-                            ? 'bg-[#003D3B] ' : 'bg-transparent',]" >
-                    <td class="ml-[20px] pl-[20px]">
-                        <input type="radio" :name="portfolio.prosperoWalletAddress" :id="portfolio.prosperoWalletAddress"
-                            @onchange=" portfolioStore.doSelectPortfolio(portfolio), toggleDisabled() " />
-                    </td>
-                    <td>{{ portfolio.name }}</td>
-                    <td class="border-r border-r-[#2D3035] pr-[30px]">
-                        {{ portfolio.fee }}%
-                    </td>
-                    <td>{{ portfolio.d7 }}%</td>
-                    <td>{{ portfolio.d30 }}%</td>
-                    <td>{{ portfolio.d90 }}%</td>
-                    <td>{{ portfolio.y1 }}%</td>
-                </tr>
-            </tbody>
-        </table> -->
     </div>
 
     <!-- Bottom -->
@@ -124,7 +89,7 @@ import { usePortfolios } from "@/stores/Portfolios";
 
 const props = defineProps({
     portfolioList: {
-		type: Object,
+		type: Array,
 		default: true,
 	}
 })
@@ -133,8 +98,12 @@ const props = defineProps({
 const portfolioStore = usePortfolios();
 const currentPage = ref(1);
 const filteredPortfolios = ref([]);
+const searchQuery = ref("");
 
 
+function clearSearch() {
+	searchQuery.value = "";
+}
 
 watch(
 	() => props.portfolioList,
