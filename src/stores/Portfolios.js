@@ -8,110 +8,11 @@ import {
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
 		return {
-			allPortfolios: [
-				// {
-				// 	name: "AFS1000 🔱",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: true,
-				// },
-				// {
-				// 	name: "Harry Mcguire",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: false,
-				// },
-				// {
-				// 	name: " 🌈 Lulu Nation Fans",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: false,
-				// },
-				// {
-				// 	name: "GX 650 Lords 🏖",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: false,
-				// },
-				{
-					name: "Moon Gatekeepers",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: false,
-				},
-			],
+			allPortfolios: [],
 
-			myPortfolios: [
-				{
-					name: "New User",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-					created: true,
-				},
-				// {
-				// 	name: "Harry Mcguire",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: true,
-				// },
-				// {
-				// 	name: " 🌈 Lulu Nation Fans",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: true,
-				// },
-				// {
-				// 	name: "GX 650 Lords 🏖",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: true,
-				// },
-				// {
-				// 	name: "Moon Gatekeepers",
-				// 	fee: 2.6,
-				// 	d7: 8,
-				// 	d30: 12,
-				// 	d90: 34,
-				// 	y1: 60,
-				// 	created: true,
-				// },
-			],
+			myPortfolios: [],
 
-			selectedPortfolio: {
-				name: "",
-				fee: 0,
-				d7: 0,
-				d30: 0,
-				d90: 0,
-				y1: 0,
-			},
+			selectedPortfolio: {},
 
 			allocationList: [],
 
@@ -240,12 +141,14 @@ export const usePortfolios = defineStore("Portfolios", {
 			} catch (error) {
 				console.log(error);
 			}
-			console.log("this.allPortfolios:"+JSON.stringify(this.allPortfolios,null,2))
+			//console.log(
+			//	"this.allPortfolios:" + JSON.stringify(this.allPortfolios, null, 2)
+			//);
 		},
 
 		async getMyPortfolios() {
 			try {
-				console.log("getMyPortfolios called");
+				//console.log("getMyPortfolios called");
 				this.myPortfolios = await getMyPortfoliosDataForTable();
 			} catch (error) {
 				console.log(error);

@@ -156,8 +156,10 @@
 
 			<!-- todo: replace these with real values  -->
 			<p class="text-[16px]">
-				$20.00 has been sent to AFS1000 🔱. Wait a few moments for the
-				tokens to transfer and reflect in your portfolio tab. Gas used $2.24
+				${{ totalAmtToDeposit }} has been sent to
+				{{ portfolioStore.selectedPortfolio.name }}. Wait a few moments for
+				the tokens to transfer and reflect in your portfolio tab. Gas used
+				${{ usdAmountOfGas }}
 			</p>
 
 			<button
@@ -190,6 +192,8 @@ const secondView = ref(false);
 
 const tokenList = ref([]);
 
+let usdAmountOfGas = ref("");
+
 onMounted(() => {
 	getTokenList();
 });
@@ -214,24 +218,22 @@ async function getTokenList() {
 	} catch (error) {
 		console.log(error);
 	}
-	
 }
 function enableDeposit(f) {}
 
 async function depositToPortfolio() {
 	firstView.value = false;
 	secondView.value = true;
-	loading.value = true;
 
 	console.log("depositToPortfolio called");
 	try {
 		let res = await handleDepositType();
 		//console.log("res:"+JSON.stringify(res))
-		if (!res.success){
+		if (!res.success) {
 			error.value = true;
 			console.log(res.error);
-		}else{
-			let usdAmountOfGas = res.gasUsed.usdAmountOfGas;
+		} else {
+			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas;
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
 		}
 		loading.value = false;
@@ -247,12 +249,11 @@ async function add(amt, name) {
 	let newTokenList = tokenList.value.map((token) => {
 		if (token.name === name) {
 			token = { ...token, usdAmountEnteredByUser: parseFloat(amt) };
-			console.log("TOKEN:"+JSON.stringify(token,null,2))
+			console.log("TOKEN:" + JSON.stringify(token, null, 2));
 		}
 		return token;
 	});
 	updateApiTokenList(newTokenList);
-
 
 	tokenList.value = newTokenList;
 

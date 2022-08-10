@@ -1,8 +1,8 @@
 <template>
 	<div class="grid grid-cols-[300px_1fr] gap-0">
 		<Sidebar class="w-[300px]" />
-		<main class="p-[28px]">
-			<h1 class="text-white text-[30px] text-center">History</h1>
+		<main class="z-10 bg-[#191A20] p-[28px] max-h-[100vh] relative">
+			<slot></slot>
 		</main>
 	</div>
 </template>

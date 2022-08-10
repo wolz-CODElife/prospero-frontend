@@ -192,7 +192,7 @@ async function handleDepositType() {
 		console.log(" UI_JOIN_THEN_DEPOSIT");
 		var res = await joinPortfolioThenDeposit();
 	} else if (UIStatus == UI_DEPOSIT_MY_PORTFOLIO) {
-		console.log(" UI_DEPOSIT_MY_PORTFOLIO");
+		console.log("UI_DEPOSIT_MY_PORTFOLIO");
 		var res = await deposit();
 	} else {
 		console.log("ERROR - no UI STATUS FOUND");
@@ -440,11 +440,24 @@ function getLeadersPortfolioForAddress(prosperoWalletAddress) {
 			leaderBoardData[i]["prosperoWalletAddress"];
 		thisProsperoWalletAddress = thisProsperoWalletAddress.toLowerCase();
 		prosperoWalletAddress = prosperoWalletAddress.toLowerCase();
-    console.log("prosperoWalletAddress    :"+prosperoWalletAddress)
-    console.log("thisProsperoWalletAddress:"+thisProsperoWalletAddress)
+    //console.log("prosperoWalletAddress    :"+prosperoWalletAddress)
+    //console.log("thisProsperoWalletAddress:"+thisProsperoWalletAddress)
 
 		if (thisProsperoWalletAddress == prosperoWalletAddress) {
 			return leaderBoardData[i];
+		}
+	}
+	//right here 
+	for (var i = 0; i < myPortfolioDataForTable.length; i++) {
+		var thisProsperoWalletAddress =
+			myPortfolioDataForTable[i]["prosperoWalletAddress"];
+		thisProsperoWalletAddress = thisProsperoWalletAddress.toLowerCase();
+		prosperoWalletAddress = prosperoWalletAddress.toLowerCase();
+    //console.log("prosperoWalletAddress    :"+prosperoWalletAddress)
+    //console.log("thisProsperoWalletAddress:"+thisProsperoWalletAddress)
+
+		if (thisProsperoWalletAddress == prosperoWalletAddress) {
+			return myPortfolioDataForTable[i];
 		}
 	}
 	console.error(
@@ -639,8 +652,8 @@ async function updateUIFieldValuesLeaderboard() {
 	var profitsPercentage = portfolio.profitPercentage;
 	//to do - update Ui
 }
-function updateApiTokenList(newTokenList){
-  balancesInEoa=newTokenList;
+function updateApiTokenList(newTokenList) {
+	balancesInEoa = newTokenList;
 }
 async function updateAmount(amount, tokenAddress) {
 	console.log(
@@ -662,7 +675,6 @@ async function updateAmount(amount, tokenAddress) {
 async function updateSelectedProsperoWalletAddress(address) {
 	console.log("*updateSelectedProsperoWallet called with address:" + address);
 	selectedProsperoWalletAddress = address;
-  
 }
 async function initNewEventListener() {
 	console.log("initNewEventListener");
@@ -878,17 +890,17 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData(){
 	//leaderBoardUITableObject=[];
 	//leaderBoardData=[];
 
-	console.log("graphData.length:"+graphData.length)
+	//console.log("graphData.length:"+graphData.length)
 	for (var i = 0; i < graphData.length; i++) {
 		var graphItem = graphData[i];
-		console.log("graphItem:"+JSON.stringify(graphItem,null,2))
+		//console.log("graphItem:"+JSON.stringify(graphItem,null,2))
 		var thisProsperoWalletAddress = graphItem["addressVars"][2]
 		thisProsperoWalletAddress = thisProsperoWalletAddress.toLowerCase();
 		if (!leaderBoardDataNew.hasOwnProperty(thisProsperoWalletAddress)){
 			leaderBoardDataNew[thisProsperoWalletAddress]=graphItem
-			console.log("adding")
+			//console.log("adding")
 		}else{
-			console.log('already has.')
+			//console.log('already has.')
 		}
 	}
 	var cntrLB = 0;
@@ -923,10 +935,10 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData(){
 		//var profitLeaderUsd = leadersValue - leadersUsdInvested;
 		var percentageOwnership = thisGraphItem["percentageOwnerships"]
 		var thisPercentage = percentageOwnership[indexOfLeader];
-		console.log("thisPercentage:"+thisPercentage)
+		//console.log("thisPercentage:"+thisPercentage)
 		//thisPercentage = thisPercentage / USD_SCALE;
 		thisPercentage = thisPercentage / 100;
-		console.log("thisPercentage:"+thisPercentage)
+		//console.log("thisPercentage:"+thisPercentage)
 		var portfolioObject = {}
 		var leadersValue = 0;
 		for (var i =0;i<tokens.length;i++){
@@ -958,7 +970,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData(){
 			//tokenObj["twentyFourHour"] -70.74646037905265,
 			//tokenObj["image"] "https://raw.githubusercontent.com/ava-labs/bridge-tokens/main/avalanche-tokens/0xf20d962a6c8f70c731bd838a3a388D7d48fA6e15/logo.png"
 			//allTokensInThisPort.push(tokenObj);
-			console.log("TOKEN OBJECT:"+JSON.stringify(tokenObj,null,2))
+			//console.log("TOKEN OBJECT:"+JSON.stringify(tokenObj,null,2))
 			portfolioObject[thisTokenAddress] = tokenObj;
 		}
 		for (var i =0;i<tokens.length;i++){
@@ -990,7 +1002,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData(){
 		leaderBoardDataObject["d7"] = 0;
 		leaderBoardDataObject["d30"] = 0;
 		leaderBoardDataObject["d90"] = 0;
-		leaderBoardDataObject["y1"] = profitLeaderPercentage.toFixed(2);
+		leaderBoardDataObject["y1"] = profitLeaderPercentage.toFixed(2)+"%";
 		leaderBoardDataObject["prosperoWalletAddress"] = thisProsperoWalletAddress
 		leaderBoardDataObject["portfolioObject"] = portfolioObject;
 		leaderBoardDataObject["profitLeader"] = profitLeaderUsd;
@@ -1001,7 +1013,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData(){
 		leaderBoardDataObject["prosperoPercentageFeeOfLeader"]  = "20%";//TO DO - need to add this
 		leaderBoardDataObject["numberOfTrailers"] = usersInPortfolio.length;
 		leaderBoardDataObject["profitPercentage"] = profitLeaderPercentage;
-		console.log("NEW LB DATA OBJ:"+JSON.stringify(leaderBoardDataObject,null,2))
+		//console.log("NEW LB DATA OBJ:"+JSON.stringify(leaderBoardDataObject,null,2))
 		if (usersInPortfolio > 1){
 			if (firstWallet == ""){
 			  firstWallet = thisProsperoWalletAddress;
@@ -1010,7 +1022,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData(){
 			cntrLB=cntrLB+1;
 			leaderBoardDataFinal.push(leaderBoardDataObject);
 		}else{
-			console.log('not adding - only leader invested.')
+			//console.log('not adding - only leader invested.')
 		}
 		if (indexOfUser==0){
 			//EOA is Leader
@@ -1040,8 +1052,8 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData(){
 	  leaderBoardUITableObject = leaderBoardDataFinal;
 	  leaderBoardData = leaderBoardDataFinal;
 
-	  console.log("myWalletsDataFinal:"+JSON.stringify(myWalletsDataFinal,null,2))
-	  console.log("leaderBoardDataFinal:"+JSON.stringify(leaderBoardDataFinal,null,2))
+	 //console.log("myWalletsDataFinal:"+JSON.stringify(myWalletsDataFinal,null,2))
+	 // console.log("leaderBoardDataFinal:"+JSON.stringify(leaderBoardDataFinal,null,2))
 
 		/*
 		"index": 0,
@@ -1143,11 +1155,11 @@ async function getGraphData() {
       }
       `,
 		});
-		console.log ("Query result: \n", result.data.data.latestBalancesFactories);
+		//console.log ("Query result: \n", result.data.data.latestBalancesFactories);
 		graphData = result.data.data.latestBalancesFactories;
 		for (var i = 0; i < graphData.length; i++) {
 			var graphItem = graphData[i];
-			console.log("graphItem:"+JSON.stringify(graphItem,null,2))
+			//console.log("graphItem:"+JSON.stringify(graphItem,null,2))
 		}
 	} catch (err) {
 		console.log("error getGraphData:" + err);
@@ -1645,7 +1657,7 @@ async function withdraw(tokenSwappingInto, amountToWithdraw) {
 				return { success: false, error: msg };
 			}
 		}
-		return { success: true, gasUsed:gasUsed };
+		return { success: true, gasUsed: gasUsed };
 	} catch (e) {
 		console.log("exception in withdraw" + e);
 		return { success: false, error: e };
@@ -1752,7 +1764,7 @@ async function rebalance(percentages, tokenAddressesToRemix) {
 				error: "Current percentages do not match goal percentages.",
 			};
 		}
-		return { success: true, gasUsed:gasUsed};
+		return { success: true, gasUsed: gasUsed };
 	} catch (exception) {
 		console.error(
 			"exception rebalance():" + JSON.stringify(exception, null, 2)
@@ -1814,24 +1826,26 @@ async function deposit() {
 	var foundOneAmtAboveZero = false;
 	for (var i = 0; i < balancesInEoa.length; i++) {
 		var thisDepositingObj = balancesInEoa[i];
-		console.log('thisDepositingObj:'+JSON.stringify(thisDepositingObj,null,2))
+		console.log(
+			"thisDepositingObj:" + JSON.stringify(thisDepositingObj, null, 2)
+		);
 		var usdAmountEnteredByUser = thisDepositingObj["usdAmountEnteredByUser"];
 		usdAmountEnteredByUser = Number(usdAmountEnteredByUser);
 		if (usdAmountEnteredByUser > 0) {
-			console.log('thisDepositingObj.name:'+thisDepositingObj.name)
+			console.log("thisDepositingObj.name:" + thisDepositingObj.name);
 			//var weiAmount = await getWeiAmount(usdAmountEnteredByUser, thisDepositingObj.address)
 			var amountInEth = usdAmountEnteredByUser / thisDepositingObj.price;
 			amountInEth = amountInEth.toFixed(16);
-			console.log('amountInEth:'+amountInEth)
+			console.log("amountInEth:" + amountInEth);
 			var weiAmt = web3.utils.toWei(amountInEth + "", "ether");
-			console.log('weiAmt1:'+weiAmt)
+			console.log("weiAmt1:" + weiAmt);
 			weiAmt = await updateBalanceFromEighteenDecimalsIfNeeded(
 				weiAmt,
 				thisDepositingObj.address
 			);
-			console.log('weiAmt2:'+weiAmt)
+			console.log("weiAmt2:" + weiAmt);
 			if (thisDepositingObj.name == NativeTokenName) {
-				 //console.log("WEI:"+thisDepositingObj.weiDepositing)
+				//console.log("WEI:"+thisDepositingObj.weiDepositing)
 				avaxValue = weiAmt + "";
 			} else {
 				tokens.push(thisDepositingObj.address);
@@ -1982,15 +1996,15 @@ async function calculateGasEstimate(gasEstimate, gasPriceToUse) {
 	//feeHex = serverResponse.result
 	//eth_baseFee = parseInt(feeHex,16)
 	////console.log'eth_baseFee:'+eth_baseFee)
- 
+
 	//GAS_PRICE=eth_baseFee;
 	//console.log("GAS_PRICE NOW:"+GAS_PRICE)
 	var estimatedGasCostWei = estimatedGasBigNumber.multipliedBy(GAS_PRICE + "");
-	console.log("Estimate calculateGasEstimate wei:"+estimatedGasCostWei)
+	console.log("Estimate calculateGasEstimate wei:" + estimatedGasCostWei);
 	var estimatedCostInEth = ethers.utils.formatEther(estimatedGasCostWei + "");
- //console.log("AVAX PRICE:"+avaxPrice)
+	//console.log("AVAX PRICE:"+avaxPrice)
 	var usdAmountOfGas = avaxPrice * estimatedCostInEth;
-	console.log("Estimate calculateGasEstimate eth:"+estimatedCostInEth)
+	console.log("Estimate calculateGasEstimate eth:" + estimatedCostInEth);
 	return {
 		estimatedGasCostWei: estimatedGasCostWei,
 		estimatedCostInEth: estimatedCostInEth,
@@ -2138,7 +2152,7 @@ if (!isSubnet){
 }
 */
 	//console.log("balancesInEoa:"+JSON.stringify(balancesInEoa,null,2))
-  balancesInEoa = thisBalancesInEoa
+	balancesInEoa = thisBalancesInEoa;
 	return thisBalancesInEoa;
 }
 
@@ -2239,7 +2253,7 @@ async function initLeaderBoardTableObject() {
 			fee = fee + "%";
 			profitLeader = profitLeader * 100;
 			//profitLeader = parseInt(profitLeader);
-      //profitLeader = profitLeader.toFixed(2);
+			//profitLeader = profitLeader.toFixed(2);
 			//profitLeader = profitLeader + "%";
 
 			var prosperoWalletAddress =
@@ -2265,13 +2279,16 @@ async function initLeaderBoardTableObject() {
 	return { success: true };
 }
 async function getLeaderBoardDataForTable() {
-  console.log("leaderBoardUITableObject:"+JSON.stringify(leaderBoardUITableObject,null,2))
+	console.log(
+		"ALL PORTFOLIOS:" +
+			JSON.stringify(leaderBoardUITableObject, null, 2)
+	);
 	return leaderBoardUITableObject;
 }
 
 async function getMyPortfoliosDataForTable() {
 	console.log(
-		"getMyPortfoliosDataForTabl - myPortfolioDataForTable:" +
+		"MY PORTFOLIOS:" +
 			JSON.stringify(myPortfolioDataForTable, null, 2)
 	);
 	return myPortfolioDataForTable;
@@ -2608,17 +2625,17 @@ async function initializeDataObjects() {
 	}
 
 
- 	console.log('getBlockNumber');
+ 	//console.log('getBlockNumber');
 
 	blockNumWhenWebAppLaunched = await web3.eth.getBlockNumber();
 	//await initNewEventListener();
- //console.log('calling updatePrices');
+	//console.log('calling updatePrices');
 
 	status = await updatePrices();
- 	console.log('got prices');
+ 	//console.log('got prices');
 	 console.log('calling convertGraphDataToLeaderBoardAndMyWalletsData');
 	 await convertGraphDataToLeaderBoardAndMyWalletsData()
-	 console.log('done calling convertGraphDataToLeaderBoardAndMyWalletsData');
+	//console.log('done calling convertGraphDataToLeaderBoardAndMyWalletsData');
 	if (!status.success) {
 		console.error("error updatePrices: " + status.error);
 		return status;
@@ -2634,12 +2651,12 @@ async function initializeDataObjects() {
  	//console.log('called createMyWalletsDataAndUIObject ');
 
 	var port = await getMyWallet();
- 	console.log('called getMyWallet');
 
 	//await getHistoricalPricesUpdateChartsData();
  	//console.log('called getHistoricalPricesUpdateChartsData');
 
 	//await getBalancesInEoa();
+	console.log('done initializeApi');
 	return { success: true };
 }
 
@@ -2654,7 +2671,7 @@ async function initializeBlockchainConnection() {
 			error: "Do you have multiple wallets installed?",
 		};
 	}
-	console.log('got provider')
+	//console.log('got provider')
 	if (provider) {
 		try {
 			var accounts = await window.ethereum.request({
@@ -2687,11 +2704,11 @@ async function initializeBlockchainConnection() {
 	}
 	//udates selectedProsperoWalletAddres to last wallet on init
 	//getMyWallet();
-  //console.log('set eoaAddress')
+	//console.log('set eoaAddress')
 	ethersProvider = await new ethers.providers.Web3Provider(window.ethereum);
 	ethersSigner = ethersProvider.getSigner();
 	web3 = new Web3(window.ethereum);
-	console.log("got Web3 version", web3.version);
+	//console.log("got Web3 version", web3.version);
 
 	ethereum.on("accountsChanged", (accounts) => {
 		console.error("Accounts changed -- reloading....");
@@ -2793,7 +2810,7 @@ async function updatePrices() {
 				//console.log("wavaxLowerC  :"+wavaxLowerC)
 
 				if (lowerCaseCAdd == wavaxLowerC) {
-         //console.log('setting avax price');
+					//console.log('setting avax price');
 					avaxPrice = prosperoPrice;
 				}
 			}
@@ -2998,7 +3015,7 @@ async function createMyWalletsDataAndUIObject() {
 		//thisWalletsObj['has_inited_event_listener']=false
 
 		thisWalletsObj["prosperoWalletAddress"] = thisWalletAddress;
-    //thisWalletsObj = getOtherDataFromLeaderboardObject(thisWalletsObj)
+		//thisWalletsObj = getOtherDataFromLeaderboardObject(thisWalletsObj)
 		if (myWalletTypes[i] == 0) {
 			thisWalletsObj["wallet_type"] = "Trailer";
 		}
@@ -3011,8 +3028,6 @@ async function createMyWalletsDataAndUIObject() {
 	//myWallets=myWallets;
 	await updateMyPortfoliosDataForTable();
 }
-
-
 
 async function updateMyPortfoliosDataForTable() {
 	console.log("updateMyPortfoliosDataForTable");
@@ -3041,11 +3056,13 @@ async function updateMyPortfoliosDataForTable() {
 			profitPercAll = thisPortfolio.profit / totalUsd;
 			//profitPercAll = profitPercAll.toFixed(2);
 			profitPercAll = profitPercAll * 100;
-      //profitPercAll = profitPercAll.toFixed(2);
+			//profitPercAll = profitPercAll.toFixed(2);
 		}
 		var prosperoWalletAddressLower = prosperoWalletAddress.toLowerCase();
-    var leaderPortfolio = getLeadersPortfolioForAddress(prosperoWalletAddressLower);
-    thisPortfolio['numberOfTrailers']=leaderPortfolio['numberOfTrailers']
+		var leaderPortfolio = getLeadersPortfolioForAddress(
+			prosperoWalletAddressLower
+		);
+		thisPortfolio["numberOfTrailers"] = leaderPortfolio["numberOfTrailers"];
 		var objForTable = {
 			index: cntr,
 			name: name,
@@ -3323,7 +3340,7 @@ async function makeRandomColorArray() {
 	}
 }
 export {
-  getLeadersPortfolioForAddress,
+	getLeadersPortfolioForAddress,
 	getLeaderBoardDataForTable,
 	initializeApi,
 	joinPortfolio,
@@ -3350,5 +3367,5 @@ export {
 	updateNewWalletVariables,
 	handleDepositType,
 	getTokenListForManageUI,
-  updateApiTokenList
+	updateApiTokenList,
 };

@@ -67,7 +67,7 @@ function getProfit(portObject){
 }
 function getNumberOfTrailers(portObject){
 	//portObject = portObject['portfolioObject']
-	console.log("getNumberOfTrailers portObject:"+JSON.stringify(portObject,null,2))
+	//console.log("getNumberOfTrailers portObject:"+JSON.stringify(portObject,null,2))
 
 	if (portObject==undefined){
 		return 0;
@@ -76,7 +76,7 @@ function getNumberOfTrailers(portObject){
 }
 
 function getProfitPercentage(portObject){
-		console.log("pp getNumberOfTrailers portObject:"+JSON.stringify(portObject,null,2))
+	//console.log("pp getNumberOfTrailers portObject:"+JSON.stringify(portObject,null,2))
 
 	//console.log("portObject:"+JSON.stringify(portObject,null,2))
 	if (portObject == null){
