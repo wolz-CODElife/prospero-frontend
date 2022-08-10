@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount, onMounted } from "vue";
+import { ref, computed, onBeforeMount } from "vue";
 import { updateUIStatus } from "@/api";
 import Sidebar from "./dashboard/Sidebar.vue";
 import DashHeader from "./dashboard/header/DashHeader.vue";
@@ -105,7 +105,7 @@ function goBack() {
 function redirect() {
 	if (joinView.value) {
 		portfolioStore.activeMode = "join";
-		console.log("Portoflio to be joined", portfolioStore.selectedPortfolio);
+		// console.log("Portoflio to be joined", portfolioStore.selectedPortfolio);
 		portfolioStore.myPortfolios.push(portfolioStore.selectedPortfolio);
 
 		portfolioStore.activePortfolioType = "My Portfolios";
