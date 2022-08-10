@@ -99,6 +99,7 @@ const portfolioStore = usePortfolios();
 const currentPage = ref(1);
 const filteredPortfolios = ref([]);
 const searchQuery = ref("");
+const disabled = ref(true);
 
 
 function clearSearch() {
@@ -156,6 +157,23 @@ function prevPage() {
 	if (currentPage.value > 1) {
 		currentPage.value -= 1;
 		updateShowingPortfolios();
+	}
+}
+
+function toggleDisabledJoin() {
+	if (
+		portfolioStore.myPortfolios.some(
+			(selected) =>
+				selected.prosperoWalletAddress ===
+				portfolioStore.selectedPortfolio.prosperoWalletAddress
+		)
+	) {
+		disabled.value = true;
+		setTimeout(() => {
+			alert("You've already joined ", portfolioStore.selectedPortfolio.name);
+		}, 500);
+	} else {
+		disabled.value = false;
 	}
 }
 </script>

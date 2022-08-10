@@ -436,8 +436,6 @@ const wcTwo = ref({
 
 const tokenList = ref([]);
 
-const disabled = ref(true);
-
 const loading = ref(false);
 
 const error = ref(false);
@@ -566,22 +564,6 @@ function toggleDisabled() {
 	disabled.value = false;
 }
 
-function toggleDisabledJoin() {
-	if (
-		portfolioStore.myPortfolios.some(
-			(selected) =>
-				selected.prosperoWalletAddress ===
-				portfolioStore.selectedPortfolio.prosperoWalletAddress
-		)
-	) {
-		disabled.value = true;
-		setTimeout(() => {
-			alert("You've already joined ", portfolioStore.selectedPortfolio.name);
-		}, 500);
-	} else {
-		disabled.value = false;
-	}
-}
 
 function assignName() {
 	portfolioStore.selectedPortfolio.name = portfolioName.value;
