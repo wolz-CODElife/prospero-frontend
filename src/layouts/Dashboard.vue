@@ -29,7 +29,7 @@
 </template>
 
 <script setup>
-import { ref, computed, onBeforeMount, onMounted } from "vue";
+import { ref, computed, onBeforeMount } from "vue";
 import { updateUIStatus } from "@/api";
 import Sidebar from "./dashboard/Sidebar.vue";
 import DashHeader from "./dashboard/header/DashHeader.vue";
@@ -105,8 +105,10 @@ function goBack() {
 function redirect() {
 	if (joinView.value) {
 		portfolioStore.activeMode = "join";
+		// console.log("Portoflio to be joined", portfolioStore.selectedPortfolio);
+		portfolioStore.myPortfolios.push(portfolioStore.selectedPortfolio);
+
 		portfolioStore.activePortfolioType = "My Portfolios";
-		// portfolioStore.myPortfolios.push()
 		portfolioStore.reset();
 	} else {
 		// todo: populate my portfolios array with this new deposit
@@ -119,15 +121,7 @@ function redirect() {
 		portfolioStore.activeMode = "create";
 		portfolioStore.firstCreateView = false;
 		// todo: replace with correct values
-		portfolioStore.selectedPortfolio = {
-			name: "test display",
-			fee: 0,
-			d7: 0,
-			d30: 0,
-			d90: 0,
-			y1: 0,
-		};
-		portfolioStore.createdPortfolios.push(portfolioStore.selectedPortfolio);
+		portfolioStore.myPortfolios.push(portfolioStore.selectedPortfolio);
 	}
 	joinView.value = false;
 	createView.value = false;

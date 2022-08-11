@@ -57,8 +57,8 @@
 							class="w-[30px] h-[30px] mr-[10px]"
 						/>{{ slice(token.name, 12, 9) }}
 					</td>
-					<td>${{ parseFloat(token.price) }}</td>
-					<td>${{ parseFloat(token.available) }}</td>
+					<td>${{ parseFloat(token.price).toFixed(2) }}</td>
+					<td>${{ parseFloat(token.available).toFixed(2) }}</td>
 					<td class="py-[10px]">
 						<input
 							class="py-[4px] pl-[8px] w-max bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
@@ -126,20 +126,20 @@
 	</Modal>
 
 	<Modal @close="closeViews" v-if="secondView">
-		<!-- Loading  -->
-		<div
-			v-if="loading"
-			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-		>
-			<h1 class="text-[20px] text-center uppercase">Loading...</h1>
-		</div>
+			<!-- Loading  -->
+			<div v-if="loading" class="flex flex-col justify-center items-center gap-[30px] text-center my-[20px]" >
+				<!-- Logo  -->
+				<img src="https://i.postimg.cc/tJMqnqDk/image.png" alt="" class="mx-auto max-w-[130px] object-contain animate-pulse" />
+				<h1 class="text-white text-center text-[20px] uppercase">Pending transaction...</h1>
+			</div>
 
 		<!-- Error  -->
 		<div
 			v-else-if="error"
 			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
 		>
-			<h1 class="text-[20px] text-center uppercase">Deposit Unsucessful</h1>
+				<img src="https://i.postimg.cc/tJMqnqDk/image.png" alt="" class="mx-auto max-w-[130px] object-contain animate-pulse" />
+			<h1 class="text-[20px] text-center uppercase">🚫 Deposit Unsuccessful!</h1>
 		</div>
 
 		<!-- Successful -->
@@ -152,7 +152,7 @@
 				alt=""
 				class="max-w-[65%]"
 			/>
-			<h1 class="text-[20px] uppercase">Deposit Successful</h1>
+			<h1 class="text-[20px] uppercase">🥳 Deposit Successful!</h1>
 
 			<!-- todo: replace these with real values  -->
 			<p class="text-[16px]">
@@ -226,17 +226,22 @@ async function depositToPortfolio() {
 	secondView.value = true;
 
 	console.log("depositToPortfolio called");
+	loading.value = true
 	try {
 		let res = await handleDepositType();
 		//console.log("res:"+JSON.stringify(res))
 		if (!res.success) {
 			error.value = true;
 			console.log(res.error);
+			loading.value = false;
 		} else {
-			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas;
+			usdAmountOfGas.value = parseInt(res.gasUsed.usdAmountOfGas).toFixed(2);
+			// usdAmountOfGas.value = Math.round(res.gasUsed.usdAmountOfGas);
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
+			// TODO::::
+			// Then push selectedPortfiolio to myPortofolio
+			loading.value = false;
 		}
-		loading.value = false;
 	} catch (err) {
 		loading.value = false;
 		error.value = true;

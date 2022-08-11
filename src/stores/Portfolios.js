@@ -195,14 +195,7 @@ export const usePortfolios = defineStore("Portfolios", {
 		},
 
 		reset() {
-			this.selectedPortfolio = {
-				name: "",
-				fee: 0,
-				d7: 0,
-				d30: 0,
-				d90: 0,
-				y1: 0,
-			};
+			this.selectedPortfolio = {};
 		},
 
 		goBack() {
