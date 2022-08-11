@@ -43,28 +43,27 @@ const portfolioStore = usePortfolios();
 
 // Route protection
 onBeforeMount(async () => {
-	 (async () => {
-
-	if (!JSON.parse(localStorage.getItem("userState")).status) {
-		// todo: change this to router replace
-		window.location.replace("/");
-	} else {
-		// todo: optimize nested try blocks
-		try {
-			console.log("calling initializeAPI");
-			await initializeApi();
-
+	(async () => {
+		if (!JSON.parse(localStorage.getItem("userState")).status) {
+			// todo: change this to router replace
+			window.location.replace("/");
+		} else {
 			try {
-				await portfolioStore.getAllPortfolios();
-				await portfolioStore.getMyPortfolios();
+				console.log("calling initializeAPI");
+				await initializeApi();
+				portfolioStore.isLoading = true;
+				try {
+					await portfolioStore.getPortfolios();
+					portfolioStore.isLoading = false;
+				} catch (error) {
+					portfolioStore.isLoading = false;
+					console.log("get portfolios error", error);
+				}
 			} catch (error) {
-				console.log("get all portfolios error", error);
+				console.log("init error", error);
 			}
-		} catch (error) {
-			console.log("init error", error);
 		}
-	}
-	 })()
+	})();
 });
 
 const joinView = ref(false);
@@ -75,7 +74,7 @@ const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 
 function doJoin() {
 	console.log("doJoin function caing - dashboard");
-	updateUIStatus(2)
+	updateUIStatus(2);
 	joinView.value = true;
 }
 
@@ -121,7 +120,6 @@ function redirect() {
 		portfolioStore.activeMode = "create";
 		portfolioStore.firstCreateView = false;
 		// todo: replace with correct values
-		portfolioStore.myPortfolios.push(portfolioStore.selectedPortfolio);
 	}
 	joinView.value = false;
 	createView.value = false;

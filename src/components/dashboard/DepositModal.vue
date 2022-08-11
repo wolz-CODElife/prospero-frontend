@@ -103,9 +103,8 @@
 			</button>
 		</div>
 	</div>
-	<!-- @close="$emit('goBack'), closeViews()" -->
 
-	<Modal @close="closeViews" v-if="firstView">
+	<Modal @close="$emit('goBack'), closeViews()" v-if="firstView">
 		<!--  Approve Required  -->
 		<div
 			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
@@ -125,21 +124,36 @@
 		</div>
 	</Modal>
 
-	<Modal @close="closeViews" v-if="secondView">
-			<!-- Loading  -->
-			<div v-if="loading" class="flex flex-col justify-center items-center gap-[30px] text-center my-[20px]" >
-				<!-- Logo  -->
-				<img src="https://i.postimg.cc/tJMqnqDk/image.png" alt="" class="mx-auto max-w-[130px] object-contain animate-pulse" />
-				<h1 class="text-white text-center text-[20px] uppercase">Pending transaction...</h1>
-			</div>
+	<Modal @close="$emit('goBack'), closeViews()" v-if="secondView">
+		<!-- Loading  -->
+		<div
+			v-if="loading"
+			class="flex flex-col justify-center items-center gap-[30px] text-center my-[20px]"
+		>
+			<!-- Logo  -->
+			<img
+				src="https://i.postimg.cc/tJMqnqDk/image.png"
+				alt=""
+				class="mx-auto max-w-[130px] object-contain animate-pulse"
+			/>
+			<h1 class="text-white text-center text-[20px] uppercase">
+				Pending transaction. Please wait for confirmation...
+			</h1>
+		</div>
 
 		<!-- Error  -->
 		<div
 			v-else-if="error"
 			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
 		>
-				<img src="https://i.postimg.cc/tJMqnqDk/image.png" alt="" class="mx-auto max-w-[130px] object-contain animate-pulse" />
-			<h1 class="text-[20px] text-center uppercase">🚫 Deposit Unsuccessful!</h1>
+			<img
+				src="https://i.postimg.cc/tJMqnqDk/image.png"
+				alt=""
+				class="mx-auto max-w-[130px] object-contain animate-pulse"
+			/>
+			<h1 class="text-[20px] text-center uppercase">
+				🚫 Deposit Unsuccessful
+			</h1>
 		</div>
 
 		<!-- Successful -->
@@ -184,6 +198,8 @@ const loading = ref(false);
 
 const error = ref(false);
 
+const errorMsg = ref("");
+
 const success = ref(false);
 
 const firstView = ref(false);
@@ -226,26 +242,24 @@ async function depositToPortfolio() {
 	secondView.value = true;
 
 	console.log("depositToPortfolio called");
-	loading.value = true
+	loading.value = true;
 	try {
 		let res = await handleDepositType();
 		//console.log("res:"+JSON.stringify(res))
 		if (!res.success) {
-			error.value = true;
-			console.log(res.error);
 			loading.value = false;
+			error.value = true;
+			errorMsg.value = res.error;
+			console.log(errorMsg.value);
 		} else {
 			usdAmountOfGas.value = parseInt(res.gasUsed.usdAmountOfGas).toFixed(2);
-			// usdAmountOfGas.value = Math.round(res.gasUsed.usdAmountOfGas);
-			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
-			// TODO::::
-			// Then push selectedPortfiolio to myPortofolio
+			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
 			loading.value = false;
+			portfolioStore.myPortfolios.push(portfolioStore.selectedPortfolio);
 		}
 	} catch (err) {
 		loading.value = false;
 		error.value = true;
-		console.log(err);
 	}
 	console.log("done");
 }

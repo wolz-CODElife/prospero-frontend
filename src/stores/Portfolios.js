@@ -129,28 +129,26 @@ export const usePortfolios = defineStore("Portfolios", {
 			],
 
 			selectedManagePortfolio: {},
+
+			isLoading: true,
 		};
 	},
 
 	actions: {
 		// Fill empty portfolio list with an API call
-		async getAllPortfolios() {
-			console.log("getAllPortfolios called");
+		async getPortfolios() {
+			this.isLoading = true;
 			try {
 				this.allPortfolios = await getLeaderBoardDataForTable();
-			} catch (error) {
-				console.log(error);
-			}
-			//console.log(
-			//	"this.allPortfolios:" + JSON.stringify(this.allPortfolios, null, 2)
-			//);
-		},
-
-		async getMyPortfolios() {
-			try {
-				//console.log("getMyPortfolios called");
 				this.myPortfolios = await getMyPortfoliosDataForTable();
+				this.isLoading = false;
+				console.log("got all and my portfolios");
+				console.log(
+					"isLoading value which should be false is:",
+					this.isLoading
+				);
 			} catch (error) {
+				this.isLoading = false;
 				console.log(error);
 			}
 		},
@@ -219,10 +217,10 @@ export const usePortfolios = defineStore("Portfolios", {
 		// 		(portfolio) => portfolio.created === true
 		// 	);
 		// },
-
 		joinedPortfolios(state) {
 			return state.myPortfolios.filter(
-				(portfolio) => portfolio.created === false
+				(portfolio) =>
+					portfolio.prosperoWalletAddress === portfolio.leaderAddress
 			);
 		},
 	},
