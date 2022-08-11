@@ -88,10 +88,18 @@
 				</div>
 
 				<!-- Skeleton table -->
-				<TableSkeleton v-if="loading" />
-        
+				<TableSkeleton v-if="portfolioStore.isLoading" />
+
 				<!-- All Portfolios / My Portfolios Tables -->
-				<TableComponent v-else :portfolioList="portfolioStore.activePortfolioType === 'All Portfolios'?portfolioStore.allPortfolios: portfolioStore.myPortfolios" @toggleDisabledJoin="toggleDisabledJoin" />
+				<TableComponent
+					v-else
+					:portfolioList="
+						portfolioStore.activePortfolioType === 'All Portfolios'
+							? portfolioStore.allPortfolios
+							: portfolioStore.myPortfolios
+					"
+					@toggleDisabled="toggleDisabled"
+				/>
 			</div>
 
 			<!-- Create / Withdraw View  -->
@@ -269,10 +277,19 @@
 
 		<div v-else>
 			<!-- Loading  -->
-			<div v-if="loading" class="flex flex-col justify-center items-center gap-[30px] text-center my-[20px]" >
+			<div
+				v-if="loading"
+				class="flex flex-col justify-center items-center gap-[30px] text-center my-[20px]"
+			>
 				<!-- Logo  -->
-				<img src="https://i.postimg.cc/tJMqnqDk/image.png" alt="" class="mx-auto max-w-[130px] object-contain animate-pulse" />
-				<h1 class="text-white text-center text-[20px] uppercase">Pending transaction...</h1>
+				<img
+					src="https://i.postimg.cc/tJMqnqDk/image.png"
+					alt=""
+					class="mx-auto max-w-[130px] object-contain animate-pulse"
+				/>
+				<h1 class="text-white text-center text-[20px] uppercase">
+					Pending transaction. Please wait for confirmation...
+				</h1>
 			</div>
 
 			<!-- Error  -->
@@ -354,10 +371,19 @@
 
 		<div v-else>
 			<!-- Loading  -->
-			<div v-if="loading" class="flex flex-col justify-center items-center gap-[30px] text-center my-[20px]" >
+			<div
+				v-if="loading"
+				class="flex flex-col justify-center items-center gap-[30px] text-center my-[20px]"
+			>
 				<!-- Logo  -->
-				<img src="https://i.postimg.cc/tJMqnqDk/image.png" alt="" class="mx-auto max-w-[130px] object-contain animate-pulse" />
-				<h1 class="text-white text-center text-[20px] uppercase">Pending transaction...</h1>
+				<img
+					src="https://i.postimg.cc/tJMqnqDk/image.png"
+					alt=""
+					class="mx-auto max-w-[130px] object-contain animate-pulse"
+				/>
+				<h1 class="text-white text-center text-[20px] uppercase">
+					Pending transaction...
+				</h1>
 			</div>
 
 			<!-- Error  -->
@@ -459,14 +485,11 @@ const singleToken = ref("");
 
 const tabs = ref(["All Portfolios", "My Portfolios"]);
 
-const placeholder = ref(25);
-
 const disabled = ref(true);
 
 const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
-
 
 function getTokenListForManage() {
 	console.log("getTokenListForManage");
@@ -478,31 +501,29 @@ function getTokenListForManage() {
 	}
 }
 
-
-function toggleDisabledJoin() {
-	if (
-		portfolioStore.myPortfolios.some(
-			(selected) =>
-				selected.prosperoWalletAddress ===
-				portfolioStore.selectedPortfolio.prosperoWalletAddress
-		)
-	) {
-		disabled.value = true;
-		setTimeout(() => {
-			alert("You've already joined ", portfolioStore.selectedPortfolio.name);
-		}, 500);
+function toggleDisabled() {
+	if (portfolioStore.activePortfolioType === "All Portfolios") {
+		if (
+			portfolioStore.myPortfolios.some(
+				(selected) =>
+					selected.prosperoWalletAddress ===
+					portfolioStore.selectedPortfolio.prosperoWalletAddress
+			)
+		) {
+			disabled.value = true;
+			setTimeout(() => {
+				alert(
+					"You've already joined ",
+					portfolioStore.selectedPortfolio.name
+				);
+			}, 500);
+		} else {
+			disabled.value = false;
+		}
 	} else {
 		disabled.value = false;
 	}
 }
-//async function getTokenList() {
-//	try {
-//		tokenList.value = await getWithdrawTableData()();
-//		//console.log("token list is:", tokenList.value);
-//	} catch (error) {
-//		console.log(error);
-//	}
-//}
 
 const disableWithdraw = computed(() => {
 	if (swap.value) {
@@ -577,16 +598,6 @@ function reset() {
 	singleToken.value = "";
 }
 
-// function openSaveAllocationModal() {
-// 	saveAllocationModal.value = true;
-// 	success.value = true;
-// }
-
-function toggleDisabled() {
-	disabled.value = false;
-}
-
-
 function assignName() {
 	portfolioStore.selectedPortfolio.name = portfolioName.value;
 }
@@ -603,4 +614,3 @@ watch(
 	}
 );
 </script>
-
