@@ -894,6 +894,8 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData(){
 	for (var i = 0; i < graphData.length; i++) {
 		var graphItem = graphData[i];
 		//console.log("graphItem:"+JSON.stringify(graphItem,null,2))
+		var intVars = graphItem['intVars'];
+		//var methodType = intVars[]
 		var thisProsperoWalletAddress = graphItem["addressVars"][2]
 		thisProsperoWalletAddress = thisProsperoWalletAddress.toLowerCase();
 		if (!leaderBoardDataNew.hasOwnProperty(thisProsperoWalletAddress)){
@@ -901,6 +903,18 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData(){
 			//console.log("adding")
 		}else{
 			//console.log('already has.')
+			var graphItemWeHaveAlready = leaderBoardDataNew[thisProsperoWalletAddress]
+			var timeOfOneWeHave = graphItemWeHaveAlready["intVars"][4]
+			var timeOfThisOne = graphItem["intVars"][4]
+			//console.log("timeOfThisOne  :"+timeOfThisOne)
+			//console.log("timeOfOneWeHave:"+timeOfOneWeHave)
+
+			if (timeOfThisOne > timeOfOneWeHave){
+				//console.log("replacing...")
+				leaderBoardDataNew[thisProsperoWalletAddress]=graphItem
+			}else{
+				//console.log("Not replacing")
+			}
 		}
 	}
 	var cntrLB = 0;
@@ -917,7 +931,10 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData(){
 		var leaderAddress = addressVars[1];
 		var indexOfLeader = getIndexOfUser(thisGraphItem["users"], leaderAddress);
 		leaderAddress = leaderAddress.toLowerCase();
-		if (indexOfLeader != -1){
+		if (indexOfLeader != 0){
+			console.error("ERROR - Index of leader is not zero - problem....")
+			return;
+		}
 
 		var leadersUsdInvested = thisGraphItem["usdInvested"][indexOfLeader] / USD_SCALE;
 		
@@ -945,7 +962,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData(){
 			var tokenObj = {};
 			var thisTokenAddress = tokens[i];
 			thisTokenAddress = thisTokenAddress.toLowerCase();
-			tokenObj["balance"] = (tokenBalances[i] * thisPercentage);
+			tokenObj["balance"] = parseInt((tokenBalances[i] * thisPercentage)+"");
 			//right here 
 			var aTokenObject = await getTokenObject_newMine(thisTokenAddress);
 			var usdThisUserThisToken = await getUSDValue_MINE(
@@ -1014,7 +1031,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData(){
 		leaderBoardDataObject["numberOfTrailers"] = usersInPortfolio.length;
 		leaderBoardDataObject["profitPercentage"] = profitLeaderPercentage;
 		//console.log("NEW LB DATA OBJ:"+JSON.stringify(leaderBoardDataObject,null,2))
-		if (usersInPortfolio > 1){
+		if (leadersValue > 0){
 			if (firstWallet == ""){
 			  firstWallet = thisProsperoWalletAddress;
 			}
@@ -1022,9 +1039,9 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData(){
 			cntrLB=cntrLB+1;
 			leaderBoardDataFinal.push(leaderBoardDataObject);
 		}else{
-			//console.log('not adding - only leader invested.')
+			console.log('not adding - leader did not invest yet.')
 		}
-		if (indexOfUser==0){
+		if (indexOfUser == 0){
 			//EOA is Leader
 			leaderBoardDataObject['wallet_type'] = "Leader"
 			//leaderBoardDataObject["index"] = cntrMyWallets;//TO DO - need to add this
@@ -1038,12 +1055,13 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData(){
 
 		}else{
 			//EOA is not part of this wallet
+			leaderBoardDataObject['wallet_type']=""
 		}
 		if ((indexOfUser > 0) || (indexOfUser == 0)){
 			myWalletsDataFinal[thisProsperoWalletAddress]=leaderBoardDataObject
 			myPortfolioDataForTable.push(leaderBoardDataObject);
 		}
-		}
+		
 	  }
 	  selectedProsperoWalletAddress = firstWallet;
 
@@ -1100,6 +1118,43 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData(){
     }
   }
   */
+
+  //leaderBoardUITableObject
+  //myPortfolioDataForTable
+  var dupesCheck = []
+  console.log(" ")
+  console.log("Leader Board Summary:")
+  console.log("Number Of Wallets:"+leaderBoardUITableObject.length)
+  for (var i =0;i<leaderBoardUITableObject.length;i++){
+	var thisObj = leaderBoardUITableObject[i];
+	console.log("Name:"+thisObj.name)
+	console.log(" address    :"+thisObj.prosperoWalletAddress)
+	console.log(" wallet_type:"+thisObj.wallet_type)
+	var prospAd = thisObj.prosperoWalletAddress;
+	prospAd = prospAd.toLowerCase();
+	if (dupesCheck.indexOf(prospAd)>-1){
+	  console.error("Error - DUPE!!!!")
+	}
+	dupesCheck.push(prospAd)
+  }
+  dupesCheck = []
+  console.log(" ")
+  console.log("My Wallets Summary:")
+  console.log("Number Of Wallets:"+myPortfolioDataForTable.length)
+  for (var i =0;i<myPortfolioDataForTable.length;i++){
+	var thisObj = myPortfolioDataForTable[i];
+	console.log("Name:"+thisObj.name)
+	console.log(" address    :"+thisObj.prosperoWalletAddress)
+	console.log(" wallet_type:"+thisObj.wallet_type)
+	var prospAd = thisObj.prosperoWalletAddress;
+	prospAd = prospAd.toLowerCase();
+	if (dupesCheck.indexOf(prospAd)>-1){
+	  console.error("DUPE!!!!")
+	}
+	dupesCheck.push(prospAd)
+  }
+  console.log(" ")
+
 
 }
 
