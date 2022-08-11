@@ -15,13 +15,13 @@
 
             <tbody>
                 <tr v-for="portfolio in filteredPortfolios" key="portfolio" 
-                    @click="portfolioStore.doSelectPortfolio(portfolio), toggleDisabledJoin()"
+                    @click="portfolioStore.doSelectPortfolio(portfolio), $emit('toggleDisabledJoin')"
                     class="text-left py-[20px] mx-[28px] border-b border-b-[#2D3035] text-white hover:bg-[#003D3B]"
                     :class="[ portfolioStore.selectedPortfolio.prosperoWalletAddress === portfolio.prosperoWalletAddress
                             ? 'bg-[#003D3B] ' : 'bg-transparent', ]">
                     <td class="ml-[20px] pl-[20px]">
                         <input type="radio" :name="portfolio.prosperoWalletAddress" :id="portfolio.prosperoWalletAddress"
-                            @onchange="portfolioStore.doSelectPortfolio(portfolio), toggleDisabledJoin()" />
+                            @onchange="portfolioStore.doSelectPortfolio(portfolio), $emit('toggleDisabledJoin')" />
                     </td>
                     <td>{{ portfolio.name }}</td>
                     <td class="border-r border-r-[#2D3035]">
@@ -99,7 +99,6 @@ const portfolioStore = usePortfolios();
 const currentPage = ref(1);
 const filteredPortfolios = ref([]);
 const searchQuery = ref("");
-const disabled = ref(true);
 
 
 function clearSearch() {
@@ -122,7 +121,7 @@ const totalLeaderboardPages = computed(() => {
 });
 
 function updateShowingPortfolios() {
-	if (props.portfolioList.length / 4 > 1 && currentPage.value > 1) {
+	if (currentPage.value <= props.portfolioList.length / 4 && currentPage.value > 1) {
 		filteredPortfolios.value = props.portfolioList
 			.slice(-(currentPage.value * 4), -(currentPage.value * 4 - 4))
 			.reverse();
@@ -158,22 +157,6 @@ function prevPage() {
 	}
 }
 
-function toggleDisabledJoin() {
-	if (
-		portfolioStore.myPortfolios.some(
-			(selected) =>
-				selected.prosperoWalletAddress ===
-				portfolioStore.selectedPortfolio.prosperoWalletAddress
-		)
-	) {
-		disabled.value = true;
-		setTimeout(() => {
-			alert("You've already joined ", portfolioStore.selectedPortfolio.name);
-		}, 500);
-	} else {
-		disabled.value = false;
-	}
-}
 </script>
 
 

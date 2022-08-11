@@ -90,7 +90,7 @@
 				<!-- Skeleton table -->
 				<TableSkeleton v-if="loading" />
 				<!-- All Portfolios / My Portfolios Tables -->
-				<TableComponent v-else :portfolioList="portfolioStore.activePortfolioType === 'All Portfolios'?portfolioStore.allPortfolios: portfolioStore.myPortfolios" />
+				<TableComponent v-else :portfolioList="portfolioStore.activePortfolioType === 'All Portfolios'?portfolioStore.allPortfolios: portfolioStore.myPortfolios" @toggleDisabledJoin="toggleDisabledJoin" />
 
 			</div>
 
@@ -272,6 +272,7 @@
 			<div v-if="loading" class="flex flex-col justify-center items-center gap-[30px] text-center my-[20px]" >
 				<!-- Logo  -->
 				<img src="https://i.postimg.cc/tJMqnqDk/image.png" alt="" class="mx-auto max-w-[130px] object-contain animate-pulse" />
+				<h1 class="text-white text-center text-[20px] uppercase">Pending transaction...</h1>
 			</div>
 
 			<!-- Error  -->
@@ -356,6 +357,7 @@
 			<div v-if="loading" class="flex flex-col justify-center items-center gap-[30px] text-center my-[20px]" >
 				<!-- Logo  -->
 				<img src="https://i.postimg.cc/tJMqnqDk/image.png" alt="" class="mx-auto max-w-[130px] object-contain animate-pulse" />
+				<h1 class="text-white text-center text-[20px] uppercase">Pending transaction...</h1>
 			</div>
 
 			<!-- Error  -->
@@ -459,6 +461,8 @@ const tabs = ref(["All Portfolios", "My Portfolios"]);
 
 const placeholder = ref(25);
 
+const disabled = ref(true);
+
 const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
@@ -474,6 +478,23 @@ function getTokenListForManage() {
 	}
 }
 
+
+function toggleDisabledJoin() {
+	if (
+		portfolioStore.myPortfolios.some(
+			(selected) =>
+				selected.prosperoWalletAddress ===
+				portfolioStore.selectedPortfolio.prosperoWalletAddress
+		)
+	) {
+		disabled.value = true;
+		setTimeout(() => {
+			alert("You've already joined ", portfolioStore.selectedPortfolio.name);
+		}, 500);
+	} else {
+		disabled.value = false;
+	}
+}
 //async function getTokenList() {
 //	try {
 //		tokenList.value = await getWithdrawTableData()();

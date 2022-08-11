@@ -126,21 +126,20 @@
 	</Modal>
 
 	<Modal @close="closeViews" v-if="secondView">
-		<!-- Loading  -->
-		<div
-			v-if="loading"
-			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-		>
-		<!-- TODO:::: Revamp Loader -->
-			<h1 class="text-[20px] text-center uppercase">Loading...</h1>
-		</div>
+			<!-- Loading  -->
+			<div v-if="loading" class="flex flex-col justify-center items-center gap-[30px] text-center my-[20px]" >
+				<!-- Logo  -->
+				<img src="https://i.postimg.cc/tJMqnqDk/image.png" alt="" class="mx-auto max-w-[130px] object-contain animate-pulse" />
+				<h1 class="text-white text-center text-[20px] uppercase">Pending transaction...</h1>
+			</div>
 
 		<!-- Error  -->
 		<div
 			v-else-if="error"
 			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
 		>
-			<h1 class="text-[20px] text-center uppercase">Deposit Unsucessful</h1>
+				<img src="https://i.postimg.cc/tJMqnqDk/image.png" alt="" class="mx-auto max-w-[130px] object-contain animate-pulse" />
+			<h1 class="text-[20px] text-center uppercase">🚫 Deposit Unsuccessful!</h1>
 		</div>
 
 		<!-- Successful -->
@@ -153,7 +152,7 @@
 				alt=""
 				class="max-w-[65%]"
 			/>
-			<h1 class="text-[20px] uppercase">Deposit Successful</h1>
+			<h1 class="text-[20px] uppercase">🥳 Deposit Successful!</h1>
 
 			<!-- todo: replace these with real values  -->
 			<p class="text-[16px]">
