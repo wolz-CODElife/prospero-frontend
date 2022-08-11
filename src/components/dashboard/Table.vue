@@ -89,9 +89,9 @@
 
 				<!-- Skeleton table -->
 				<TableSkeleton v-if="loading" />
+        
 				<!-- All Portfolios / My Portfolios Tables -->
 				<TableComponent v-else :portfolioList="portfolioStore.activePortfolioType === 'All Portfolios'?portfolioStore.allPortfolios: portfolioStore.myPortfolios" @toggleDisabledJoin="toggleDisabledJoin" />
-
 			</div>
 
 			<!-- Create / Withdraw View  -->

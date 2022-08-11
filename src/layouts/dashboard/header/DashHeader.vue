@@ -46,7 +46,7 @@
 						<h2 class="text-[#868C9D] text-[14px] mt-[16px]">
 							My holdings
 						</h2>
-						<h3 class="text-white text-[24px]">${{ getMyHoldings() }}</h3>
+						<h3 class="text-white text-[24px]">${{ myHoldings }}</h3>
 						<hr class="my-[12px] border-[#2D3035]" />
 						<h2 class="text-[#868C9D] text-[14px]">ROI</h2>
 						<h3 class="text-white text-[24px]">
@@ -116,10 +116,10 @@ calculateTotals();
 var myHoldings = 0;
 
 function calculateTotals() {
-	console.log("calculateTotals");
+	console.log("calculateTotals - how to call after api call?");
 	var myPortfolios = portfolioStore.myPortfolios;
 
-	console.log("portfolioStore:" + JSON.stringify(portfolioStore, null, 2));
+	//console.log("portfolioStore:" + JSON.stringify(portfolioStore, null, 2));
 	myHoldings = 0;
 	var deposits = 0;
 	var withdrawals = 0;
@@ -128,9 +128,9 @@ function calculateTotals() {
 		var thisPortObj = myPortfolios[i];
 		var portfolioObject = thisPortObj["portfolioObject"];
 		if (portfolioObject != undefined) {
-			console.log(
-				"portfolioObject:" + JSON.stringify(portfolioObject, null, 2)
-			);
+			//console.log(
+			//	"portfolioObject:" + JSON.stringify(portfolioObject, null, 2)
+			//);
 			myHoldings = myHoldings + portfolioObject.totalValue;
 			deposits = deposits + portfolioObject.totalUsd;
 			//withdrawals = withdrawa
@@ -138,10 +138,8 @@ function calculateTotals() {
 			console.log("myHoldings:" + myHoldings);
 		}
 	}
+	
 }
 
-function getMyHoldings() {
-	console.log("getMyHoldings");
-	return myHoldings;
-}
+
 </script>

@@ -141,14 +141,14 @@ export const usePortfolios = defineStore("Portfolios", {
 			} catch (error) {
 				console.log(error);
 			}
-			console.log(
-				"this.allPortfolios:" + JSON.stringify(this.allPortfolios, null, 2)
-			);
+			//console.log(
+			//	"this.allPortfolios:" + JSON.stringify(this.allPortfolios, null, 2)
+			//);
 		},
 
 		async getMyPortfolios() {
 			try {
-				console.log("getMyPortfolios called");
+				//console.log("getMyPortfolios called");
 				this.myPortfolios = await getMyPortfoliosDataForTable();
 			} catch (error) {
 				console.log(error);
