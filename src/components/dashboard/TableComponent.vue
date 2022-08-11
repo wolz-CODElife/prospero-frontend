@@ -109,9 +109,7 @@ function clearSearch() {
 watch(
 	() => props.portfolioList,
 	() => {
-		filteredPortfolios.value = props.portfolioList
-			.slice(-4)
-			.reverse();
+        updateShowingPortfolios()
 	}
 );
 
@@ -124,7 +122,7 @@ const totalLeaderboardPages = computed(() => {
 });
 
 function updateShowingPortfolios() {
-	if (currentPage.value > 1) {
+	if (props.portfolioList.length / 4 > 1 && currentPage.value > 1) {
 		filteredPortfolios.value = props.portfolioList
 			.slice(-(currentPage.value * 4), -(currentPage.value * 4 - 4))
 			.reverse();

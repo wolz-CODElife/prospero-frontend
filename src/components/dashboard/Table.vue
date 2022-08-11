@@ -87,8 +87,10 @@
 					</div>
 				</div>
 
+				<!-- Skeleton table -->
+				<TableSkeleton v-if="loading" />
 				<!-- All Portfolios / My Portfolios Tables -->
-				<TableComponent :portfolioList="portfolioStore.activePortfolioType === 'All Portfolios'?portfolioStore.allPortfolios: portfolioStore.myPortfolios" />
+				<TableComponent v-else :portfolioList="portfolioStore.activePortfolioType === 'All Portfolios'?portfolioStore.allPortfolios: portfolioStore.myPortfolios" />
 
 			</div>
 
@@ -267,11 +269,9 @@
 
 		<div v-else>
 			<!-- Loading  -->
-			<div
-				v-if="loading"
-				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-			>
-				<h1 class="text-[20px] text-center uppercase">Loading...</h1>
+			<div v-if="loading" class="flex flex-col justify-center items-center gap-[30px] text-center my-[20px]" >
+				<!-- Logo  -->
+				<img src="https://i.postimg.cc/tJMqnqDk/image.png" alt="" class="mx-auto max-w-[130px] object-contain animate-pulse" />
 			</div>
 
 			<!-- Error  -->
@@ -353,11 +353,9 @@
 
 		<div v-else>
 			<!-- Loading  -->
-			<div
-				v-if="loading"
-				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-			>
-				<h1 class="text-[20px] text-center uppercase">Loading...</h1>
+			<div v-if="loading" class="flex flex-col justify-center items-center gap-[30px] text-center my-[20px]" >
+				<!-- Logo  -->
+				<img src="https://i.postimg.cc/tJMqnqDk/image.png" alt="" class="mx-auto max-w-[130px] object-contain animate-pulse" />
 			</div>
 
 			<!-- Error  -->
@@ -413,6 +411,7 @@ import WcOverview from "./WcOverview.vue";
 import { useRouter } from "vue-router";
 import AllocationContainer from "../manage/AllocationContainer.vue";
 import TableComponent from "./TableComponent.vue";
+import TableSkeleton from "./TableSkeleton.vue";
 
 const { currentRoute } = useRouter();
 
@@ -515,16 +514,18 @@ async function doWithdraw() {
 		if (res.success) {
 			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
+			loading.value = false;
 		} else {
 			error.value = true;
 			console.log(success.error);
+			loading.value = false;
 		}
 	} catch (error) {
 		error.value = true;
 		console.log(error);
+		loading.value = false;
 	}
 	firstView.value = false;
-	loading.value = false;
 	error.value = false;
 }
 
