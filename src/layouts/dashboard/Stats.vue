@@ -15,7 +15,10 @@
 				<h3 class="text-white text-[16px]">
 					${{ getProfit(portfolioStore.selectedPortfolio) }}
 
-					<span class="text-[14px]">{{ getProfitPercentage(portfolioStore.selectedPortfolio) }}% <span>^</span></span>
+					<span class="text-[14px]"
+						>{{ getProfitPercentage(portfolioStore.selectedPortfolio) }}%
+						<span>^</span></span
+					>
 				</h3>
 			</div>
 		</div>
@@ -25,14 +28,16 @@
 			<div class="border-l border-[#2D3035] pl-[10px]">
 				<h2 class="text-[#868C9D] text-[14px]">AUM</h2>
 				<h3 class="text-white text-[16px]">
-					${{getTotalValue(portfolioStore.selectedPortfolio)}}
-					</h3>
+					${{ getTotalValue(portfolioStore.selectedPortfolio) }}
+				</h3>
 			</div>
 
 			<hr class="my-[12px] border-[#2D3035]" />
 			<div class="border-l border-[#2D3035] pl-[10px]">
 				<h2 class="text-[#868C9D] text-[14px]">Investors</h2>
-				<h3 class="text-white text-[16px]">{{ getNumberOfTrailers(portfolioStore.selectedPortfolio) }}</h3>
+				<h3 class="text-white text-[16px]">
+					{{ getNumberOfTrailers(portfolioStore.selectedPortfolio) }}
+				</h3>
 			</div>
 		</div>
 	</div>
@@ -40,63 +45,61 @@
 
 <script setup>
 import { usePortfolios } from "@/stores/Portfolios";
-import {
-	getLeadersPortfolioForAddress
-} from "@/api";
+import { getLeadersPortfolioForAddress } from "@/api";
 const portfolioStore = usePortfolios();
 
 function slice(str) {
 	if (str.length <= 13) return str;
 	return str.slice(0, 10) + "...";
 }
-function getProfit(portObject){
-	//console.log("getProfit portObject:"+JSON.stringify(portObject,null,2))
 
-	portObject = portObject['portfolioObject']
-	//console.log("getProfit 2 portObject:"+JSON.stringify(portObject,null,2))
+function getProfit(portObject) {
+	portObject = portObject["portfolioObject"];
 
-	if (portObject == undefined){
+	if (portObject == undefined) {
 		return 0;
 	}
-	var profit = portObject['profit']
-	if (profit == 0 ){
-		return 0;
-	}
-	profit = profit.toFixed(2)
-	return profit
-}
-function getNumberOfTrailers(portObject){
-	//portObject = portObject['portfolioObject']
-	//console.log("getNumberOfTrailers portObject:"+JSON.stringify(portObject,null,2))
 
-	if (portObject==undefined){
+	var profit = portObject["profit"];
+
+	if (profit == 0) {
 		return 0;
 	}
-	return portObject['numberOfTrailers']
+
+	profit = profit.toFixed(2);
+
+	return profit;
 }
 
-function getProfitPercentage(portObject){
+function getNumberOfTrailers(portObject) {
+	if (portObject == undefined) {
+		return 0;
+	}
+	return portObject["numberOfTrailers"];
+}
+
+function getProfitPercentage(portObject) {
 	//console.log("pp getNumberOfTrailers portObject:"+JSON.stringify(portObject,null,2))
 
 	//console.log("portObject:"+JSON.stringify(portObject,null,2))
-	if (portObject == null){
-		return 0
-	}
-	
-	var profitP = portObject.y1;
-	if (profitP==0){
+	if (portObject == null) {
 		return 0;
 	}
-	return profitP;//.toFixed(2);
+
+	var profitP = portObject.y1;
+	if (profitP == 0) {
+		return 0;
+	}
+	return profitP; //.toFixed(2);
 }
 
-function getTotalValue(portObject){
-	portObject = portObject['portfolioObject']
-	if (portObject==undefined){
+function getTotalValue(portObject) {
+	portObject = portObject["portfolioObject"];
+	if (portObject == undefined) {
 		return 0;
 	}
 	var totalValue = portObject.totalValue;
-	totalValue = totalValue.toFixed(2)
+	totalValue = totalValue.toFixed(2);
 	return totalValue;
 }
 </script>

@@ -139,10 +139,6 @@ const currentPage = ref(1);
 const filteredPortfolios = ref([]);
 const searchQuery = ref("");
 
-function clearSearch() {
-	searchQuery.value = "";
-}
-
 watch(
 	() => props.portfolioList,
 	() => {
@@ -157,6 +153,11 @@ const totalLeaderboardPages = computed(() => {
 		return Math.ceil(props.portfolioList.length / 4);
 	}
 });
+
+function clearSearch() {
+	searchQuery.value = "";
+	filteredPortfolios.value = props.portfolioList.slice(-4).reverse();
+}
 
 function updateShowingPortfolios() {
 	if (
