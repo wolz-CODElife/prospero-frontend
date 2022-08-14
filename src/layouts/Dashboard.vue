@@ -105,7 +105,7 @@ function redirect() {
 	if (joinView.value) {
 		portfolioStore.activeMode = "join";
 		// console.log("Portoflio to be joined", portfolioStore.selectedPortfolio);
-		portfolioStore.myPortfolios.push(portfolioStore.selectedPortfolio);
+		//portfolioStore.myPortfolios.push(portfolioStore.selectedPortfolio);
 
 		portfolioStore.activePortfolioType = "My Portfolios";
 		portfolioStore.reset();
