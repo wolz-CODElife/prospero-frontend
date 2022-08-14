@@ -131,6 +131,10 @@ const props = defineProps({
     type: Array,
     default: true,
   },
+  portfolioState: {
+    type: String,
+    default: true
+  }
 });
 
 
@@ -143,12 +147,19 @@ onMounted(() => {
   filteredPortfolios.value = props.portfolioList.slice(0, 4);
 })
 
+const resetCurrentPage = () => {
+  currentPage.value = 1
+  filteredPortfolios.value = props.portfolioList.slice((currentPage.value - 1) * 4, currentPage.value * 4)
+}
+
 watch(
-  () => props.portfolioList,
+  () => [props.portfolioList, props.portfolioState],
   () => {
-    updateShowingPortfolios();
+    updateShowingPortfolios(),
+    resetCurrentPage();
   }
 );
+
 
 const totalLeaderboardPages = computed(() => {
   if (props.portfolioList.length / 4 < 1) {

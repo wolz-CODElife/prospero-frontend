@@ -98,6 +98,7 @@
 							? portfolioStore.allPortfolios
 							: portfolioStore.myPortfolios
 					"
+					portfolioState="portfolioStore.activePortfolioType"
 					@toggle-disabled="toggleDisabled"
 				/>
 			</div>
