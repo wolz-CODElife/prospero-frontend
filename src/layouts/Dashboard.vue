@@ -57,6 +57,7 @@ onBeforeMount(async () => {
 					portfolioStore.isLoading = false;
 				} catch (error) {
 					portfolioStore.isLoading = false;
+					portfolioStore.isError = true;
 					console.log("get portfolios error", error);
 				}
 			} catch (error) {
