@@ -213,6 +213,7 @@ const totalAllocation = computed(() => {
 });
 
 function openSaveAllocationModal() {
+	console.log("openSaveAllocationModal");
 	saveAllocationModal.value = true;
 	success.value = true;
 }
