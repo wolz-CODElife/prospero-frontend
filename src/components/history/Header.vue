@@ -1,8 +1,7 @@
 <template>
 	<div class="bg-[#191A20]">
-		<div
-			class="grid grid-cols-12 text-[#868C9D] m-[30px] border-[20px] border-[#868C9D]"
-		>
+		<!-- border-[20px] border-[#868C9D] -->
+		<div class="grid grid-cols-12 text-[#868C9D] m-[30px]">
 			<!-- Left side of header  -->
 			<div
 				class="col-span-8 bg-black px-[30px] py-[20px] flex items-center justify-between h-full font-medium uppercase"
@@ -63,7 +62,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, watch } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
 
 const portfolioStore = usePortfolios();
