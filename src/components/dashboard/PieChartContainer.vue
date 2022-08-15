@@ -18,7 +18,20 @@
 				arrow-class="-rotate-45"
 			>
 				<template #selectedPortfolioDisplay>
-					<p class="text-center text-white">Insert token charts here</p>
+					<div class="flex gap-[24px] text-white">
+						<div
+							v-for="(portfolio, i) in portfolioStore.selectedPortfolio
+								.portfolioObject"
+							:key="i"
+						>
+							<div
+								class="flex flex-col items-center justify-center gap-[12px]"
+							>
+								<div>{{ portfolio.name }}</div>
+								<!-- <div>{{ percent(portfolio.percentage) }}</div> -->
+							</div>
+						</div>
+					</div>
 				</template>
 			</DashDir>
 
@@ -46,6 +59,15 @@
 </template>
 
 <script setup>
+import { computed } from "vue";
 import DashDir from "@/layouts/dashboard/DashDir.vue";
 import Stats from "@/layouts/dashboard/Stats.vue";
+
+import { usePortfolios } from "@/stores/Portfolios";
+
+const portfolioStore = usePortfolios();
+
+const percent = computed((arg) => {
+	return arg + "%";
+});
 </script>

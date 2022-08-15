@@ -143,10 +143,6 @@ export const usePortfolios = defineStore("Portfolios", {
 				this.myPortfolios = await getMyPortfoliosDataForTable();
 				this.isLoading = false;
 				console.log("got all and my portfolios");
-				console.log(
-					"isLoading value which should be false is:",
-					this.isLoading
-				);
 			} catch (error) {
 				this.isLoading = false;
 				console.log(error);
@@ -219,8 +215,7 @@ export const usePortfolios = defineStore("Portfolios", {
 		// },
 		joinedPortfolios(state) {
 			return state.myPortfolios.filter(
-				(portfolio) =>
-					portfolio.prosperoWalletAddress === portfolio.leaderAddress
+				(portfolio) => portfolio.wallet_type === "Leader"
 			);
 		},
 	},

@@ -98,7 +98,8 @@
 							? portfolioStore.allPortfolios
 							: portfolioStore.myPortfolios
 					"
-					@toggleDisabled="toggleDisabled"
+					portfolioState="portfolioStore.activePortfolioType"
+					@toggle-disabled="toggleDisabled"
 				/>
 			</div>
 
@@ -190,19 +191,30 @@
 					v-if="portfolioStore.activeMode === 'withdraw'"
 					class="px-[20px]"
 				>
-					<withdrawal-card
+					<!-- Choose withdraw type  -->
+					<WithdrawalPrompt
 						:title="wcOne.title"
 						:desc="wcOne.desc"
 						icon="https://i.postimg.cc/05pNHQs8/image.png"
-						@withdraw-action="openSwapModal"
+						@withdraw-action="enableSwap"
 					/>
-					<withdrawal-card
+
+					<WithdrawalPrompt
 						:title="wcTwo.title"
 						:desc="wcTwo.desc"
 						icon="https://i.postimg.cc/Gm3tbWcH/image.png"
-						@withdraw-action="openDirectModal"
+						@withdraw-action="enableDirect"
 					/>
 				</div>
+
+				<!-- Withdrawal Modal  -->
+				<WithdrawalModal
+					v-if="withdrawMode !== ''"
+					@close="closeWithdrawalModal"
+					@doWithdraw="doWithdraw"
+					mode="withdrawMode"
+					firstView="firstView"
+				/>
 			</div>
 		</div>
 
@@ -217,211 +229,6 @@
 			<AllocationContainer />
 		</div>
 	</div>
-
-	<!-- swap Modal -->
-	<Modal v-if="swap" @close="closeSwapModal()">
-		<div v-if="firstView" class="mx-[20px] my-[16px]">
-			<wc-overview />
-			<!-- Form  -->
-			<div class="w-full mt-[32px]">
-				<!-- Enter amount  -->
-				<div class="mb-[28px] relative">
-					<label
-						for="amount"
-						class="-top-[12px] z-50 absolute ml-[14px] uppercase text-white text-[10px] bg-black px-[8px] py-[4px] -mb-[16px] w-max"
-						>Enter Amount</label
-					>
-					<input
-						type="text"
-						name="amount"
-						id="amount"
-						v-model="amount"
-						placeholder="$0"
-						class="pt-[16px] pb-[6px] pl-[16px] w-full bg-black text-white text-[14px] border border-black focus:outline-none focus:border-[#00ff00]"
-					/>
-				</div>
-
-				<!-- SELECT THE SINGLE TOKEN YOU ARE WITHDRAWING INTO  -->
-				<div class="mb-[28px] relative">
-					<label
-						for="token"
-						class="-top-[12px] z-50 absolute ml-[14px] uppercase text-white text-[10px] bg-black px-[8px] py-[4px] -mb-[16px]"
-						>SELECT THE SINGLE TOKEN YOU ARE WITHDRAWING INTO</label
-					>
-					<!-- todo: change to select  -->
-					<input
-						type="text"
-						name="token"
-						id="token"
-						v-model="singleToken"
-						placeholder="Select"
-						class="pt-[16px] pb-[6px] pl-[16px] w-full bg-black text-white text-[14px] border border-black focus:outline-none focus:border-[#00ff00]"
-					/>
-				</div>
-
-				<!-- Withdraw  -->
-				<button
-					@click="doWithdraw"
-					class="btn btn-primary w-full"
-					:class="
-						disableWithdraw
-							? 'opacity-50 cursor-text '
-							: 'opacity-1 cursor-pointer hover:bg-transparent'
-					"
-					:disabled="disableWithdraw"
-				>
-					Withdraw
-				</button>
-			</div>
-		</div>
-
-		<div v-else>
-			<!-- Loading  -->
-			<div
-				v-if="loading"
-				class="flex flex-col justify-center items-center gap-[30px] text-center my-[20px]"
-			>
-				<!-- Logo  -->
-				<img
-					src="https://i.postimg.cc/tJMqnqDk/image.png"
-					alt=""
-					class="mx-auto max-w-[130px] object-contain animate-pulse"
-				/>
-				<h1 class="text-white text-center text-[20px] uppercase">
-					Pending transaction. Please wait for confirmation...
-				</h1>
-			</div>
-
-			<!-- Error  -->
-			<div
-				v-else-if="error"
-				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-			>
-				<h1 class="text-[20px] text-center uppercase">
-					Unable to swap into one token
-				</h1>
-			</div>
-
-			<!-- Successful -->
-			<div
-				v-else
-				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-			>
-				<img
-					src="https://i.postimg.cc/Y2vdsnZW/image.png"
-					alt=""
-					class="max-w-[65%]"
-				/>
-				<h1 class="text-[20px] uppercase">withdrawal successful!</h1>
-
-				<!-- todo: replace this w real values -->
-				<p class="text-[16px]">
-					$10.00 has been sent to you. Wait a few moments for the tokens to
-					transfer and reflect in your wallet. Gas used $2.24
-				</p>
-
-				<button
-					@click="closeSwapModal"
-					class="btn btn-primary uppercase w-full"
-				>
-					Take me to home
-				</button>
-			</div>
-		</div>
-	</Modal>
-
-	<!-- Withdrawal Modal -->
-	<Modal v-if="direct" @close="closeDirectModal()">
-		<div v-if="firstView" class="mx-[20px] my-[16px]">
-			<wc-overview />
-			<!-- Form  -->
-			<div class="w-full mt-[32px]">
-				<!-- Enter amount  -->
-				<div class="mb-[28px] relative">
-					<label
-						for="amount"
-						class="-top-[12px] z-50 absolute ml-[14px] uppercase text-white text-[10px] bg-black px-[8px] py-[4px] -mb-[16px] w-max"
-						>Enter Amount</label
-					>
-					<input
-						type="text"
-						name="amount"
-						id="amount"
-						v-model="amount"
-						placeholder="$0"
-						class="pt-[16px] pb-[6px] pl-[16px] w-full bg-black text-white text-[14px] border border-black focus:outline-none focus:border-[#00ff00]"
-					/>
-				</div>
-
-				<!-- Withdraw  -->
-				<button
-					@click="doWithdraw"
-					class="btn btn-primary w-full"
-					:class="
-						disableWithdraw
-							? 'opacity-50 cursor-text '
-							: 'opacity-1 cursor-pointer hover:bg-transparent'
-					"
-					:disabled="disableWithdraw"
-				>
-					Withdraw
-				</button>
-			</div>
-		</div>
-
-		<div v-else>
-			<!-- Loading  -->
-			<div
-				v-if="loading"
-				class="flex flex-col justify-center items-center gap-[30px] text-center my-[20px]"
-			>
-				<!-- Logo  -->
-				<img
-					src="https://i.postimg.cc/tJMqnqDk/image.png"
-					alt=""
-					class="mx-auto max-w-[130px] object-contain animate-pulse"
-				/>
-				<h1 class="text-white text-center text-[20px] uppercase">
-					Pending transaction...
-				</h1>
-			</div>
-
-			<!-- Error  -->
-			<div
-				v-else-if="error"
-				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-			>
-				<h1 class="text-[20px] text-center uppercase">
-					Unable to swap into one token
-				</h1>
-			</div>
-
-			<!-- Successful -->
-			<div
-				v-else
-				class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
-			>
-				<img
-					src="https://i.postimg.cc/Y2vdsnZW/image.png"
-					alt=""
-					class="max-w-[65%]"
-				/>
-				<h1 class="text-[20px] uppercase">withdrawal successful!</h1>
-				todo:
-				<p class="text-[16px]">
-					$10.00 has been sent to you. Wait a few moments for the tokens to
-					transfer and reflect in your wallet. Gas used $2.24
-				</p>
-
-				<button
-					@click="closeDirectModal"
-					class="btn btn-primary uppercase w-full"
-				>
-					Take me to home
-				</button>
-			</div>
-		</div>
-	</Modal>
 </template>
 
 <script setup>
@@ -433,9 +240,8 @@ import {
 	updateUIStatus,
 	getTokenListForManageUI,
 } from "@/api";
-import Modal from "../Modal.vue";
-import WithdrawalCard from "./WithdrawalCard.vue";
-import WcOverview from "./WcOverview.vue";
+import WithdrawalPrompt from "../withdrawal/WithdrawalPrompt.vue";
+import WithdrawalModal from "../withdrawal/WithdrawalModal.vue";
 import { useRouter } from "vue-router";
 import AllocationContainer from "../manage/AllocationContainer.vue";
 import TableComponent from "./TableComponent.vue";
@@ -469,9 +275,7 @@ const error = ref(false);
 
 const success = ref(false);
 
-const swap = ref(false);
-
-const direct = ref(false);
+const withdrawMode = ref("");
 
 const firstView = ref(true);
 
@@ -571,23 +375,18 @@ async function doWithdraw() {
 	error.value = false;
 }
 
-function openSwapModal() {
-	swap.value = true;
-	console.log("swap value rn is: ", swap.value);
+function enableSwap() {
+	withdrawMode.value = "swap";
 	console.log("works.....swap");
 }
 
-function openDirectModal() {
-	direct.value = true;
+function enableDirect() {
+	withdrawMode.value = "direct";
+	console.log("works.....direct");
 }
 
-function closeSwapModal() {
-	swap.value = false;
-	reset();
-}
-
-function closeDirectModal() {
-	direct.value = false;
+function closeWithdrawalModal() {
+	withdrawMode.value = "";
 	reset();
 }
 

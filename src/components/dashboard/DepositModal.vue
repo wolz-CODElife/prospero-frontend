@@ -1,7 +1,7 @@
 <template>
 	<div class="h-full w-full bg-[#191A20] border border-[#2D3035] p-[30px]">
+		<!-- Go BACK -->
 		<div class="flex justify-between">
-			<!-- Go BACK -->
 			<button
 				class="button text-[#00FF00] uppercase flex gap-[14px] items-center"
 				@click="$emit('goBack')"
@@ -235,7 +235,6 @@ async function getTokenList() {
 		console.log(error);
 	}
 }
-function enableDeposit(f) {}
 
 async function depositToPortfolio() {
 	firstView.value = false;
@@ -243,16 +242,16 @@ async function depositToPortfolio() {
 
 	console.log("depositToPortfolio called");
 	loading.value = true;
+
 	try {
 		let res = await handleDepositType();
-		//console.log("res:"+JSON.stringify(res))
 		if (!res.success) {
 			loading.value = false;
 			error.value = true;
 			errorMsg.value = res.error;
 			console.log(errorMsg.value);
 		} else {
-			usdAmountOfGas.value = parseInt(res.gasUsed.usdAmountOfGas).toFixed(2);
+			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas.toFixed(2);
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
 			loading.value = false;
 			portfolioStore.myPortfolios.push(portfolioStore.selectedPortfolio);
