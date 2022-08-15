@@ -124,7 +124,7 @@
 </template>
 
 <script setup>
-import { ref, computed, watch } from "vue";
+import { ref, computed, watch, onMounted } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
 
 const props = defineProps({
@@ -145,6 +145,10 @@ watch(
 		updateShowingPortfolios();
 	}
 );
+
+onMounted(() => {
+	filteredPortfolios.value = props.portfolioList.slice(-4).reverse();
+});
 
 const totalLeaderboardPages = computed(() => {
 	if (props.portfolioList.length / 4 < 1) {

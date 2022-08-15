@@ -104,22 +104,11 @@ function goBack() {
 function redirect() {
 	if (joinView.value) {
 		portfolioStore.activeMode = "join";
-		// console.log("Portoflio to be joined", portfolioStore.selectedPortfolio);
-		portfolioStore.myPortfolios.push(portfolioStore.selectedPortfolio);
-
 		portfolioStore.activePortfolioType = "My Portfolios";
 		portfolioStore.reset();
 	} else {
-		// todo: populate my portfolios array with this new deposit
-		// - if it's a new portfolio you're creating i.e first deposit,
-		// - then push object to my portfolios
-		// - else update existing portfolio with new deposit, rebalance and all
-
-		// if it's a new portfolio you're joining,
-		// simply push object to myPortfolios
 		portfolioStore.activeMode = "create";
 		portfolioStore.firstCreateView = false;
-		// todo: replace with correct values
 	}
 	joinView.value = false;
 	createView.value = false;
