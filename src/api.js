@@ -141,7 +141,7 @@ function getTokenListForManageUI() {
     "prosperoWalletAddress": "0x45adf1db8c12e68928712d8a20b5b342c3c47bc8",
     "profitLeader": 233.39998681086308,
     "walletValues": {
-      "ProsperoBeaconFactoryAddress": "0x377D251772a4FCd2C039C718b14e229364bdC04e",
+      "ProsperoBeaconFactoryAddress": "0x6cDC213b103be41dcee387108E646a777D4741eD",
       "leaderEOA": "0xeeca92f4eb0b3102a62a414f1ff6290fFE23B67d",
       "prosperoPricesAddress": "0x3eac8c5D6518D434CB27E12f8b6565ed50B5b992",
       "prosperoDataAddress": "0x6264915AC05931470C35beccD6847dEB1F5B5fBd",
@@ -1099,7 +1099,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
       "prosperoWalletAddress": "0xdd9ac527a74cbf673f7d5d37053d0781b654b940",
       "profitLeader": 0.6017876300118241,
       "walletValues": {
-        "ProsperoBeaconFactoryAddress": "0x377D251772a4FCd2C039C718b14e229364bdC04e",
+        "ProsperoBeaconFactoryAddress": "0x6cDC213b103be41dcee387108E646a777D4741eD",
         "leaderEOA": "0x071018cb3364C47F407769C267e4B691227402aD",
         "prosperoPricesAddress": "0x3eac8c5D6518D434CB27E12f8b6565ed50B5b992",
         "prosperoDataAddress": "0x6264915AC05931470C35beccD6847dEB1F5B5fBd",
@@ -1208,11 +1208,11 @@ async function getGraphData() {
       }
       `,
 		});
-		//console.log ("Query result: \n", result.data.data.latestBalancesFactories);
+		console.log ("Query result: \n", result.data.data.latestBalancesFactories);
 		graphData = result.data.data.latestBalancesFactories;
 		for (var i = 0; i < graphData.length; i++) {
 			var graphItem = graphData[i];
-			//console.log("graphItem:"+JSON.stringify(graphItem,null,2))
+			console.log("graphItem:"+JSON.stringify(graphItem,null,2))
 		}
 	} catch (err) {
 		console.log("error getGraphData:" + err);
@@ -2259,6 +2259,8 @@ async function createPortfolio(walletName, fundFee) {
 	console.log(
 		"api createPortfolio walletName:" + walletName + " fundFee:" + fundFee
 	);
+	fundFee = fundFee * (USD_SCALE/100);
+	console.log("new fund fee:"+fundFee);
 	try {
 		var prosperoBeaconFactoryInstance = await new ethers.Contract(
 			factoryAddress,
@@ -2266,7 +2268,8 @@ async function createPortfolio(walletName, fundFee) {
 			ethersSigner
 		);
 		var tx = await prosperoBeaconFactoryInstance.newProsperoWallet(
-			walletName
+			walletName,
+			fundFee+""
 		);
 		var r = await tx.wait();
 		console.log(
