@@ -132,6 +132,10 @@ const props = defineProps({
 		type: Array,
 		default: true,
 	},
+	portfolioState: {
+		type: String,
+		default: true,
+	},
 });
 
 const portfolioStore = usePortfolios();
@@ -139,10 +143,22 @@ const currentPage = ref(1);
 const filteredPortfolios = ref([]);
 const searchQuery = ref("");
 
+onMounted(() => {
+	filteredPortfolios.value = props.portfolioList.slice(0, 4);
+});
+
+const resetCurrentPage = () => {
+	currentPage.value = 1;
+	filteredPortfolios.value = props.portfolioList.slice(
+		(currentPage.value - 1) * 4,
+		currentPage.value * 4
+	);
+};
+
 watch(
-	() => props.portfolioList,
+	() => [props.portfolioList, props.portfolioState],
 	() => {
-		updateShowingPortfolios();
+		updateShowingPortfolios(), resetCurrentPage();
 	}
 );
 
@@ -164,16 +180,21 @@ function clearSearch() {
 }
 
 function updateShowingPortfolios() {
-	if (
-		currentPage.value <= props.portfolioList.length / 4 &&
-		currentPage.value > 1
-	) {
-		filteredPortfolios.value = props.portfolioList
-			.slice(-(currentPage.value * 4), -(currentPage.value * 4 - 4))
-			.reverse();
-	} else {
-		filteredPortfolios.value = props.portfolioList.slice(-4).reverse();
-	}
+	// if (
+	//   currentPage.value <= props.portfolioList.length / 4 &&
+	//   currentPage.value > 1
+	// ) {
+	//   filteredPortfolios.value = props.portfolioList
+	//     .slice(-(currentPage.value * 4), -(currentPage.value * 4 - 4))
+	//     .reverse();
+	// } else {
+	//   filteredPortfolios.value = props.portfolioList.slice(4).reverse();
+	// }
+
+	filteredPortfolios.value = props.portfolioList.slice(
+		(currentPage.value - 1) * 4,
+		currentPage.value * 4
+	);
 }
 
 function updateSearchedPortfolios(event) {
