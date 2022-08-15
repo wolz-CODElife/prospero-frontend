@@ -131,6 +131,8 @@ export const usePortfolios = defineStore("Portfolios", {
 			selectedManagePortfolio: {},
 
 			isLoading: true,
+
+			isError: false,
 		};
 	},
 
@@ -145,6 +147,7 @@ export const usePortfolios = defineStore("Portfolios", {
 				console.log("got all and my portfolios");
 			} catch (error) {
 				this.isLoading = false;
+				this.isError = true;
 				console.log(error);
 			}
 		},

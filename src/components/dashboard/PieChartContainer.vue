@@ -27,8 +27,9 @@
 							<div
 								class="flex flex-col items-center justify-center gap-[12px]"
 							>
+								<img :src="portfolio.image" alt="portfolio image" />
 								<div>{{ portfolio.name }}</div>
-								<!-- <div>{{ percent(portfolio.percentage) }}</div> -->
+								<div>{{ percent(portfolio.percentage) }}</div>
 							</div>
 						</div>
 					</div>
