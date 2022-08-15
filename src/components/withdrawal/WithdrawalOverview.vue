@@ -5,11 +5,19 @@
 		<div class="flex flex-col gap-y-[16px] font-medium uppercase">
 			<div class="">
 				<h2 class="text-[#868C9D] text-[12px]">Portfolio</h2>
-				<h3 class="text-white text-[16px]">Test Name</h3>
+				<h3 class="text-white text-[16px]">
+					{{ portfolioStore.selectedPortfolio.name }}
+				</h3>
 			</div>
 			<div class="">
 				<h2 class="text-[#868C9D] text-[12px]">Available Balance</h2>
-				<h3 class="text-white text-[16px]">$0.00</h3>
+				<h3 class="text-white text-[16px]">
+					${{
+						portfolioStore.selectedPortfolio.portfolioObject.totalValue.toFixed(
+							2
+						)
+					}}
+				</h3>
 			</div>
 		</div>
 
@@ -23,5 +31,6 @@
 </template>
 
 <script setup>
-// const props = defineProps(["title", "desc", "icon"]);
+import { usePortfolios } from "@/stores/Portfolios";
+const portfolioStore = usePortfolios();
 </script>

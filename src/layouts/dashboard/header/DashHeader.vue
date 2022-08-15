@@ -22,7 +22,7 @@
 								@click="
 									portfolioStore.updateActiveOverview(tab.asset.name)
 								"
-								class="p-[6px] flex gap-[10px] items-center"
+								class="p-[6px] flex gap-[10px] items-center cursor-pointer"
 								:class="[
 									portfolioStore.activeOverview.asset.name ===
 									tab.asset.name
@@ -138,8 +138,5 @@ function calculateTotals() {
 			console.log("myHoldings:" + myHoldings);
 		}
 	}
-	
 }
-
-
 </script>
