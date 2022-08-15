@@ -91,7 +91,10 @@
 				<TableSkeleton v-if="portfolioStore.isLoading" />
 
 				<div
-					v-else-if="portfolioStore.allPortfolios.length === 0"
+					v-else-if="
+						portfolioStore.isError ||
+						portfolioStore.allPortfolios.length === 0
+					"
 					class="text-center text-white mt-[150px]"
 				>
 					An error occured loading portfolio
