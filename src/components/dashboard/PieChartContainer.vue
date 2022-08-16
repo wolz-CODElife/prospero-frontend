@@ -29,7 +29,7 @@
 							>
 								<img :src="portfolio.image" alt="portfolio image" />
 								<div>{{ portfolio.name }}</div>
-								<div>{{ percent(portfolio.percentage) }}</div>
+								<div>{{ displayPerc(portfolio.percentage) }}</div>
 							</div>
 						</div>
 					</div>
@@ -68,7 +68,8 @@ import { usePortfolios } from "@/stores/Portfolios";
 
 const portfolioStore = usePortfolios();
 
-const percent = computed((arg) => {
-	return arg + "%";
-});
+function displayPerc(perc){
+	return (perc * 100).toFixed(1) + "%";
+}
+
 </script>
