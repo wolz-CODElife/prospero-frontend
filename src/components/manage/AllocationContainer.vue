@@ -1,9 +1,13 @@
 <template>
 	<div>
 		<hr class="border-[#2D3035]" />
+		<!-- Select Portfolio to Manage component  -->
 		<SelectPortfolio />
+
 		<div class="flex items-center justify-between p-[10px]">
+			<!-- Select Token To add -->
 			<SelectToken />
+
 			<!-- Change Fund fee -->
 			<div class="flex items-center gap-[10px]">
 				<label for="" class="uppercase text-white text-[12px]"
@@ -95,7 +99,7 @@
 		<!-- Save allocation -->
 		<button
 			v-if="!success && totalAllocation > 0"
-			@click="openSaveAllocationModal"
+			@click="doSaveAllocation"
 			class="btn btn-primary uppercase w-full mt-[50px]"
 			:class="
 				disableSaveAllocation
@@ -212,7 +216,7 @@ const totalAllocation = computed(() => {
 	}, 0);
 });
 
-function openSaveAllocationModal() {
+function doSaveAllocation() {
 	saveAllocationModal.value = true;
 	success.value = true;
 }
