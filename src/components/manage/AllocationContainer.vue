@@ -216,6 +216,7 @@ const totalAllocation = computed(() => {
 	}, 0);
 });
 
+
 function doSaveAllocation() {
 	saveAllocationModal.value = true;
 	success.value = true;

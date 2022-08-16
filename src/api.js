@@ -141,7 +141,7 @@ function getTokenListForManageUI() {
     "prosperoWalletAddress": "0x45adf1db8c12e68928712d8a20b5b342c3c47bc8",
     "profitLeader": 233.39998681086308,
     "walletValues": {
-      "ProsperoBeaconFactoryAddress": "0x6cDC213b103be41dcee387108E646a777D4741eD",
+      "ProsperoBeaconFactoryAddress": "0x5E6eFBEcEb565dB7e3660B2B27690EE687Dc9Fb3",
       "leaderEOA": "0xeeca92f4eb0b3102a62a414f1ff6290fFE23B67d",
       "prosperoPricesAddress": "0x3eac8c5D6518D434CB27E12f8b6565ed50B5b992",
       "prosperoDataAddress": "0x6264915AC05931470C35beccD6847dEB1F5B5fBd",
@@ -918,6 +918,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			}
 		}
 	}
+	console.log("leaderBoardDataNew:"+JSON.stringify(leaderBoardDataNew,null,2));
 	var cntrLB = 0;
 	var cntrMyWallets = 0;
 	var firstWallet = "";
@@ -966,6 +967,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			thisTokenAddress = thisTokenAddress.toLowerCase();
 			tokenObj["balance"] = parseInt(tokenBalances[i] * thisPercentage + "");
 			//right here
+
 			var aTokenObject = await getTokenObject_newMine(thisTokenAddress);
 			var usdThisUserThisToken = await getUSDValue_MINE(
 				tokenObj["balance"],
@@ -1099,7 +1101,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
       "prosperoWalletAddress": "0xdd9ac527a74cbf673f7d5d37053d0781b654b940",
       "profitLeader": 0.6017876300118241,
       "walletValues": {
-        "ProsperoBeaconFactoryAddress": "0x6cDC213b103be41dcee387108E646a777D4741eD",
+        "ProsperoBeaconFactoryAddress": "0x5E6eFBEcEb565dB7e3660B2B27690EE687Dc9Fb3",
         "leaderEOA": "0x071018cb3364C47F407769C267e4B691227402aD",
         "prosperoPricesAddress": "0x3eac8c5D6518D434CB27E12f8b6565ed50B5b992",
         "prosperoDataAddress": "0x6264915AC05931470C35beccD6847dEB1F5B5fBd",
@@ -1208,7 +1210,7 @@ async function getGraphData() {
       }
       `,
 		});
-		console.log ("Query result: \n", result.data.data.latestBalancesFactories);
+		//console.log ("Query result: \n", result.data.data.latestBalancesFactories);
 		graphData = result.data.data.latestBalancesFactories;
 		for (var i = 0; i < graphData.length; i++) {
 			var graphItem = graphData[i];
