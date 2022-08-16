@@ -8,7 +8,7 @@
 				Select a portfolio to manage
 			</option>
 			<option
-				v-for="(portfolio, i) in portfolioStore.createdPortfolios"
+				v-for="(portfolio, i) in portfolioStore.joinedPortfolios"
 				:key="i"
 				:value="portfolio"
 			>
