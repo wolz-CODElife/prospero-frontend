@@ -275,6 +275,7 @@ async function rebalance(percentages, tokenAddressesToRemix) {
 	success.value = true;
 }
 
+/*
 function rebalance(
 	percentages,
 	tokensAddressesToRemix,
@@ -284,7 +285,7 @@ function rebalance(
 	tokensAddressesToRemix = portfolioStore.tokenList;
 	prosperoWalletAddressToRebalance =
 		portfolioStore.selectedPortfolio.prosperoWalletAddress;
-}
+}*/
 
 function closeAllocationModal() {
 	saveAllocationModal.value = false;
