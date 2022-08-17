@@ -5,8 +5,7 @@
 				<tr
 					class="text-[#868C9D] text-left border-b border-b-[#2D3035] py-[10px] px-[30px]"
 				>
-					<th class="pl-[20px]">SELECT</th>
-					<th>NAME</th>
+					<th class="pl-[20px]">NAME</th>
 					<th class="border-r border-r-[#2D3035]">FEE</th>
 					<th class="pl-[20px]">7D%</th>
 					<th>30D%</th>
@@ -31,18 +30,16 @@
 							: 'bg-transparent',
 					]"
 				>
-					<td class="ml-[20px] pl-[20px]">
-						<input
-							type="radio"
-							:name="portfolio.prosperoWalletAddress"
-							:id="portfolio.prosperoWalletAddress"
-							@onchange="
-								portfolioStore.doSelectPortfolio(portfolio),
-									$emit('toggleDisabled')
-							"
-						/>
+					<td
+						class="ml-[20px] pl-[20px] flex justify-between items-center"
+					>
+						{{ portfolio.name }}
+						<span
+							v-if="portfolio.wallet_type === 'Leader'"
+							class="bg-[#6FCF97] bg-opacity-20 text-[#6FCF97] text-[10px] p-[6px]"
+							>Managing</span
+						>
 					</td>
-					<td>{{ portfolio.name }}</td>
 					<td class="border-r border-r-[#2D3035]">
 						{{ portfolio.fee }}
 					</td>

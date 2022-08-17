@@ -193,7 +193,7 @@
 					</div>
 
 					<!-- Allocation view on redirect  -->
-					<AllocationContainer v-else />
+					<ManageContainer v-else />
 				</div>
 
 				<!-- Withdraw mode  -->
@@ -236,7 +236,7 @@
 			</h3>
 
 			<!-- Manage Portfolio  -->
-			<AllocationContainer />
+			<ManageContainer />
 		</div>
 	</div>
 </template>
@@ -253,7 +253,7 @@ import {
 import WithdrawalPrompt from "../withdrawal/WithdrawalPrompt.vue";
 import WithdrawalModal from "../withdrawal/WithdrawalModal.vue";
 import { useRouter } from "vue-router";
-import AllocationContainer from "../manage/AllocationContainer.vue";
+import ManageContainer from "../manage/ManageContainer.vue";
 import TableComponent from "./TableComponent.vue";
 import TableSkeleton from "./TableSkeleton.vue";
 

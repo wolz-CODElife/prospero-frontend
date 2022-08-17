@@ -218,7 +218,6 @@ const totalAllocation = computed(() => {
 	}, 0);
 });
 
-
 function doSaveAllocation() {
 	//right here
 	console.log("save allocation");
@@ -274,6 +273,17 @@ async function rebalance(percentages, tokenAddressesToRemix) {
 
 	saveAllocationModal.value = true;
 	success.value = true;
+}
+
+function rebalance(
+	percentages,
+	tokensAddressesToRemix,
+	prosperoWalletAddressToRebalance
+) {
+	percentages = [];
+	tokensAddressesToRemix = portfolioStore.tokenList;
+	prosperoWalletAddressToRebalance =
+		portfolioStore.selectedPortfolio.prosperoWalletAddress;
 }
 
 function closeAllocationModal() {
