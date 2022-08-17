@@ -1,9 +1,5 @@
 <template>
-	<DepositModal
-		@deposit-action="joinDepositAction"
-		@go-back="props.goBack"
-		@redirect="props.redirect"
-	/>
+	<DepositModal @go-back="props.goBack" @redirect="props.redirect" />
 </template>
 
 <script setup>
@@ -20,9 +16,4 @@ const props = defineProps({
 		type: Function,
 	},
 });
-
-function joinDepositAction() {
-	console.log("Opened Join Deposit Action");
-	portfolioStore.depositDialog = true;
-}
 </script>

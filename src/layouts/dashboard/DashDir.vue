@@ -17,7 +17,7 @@
 						v-if="portfolioStore.activePortfolioType === 'All Portfolios'"
 					>
 						Select
-						<span v-if="portfolioStore.joinedPortfolios.length === 0"
+						<span v-if="portfolioStore.myPortfolios.length === 0"
 							>first</span
 						>
 						Portfolio to Join
