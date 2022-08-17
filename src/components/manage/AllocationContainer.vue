@@ -183,6 +183,8 @@ import Modal from "../Modal.vue";
 
 import SelectPortfolio from "./SelectPortfolio.vue";
 import { usePortfolios } from "@/stores/Portfolios";
+import { rebalance } from "@/api";
+
 
 const portfolioStore = usePortfolios();
 
@@ -218,6 +220,58 @@ const totalAllocation = computed(() => {
 
 
 function doSaveAllocation() {
+	//right here
+	console.log("save allocation");
+	console.log("portfolioStore:"+JSON.stringify(portfolioStore,null,2));
+	console.log("alloation list:"+JSON.stringify(portfolioStore.allocationList,null,2));
+	var selectedProsperoWalletAddress = portfolioStore.selectedPortfolio.prosperoWalletAddress;
+	/*
+	var tokensAddressesToRemix = []
+	var percentages = []
+	var portObject = portfolioStore.selectedPortfolio.portfolioObject
+	for (var i =0;i<portObject.length;i++){
+		tokensAddressesToRemix.push()
+	}
+	try {
+		let res = await rebalance();
+		if (!res.success) {
+			loading.value = false;
+			error.value = true;
+			errorMsg.value = res.error;
+			console.log(errorMsg.value);
+		} else {
+			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas.toFixed(2);
+			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
+		}
+	} catch (err) {
+		loading.value = false;
+		error.value = true;
+	}
+	console.log("done");
+	*/
+	/*
+	//for manage portfolio (rebalanceing) - kachi
+//tokenAddressesToRemix is an array of string token addresses
+//percentages is an array of percentages allocations [33, 67]
+async function rebalance(percentages, tokenAddressesToRemix) {
+	*/
+	//allocationList
+	/*
+	[
+    {
+      "name": "BTC",
+      "allocation": 100,
+      "price": 120,
+      "mc": 340,
+      "d7": 10,
+      "d30": 20,
+      "d90": 30,
+      "y1": 120,
+      "icon": "https://i.postimg.cc/MGnDWTSy/image.png"
+    }
+  ]
+  */
+
 	saveAllocationModal.value = true;
 	success.value = true;
 }
@@ -234,7 +288,6 @@ function newList(amt, name) {
 		return token;
 	});
 	portfolioStore.tokenList = newTokenList;
-	t;
 }
 
 function deleteToken(item) {

@@ -1,9 +1,13 @@
 import { defineStore } from "pinia";
+
 import {
 	getLeaderBoardDataForTable,
 	getMyPortfoliosDataForTable,
-	updateSelectedWallet,
+	updateSelectedWallet
 } from "@/api";
+
+
+
 
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
@@ -15,6 +19,7 @@ export const usePortfolios = defineStore("Portfolios", {
 			selectedPortfolio: {},
 
 			allocationList: [],
+
 
 			tokenList: [
 				{
@@ -223,3 +228,5 @@ export const usePortfolios = defineStore("Portfolios", {
 		},
 	},
 });
+
+

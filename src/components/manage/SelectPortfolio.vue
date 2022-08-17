@@ -12,17 +12,28 @@
 				:key="i"
 				:value="portfolio"
 			>
-				{{ portfolio.name }}
+				{{ returnNameUpdateSelectedPortfolio(portfolio) }}
 			</option>
 		</select>
 	</div>
 </template>
 
 <script setup>
-import { ref } from "vue";
+import { ref} from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
 
 const portfolioStore = usePortfolios();
+
+function returnNameUpdateSelectedPortfolio(portfolio){
+	
+	console.log("PORT:"+JSON.stringify(portfolio,null,2));
+	portfolioStore.selectedPortfolio=portfolio;
+	return portfolio.name;
+}
+
+function onChangeManagedPortfolio(portfolio) {
+  console.log(JSON.stringify(portfolio, null, 2));
+}
 
 defineProps({
 	placeholder: {
@@ -33,7 +44,5 @@ defineProps({
 
 const open = ref(false);
 
-function toggleDropdown() {
-	open.value = !open.value;
-}
+
 </script>
