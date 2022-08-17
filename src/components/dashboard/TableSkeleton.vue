@@ -5,8 +5,7 @@
 				<tr
 					class="text-[#868C9D] text-left border-b border-b-[#2D3035] py-[10px] px-[30px]"
 				>
-					<th class="pl-[20px]">SELECT</th>
-					<th>NAME</th>
+					<th class="pl-[20px]">NAME</th>
 					<th class="border-r border-r-[#2D3035]">FEE</th>
 					<th class="pl-[20px]">7D%</th>
 					<th>30D%</th>
@@ -17,39 +16,22 @@
 			<tbody>
 				<tr v-for="i in [1, 2, 3, 4]">
 					<td class="p-[10px]">
-						<div
-							class="p-[10px] rounded-[20px] bg-[#FFFFFF0A] animate-pulse"
-						></div>
+						<div class="p-[10px] bg-[#FFFFFF0A] animate-pulse"></div>
 					</td>
 					<td class="p-[10px]">
-						<div
-							class="p-[10px] rounded-[20px] bg-[#FFFFFF0A] animate-pulse"
-						></div>
+						<div class="p-[10px] bg-[#FFFFFF0A] animate-pulse"></div>
 					</td>
 					<td class="p-[10px]">
-						<div
-							class="p-[10px] rounded-[20px] bg-[#FFFFFF0A] animate-pulse"
-						></div>
+						<div class="p-[10px] bg-[#FFFFFF0A] animate-pulse"></div>
 					</td>
 					<td class="p-[10px]">
-						<div
-							class="p-[10px] rounded-[20px] bg-[#FFFFFF0A] animate-pulse"
-						></div>
+						<div class="p-[10px] bg-[#FFFFFF0A] animate-pulse"></div>
 					</td>
 					<td class="p-[10px]">
-						<div
-							class="p-[10px] rounded-[20px] bg-[#FFFFFF0A] animate-pulse"
-						></div>
+						<div class="p-[10px] bg-[#FFFFFF0A] animate-pulse"></div>
 					</td>
 					<td class="p-[10px]">
-						<div
-							class="p-[10px] rounded-[20px] bg-[#FFFFFF0A] animate-pulse"
-						></div>
-					</td>
-					<td class="p-[10px]">
-						<div
-							class="p-[10px] rounded-[20px] bg-[#FFFFFF0A] animate-pulse"
-						></div>
+						<div class="p-[10px] bg-[#FFFFFF0A] animate-pulse"></div>
 					</td>
 				</tr>
 			</tbody>

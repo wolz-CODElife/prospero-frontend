@@ -4,7 +4,7 @@ import {
 	getMyPortfoliosDataForTable,
 	updateSelectedWallet,
 } from "@/api";
-
+// convertGraphDataToLeaderBoardAndMyWalletsData;
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
 		return {
@@ -101,32 +101,7 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			depositDisabled: true,
 
-			createdPortfolios: [
-				{
-					name: "AFS1000 🔱",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-				},
-				{
-					name: " 🌈 Lulu Nation Fans",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-				},
-				{
-					name: "GX 650 Lords 🏖",
-					fee: 2.6,
-					d7: 8,
-					d30: 12,
-					d90: 34,
-					y1: 60,
-				},
-			],
+			createdPortfolios: [],
 
 			selectedManagePortfolio: {},
 

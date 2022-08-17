@@ -216,10 +216,20 @@ const totalAllocation = computed(() => {
 	}, 0);
 });
 
-
 function doSaveAllocation() {
 	saveAllocationModal.value = true;
 	success.value = true;
+}
+
+function rebalance(
+	percentages,
+	tokensAddressesToRemix,
+	prosperoWalletAddressToRebalance
+) {
+	percentages = [];
+	tokensAddressesToRemix = portfolioStore.tokenList;
+	prosperoWalletAddressToRebalance =
+		portfolioStore.selectedPortfolio.prosperoWalletAddress;
 }
 
 function closeAllocationModal() {
@@ -234,7 +244,6 @@ function newList(amt, name) {
 		return token;
 	});
 	portfolioStore.tokenList = newTokenList;
-	t;
 }
 
 function deleteToken(item) {
