@@ -929,6 +929,29 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		var addressVars = thisGraphItem["addressVars"];
 		var tokens = thisGraphItem["tokens"];
 		var tokenBalances = thisGraphItem["balances"];
+		/*for (var f =0;f<tokenBalances.length;f++){
+			//right here 
+			var thisTokenAddressHere = tokens[f];
+			var aTokenObject = await getTokenObject_newMine(thisTokenAddressHere);
+			if (aTokenObject.decimals < 18){
+				console.log("tb before:"+tokenBalances[f])
+				var tbBefore = tokenBalances[f]+"";
+				var tbBeforeNum = Number(tokenBalances[f]);
+				console.log('tbBefore.length :'+tbBefore.length )
+				console.log("aTokenObject.decimals:"+aTokenObject.decimals)
+				//var newLength = tbBefore.length - (18 - aTokenObject.decimals)
+				//console.log("NEW LENGTH:"+newLength)
+				console.log("tbBeforeNum:"+tbBeforeNum)
+				var helperNum = Math.pow(10,(18-aTokenObject.decimals));
+				console.log("helperNum:"+helperNum);
+				var tbNow = tbBeforeNum / helperNum;
+				console.log("tb after:"+tbNow);
+				tbNow = parseInt(tbNow);
+				//var tbNow = tbBeforeNum.toFixed(newLength)
+				tokenBalances[f]=Number(tbNow)
+			}
+			
+		}*/
 		var usersInPortfolio = thisGraphItem["users"];
 		var leaderAddress = addressVars[1];
 		var indexOfLeader = getIndexOfUser(thisGraphItem["users"], leaderAddress);
@@ -956,8 +979,8 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		var percentageOwnership = thisGraphItem["percentageOwnerships"];
 		var thisPercentage = percentageOwnership[indexOfLeader];
 		//console.log("thisPercentage:"+thisPercentage)
-		//thisPercentage = thisPercentage / USD_SCALE;
-		thisPercentage = thisPercentage / 100;
+		thisPercentage = thisPercentage / USD_SCALE;
+
 		//console.log("thisPercentage:"+thisPercentage)
 		var portfolioObject = {};
 		var leadersValue = 0;
@@ -965,9 +988,13 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			var tokenObj = {};
 			var thisTokenAddress = tokens[i];
 			thisTokenAddress = thisTokenAddress.toLowerCase();
-			tokenObj["balance"] = parseInt(tokenBalances[i] * thisPercentage + "");
-			//right here
+			console.log('thisPercentage:'+thisPercentage)
+			console.log("BAL b4:"+tokenBalances[i])
 
+			tokenObj["balance"] = tokenBalances[i] * thisPercentage + "";
+			//right here
+			tokenObj["balance"]=parseInt(tokenObj["balance"])
+			console.log("BAL af:"+tokenObj["balance"])
 			var aTokenObject = await getTokenObject_newMine(thisTokenAddress);
 			var usdThisUserThisToken = await getUSDValue_MINE(
 				tokenObj["balance"],
@@ -1214,7 +1241,7 @@ async function getGraphData() {
 		graphData = result.data.data.latestBalancesFactories;
 		for (var i = 0; i < graphData.length; i++) {
 			var graphItem = graphData[i];
-			console.log("graphItem:"+JSON.stringify(graphItem,null,2))
+			//console.log("graphItem:"+JSON.stringify(graphItem,null,2))
 		}
 	} catch (err) {
 		console.log("error getGraphData:" + err);
@@ -2973,7 +3000,7 @@ async function getValueOfBalancesOfTokensInPortfolio(balancesAndTokensObj) {
 	return balanceValue;
 }
 async function getUSDValue_MINE(amountInWei, address) {
-	//console.log("getUSDValue_MINE amountInWei:"+amountInWei+" address:"+address)
+	console.log("getUSDValue_MINE amountInWei:"+amountInWei+" address:"+address)
 
 	var amountInWeiUpScaledForLowDecimalPoints =
 		await updateBalanceToEighteenDecimalsIfNeeded(amountInWei, address);
@@ -2981,7 +3008,7 @@ async function getUSDValue_MINE(amountInWei, address) {
 	var amountInEther = Number(
 		ethers.utils.formatEther(amountInWeiUpScaledForLowDecimalPoints + "") + ""
 	);
-	//console.log("anountInEther:"+amountInEther)
+	console.log("anountInEther:"+amountInEther)
 
 	address = address.toLowerCase();
 	//console.log('address:'+address)
@@ -3208,6 +3235,7 @@ async function updateBalanceFromEighteenDecimalsIfNeeded(
 	balance,
 	tokenAddress
 ) {
+	console.log("updateBalanceFromEighteenDecimalsIfNeeded");
 	for (var i = 0; i < tokenArray.length; i++) {
 		tokenAddress = tokenAddress.toLowerCase();
 		if (tokenArray[i]["address"] == tokenAddress) {
@@ -3218,9 +3246,9 @@ async function updateBalanceFromEighteenDecimalsIfNeeded(
 				var diffPower = Math.pow(10, diff);
 				var diffPowerBn = BigNumber(diffPower + "");
 				var balBn = BigNumber(balance);
-				//console.log("diffPower:"+diffPower)
+				console.log("diffPower:"+diffPower)
 				var balDiff = diffPowerBn.dividedBy(balBn);
-				//console.log("balDiff:"+balDiff)
+				console.log("balDiff:"+balDiff)
 				balDiff = balDiff.integerValue();
 				return balDiff;
 			}
