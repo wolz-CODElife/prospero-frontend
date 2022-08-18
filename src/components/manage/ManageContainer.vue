@@ -183,7 +183,8 @@ import Modal from "../Modal.vue";
 
 import SelectPortfolio from "./SelectPortfolio.vue";
 import { usePortfolios } from "@/stores/Portfolios";
-import { rebalance } from "@/api";
+import { rebalance, getTokenArray} from "@/api";
+
 
 
 const portfolioStore = usePortfolios();
@@ -218,21 +219,41 @@ const totalAllocation = computed(() => {
 	}, 0);
 });
 
-function doSaveAllocation() {
+async function doSaveAllocation() {
 	//right here
-	console.log("save allocation");
-	console.log("portfolioStore:"+JSON.stringify(portfolioStore,null,2));
-	console.log("alloation list:"+JSON.stringify(portfolioStore.allocationList,null,2));
+	console.log("doSaveAlocation");
+	//console.log("portfolioStore:"+JSON.stringify(portfolioStore,null,2));
+	//console.log("alloation list:"+JSON.stringify(portfolioStore.allocationList,null,2));
 	var selectedProsperoWalletAddress = portfolioStore.selectedPortfolio.prosperoWalletAddress;
-	/*
-	var tokensAddressesToRemix = []
-	var percentages = []
-	var portObject = portfolioStore.selectedPortfolio.portfolioObject
-	for (var i =0;i<portObject.length;i++){
-		tokensAddressesToRemix.push()
+	//console.log("newList:"+JSON.stringify(portfolioStore.tokenList,null,2))
+	//newList
+	//portfolioStore.tokenList -- 
+	var tokenAddressesToRemix=[];
+	var percentages = [];
+	var newTokensAlloc = portfolioStore.allocationList
+	for (var i =0;i<newTokensAlloc.length;i++){
+		var token = newTokensAlloc[i];
+		//console.log("token:"+JSON.stringify(token,null,2));
+		tokenAddressesToRemix.push(token.address);
+		if (token.allocation>0){
+			//console.log('token.allocation:'+token.allocation)
+			//var usdScale = getUsdScale();
+			//console.log("USD:"+usdScale);
+
+			//var formattedPercForApi = usdScale * (Number(token.allocation) / 100);
+			//console.log("formattedPercForApi:"+formattedPercForApi);
+
+			percentages.push(Number(token.allocation));
+		}
 	}
+
 	try {
-		let res = await rebalance();
+		//console.log("calling rebalance with:")
+		//console.log("percentages		  :"+percentages)
+		//console.log("tokenAddressesToRemix:"+tokenAddressesToRemix)
+		//console.log("selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
+
+		let res = await rebalance(percentages, tokenAddressesToRemix, selectedProsperoWalletAddress);
 		if (!res.success) {
 			loading.value = false;
 			error.value = true;
@@ -246,52 +267,20 @@ function doSaveAllocation() {
 		loading.value = false;
 		error.value = true;
 	}
-	console.log("done");
-	*/
-	/*
-	//for manage portfolio (rebalanceing) - kachi
-//tokenAddressesToRemix is an array of string token addresses
-//percentages is an array of percentages allocations [33, 67]
-async function rebalance(percentages, tokenAddressesToRemix) {
-	*/
-	//allocationList
-	/*
-	[
-    {
-      "name": "BTC",
-      "allocation": 100,
-      "price": 120,
-      "mc": 340,
-      "d7": 10,
-      "d30": 20,
-      "d90": 30,
-      "y1": 120,
-      "icon": "https://i.postimg.cc/MGnDWTSy/image.png"
-    }
-  ]
-  */
 
 	saveAllocationModal.value = true;
 	success.value = true;
+	console.log("done");
 }
 
-/*
-function rebalance(
-	percentages,
-	tokensAddressesToRemix,
-	prosperoWalletAddressToRebalance
-) {
-	percentages = [];
-	tokensAddressesToRemix = portfolioStore.tokenList;
-	prosperoWalletAddressToRebalance =
-		portfolioStore.selectedPortfolio.prosperoWalletAddress;
-}*/
+
 
 function closeAllocationModal() {
 	saveAllocationModal.value = false;
 }
 
 function newList(amt, name) {
+	console.log("newList:"+name);
 	let newTokenList = portfolioStore.tokenList.map((token) => {
 		if (token.name === name) {
 			token = { ...token, allocation: parseFloat(amt) };
@@ -302,7 +291,12 @@ function newList(amt, name) {
 }
 
 function deleteToken(item) {
-	portfolioStore.allocationList.splice(item, 1);
+	//console.log("delteItem item:"+JSON.stringify(item,null,2))
+	for ( var i =0;i<portfolioStore.allocationList.length;i++){
+		if (item.address == portfolioStore.allocationList[i]['address']){
+			portfolioStore.allocationList.splice(i, 1);
+		}
+	}
 	portfolioStore.tokenList.push(item);
 }
 </script>
