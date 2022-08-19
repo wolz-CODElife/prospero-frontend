@@ -129,7 +129,7 @@
 				<!-- Create mode  -->
 				<div v-if="portfolioStore.activeMode === 'create'">
 					<!-- Top - Create view  -->
-					<div v-if="portfolioStore.firstCreateView">
+					<div>
 						<!-- Create new portfolio -->
 						<h4
 							class="text-[16px] text-center uppercase text-white mt-[40px] mb-[28px]"
@@ -193,7 +193,7 @@
 					</div>
 
 					<!-- Allocation view on redirect  -->
-					<ManageContainer v-else />
+					<!-- <ManageContainer v-else /> -->
 				</div>
 
 				<!-- Withdraw mode  -->
@@ -291,7 +291,7 @@ const firstView = ref(true);
 
 const portfolioName = ref("");
 
-const fundFee = ref("1.0");
+const fundFee = ref("20");
 
 const amount = ref("");
 

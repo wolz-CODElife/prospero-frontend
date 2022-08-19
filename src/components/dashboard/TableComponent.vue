@@ -30,9 +30,7 @@
 							: 'bg-transparent',
 					]"
 				>
-					<td
-						class="ml-[20px] pl-[20px] flex justify-between items-center"
-					>
+					<td class="pl-[20px] flex justify-between items-center">
 						{{ portfolio.name }}
 						<span
 							v-if="portfolio.wallet_type === 'Leader'"
