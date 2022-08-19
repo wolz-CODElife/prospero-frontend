@@ -325,12 +325,12 @@ function toggleDisabled() {
 			)
 		) {
 			disabled.value = true;
-			setTimeout(() => {
-				alert(
-					"You've already joined ",
-					portfolioStore.selectedPortfolio.name
-				);
-			}, 500);
+			//setTimeout(() => {
+			//	alert(
+			//		"You've already joined ",
+			//		portfolioStore.selectedPortfolio.name
+			//	);
+			//}, 500);
 		} else {
 			disabled.value = false;
 		}

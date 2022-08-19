@@ -4,8 +4,10 @@ import {
 	getLeaderBoardDataForTable,
 	getMyPortfoliosDataForTable,
 	updateSelectedWallet,
-	getTokenListForManagePortfolio,
-	getTokenArray
+	getMyHoldings,
+	getMyUSDDepositsTotal,
+	getMyROITotal,
+	getMyROITotalPercentage
 } from "@/api";
 
 export const usePortfolios = defineStore("Portfolios", {
@@ -27,7 +29,7 @@ export const usePortfolios = defineStore("Portfolios", {
 						name: "USD",
 						icon: "https://i.postimg.cc/Mpmky9Ms/image.png",
 					},
-					holdings: "1000.00",
+					holdings: "0",
 					roi: { value: "0.00", percent: 0 },
 					deposits: "40.00",
 					withdrawals: "0.00",
@@ -59,7 +61,7 @@ export const usePortfolios = defineStore("Portfolios", {
 					name: "USD",
 					icon: "https://i.postimg.cc/Mpmky9Ms/image.png",
 				},
-				holdings: "1000.00",
+				holdings: "0",
 				roi: { value: "0.00", percent: 0 },
 				deposits: "40.00",
 				withdrawals: "0.00",
@@ -98,6 +100,11 @@ export const usePortfolios = defineStore("Portfolios", {
 			try {
 				this.allPortfolios = await getLeaderBoardDataForTable();
 				this.myPortfolios = await getMyPortfoliosDataForTable();
+				this.activeOverview.holdings = await getMyHoldings();
+				this.activeOverview.deposits = await getMyUSDDepositsTotal();
+				this.activeOverview.roi.value = await getMyROITotal();
+				this.activeOverview.roi.percent = await getMyROITotalPercentage();
+
 				this.isLoading = false;
 				console.log("got all and my portfolios");
 			} catch (error) {
