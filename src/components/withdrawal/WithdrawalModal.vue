@@ -42,15 +42,15 @@
 				</div>
 
 				<!-- Withdraw  -->
-				<button
-					type="submit"
-					class="btn btn-primary w-full"
-					:class="
+				<!-- :disabled="disableWithdraw" -->
+				<!-- :class="
 						disableWithdraw
 							? 'opacity-50 cursor-text '
 							: 'opacity-1 cursor-pointer hover:bg-transparent'
-					"
-					:disabled="disableWithdraw"
+					" -->
+				<button
+					type="submit"
+					class="btn btn-primary bg-[#00ff00] w-full cursor-pointer hover:bg-transparent"
 				>
 					Withdraw
 				</button>
