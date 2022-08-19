@@ -46,15 +46,16 @@
 						<h2 class="text-[#868C9D] text-[14px] mt-[16px]">
 							My holdings
 						</h2>
-						<h3 class="text-white text-[24px]">{{ portfolioStore.activeOverview?.holdings }}</h3>
+						<h3 class="text-white text-[24px]">
+							{{ portfolioStore.activeOverview?.holdings }}
+						</h3>
 						<hr class="my-[12px] border-[#2D3035]" />
 						<h2 class="text-[#868C9D] text-[14px]">ROI</h2>
 						<h3 class="text-white text-[24px]">
 							{{ portfolioStore.activeOverview?.roi.value }}
 							<span class="text-[14px]"
 								>{{ portfolioStore.activeOverview?.roi.percent }}
-								<span>^</span></span
-							>
+							</span>
 						</h3>
 					</div>
 
@@ -111,5 +112,4 @@ import { usePortfolios } from "@/stores/Portfolios";
 import RightHeader from "../header/RightHeader.vue";
 
 const portfolioStore = usePortfolios();
-
 </script>

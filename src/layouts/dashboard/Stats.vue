@@ -17,8 +17,7 @@
 
 					<span class="text-[14px]"
 						>{{ getProfitPercentage(portfolioStore.selectedPortfolio) }}
-						<span>^</span></span
-					>
+					</span>
 				</h3>
 			</div>
 		</div>
