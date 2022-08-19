@@ -376,14 +376,15 @@ async function doWithdraw() {
 			console.log(success.error);
 			loading.value = false;
 		}
+		withdrawMode.value = "";
 	} catch (error) {
 		error.value = true;
 		console.log(error);
 		loading.value = false;
+		withdrawMode.value = "";
 	}
 	firstView.value = false;
 	error.value = false;
-	withdrawMode.value = "";
 }
 
 function enableSwap() {
