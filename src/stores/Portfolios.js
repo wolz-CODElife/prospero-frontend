@@ -7,7 +7,7 @@ import {
 	getMyHoldings,
 	getMyUSDDepositsTotal,
 	getMyROITotal,
-	getMyROITotalPercentage
+	getMyROITotalPercentage,
 } from "@/api";
 
 export const usePortfolios = defineStore("Portfolios", {
@@ -31,7 +31,7 @@ export const usePortfolios = defineStore("Portfolios", {
 					},
 					holdings: "0",
 					roi: { value: "0.00", percent: 0 },
-					deposits: "40.00",
+					deposits: "0.00",
 					withdrawals: "0.00",
 				},
 				{
@@ -39,20 +39,20 @@ export const usePortfolios = defineStore("Portfolios", {
 						name: "BTC",
 						icon: "https://i.postimg.cc/MGnDWTSy/image.png",
 					},
-					holdings: "0.0",
-					roi: { value: "50.0", percent: 1 },
-					deposits: "0.0",
-					withdrawals: "20.0",
+					holdings: "0",
+					roi: { value: "0.00", percent: 0 },
+					deposits: "0.00",
+					withdrawals: "0.00",
 				},
 				{
 					asset: {
 						name: "AVAX",
 						icon: "https://i.postimg.cc/br1T18qh/image.png",
 					},
-					holdings: "0.10",
-					roi: { value: "0.0", percent: 0 },
-					deposits: "0.0",
-					withdrawals: "100.0",
+					holdings: "0.00",
+					roi: { value: "0.00", percent: 0 },
+					deposits: "0.00",
+					withdrawals: "0.00",
 				},
 			],
 
@@ -63,7 +63,7 @@ export const usePortfolios = defineStore("Portfolios", {
 				},
 				holdings: "0",
 				roi: { value: "0.00", percent: 0 },
-				deposits: "40.00",
+				deposits: "0.00",
 				withdrawals: "0.00",
 			},
 
@@ -185,5 +185,3 @@ export const usePortfolios = defineStore("Portfolios", {
 		},
 	},
 });
-
-
