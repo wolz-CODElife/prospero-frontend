@@ -62,7 +62,12 @@ function toggleDropdown() {
 
 function add(item) {
 	portfolioStore.allocationList.push(item);
-	portfolioStore.tokenList.splice(item, 1);
+	for ( var i =0;i<portfolioStore.tokenList.length;i++){
+		if (item.address == portfolioStore.tokenList[i]['address']){
+			portfolioStore.tokenList.splice(i, 1);
+		}
+	}
+	//portfolioStore.tokenList.splice(item, 1);
 	open.value = false;
 }
 </script>

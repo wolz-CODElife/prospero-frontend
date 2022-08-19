@@ -1,10 +1,13 @@
 import { defineStore } from "pinia";
+
 import {
 	getLeaderBoardDataForTable,
 	getMyPortfoliosDataForTable,
 	updateSelectedWallet,
+	getTokenListForManagePortfolio,
+	getTokenArray
 } from "@/api";
-// convertGraphDataToLeaderBoardAndMyWalletsData;
+
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
 		return {
@@ -16,30 +19,7 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			allocationList: [],
 
-			tokenList: [
-				{
-					name: "BTC",
-					allocation: 0,
-					price: 120,
-					mc: 340,
-					d7: 10,
-					d30: 20,
-					d90: 30,
-					y1: 120,
-					icon: "https://i.postimg.cc/MGnDWTSy/image.png",
-				},
-				{
-					name: "AVAX",
-					allocation: 0,
-					price: 10,
-					mc: 34,
-					d7: 1,
-					d30: 2,
-					d90: 3,
-					y1: 12,
-					icon: "https://i.postimg.cc/br1T18qh/image.png",
-				},
-			],
+			tokenList: [],
 
 			overview: [
 				{
@@ -198,3 +178,5 @@ export const usePortfolios = defineStore("Portfolios", {
 		},
 	},
 });
+
+

@@ -183,6 +183,9 @@ import Modal from "../Modal.vue";
 
 import SelectPortfolio from "./SelectPortfolio.vue";
 import { usePortfolios } from "@/stores/Portfolios";
+import { rebalance, getTokenArray} from "@/api";
+
+
 
 const portfolioStore = usePortfolios();
 
@@ -216,27 +219,68 @@ const totalAllocation = computed(() => {
 	}, 0);
 });
 
-function doSaveAllocation() {
+async function doSaveAllocation() {
+	//right here
+	console.log("doSaveAlocation");
+	//console.log("portfolioStore:"+JSON.stringify(portfolioStore,null,2));
+	//console.log("alloation list:"+JSON.stringify(portfolioStore.allocationList,null,2));
+	var selectedProsperoWalletAddress = portfolioStore.selectedPortfolio.prosperoWalletAddress;
+	//console.log("newList:"+JSON.stringify(portfolioStore.tokenList,null,2))
+	//newList
+	//portfolioStore.tokenList -- 
+	var tokenAddressesToRemix=[];
+	var percentages = [];
+	var newTokensAlloc = portfolioStore.allocationList
+	for (var i =0;i<newTokensAlloc.length;i++){
+		var token = newTokensAlloc[i];
+		//console.log("token:"+JSON.stringify(token,null,2));
+		tokenAddressesToRemix.push(token.address);
+		if (token.allocation>0){
+			//console.log('token.allocation:'+token.allocation)
+			//var usdScale = getUsdScale();
+			//console.log("USD:"+usdScale);
+
+			//var formattedPercForApi = usdScale * (Number(token.allocation) / 100);
+			//console.log("formattedPercForApi:"+formattedPercForApi);
+
+			percentages.push(Number(token.allocation));
+		}
+	}
+
+	try {
+		//console.log("calling rebalance with:")
+		//console.log("percentages		  :"+percentages)
+		//console.log("tokenAddressesToRemix:"+tokenAddressesToRemix)
+		//console.log("selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
+
+		let res = await rebalance(percentages, tokenAddressesToRemix, selectedProsperoWalletAddress);
+		if (!res.success) {
+			loading.value = false;
+			error.value = true;
+			errorMsg.value = res.error;
+			console.log(errorMsg.value);
+		} else {
+			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas.toFixed(2);
+			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
+		}
+	} catch (err) {
+		loading.value = false;
+		error.value = true;
+	}
+
 	saveAllocationModal.value = true;
 	success.value = true;
+	console.log("done");
 }
 
-function rebalance(
-	percentages,
-	tokensAddressesToRemix,
-	prosperoWalletAddressToRebalance
-) {
-	percentages = [];
-	tokensAddressesToRemix = portfolioStore.tokenList;
-	prosperoWalletAddressToRebalance =
-		portfolioStore.selectedPortfolio.prosperoWalletAddress;
-}
+
 
 function closeAllocationModal() {
 	saveAllocationModal.value = false;
 }
 
 function newList(amt, name) {
+	console.log("newList:"+name);
 	let newTokenList = portfolioStore.tokenList.map((token) => {
 		if (token.name === name) {
 			token = { ...token, allocation: parseFloat(amt) };
@@ -247,7 +291,12 @@ function newList(amt, name) {
 }
 
 function deleteToken(item) {
-	portfolioStore.allocationList.splice(item, 1);
+	//console.log("delteItem item:"+JSON.stringify(item,null,2))
+	for ( var i =0;i<portfolioStore.allocationList.length;i++){
+		if (item.address == portfolioStore.allocationList[i]['address']){
+			portfolioStore.allocationList.splice(i, 1);
+		}
+	}
 	portfolioStore.tokenList.push(item);
 }
 </script>
