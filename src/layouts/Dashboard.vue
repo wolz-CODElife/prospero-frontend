@@ -88,7 +88,7 @@ function doJustDeposit() {
 function doCreate() {
 	console.log("doCreate function caing updateUIStatus(1)");
 	updateUIStatus(1);
-	createView.value = true;
+	// createView.value = true;
 }
 
 function goBack() {
@@ -103,15 +103,17 @@ function goBack() {
 }
 
 function redirect() {
-	if (joinView.value) {
-		portfolioStore.activeMode = "join";
-		portfolioStore.activePortfolioType = "My Portfolios";
-		portfolioStore.reset();
-	} else {
-		portfolioStore.activeMode = "create";
-		portfolioStore.firstCreateView = false;
-	}
+	// if (joinView.value) {
+	portfolioStore.activeMode = "join";
+	portfolioStore.activePortfolioType = "My Portfolios";
 	joinView.value = false;
 	createView.value = false;
+	portfolioStore.getPortfolios();
+	portfolioStore.reset();
+
+	// } else {
+	// 	portfolioStore.activeMode = "create";
+	// 	portfolioStore.firstCreateView = false;
+	// }
 }
 </script>

@@ -270,7 +270,9 @@ async function depositToPortfolio() {
 			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas.toFixed(2);
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
 			loading.value = false;
-			portfolioStore.myPortfolios.push(portfolioStore.selectedPortfolio);
+			// portfolioStore.myPortfolios.push(portfolioStore.selectedPortfolio);
+			await initializeApi();
+			await portfolioStore.getPortfolios();
 		}
 	} catch (err) {
 		loading.value = false;

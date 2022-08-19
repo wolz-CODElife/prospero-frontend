@@ -4,7 +4,7 @@
 		<div class="grid grid-cols-12 text-[#868C9D] m-[30px]">
 			<!-- Left side of header  -->
 			<div
-				class="col-span-8 bg-black px-[30px] py-[20px] flex items-center justify-between h-full font-medium uppercase"
+				class="col-span-8 bg-black px-[30px] py-[12px] flex items-center justify-between h-full font-medium uppercase"
 			>
 				<!-- My holdings -->
 				<div>
@@ -33,7 +33,7 @@
 
 			<!-- Right side of header  -->
 			<div
-				class="col-span-4 bg-transparent pl-[30px] py-[20px] uppercase flex flex-col gap-y-[12px]"
+				class="col-span-4 bg-transparent pl-[30px] py-[12px] uppercase flex flex-col gap-y-[12px]"
 			>
 				<div class="flex items-center">
 					<h3 class="text-white mr-auto">From</h3>
