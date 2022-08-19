@@ -364,7 +364,7 @@ function updateUIStatusAPICaller(uiType) {
 async function doWithdraw() {
 	//to do - add tokens swapping into
 	try {
-		console.log("do ");
+		console.log("Do Withdraw function works");
 		const res = await withdraw([], amount.value);
 		console.log(res);
 		if (res.success) {
@@ -383,6 +383,7 @@ async function doWithdraw() {
 	}
 	firstView.value = false;
 	error.value = false;
+	withdrawMode.value = "";
 }
 
 function enableSwap() {

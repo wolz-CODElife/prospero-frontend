@@ -3,7 +3,7 @@
 		<div class="mx-[20px] my-[16px]">
 			<WithdrawalOverview />
 			<!-- Form  -->
-			<form class="w-full mt-[32px]" @submit="$emit('doWithdraw')">
+			<form class="w-full mt-[32px]">
 				<!-- Enter amount  -->
 				<div class="mb-[28px] relative">
 					<label
@@ -49,8 +49,8 @@
 							: 'opacity-1 cursor-pointer hover:bg-transparent'
 					" -->
 				<button
-					type="submit"
-					class="btn btn-primary bg-[#00ff00] w-full cursor-pointer hover:bg-transparent"
+					@click.prevent="$emit('doWithdraw')"
+					class="btn btn-primary bg-[#005A57] w-full cursor-pointer hover:bg-transparent"
 				>
 					Withdraw
 				</button>
