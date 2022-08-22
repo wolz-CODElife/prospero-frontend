@@ -15,8 +15,8 @@
 						type="text"
 						name="amount"
 						id="amount"
-						:value="amount"
-						@input="(e) => (amount = e.target.value)"
+						:value="props.amount"
+						@input="$emit('update:props.amount', $event.target.value)"
 						placeholder="$0"
 						class="pt-[16px] pb-[6px] pl-[16px] w-full bg-black text-white text-[14px] border border-black focus:outline-none focus:border-[#00ff00]"
 					/>
@@ -34,8 +34,10 @@
 						type="text"
 						name="token"
 						id="token"
-						:value="singleToken"
-						@input="(e) => (singleToken = e.target.value)"
+						:value="props.singleToken"
+						@input="
+							$emit('update:props.singleToken', $event.target.value)
+						"
 						placeholder="Select"
 						class="pt-[16px] pb-[6px] pl-[16px] w-full bg-black text-white text-[14px] border border-black focus:outline-none focus:border-[#00ff00]"
 					/>
@@ -99,9 +101,9 @@
 
 			<!-- todo: replace this w real values -->
 			<p class="text-[16px]">
-				$10.00 has been sent to you. Wait a few moments for the tokens to
-				transfer and reflect in your wallet. Gas used ${{
-					portfolioStore.selectedPortfolio.name
+				${{ props.amount }} has been sent to you. Wait a few moments for the
+				tokens to transfer and reflect in your wallet. Gas used ${{
+					props.usdAmountOfGas
 				}}
 			</p>
 
@@ -125,6 +127,7 @@ const props = defineProps({
 	singleToken: String,
 	mode: String,
 	firstView: Boolean,
+	usdAmountofGas: String,
 });
 
 const totalAmtToWithdraw = ref("");
