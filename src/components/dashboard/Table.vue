@@ -224,6 +224,8 @@
 					@doWithdraw="doWithdraw"
 					mode="withdrawMode"
 					firstView="firstView"
+					v-model="amount"
+					v-model:singleToken="singleToken"
 				/>
 			</div>
 		</div>
