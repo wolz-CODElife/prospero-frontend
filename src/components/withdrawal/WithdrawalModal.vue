@@ -127,6 +127,7 @@ const props = defineProps({
 	firstView: Boolean,
 });
 
+
 const totalAmtToWithdraw = ref("");
 
 const disableWithdraw = computed(() => totalAmtToWithdraw.value <= 0);

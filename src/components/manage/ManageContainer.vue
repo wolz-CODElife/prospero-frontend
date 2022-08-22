@@ -234,8 +234,9 @@ async function doSaveAllocation() {
 	for (var i =0;i<newTokensAlloc.length;i++){
 		var token = newTokensAlloc[i];
 		//console.log("token:"+JSON.stringify(token,null,2));
-		tokenAddressesToRemix.push(token.address);
-		if (token.allocation>0){
+		var perc = Number(token.allocation);
+		//console.log('perc:'+perc)
+		if (perc > 0){
 			//console.log('token.allocation:'+token.allocation)
 			//var usdScale = getUsdScale();
 			//console.log("USD:"+usdScale);
@@ -244,7 +245,18 @@ async function doSaveAllocation() {
 			//console.log("formattedPercForApi:"+formattedPercForApi);
 
 			percentages.push(Number(token.allocation));
+			tokenAddressesToRemix.push(token.address);
 		}
+	}
+	//console.log("perc len:"+percentages.length)
+	//console.log("tokenAddressesToRemix len:"+tokenAddressesToRemix.length)
+
+	//console.log("percentages		  :"+JSON.stringify(percentages,null,2))
+	//console.log("tokenAddressesToRemix:"+JSON.stringify(tokenAddressesToRemix,null,2))
+
+	if (percentages.length != tokenAddressesToRemix.length){
+		console.error("percentages and tokenAddressesToRemix length are different!");
+		return;
 	}
 
 	try {
