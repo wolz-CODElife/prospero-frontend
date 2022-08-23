@@ -191,6 +191,9 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		var addressVars = thisGraphItem["addressVars"];
 		var tokens = thisGraphItem["tokens"];
 		var tokenBalances = thisGraphItem["balances"];
+		//for ( var k =0;k<tokenBalances.length;k++){
+		//	tokensBalances[k]=BigNumber(tokenBalances[k]+"")
+		//}
 		var usersInPortfolio = thisGraphItem["users"];
 		var leaderAddress = addressVars[1];
 		var indexOfLeader = getIndexOfUser(thisGraphItem["users"], leaderAddress);
@@ -229,14 +232,20 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		var usersValue = 0;
 		var totalValueAllUsers = 0;
 		for (var i = 0; i < tokens.length; i++) {
-			var bal = tokenBalances[i] * leaderPercentage + "";
+			//var bal = tokenBalances[i] * leaderPercentage + "";
+			//bal=parseInt(bal);
+			var bal = multipleBN(tokenBalances[i], leaderPercentage);
+
 			var totalBal = tokenBalances[i];
 			bal = parseInt(bal);
 			var thisTokenAddress = tokens[i];
+			//console.log('bal:'+bal)
 			var usdThisUserThisToken = await getUSDValue_MINE(
 				bal,
 				thisTokenAddress
 			);
+			//console.log('totalBal:'+bal)
+
 			var totalUsdThisToken = await getUSDValue_MINE(
 				totalBal,
 				thisTokenAddress
@@ -245,6 +254,9 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			leadersValue = leadersValue + usdThisUserThisToken;
 			totalValueAllUsers = totalValueAllUsers + totalUsdThisToken;
 		}
+		//console.log("total leaders value:"+leadersValue)
+		//console.log("totalValueAllUsers:"+totalValueAllUsers)
+		//console.log("indexOfUser:"+indexOfUser);
 
 		//only calculate if user is a follower here (not the leader)
 		var userPercentage;
@@ -257,6 +269,8 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 				var bal = tokenBalances[i] * userPercentage + "";
 				bal = parseInt(bal);
 				var thisTokenAddress = tokens[i];
+				console.log("bal2:" + bal);
+
 				var usdThisUserThisToken = await getUSDValue_MINE(
 					bal,
 					thisTokenAddress
@@ -294,6 +308,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			tokenObj["balance"] = tokenBalances[i] * leaderPercentage + "";
 			tokenObj["balance"] = parseInt(tokenObj["balance"]);
 			var aTokenObject = await getTokenObject_newMine(thisTokenAddress);
+
 			var usdThisUserThisToken = await getUSDValue_MINE(
 				tokenObj["balance"],
 				thisTokenAddress
@@ -346,6 +361,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		portfolioObject["profit"] = profitUsd;
 
 		leaderBoardDataObject["y1"] = profitPercentage.toFixed(2);
+		leaderBoardDataObject["y1"] = leaderBoardDataObject["y1"] + "%";
 		leaderBoardDataObject["profitPercentage"] = profitPercentage;
 		leaderBoardDataObject["name"] = thisGraphItem["walletName"];
 		leaderBoardDataObject["fee"] = "20%"; //TO DO - need to add this
@@ -396,6 +412,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			//var profitLeader = profitUsd;
 			//var profitPercentageLeader = profitPercentage;
 			leaderBoardDataObjectCOPY["y1"] = profitPercentageLeader.toFixed(2);
+			//leaderBoardDataObjectCOPY["y1"]  = leaderBoardDataObjectCOPY["y1"]  + "%";
 			leaderBoardDataObjectCOPY["profitPercentage"] = profitPercentageLeader;
 			//leaderBoardDataObject
 			leaderBoardDataFinal.push(leaderBoardDataObjectCOPY);
@@ -1741,6 +1758,8 @@ async function updateHistoryChartsDataObject(
 //tokenSwappingInto is an array of addresses swapping into, can only be of length 1 or 0.  So if you are
 //not swapping into any tokens, just have an empty array - []
 async function withdraw(tokenSwappingInto, amountToWithdraw) {
+	//console.log("SETTING AMOUNT TO WITHDRAW FOR TESTING TO 1");
+	//amountToWithdraw="1"
 	console.log(
 		"withdraw called:" +
 			tokenSwappingInto +
@@ -1758,7 +1777,10 @@ async function withdraw(tokenSwappingInto, amountToWithdraw) {
 			"valueOfUsersPortfolio before:" + valueOfUsersPortfolioBefore
 		);
 		amountToWithdraw = amountToWithdraw * USD_SCALE;
+		amountToWithdraw = noNotation(amountToWithdraw);
 		amountToWithdraw = parseInt(amountToWithdraw);
+		amountToWithdraw = noNotation(amountToWithdraw);
+
 		console.log("amountScaled:" + amountToWithdraw);
 		var otherToken;
 		var balSwappingIntoTokenBefore;
@@ -1811,8 +1833,8 @@ async function withdraw(tokenSwappingInto, amountToWithdraw) {
 			EOAAddress,
 			false
 		);
-		//console.log("valueOfUsersPortfolioBefore:"+valueOfUsersPortfolioBefore);
-		//console.log("valueOfUsersPortfolioAfter :"+valueOfUsersPortfolioAfter);
+		console.log("valueOfUsersPortfolioBefore:" + valueOfUsersPortfolioBefore);
+		console.log("valueOfUsersPortfolioAfter :" + valueOfUsersPortfolioAfter);
 		var success = false;
 		if (
 			Number(valueOfUsersPortfolioAfter) <
@@ -2114,28 +2136,14 @@ async function deposit() {
 		if (!status.success) {
 			return status;
 		}
-		/*var prosperoWalletInstance = await new ethers.Contract(selectedProsperoWalletAddress, ProsperoWalletJson.abi,  ethersSigner);
-   //console.log("about to dep...")
-    var tx = await prosperoWalletInstance.deposit(
-      tokens,
-      amounts,
-      methodType,
-      {
-        value:avaxValue+""
-      }
-    );
-   //console.log("dep tx 1:"+JSON.stringify(tx,null,2))
-    var f = await tx.wait();
-   //console.log("dep tx 2 :"+JSON.stringify(f,null,2))
-    var cumulativeGasUsed = f.cumulativeGasUsed;
-    var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
-   //console.log("gasUsed:"+JSON.stringify(gasUsed,null,2))
-    */
+
 		var valueOfUsersPortfolioAfter = await getValueOfUsersPortfolio(
 			selectedProsperoWalletAddress,
 			EOAAddress,
 			false
 		);
+		console.log("valueOfUsersPortfolioBefore:" + valueOfUsersPortfolioBefore);
+		console.log("valueOfUsersPortfolioAfter :" + valueOfUsersPortfolioAfter);
 		var success = false;
 		if (
 			Number(valueOfUsersPortfolioAfter) >
@@ -2736,12 +2744,18 @@ async function getValueOfUsersPortfolio(
 	usersEOA,
 	shouldKeepAsBigNumber
 ) {
-	// //console.log(
-	//  "getValueOfUsersPortfolio pricesLibraryAddress: "+pricesLibraryAddress+
-	//  " prosperoPricesAddress: "+prosperoPricesAddress+
-	//  " prosperoWalletAddress: "+prosperoWalletAddress
-	//  +" usersEOA: "+usersEOA
-	//  +" PricesLibraryJson.abi:"+JSON.stringify(PricesLibraryJson.abi,null,2))
+	console.log(
+		"getValueOfUsersPortfolio pricesLibraryAddress: " +
+			pricesLibraryAddress +
+			" prosperoPricesAddress: " +
+			prosperoPricesAddress +
+			" prosperoWalletAddress: " +
+			prosperoWalletAddress +
+			" usersEOA: " +
+			usersEOA +
+			" PricesLibraryJson.abi:" +
+			JSON.stringify(PricesLibraryJson.abi, null, 2)
+	);
 	try {
 		var pricesLibraryInstance = new web3.eth.Contract(
 			PricesLibraryJson.abi,
@@ -2764,17 +2778,17 @@ async function getValueOfUsersPortfolio(
 			.call({
 				from: usersEOA,
 			});
-		//console.log("usersValue:"+usersValue);
+		console.log("usersValue:" + usersValue);
 		var bnUv = BigNumber(usersValue);
 		if (shouldKeepAsBigNumber == true) {
 			return bnUv;
 		}
 		bnUv = bnUv.dividedBy(USD_SCALE);
 		var uvNumber = Number(bnUv + "");
-		//console.log("USERS VALUE:"+uvNumber)
+		console.log("USERS VALUE:" + uvNumber);
 		return uvNumber;
 	} catch (e) {
-		//console.log('exception:'+e)
+		console.log("getValueOfUsersPortfolio exception:" + e);
 		return 0;
 	}
 }
@@ -3027,7 +3041,7 @@ async function updatePrices() {
 				}
 			}
 		} catch (e) {
-			////console.log("updatePricesNew exception1:"+e);
+			console.log("updatePricesNew exception1:" + e);
 			// alert('Could not get prices from ProsperoPrices, please reload page :'+e)
 			return {
 				success: false,
@@ -3126,6 +3140,9 @@ async function getValueOfBalancesOfTokensInPortfolio(balancesAndTokensObj) {
 async function getUSDValue_MINE(amountInWei, address) {
 	//console.log("getUSDValue_MINE amountInWei:"+amountInWei+" address:"+address)
 
+	amountInWei = noNotation(amountInWei);
+	//console.log("getUSDValue_MINE amountInWei:"+amountInWei+" address:"+address)
+
 	var amountInWeiUpScaledForLowDecimalPoints =
 		await updateBalanceToEighteenDecimalsIfNeeded(amountInWei, address);
 
@@ -3161,6 +3178,25 @@ async function getUSDValue_MINE(amountInWei, address) {
 	alert("COULD NOT FIND PRICE IN getUSDValue_MINE address:" + address);
 	console.log("COULD NOT FIND PRICE IN getUSDValue_MINE" + address);
 }
+
+function noNotation(x) {
+	if (Math.abs(x) < 1.0) {
+		var e = parseInt(x.toString().split("e-")[1]);
+		if (e) {
+			x *= Math.pow(10, e - 1);
+			x = "0." + new Array(e).join("0") + x.toString().substring(2);
+		}
+	} else {
+		var e = parseInt(x.toString().split("+")[1]);
+		if (e > 20) {
+			e -= 20;
+			x /= Math.pow(10, e);
+			x += new Array(e + 1).join("0");
+		}
+	}
+	return x;
+}
+
 async function toPlainString(num) {
 	return ("" + +num).replace(
 		/(-?)(\d*)\.?(\d*)e([+-]\d+)/,

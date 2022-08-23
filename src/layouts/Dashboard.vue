@@ -88,7 +88,7 @@ function doJustDeposit() {
 function doCreate() {
 	console.log("doCreate function caing updateUIStatus(1)");
 	updateUIStatus(1);
-	// createView.value = true;
+	createView.value = true;
 }
 
 function goBack() {
