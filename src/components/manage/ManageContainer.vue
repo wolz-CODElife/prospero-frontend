@@ -31,14 +31,15 @@
 					>Accepting <br />
 					new investors</label
 				>
-				<div class="switch">
+				<label class="switch">
 					<input
 						type="checkbox"
 						aria-label="djdn"
 						:checked="switchChecked"
+						v-model="switchChecked"
 					/>
 					<span class="slider round"></span>
-				</div>
+				</label>
 			</div>
 		</div>
 
@@ -201,6 +202,7 @@ const saveAllocationModal = ref(false);
 
 const fundFee = ref(1.5);
 
+
 const disableSaveAllocation = computed(
 	() => totalAllocation.value < 100 || totalAllocation.value > 100
 );
@@ -220,8 +222,12 @@ const totalAllocation = computed(() => {
 });
 
 async function doSaveAllocation() {
+
+	//fundFee
+
 	//right here
 	console.log("doSaveAlocation");
+	console.log("switchChecked:"+switchChecked.value);
 	//console.log("portfolioStore:"+JSON.stringify(portfolioStore,null,2));
 	//console.log("alloation list:"+JSON.stringify(portfolioStore.allocationList,null,2));
 	var selectedProsperoWalletAddress = portfolioStore.selectedPortfolio.prosperoWalletAddress;

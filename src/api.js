@@ -377,6 +377,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		portfolioObject["profit"] = profitUsd;
 
 		leaderBoardDataObject["y1"] = profitPercentage.toFixed(2);
+		leaderBoardDataObject["y1"] = leaderBoardDataObject["y1"] + "%";
 		leaderBoardDataObject["profitPercentage"] = profitPercentage;
 		leaderBoardDataObject["name"] = thisGraphItem["walletName"];
 		leaderBoardDataObject["fee"] = "20%"; //TO DO - need to add this
@@ -426,6 +427,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			//var profitLeader = profitUsd;
 			//var profitPercentageLeader = profitPercentage;
 			leaderBoardDataObjectCOPY["y1"] = profitPercentageLeader.toFixed(2);
+			//leaderBoardDataObjectCOPY["y1"]  = leaderBoardDataObjectCOPY["y1"]  + "%";
 			leaderBoardDataObjectCOPY["profitPercentage"] = profitPercentageLeader;
 			//leaderBoardDataObject
 			leaderBoardDataFinal.push(leaderBoardDataObjectCOPY);
@@ -494,6 +496,10 @@ function multipleBN(valOne, valTwo){
 }
 
 async function getMyHoldings(){
+	console.log("myHoldingsTotal:"+myHoldingsTotal)
+	myHoldingsTotal = Number(myHoldingsTotal+"")
+	console.log("myHoldingsTotal:"+myHoldingsTotal)
+
 	myHoldingsTotal=myHoldingsTotal.toFixed(2)
 	return formatNegPositiveWithDollar(myHoldingsTotal);
 
@@ -1785,6 +1791,8 @@ async function updateHistoryChartsDataObject(
 //tokenSwappingInto is an array of addresses swapping into, can only be of length 1 or 0.  So if you are
 //not swapping into any tokens, just have an empty array - []
 async function withdraw(tokenSwappingInto, amountToWithdraw) {
+	//console.log("SETTING AMOUNT TO WITHDRAW FOR TESTING TO 1");
+	//amountToWithdraw="1"
 	console.log(
 		"withdraw called:" +
 			tokenSwappingInto +
@@ -1802,7 +1810,10 @@ async function withdraw(tokenSwappingInto, amountToWithdraw) {
 			"valueOfUsersPortfolio before:" + valueOfUsersPortfolioBefore
 		);
 		amountToWithdraw = amountToWithdraw * USD_SCALE;
+		amountToWithdraw = noNotation(amountToWithdraw);
 		amountToWithdraw = parseInt(amountToWithdraw);
+		amountToWithdraw = noNotation(amountToWithdraw);
+
 		console.log("amountScaled:" + amountToWithdraw);
 		var otherToken;
 		var balSwappingIntoTokenBefore;
@@ -1855,8 +1866,8 @@ async function withdraw(tokenSwappingInto, amountToWithdraw) {
 			EOAAddress,
 			false
 		);
-		//console.log("valueOfUsersPortfolioBefore:"+valueOfUsersPortfolioBefore);
-		//console.log("valueOfUsersPortfolioAfter :"+valueOfUsersPortfolioAfter);
+		console.log("valueOfUsersPortfolioBefore:"+valueOfUsersPortfolioBefore);
+		console.log("valueOfUsersPortfolioAfter :"+valueOfUsersPortfolioAfter);
 		var success = false;
 		if (
 			Number(valueOfUsersPortfolioAfter) <
@@ -2154,28 +2165,14 @@ async function deposit() {
 		if (!status.success) {
 			return status;
 		}
-		/*var prosperoWalletInstance = await new ethers.Contract(selectedProsperoWalletAddress, ProsperoWalletJson.abi,  ethersSigner);
-   //console.log("about to dep...")
-    var tx = await prosperoWalletInstance.deposit(
-      tokens,
-      amounts,
-      methodType,
-      {
-        value:avaxValue+""
-      }
-    );
-   //console.log("dep tx 1:"+JSON.stringify(tx,null,2))
-    var f = await tx.wait();
-   //console.log("dep tx 2 :"+JSON.stringify(f,null,2))
-    var cumulativeGasUsed = f.cumulativeGasUsed;
-    var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
-   //console.log("gasUsed:"+JSON.stringify(gasUsed,null,2))
-    */
+
 		var valueOfUsersPortfolioAfter = await getValueOfUsersPortfolio(
 			selectedProsperoWalletAddress,
 			EOAAddress,
 			false
 		);
+		console.log("valueOfUsersPortfolioBefore:"+valueOfUsersPortfolioBefore);
+		console.log("valueOfUsersPortfolioAfter :"+valueOfUsersPortfolioAfter);
 		var success = false;
 		if (
 			Number(valueOfUsersPortfolioAfter) >
@@ -2776,12 +2773,12 @@ async function getValueOfUsersPortfolio(
 	usersEOA,
 	shouldKeepAsBigNumber
 ) {
-	// //console.log(
-	//  "getValueOfUsersPortfolio pricesLibraryAddress: "+pricesLibraryAddress+
-	//  " prosperoPricesAddress: "+prosperoPricesAddress+
-	//  " prosperoWalletAddress: "+prosperoWalletAddress
-	//  +" usersEOA: "+usersEOA
-	//  +" PricesLibraryJson.abi:"+JSON.stringify(PricesLibraryJson.abi,null,2))
+	console.log(
+	 "getValueOfUsersPortfolio pricesLibraryAddress: "+pricesLibraryAddress+
+	  " prosperoPricesAddress: "+prosperoPricesAddress+
+	  " prosperoWalletAddress: "+prosperoWalletAddress
+	  +" usersEOA: "+usersEOA
+	  +" PricesLibraryJson.abi:"+JSON.stringify(PricesLibraryJson.abi,null,2))
 	try {
 		var pricesLibraryInstance = new web3.eth.Contract(
 			PricesLibraryJson.abi,
@@ -2804,17 +2801,17 @@ async function getValueOfUsersPortfolio(
 			.call({
 				from: usersEOA,
 			});
-		//console.log("usersValue:"+usersValue);
+		console.log("usersValue:"+usersValue);
 		var bnUv = BigNumber(usersValue);
 		if (shouldKeepAsBigNumber == true) {
 			return bnUv;
 		}
 		bnUv = bnUv.dividedBy(USD_SCALE);
 		var uvNumber = Number(bnUv + "");
-		//console.log("USERS VALUE:"+uvNumber)
+		console.log("USERS VALUE:"+uvNumber)
 		return uvNumber;
 	} catch (e) {
-		//console.log('exception:'+e)
+		console.log('getValueOfUsersPortfolio exception:'+e)
 		return 0;
 	}
 }
