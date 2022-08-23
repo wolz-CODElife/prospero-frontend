@@ -17,7 +17,7 @@
 					type="number"
 					name=""
 					id=""
-					v-model="fundFee"
+					v-model="portfolioStore.portfolioFundFee"
 					class="py-[4px] pl-[12px] w-[55px] bg-black text-white text-[16px] border border-[#003D3B] focus:outline-none"
 				/>
 			</div>
@@ -25,7 +25,7 @@
 			<!-- Accepting new investors -->
 			<div
 				class="flex gap-[12px] items-center p-[5px_10px] text-white"
-				:class="switchChecked ? 'bg-[#005A57]' : 'bg-[#2D3035]'"
+				:class="portfolioStore.isPortfolioAcceptingNewInvestors ?  'bg-[#2D3035]' : 'bg-[#005A57]'"
 			>
 				<label for="" class="uppercase text-[12px]"
 					>Accepting <br />
@@ -35,8 +35,8 @@
 					<input
 						type="checkbox"
 						aria-label="djdn"
-						:checked="switchChecked"
-						v-model="switchChecked"
+						:checked="portfolioStore.isPortfolioAcceptingNewInvestors"
+						v-model="portfolioStore.isPortfolioAcceptingNewInvestors"
 					/>
 					<span class="slider round"></span>
 				</label>
@@ -184,7 +184,7 @@ import Modal from "../Modal.vue";
 
 import SelectPortfolio from "./SelectPortfolio.vue";
 import { usePortfolios } from "@/stores/Portfolios";
-import { rebalance, getTokenArray} from "@/api";
+import { rebalance, getTokenArray, updateNewInvestors} from "@/api";
 
 
 
@@ -196,11 +196,11 @@ const error = ref(false);
 
 const success = ref(false);
 
-const switchChecked = ref(true);
+const switchChecked = ref(portfolioStore.isPortfolioAcceptingNewInvestors);
 
 const saveAllocationModal = ref(false);
 
-const fundFee = ref(1.5);
+const fundFee = ref(portfolioStore.portfolioFundFee);
 
 
 const disableSaveAllocation = computed(
@@ -226,11 +226,48 @@ async function doSaveAllocation() {
 	//fundFee
 
 	//right here
-	console.log("doSaveAlocation");
-	console.log("switchChecked:"+switchChecked.value);
+	console.log("doSaveAllocation");
+	console.log("portfolioStore.acceptingNewInvestors:"+portfolioStore.isPortfolioAcceptingNewInvestors);
+	console.log("portfolioStore.fundFee:"+portfolioStore.fundFee);
+	console.log("portfolioStore.selectedPortfolio.fundFeeOriginal:"+portfolioStore.selectedPortfolio.fundFeeOriginal);
+
+	var selectedProsperoWalletAddress = portfolioStore.selectedPortfolio.prosperoWalletAddress;
+
+	if (portfolioStore.isPortfolioAcceptingNewInvestors != portfolioStore.selectedPortfolio.acceptingNewInvestorsOriginal){
+		console.log("Waiting for acceptingNewInvestors API call to finish....possible info modal here?")
+		console.log("acceptingNewInvestors has changed - calling API");
+		var result  = await updateNewInvestors(selectedProsperoWalletAddress, portfolioStore.isPortfolioAcceptingNewInvestors);
+		if (!result.success){
+			loading.value = false;
+			error.value = true;
+			console.error(result.error);
+			//to do - add error message here 
+			return;
+		}
+		console.log('done with updateNewInvestors')
+	}
+
+	if (portfolioStore.fundFee != portfolioStore.selectedPortfolio.fundFeeOriginal){
+
+		console.log("****")
+		console.log("Waiting for leaderPercentageFee API call to finish....possible info modal here?")
+		console.log("leaderPercentageFee has changed - calling API")
+		//updatePercentageFee(prosperoWalletAddress, newPercFee)
+		var result  = await updatePercentageFee(
+			selectedProsperoWalletAddress, 
+			portfolioStore.fundFee
+		);
+		if (!result.success){
+			loading.value = false;
+			error.value = true;
+			console.error(result.error);
+			//to do - add error message here 
+			return;
+		}
+		console.log('done with updatePercentageFees')
+	}
 	//console.log("portfolioStore:"+JSON.stringify(portfolioStore,null,2));
 	//console.log("alloation list:"+JSON.stringify(portfolioStore.allocationList,null,2));
-	var selectedProsperoWalletAddress = portfolioStore.selectedPortfolio.prosperoWalletAddress;
 	//console.log("newList:"+JSON.stringify(portfolioStore.tokenList,null,2))
 	//newList
 	//portfolioStore.tokenList -- 

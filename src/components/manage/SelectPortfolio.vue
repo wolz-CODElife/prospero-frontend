@@ -57,9 +57,16 @@ function returnNameUpdateSelectedPortfolio(portfolio){
 
 function onClickedPort(portfolio) {
 	console.log("onClickedPort");
-	//console.log("PORT:"+JSON.stringify(portfolio,null,2));
+	console.log("PORT:"+JSON.stringify(portfolio,null,2));
 	portfolioStore.selectedPortfolio=portfolio;
 	portfolioStore.allocationList=[];
+	
+	portfolioStore.portfolioFundFee = portfolio.leaderPercentageFee;
+	portfolioStore.isPortfolioAcceptingNewInvestors = portfolio.acceptingNewInvestors;
+	console.log("portfolio.leaderPercentageFee:"+portfolio.leaderPercentageFee);
+	console.log("portfolio.acceptingNewInvestors:"+portfolio.acceptingNewInvestors);
+
+	//portf
 	var port = portfolio['portfolioObject'];
 	//console.log("port:"+JSON.stringify(port,null,2));
 	//

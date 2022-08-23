@@ -90,6 +90,11 @@ export const usePortfolios = defineStore("Portfolios", {
 			isLoading: true,
 
 			isError: false,
+
+			isPortfolioAcceptingNewInvestors:false,
+
+			portfolioFundFee:0,
+
 		};
 	},
 
