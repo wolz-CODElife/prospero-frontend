@@ -607,7 +607,10 @@ async function updateNewInvestors(prosperoWalletAddress, allowNewInvestors){
 
   async function updatePercentageFee(prosperoWalletAddress, newPercFee){
 	console.log(" updatePercentageFee:"+newPercFee+" prosperoWalletAddress:"+prosperoWalletAddress)
+	newPercFee = newPercFee / 100;
 	newPercFee = multipleBN(newPercFee, USD_SCALE);
+	newPercFee = noNotation(newPercFee)
+	console.log("new perc fee after:"+newPercFee);
 	try{
 	  var ProsperoWalletInstance = new web3.eth.Contract(
 		ProsperoWalletJson.abi,
@@ -2039,9 +2042,9 @@ async function rebalance(percentages, tokenAddressesToRemix, selectedProsperoWal
 			EOAAddress,
 			selectedProsperoWalletAddressToRemix
 		);
-	console.log(
-		" thisWalletsObjBefore:" + JSON.stringify(thisWalletsObjBefore, null, 2)
-	);
+	//console.log(
+	//		" thisWalletsObjBefore:" + JSON.stringify(thisWalletsObjBefore, null, 2)
+	//);
 	var areDiff = returnTrueIfPercentagesAreDiff(
 		thisWalletsObjBefore,
 		percentages,
@@ -3746,5 +3749,6 @@ export {
 	getMyUSDDepositsTotal,
 	getMyROITotal,
 	getMyROITotalPercentage,
-	updateNewInvestors
+	updateNewInvestors,
+	updatePercentageFee
 };

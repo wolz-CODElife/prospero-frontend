@@ -184,7 +184,7 @@ import Modal from "../Modal.vue";
 
 import SelectPortfolio from "./SelectPortfolio.vue";
 import { usePortfolios } from "@/stores/Portfolios";
-import { rebalance, getTokenArray, updateNewInvestors} from "@/api";
+import { rebalance, getTokenArray, updateNewInvestors, updatePercentageFee} from "@/api";
 
 
 
@@ -228,8 +228,8 @@ async function doSaveAllocation() {
 	//right here
 	console.log("doSaveAllocation");
 	console.log("portfolioStore.acceptingNewInvestors:"+portfolioStore.isPortfolioAcceptingNewInvestors);
-	console.log("portfolioStore.fundFee:"+portfolioStore.fundFee);
-	console.log("portfolioStore.selectedPortfolio.fundFeeOriginal:"+portfolioStore.selectedPortfolio.fundFeeOriginal);
+	console.log("portfolioStore.portfolioFundFee:"+portfolioStore.portfolioFundFee);
+	console.log("portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal:"+portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal);
 
 	var selectedProsperoWalletAddress = portfolioStore.selectedPortfolio.prosperoWalletAddress;
 
@@ -247,15 +247,16 @@ async function doSaveAllocation() {
 		console.log('done with updateNewInvestors')
 	}
 
-	if (portfolioStore.fundFee != portfolioStore.selectedPortfolio.fundFeeOriginal){
-
+	//if the portfolio fee is less than the original
+	if (portfolioStore.portfolioFundFee < portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal){
 		console.log("****")
 		console.log("Waiting for leaderPercentageFee API call to finish....possible info modal here?")
 		console.log("leaderPercentageFee has changed - calling API")
 		//updatePercentageFee(prosperoWalletAddress, newPercFee)
+		portfolioStore.portfolioFundFee = parseInt(portfolioStore.portfolioFundFee);
 		var result  = await updatePercentageFee(
 			selectedProsperoWalletAddress, 
-			portfolioStore.fundFee
+			portfolioStore.portfolioFundFee
 		);
 		if (!result.success){
 			loading.value = false;
@@ -265,6 +266,8 @@ async function doSaveAllocation() {
 			return;
 		}
 		console.log('done with updatePercentageFees')
+	}else if (portfolioStore.portfolioFundFee > portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal){
+		console.error("show error - new percentage fee has to be less.")
 	}
 	//console.log("portfolioStore:"+JSON.stringify(portfolioStore,null,2));
 	//console.log("alloation list:"+JSON.stringify(portfolioStore.allocationList,null,2));
