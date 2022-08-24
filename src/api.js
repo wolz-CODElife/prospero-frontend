@@ -114,7 +114,6 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		//WITHDRAW TOTAL
 		var methodType = intVars[0];
 
-
 		var users = graphItem["users"];
 		var msgSender = graphItem["addressVars"][0];
 		var eoaALower = EOAAddress.toLowerCase();
@@ -211,9 +210,9 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 
 		var acceptingNewInvestors = intVars[8];
 
-		if (acceptingNewInvestors == 1){
+		if (acceptingNewInvestors == 1) {
 			acceptingNewInvestors = true;
-		}else{
+		} else {
 			acceptingNewInvestors = false;
 		}
 		//for ( var k =0;k<tokenBalances.length;k++){
@@ -405,7 +404,8 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		leaderBoardDataObject["prosperoPercentageFeeOfLeader"] = prosperoFundFee; //TO DO - need to add this
 		leaderBoardDataObject["numberOfTrailers"] = usersInPortfolio.length;
 		leaderBoardDataObject["acceptingNewInvestors"] = acceptingNewInvestors;
-		leaderBoardDataObject["acceptingNewInvestorsOriginal"] = acceptingNewInvestors;
+		leaderBoardDataObject["acceptingNewInvestorsOriginal"] =
+			acceptingNewInvestors;
 
 		//console.log("NEW LB DATA OBJ:"+JSON.stringify(leaderBoardDataObject,null,2))
 
@@ -542,74 +542,85 @@ function formatNegPositiveWithDollar(amt) {
 	} else return "$0";
 }
 
-async function updateNewInvestors(prosperoWalletAddress, allowNewInvestors){
-	console.log("updateNewInvestors api call with allowNewInvestors:"+allowNewInvestors+" prosperoWalletAddress:"+prosperoWalletAddress)
-	try{
-
-	  var ProsperoWalletInstance = new web3.eth.Contract(
-		ProsperoWalletJson.abi,
-		prosperoWalletAddress
-	  );
-	  var tx = await ProsperoWalletInstance.methods.updateAllowNewInvestors(allowNewInvestors).send({
-		from: EOAAddress,
-	  }).on('error', function(error, receipt){
-		console.log("error updateAllowNewInvestors:"+error)
-	  })
-	  .on('transactionHash', function(transactionHash){
-		//console.log("transactionhash:"+transactionHash)
-	  })
-	  .on('receipt', function(receipt){
-		//console.log("got receipt:"+JSON.stringify(receipt,null,2))
-		//console.log(receipt.contractAddress) // contains the new contract address
-	  })
-	  .on('confirmation', function(confirmationNumber, receipt){
-		//console.log("conf:"+JSON.stringify(receipt,null,2))
-	  })
-  
-	}catch(e){
-	  console.log('updateNewInvestors exception:'+e)
-	  return {success:false, error:e}
+async function updateNewInvestors(prosperoWalletAddress, allowNewInvestors) {
+	console.log(
+		"updateNewInvestors api call with allowNewInvestors:" +
+			allowNewInvestors +
+			" prosperoWalletAddress:" +
+			prosperoWalletAddress
+	);
+	try {
+		var ProsperoWalletInstance = new web3.eth.Contract(
+			ProsperoWalletJson.abi,
+			prosperoWalletAddress
+		);
+		var tx = await ProsperoWalletInstance.methods
+			.updateAllowNewInvestors(allowNewInvestors)
+			.send({
+				from: EOAAddress,
+			})
+			.on("error", function (error, receipt) {
+				console.log("error updateAllowNewInvestors:" + error);
+			})
+			.on("transactionHash", function (transactionHash) {
+				//console.log("transactionhash:"+transactionHash)
+			})
+			.on("receipt", function (receipt) {
+				//console.log("got receipt:"+JSON.stringify(receipt,null,2))
+				//console.log(receipt.contractAddress) // contains the new contract address
+			})
+			.on("confirmation", function (confirmationNumber, receipt) {
+				//console.log("conf:"+JSON.stringify(receipt,null,2))
+			});
+	} catch (e) {
+		console.log("updateNewInvestors exception:" + e);
+		return { success: false, error: e };
 	}
-	console.log("done - success")
-	return {success:true}
-  }
+	console.log("done - success");
+	return { success: true };
+}
 
-
-  async function updatePercentageFee(prosperoWalletAddress, newPercFee){
-	console.log(" updatePercentageFee:"+newPercFee+" prosperoWalletAddress:"+prosperoWalletAddress)
+async function updatePercentageFee(prosperoWalletAddress, newPercFee) {
+	console.log(
+		" updatePercentageFee:" +
+			newPercFee +
+			" prosperoWalletAddress:" +
+			prosperoWalletAddress
+	);
 	newPercFee = newPercFee / 100;
 	newPercFee = multipleBN(newPercFee, USD_SCALE);
-	newPercFee = noNotation(newPercFee)
-	console.log("new perc fee after:"+newPercFee);
-	try{
-	  var ProsperoWalletInstance = new web3.eth.Contract(
-		ProsperoWalletJson.abi,
-		prosperoWalletAddress
-	  );
-	  var tx = await ProsperoWalletInstance.methods.updatePercentageFee(newPercFee+"").send({
-		from: EOAAddress,
-	  }).on('error', function(error, receipt){
-		console.log("error updatePercentageFee:"+error)
-	  })
-	  .on('transactionHash', function(transactionHash){
-		//console.log("transactionhash:"+transactionHash)
-	  })
-	  .on('receipt', function(receipt){
-		//console.log("got receipt:"+JSON.stringify(receipt,null,2))
-		//console.log(receipt.contractAddress) // contains the new contract address
-	  })
-	  .on('confirmation', function(confirmationNumber, receipt){
-		//console.log("conf:"+JSON.stringify(receipt,null,2))
-	  })
-  
-	}catch(e){
-	  console.log('updatePercentageFee exception:'+e)
-	  return {success:false, error:e}
+	newPercFee = noNotation(newPercFee);
+	console.log("new perc fee after:" + newPercFee);
+	try {
+		var ProsperoWalletInstance = new web3.eth.Contract(
+			ProsperoWalletJson.abi,
+			prosperoWalletAddress
+		);
+		var tx = await ProsperoWalletInstance.methods
+			.updatePercentageFee(newPercFee + "")
+			.send({
+				from: EOAAddress,
+			})
+			.on("error", function (error, receipt) {
+				console.log("error updatePercentageFee:" + error);
+			})
+			.on("transactionHash", function (transactionHash) {
+				//console.log("transactionhash:"+transactionHash)
+			})
+			.on("receipt", function (receipt) {
+				//console.log("got receipt:"+JSON.stringify(receipt,null,2))
+				//console.log(receipt.contractAddress) // contains the new contract address
+			})
+			.on("confirmation", function (confirmationNumber, receipt) {
+				//console.log("conf:"+JSON.stringify(receipt,null,2))
+			});
+	} catch (e) {
+		console.log("updatePercentageFee exception:" + e);
+		return { success: false, error: e };
 	}
-	console.log("done - success")
-	return {success:true}
-  }
-
+	console.log("done - success");
+	return { success: true };
+}
 
 //manage - kachi
 function getTokenListForManageUI() {
@@ -3181,7 +3192,7 @@ async function getWalletValues(prosperoWalletAddress) {
 			prosperoPercentageFeeOfLeader: walletValues[9],
 		};
 	} catch (e) {
-		console.log('getWalletValues exception:'+e)
+		console.log("getWalletValues exception:" + e);
 		return false;
 	}
 	return walletValuesJson;
@@ -3719,7 +3730,7 @@ export {
 	getMyHoldings,
 	getMyUSDDepositsTotal,
 	getMyROITotal,
-	getMyROITotalPercentage,,
+	getMyROITotalPercentage,
 	updateNewInvestors,
-	updatePercentageFee
+	updatePercentageFee,
 };
