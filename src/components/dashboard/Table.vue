@@ -245,7 +245,6 @@
 
 <script setup>
 import { ref, computed, watch } from "vue";
-import { usePortfolios } from "@/stores/Portfolios";
 import {
 	withdraw,
 	updateNewWalletVariables,
@@ -258,14 +257,15 @@ import { useRouter } from "vue-router";
 import ManageContainer from "../manage/ManageContainer.vue";
 import TableComponent from "./TableComponent.vue";
 import TableSkeleton from "./TableSkeleton.vue";
+import { usePortfolios } from "@/stores/Portfolios";
+
+const portfolioStore = usePortfolios();
 
 const { currentRoute } = useRouter();
 
 const path = computed(() => {
 	return currentRoute.value.name;
 });
-
-const portfolioStore = usePortfolios();
 
 const portfolioToShow = ref("");
 
@@ -367,7 +367,7 @@ async function doWithdraw() {
 	//to do - add tokens swapping into
 	try {
 		//console.log("Do Withdraw function works amount:"+JSON.stringify(amount,null,2));
-		console.log("doWithdraw amount.value:"+amount.value);
+		console.log("doWithdraw amount.value:" + amount.value);
 		const res = await withdraw([], amount.value);
 		console.log(res);
 		if (res.success) {

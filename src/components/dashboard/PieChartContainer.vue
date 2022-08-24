@@ -60,8 +60,15 @@
 		</div>
 
 		<!-- Pie chart  -->
+
 		<div class="mt-[90px]">
+			<PieChart
+				v-if="portfolioStore.selectedPortfolio.name"
+				:chart-data="chartData"
+			/>
+
 			<img
+				v-else
 				src="https://i.postimg.cc/KjHz2Jzs/image.png"
 				alt=""
 				class="w-[250px] mx-auto"
@@ -71,13 +78,34 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, ref } from "vue";
 import DashDir from "@/layouts/dashboard/DashDir.vue";
 import Stats from "@/layouts/dashboard/Stats.vue";
+import PieChart from "../charts/PieChart.ts";
 
 import { usePortfolios } from "@/stores/Portfolios";
 
 const portfolioStore = usePortfolios();
+
+// const pieChartPlugins = ref([
+
+// ])
+
+const chartData = ref({
+	labels: ["VueJs", "EmberJs", "ReactJs", "AngularJs", "NewFramework"],
+	datasets: [
+		{
+			backgroundColor: [
+				"#7262C5",
+				"#2854D7",
+				"#BB97CD",
+				"#8BC663",
+				"#9A8D5B",
+			],
+			data: [30, 180, 30, 60, 60],
+		},
+	],
+});
 
 function displayPerc(perc) {
 	return (perc * 100).toFixed(1) + "%";
