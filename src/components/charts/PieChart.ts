@@ -19,6 +19,10 @@ export default defineComponent({
 		Pie,
 	},
 	props: {
+		chartData: {
+			type: Object,
+			default: () => {},
+		},
 		chartId: {
 			type: String,
 			default: "pie-chart",
@@ -42,10 +46,6 @@ export default defineComponent({
 		plugins: {
 			type: Array,
 			default: () => [],
-		},
-		chartData: {
-			type: Object,
-			default: () => {},
 		},
 	},
 	setup(props) {

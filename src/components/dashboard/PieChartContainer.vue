@@ -62,14 +62,17 @@
 		<!-- Pie chart  -->
 
 		<div class="mt-[90px]">
-			<!-- <img
-				v-if="loading"
+			<PieChart
+				v-if="portfolioStore.selectedPortfolio.name"
+				:chart-data="chartData"
+			/>
+
+			<img
+				v-else
 				src="https://i.postimg.cc/KjHz2Jzs/image.png"
 				alt=""
 				class="w-[250px] mx-auto"
-			/> -->
-
-			<PieChart :chart-data="chartData" />
+			/>
 		</div>
 	</div>
 </template>
@@ -89,10 +92,8 @@ const portfolioStore = usePortfolios();
 // ])
 
 const chartData = ref({
-	// pass this dynam
 	labels: ["VueJs", "EmberJs", "ReactJs", "AngularJs", "NewFramework"],
 	datasets: [
-		// no idea how to generate this
 		{
 			backgroundColor: [
 				"#7262C5",
@@ -101,7 +102,6 @@ const chartData = ref({
 				"#8BC663",
 				"#9A8D5B",
 			],
-			// dynam
 			data: [30, 180, 30, 60, 60],
 		},
 	],

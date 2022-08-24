@@ -187,7 +187,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		var leaderBoardDataObject = {};
 		var thisProsperoWalletAddress = key;
 		var thisGraphItem = leaderBoardDataNew[key];
-		console.log("  ");
+		//console.log("  ")
 		//console.log("WALLET NAME:"+thisGraphItem["walletName"])
 		var addressVars = thisGraphItem["addressVars"];
 		var tokens = thisGraphItem["tokens"];
@@ -237,7 +237,6 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			usersUsdInvested =
 				thisGraphItem["usdInvested"][indexOfUser] / USD_SCALE;
 			myUSDDepositsTotal = myUSDDepositsTotal + usersUsdInvested;
-
 			//use IS in this portfolio...to do, add to my wallets.  If user is same as leader, it should be the same object in my
 			//wallets
 		}
@@ -261,7 +260,6 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			var bal = multipleBN(tokenBalances[i], leaderPercentage);
 
 			var totalBal = tokenBalances[i];
-			bal = parseInt(bal);
 			var thisTokenAddress = tokens[i];
 			//console.log('bal:'+bal)
 			var usdThisUserThisToken = await getUSDValue_MINE(
@@ -290,8 +288,9 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		}
 		if (indexOfUser >= 0 && indexOfUser != indexOfLeader) {
 			for (var i = 0; i < tokens.length; i++) {
-				var bal = tokenBalances[i] * userPercentage + "";
-				bal = parseInt(bal);
+				//var bal = tokenBalances[i] * userPercentage + "";
+				//bal=parseInt(bal);
+				var bal = multipleBN(tokenBalances[i], userPercentage);
 				var thisTokenAddress = tokens[i];
 				console.log("bal2:" + bal);
 
@@ -309,10 +308,16 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		if (indexOfUser >= 0) {
 			//console.log('calc myHolding')
 			for (var i = 0; i < tokens.length; i++) {
-				console.log("");
-				var bal = tokenBalances[i] * userPercentage + "";
-				bal = parseInt(bal);
-				console.log("bal:" + bal);
+				//console.log(" *** ")
+				//console.log("tokenBalances[i]:"+tokenBalances[i])
+				//console.log("userPercentage  :"+userPercentage)
+
+				//var bal = tokenBalances[i] * userPercentage + "";
+				var bal = multipleBN(tokenBalances[i], userPercentage);
+
+				//console.log('bal b4:'+bal)
+				//bal=parseInt(bal);
+				//console.log('bal af:'+bal)
 				var thisTokenAddress = tokens[i];
 				var usdThisUserThisToken = await getUSDValue_MINE(
 					bal,
@@ -329,8 +334,10 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			var tokenObj = {};
 			var thisTokenAddress = tokens[i];
 			thisTokenAddress = thisTokenAddress.toLowerCase();
-			tokenObj["balance"] = tokenBalances[i] * leaderPercentage + "";
-			tokenObj["balance"] = parseInt(tokenObj["balance"]);
+			//tokenObj["balance"] = tokenBalances[i] * leaderPercentage + "";
+			tokenObj["balance"] = multipleBN(tokenBalances[i], leaderPercentage);
+
+			//tokenObj["balance"]=parseInt(tokenObj["balance"])
 			var aTokenObject = await getTokenObject_newMine(thisTokenAddress);
 
 			var usdThisUserThisToken = await getUSDValue_MINE(
@@ -349,8 +356,10 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 
 			if (indexOfUser >= 0 && indexOfUser != indexOfLeader) {
 				//only calculate if user is diff than leader and user exists in port
-				tokenObj["balance"] = tokenBalances[i] * userPercentage + "";
-				tokenObj["balance"] = parseInt(tokenObj["balance"]);
+				//tokenObj["balance"] = tokenBalances[i] * userPercentage + "";
+				tokenObj["balance"] = multipleBN(tokenBalances[i], userPercentage);
+
+				//tokenObj["balance"]=parseInt(tokenObj["balance"])
 				usdThisUserThisToken = await getUSDValue_MINE(
 					tokenObj["balance"],
 					thisTokenAddress
@@ -500,7 +509,21 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 	console.log(" ");
 }
 
+function multipleBN(valOne, valTwo) {
+	//console.log("valOne:"+valOne);
+	//console.log("valTwo:"+valTwo);
+	var valOne = BigNumber(valOne);
+	var valTwo = BigNumber(valTwo);
+	var valFinal = valOne.multipliedBy(valTwo);
+	valFinal = valFinal.integerValue();
+	return valFinal + "";
+}
+
 async function getMyHoldings() {
+	console.log("myHoldingsTotal:" + myHoldingsTotal);
+	myHoldingsTotal = Number(myHoldingsTotal + "");
+	console.log("myHoldingsTotal:" + myHoldingsTotal);
+
 	myHoldingsTotal = myHoldingsTotal.toFixed(2);
 	return formatNegPositiveWithDollar(myHoldingsTotal);
 
@@ -697,7 +720,7 @@ function getTokenListForManageUI() {
 }
 
 function getTokenArray() {
-	//console.log("tokena**:" + JSON.stringify(tokenArray, null, 2));
+	//console.log("tokena**:"+JSON.stringify(tokenArray,null,2))
 	return tokenArray;
 }
 
@@ -2882,14 +2905,14 @@ async function getValueOfUsersPortfolio(
 			.call({
 				from: usersEOA,
 			});
-		//console.log("usersValue:" + usersValue);
+		//console.log("usersValue:"+usersValue);
 		var bnUv = BigNumber(usersValue);
 		if (shouldKeepAsBigNumber == true) {
 			return bnUv;
 		}
 		bnUv = bnUv.dividedBy(USD_SCALE);
 		var uvNumber = Number(bnUv + "");
-		//console.log("USERS VALUE:" + uvNumber);
+		//console.log("USERS VALUE:"+uvNumber)
 		return uvNumber;
 	} catch (e) {
 		console.log("getValueOfUsersPortfolio exception:" + e);
