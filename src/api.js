@@ -113,6 +113,8 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 
 		//WITHDRAW TOTAL
 		var methodType = intVars[0];
+
+
 		var users = graphItem["users"];
 		var msgSender = graphItem["addressVars"][0];
 		var eoaALower = EOAAddress.toLowerCase();
@@ -191,6 +193,29 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		var addressVars = thisGraphItem["addressVars"];
 		var tokens = thisGraphItem["tokens"];
 		var tokenBalances = thisGraphItem["balances"];
+
+		var intVars = thisGraphItem["intVars"];
+		var leaderFundFee = intVars[6];
+		//console.log('leaderFundFee**:'+leaderFundFee);
+		var prosperoFundFee = intVars[7];
+		leaderFundFee = leaderFundFee / USD_SCALE;
+		//console.log('1leaderFundFee:'+leaderFundFee)
+		leaderFundFee = leaderFundFee * 100;
+		//console.log('2leaderFundFee:'+leaderFundFee)
+		leaderFundFee = parseInt(leaderFundFee);
+		//console.log('3leaderFundFee:'+leaderFundFee)
+
+		prosperoFundFee = prosperoFundFee / USD_SCALE;
+		prosperoFundFee = prosperoFundFee * 100;
+		prosperoFundFee = parseInt(prosperoFundFee);
+
+		var acceptingNewInvestors = intVars[8];
+
+		if (acceptingNewInvestors == 1){
+			acceptingNewInvestors = true;
+		}else{
+			acceptingNewInvestors = false;
+		}
 		//for ( var k =0;k<tokenBalances.length;k++){
 		//	tokensBalances[k]=BigNumber(tokenBalances[k]+"")
 		//}
@@ -364,7 +389,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		leaderBoardDataObject["y1"] = leaderBoardDataObject["y1"] + "%";
 		leaderBoardDataObject["profitPercentage"] = profitPercentage;
 		leaderBoardDataObject["name"] = thisGraphItem["walletName"];
-		leaderBoardDataObject["fee"] = "20%"; //TO DO - need to add this
+		leaderBoardDataObject["fee"] = leaderFundFee; //TO DO - need to add this
 		leaderBoardDataObject["d7"] = 0;
 		leaderBoardDataObject["d30"] = 0;
 		leaderBoardDataObject["d90"] = 0;
@@ -374,9 +399,14 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		leaderBoardDataObject["profitLeader"] = profitUsd;
 		leaderBoardDataObject["leaderEOA"] = leaderAddress;
 		leaderBoardDataObject["walletName"] = thisGraphItem["walletName"];
-		leaderBoardDataObject["leaderPercentageFee"] = "20%"; //TO DO - need to add this
-		leaderBoardDataObject["prosperoPercentageFeeOfLeader"] = "20%"; //TO DO - need to add this
+		leaderBoardDataObject["leaderPercentageFee"] = leaderFundFee; //TO DO - need to add this
+		leaderBoardDataObject["leaderPercentageFeeOriginal"] = leaderFundFee; //TO DO - need to add this
+
+		leaderBoardDataObject["prosperoPercentageFeeOfLeader"] = prosperoFundFee; //TO DO - need to add this
 		leaderBoardDataObject["numberOfTrailers"] = usersInPortfolio.length;
+		leaderBoardDataObject["acceptingNewInvestors"] = acceptingNewInvestors;
+		leaderBoardDataObject["acceptingNewInvestorsOriginal"] = acceptingNewInvestors;
+
 		//console.log("NEW LB DATA OBJ:"+JSON.stringify(leaderBoardDataObject,null,2))
 
 		//Set leader/trailer/or empty if just a leader wallet that you are not a part of
@@ -512,6 +542,75 @@ function formatNegPositiveWithDollar(amt) {
 	} else return "$0";
 }
 
+async function updateNewInvestors(prosperoWalletAddress, allowNewInvestors){
+	console.log("updateNewInvestors api call with allowNewInvestors:"+allowNewInvestors+" prosperoWalletAddress:"+prosperoWalletAddress)
+	try{
+
+	  var ProsperoWalletInstance = new web3.eth.Contract(
+		ProsperoWalletJson.abi,
+		prosperoWalletAddress
+	  );
+	  var tx = await ProsperoWalletInstance.methods.updateAllowNewInvestors(allowNewInvestors).send({
+		from: EOAAddress,
+	  }).on('error', function(error, receipt){
+		console.log("error updateAllowNewInvestors:"+error)
+	  })
+	  .on('transactionHash', function(transactionHash){
+		//console.log("transactionhash:"+transactionHash)
+	  })
+	  .on('receipt', function(receipt){
+		//console.log("got receipt:"+JSON.stringify(receipt,null,2))
+		//console.log(receipt.contractAddress) // contains the new contract address
+	  })
+	  .on('confirmation', function(confirmationNumber, receipt){
+		//console.log("conf:"+JSON.stringify(receipt,null,2))
+	  })
+  
+	}catch(e){
+	  console.log('updateNewInvestors exception:'+e)
+	  return {success:false, error:e}
+	}
+	console.log("done - success")
+	return {success:true}
+  }
+
+
+  async function updatePercentageFee(prosperoWalletAddress, newPercFee){
+	console.log(" updatePercentageFee:"+newPercFee+" prosperoWalletAddress:"+prosperoWalletAddress)
+	newPercFee = newPercFee / 100;
+	newPercFee = multipleBN(newPercFee, USD_SCALE);
+	newPercFee = noNotation(newPercFee)
+	console.log("new perc fee after:"+newPercFee);
+	try{
+	  var ProsperoWalletInstance = new web3.eth.Contract(
+		ProsperoWalletJson.abi,
+		prosperoWalletAddress
+	  );
+	  var tx = await ProsperoWalletInstance.methods.updatePercentageFee(newPercFee+"").send({
+		from: EOAAddress,
+	  }).on('error', function(error, receipt){
+		console.log("error updatePercentageFee:"+error)
+	  })
+	  .on('transactionHash', function(transactionHash){
+		//console.log("transactionhash:"+transactionHash)
+	  })
+	  .on('receipt', function(receipt){
+		//console.log("got receipt:"+JSON.stringify(receipt,null,2))
+		//console.log(receipt.contractAddress) // contains the new contract address
+	  })
+	  .on('confirmation', function(confirmationNumber, receipt){
+		//console.log("conf:"+JSON.stringify(receipt,null,2))
+	  })
+  
+	}catch(e){
+	  console.log('updatePercentageFee exception:'+e)
+	  return {success:false, error:e}
+	}
+	console.log("done - success")
+	return {success:true}
+  }
+
+
 //manage - kachi
 function getTokenListForManageUI() {
 	console.log("getTokenListForManageUI");
@@ -587,7 +686,7 @@ function getTokenListForManageUI() {
 }
 
 function getTokenArray() {
-	console.log("tokena**:" + JSON.stringify(tokenArray, null, 2));
+	//console.log("tokena**:" + JSON.stringify(tokenArray, null, 2));
 	return tokenArray;
 }
 
@@ -1914,9 +2013,9 @@ async function rebalance(
 			EOAAddress,
 			selectedProsperoWalletAddressToRemix
 		);
-	console.log(
-		" thisWalletsObjBefore:" + JSON.stringify(thisWalletsObjBefore, null, 2)
-	);
+	//console.log(
+	//		" thisWalletsObjBefore:" + JSON.stringify(thisWalletsObjBefore, null, 2)
+	//);
 	var areDiff = returnTrueIfPercentagesAreDiff(
 		thisWalletsObjBefore,
 		percentages,
@@ -2060,9 +2159,9 @@ async function deposit() {
 	var foundOneAmtAboveZero = false;
 	for (var i = 0; i < balancesInEoa.length; i++) {
 		var thisDepositingObj = balancesInEoa[i];
-		console.log(
-			"thisDepositingObj:" + JSON.stringify(thisDepositingObj, null, 2)
-		);
+		//console.log(
+		//	"thisDepositingObj:" + JSON.stringify(thisDepositingObj, null, 2)
+		//);
 		var usdAmountEnteredByUser = thisDepositingObj["usdAmountEnteredByUser"];
 		usdAmountEnteredByUser = Number(usdAmountEnteredByUser);
 		if (usdAmountEnteredByUser > 0) {
@@ -2744,18 +2843,12 @@ async function getValueOfUsersPortfolio(
 	usersEOA,
 	shouldKeepAsBigNumber
 ) {
-	console.log(
-		"getValueOfUsersPortfolio pricesLibraryAddress: " +
-			pricesLibraryAddress +
-			" prosperoPricesAddress: " +
-			prosperoPricesAddress +
-			" prosperoWalletAddress: " +
-			prosperoWalletAddress +
-			" usersEOA: " +
-			usersEOA +
-			" PricesLibraryJson.abi:" +
-			JSON.stringify(PricesLibraryJson.abi, null, 2)
-	);
+	//console.log(
+	// "getValueOfUsersPortfolio pricesLibraryAddress: "+pricesLibraryAddress+
+	//  " prosperoPricesAddress: "+prosperoPricesAddress+
+	//  " prosperoWalletAddress: "+prosperoWalletAddress
+	//  +" usersEOA: "+usersEOA
+	//  +" PricesLibraryJson.abi:"+JSON.stringify(PricesLibraryJson.abi,null,2))
 	try {
 		var pricesLibraryInstance = new web3.eth.Contract(
 			PricesLibraryJson.abi,
@@ -2778,14 +2871,14 @@ async function getValueOfUsersPortfolio(
 			.call({
 				from: usersEOA,
 			});
-		console.log("usersValue:" + usersValue);
+		//console.log("usersValue:" + usersValue);
 		var bnUv = BigNumber(usersValue);
 		if (shouldKeepAsBigNumber == true) {
 			return bnUv;
 		}
 		bnUv = bnUv.dividedBy(USD_SCALE);
 		var uvNumber = Number(bnUv + "");
-		console.log("USERS VALUE:" + uvNumber);
+		//console.log("USERS VALUE:" + uvNumber);
 		return uvNumber;
 	} catch (e) {
 		console.log("getValueOfUsersPortfolio exception:" + e);
@@ -2951,6 +3044,7 @@ async function initializeBlockchainConnection() {
 	});
 	return { success: true };
 }
+
 async function updatePrices() {
 	try {
 		var allAvalancheAddresses = "";
@@ -3087,7 +3181,7 @@ async function getWalletValues(prosperoWalletAddress) {
 			prosperoPercentageFeeOfLeader: walletValues[9],
 		};
 	} catch (e) {
-		//console.log('getWalletValues exception:'+e)
+		console.log('getWalletValues exception:'+e)
 		return false;
 	}
 	return walletValuesJson;
@@ -3625,5 +3719,7 @@ export {
 	getMyHoldings,
 	getMyUSDDepositsTotal,
 	getMyROITotal,
-	getMyROITotalPercentage,
+	getMyROITotalPercentage,,
+	updateNewInvestors,
+	updatePercentageFee
 };
