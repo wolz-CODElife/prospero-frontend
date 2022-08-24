@@ -532,11 +532,11 @@ async function getHistoricalPricesUpdateChartsData() {
 		day: "numeric",
 	};
 	var formatter = new Intl.DateTimeFormat([], options);
-	console.log("1 formatter date:" + formatter.format(new Date()));
+	//console.log("1 formatter date:" + formatter.format(new Date()));
 	var now = new Date(formatter.format(new Date()));
 	var nowFloored = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 	nowFloored = nowFloored.getTime() / 1000;
-	console.log("nowFloored:"+nowFloored+" maxDate:"+maxDate)
+	//console.log("nowFloored:"+nowFloored+" maxDate:"+maxDate)
 
 	//Only get Coingecko data if we need it, then store it in local storage so we don't have to keep getting it.
 	if (nowFloored > maxDate) {
@@ -594,7 +594,7 @@ async function getHistoricalPricesUpdateChartsData() {
 			}
 			//console.log("p:"+JSON.stringify(priceObjHere,null,2))
 			localStorage.setItem(thisToken.id, JSON.stringify(priceObjHere));
-			console.log("set local storage:"+thisToken.id)
+			//console.log("set local storage:"+thisToken.id)
 			//var theDate = new Date(theStorage[k][0]);
 			//console.log("t:"+theStorage[k][0])
 			//var justDate = (theDate.getMonth()+1) +"-"+ theDate.getDate() +"-"+ theDate.getFullYear();
@@ -609,22 +609,22 @@ async function getHistoricalPricesUpdateChartsData() {
 		day: "numeric",
 	};
 	var formatter = new Intl.DateTimeFormat([], options);
-	console.log("2 formatter date:"+formatter.format(new Date()));
+	//console.log("2 formatter date:"+formatter.format(new Date()));
 	var now = new Date(formatter.format(new Date()));
 	var nowFloored = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 	nowFloored = nowFloored.getTime() / 1000;
 
-	console.log('got them...')
+	//console.log('got them...')
 	//While we are converting coingecko to dates mm-dd-yyyy, add it to a dates array for later
 	for (var i = 0; i < tokenArray.length; i++) {
 		dates = [];
 		var thisToken = tokenArray[i];
-		console.log('thisToken.id:'+thisToken.id)
+		//console.log('thisToken.id:'+thisToken.id)
 		var theStorage = localStorage.getItem(thisToken.id);
 		theStorage = JSON.parse(theStorage);
-		console.log("theStorage:"+JSON.stringify(theStorage,null,2))
+		//console.log("theStorage:"+JSON.stringify(theStorage,null,2))
 		//var tokenHistory = JSON.parse(theStorage);
-		//console.log("thisToken.id:"+thisToken.id+"tokenHistory:"+JSON.stringify(tokenHistory,null,2))
+		////console.log("thisToken.id:"+thisToken.id+"tokenHistory:"+JSON.stringify(tokenHistory,null,2))
 		var addLowerCase = thisToken.address;
 		addLowerCase = addLowerCase.toLowerCase();
 		historicalPricesObject[addLowerCase] = {};
@@ -633,8 +633,8 @@ async function getHistoricalPricesUpdateChartsData() {
 			justDateHere = justDateHere.trim();
 			var justDateHereD = new Date(justDateHere);
 			justDateHereD = justDateHereD.getTime() / 1000;
-			//console.log('justDateHereD:'+justDateHereD)
-			//console.log('nowFloored   :'+nowFloored)
+			////console.log('justDateHereD:'+justDateHereD)
+			////console.log('nowFloored   :'+nowFloored)
 			//if (justDateHereD < nowFloored){
 			if (!dates.includes(justDateHere)) {
 				dates.push(justDateHere);
@@ -732,7 +732,7 @@ async function getHistoricalPricesUpdateChartsData() {
 		for (var i = 0; i < lbData.length; i++) {
 			var thisProsperoWalletAddressLB = lbData[i].prosperoWalletAddress;
 			thisProsperoWalletAddressLB = thisProsperoWalletAddressLB.toLowerCase();
-			console.log('lbData:'+JSON.stringify(lbData[i], null, 2));
+			//console.log('lbData:'+JSON.stringify(lbData[i], null, 2));
 			var thisLeaderEOA = lbData[i]["leaderEOA"];
 			await updateHistoryChartsDataObject(
 				thisProsperoWalletAddressLB,
@@ -760,7 +760,7 @@ async function getHistoricalPricesUpdateChartsData() {
 			);
 		}
 	}
-	console.log(
+	/*console.log(
 		"leaderBoardDataOverTime :" +
 			JSON.stringify(leaderBoardDataOverTime, null, 2)
 	);
@@ -769,13 +769,14 @@ async function getHistoricalPricesUpdateChartsData() {
 			JSON.stringify(myPortfoliosDataOverTime, null, 2)
 	);
 	console.log("*** LB OVER 0")
-
+		
 	for (var i =0; i<leaderBoardDataOverTime.length; i++){
 		var usdI = leaderBoardDataOverTime[i]['usdInvested'];
 		if (usdI > 0){
 			console.log("**: "+JSON.stringify(leaderBoardDataOverTime[i],null,2));
 		}
 	}
+	*/
 }
 
 async function updateHistoryChartsDataObject(
@@ -913,6 +914,16 @@ async function updateHistoryChartsDataObject(
 		});
 	}
 }
+
+
+function getLeaderBoardDataOverTime(){
+	return leaderBoardDataOverTime;
+}
+
+function getMyPortfoliosDataOverTime(){
+	return myPortfoliosDataOverTime;
+}
+
 
 function multipleBN(valOne, valTwo){
 	//console.log("valOne:"+valOne);
@@ -3797,5 +3808,7 @@ export {
 	getMyROITotal,
 	getMyROITotalPercentage,
 	updateNewInvestors,
-	updatePercentageFee
+	updatePercentageFee,
+	getLeaderBoardDataOverTime,
+	getMyPortfoliosDataOverTime
 };

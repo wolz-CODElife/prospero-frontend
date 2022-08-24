@@ -29,4 +29,52 @@
 import PieChartContainer from "@/components/dashboard/PieChartContainer.vue";
 import Socials from "@/components/dashboard/Socials.vue";
 import Table from "@/components/dashboard/Table.vue";
+import { getLeaderBoardDataOverTime, getMyPortfoliosDataOverTime} from "@/api";
+/*
+getLeaderBoardDataOverTime and getMyPortfoliosDataOverTime both return an array of objects for the line charts.
+Each objects key is the prospero wallet address, which is then an array of that wallets total value, profits and user invested over time.
+time is every day for the last year.
+getLeaderBoardDataOverTime will return the leaders value so when a user is clicked on the leader board (all portfolios), use this one and the other one 
+when the user has clicked on my portfolios.
+
+Here's what it looks like:
+
+myPortfoliosDataOverTime:{
+  "0x25da3a563d48f8f226568483fb62b480c7019792": [
+    {
+      "date": "8-24-2021",
+      "profit": 0,
+      "value": 0,
+      "usdInvested": 0
+    },
+    {
+      "date": "8-25-2021",
+      "profit": 0,
+      "value": 0,
+      "usdInvested": 0
+    }...............
+	................
+	  {
+      "date": "8-24-2022",
+      "profit": 1781.9954002581285,
+      "value": 1784.9954002581285,
+      "usdInvested": 2.9999999999999356
+    }
+  ],
+  "0x78bbd8f530fb2f6119509869158b15310592e4f0": [
+    {
+      "date": "8-24-2021",
+      "profit": 0,
+      "value": 0,
+      "usdInvested": 0
+    },
+    {
+      "date": "8-25-2021",
+      "profit": 0,
+      "value": 0,
+      "usdInvested": 0
+    }...........
+  ]
+]
+*/
 </script>
