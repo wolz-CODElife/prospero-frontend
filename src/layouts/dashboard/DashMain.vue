@@ -16,7 +16,9 @@
 
 			<div class="col-span-8 grid grid-rows-5 gap-[10px]">
 				<!-- Line chart  -->
-				<div class="bg-[#191A20] row-span-2"></div>
+				<div class="bg-[#191A20] row-span-2">
+					<LineChart />
+				</div>
 
 				<!--Table  -->
 				<Table v-bind="$attrs" class="row-span-3" />
@@ -26,7 +28,17 @@
 </template>
 
 <script setup>
+// import { computed } from "vue";
 import PieChartContainer from "@/components/dashboard/PieChartContainer.vue";
 import Socials from "@/components/dashboard/Socials.vue";
 import Table from "@/components/dashboard/Table.vue";
+import LineChart from "@/components/charts/LineChart.ts";
+
+// const customLineChartStyles = computed(() => {
+// 	return {
+// 		height: `${100}%`,
+// 		width: `${100}%`,
+// 		position: "relative",
+// 	};
+// });
 </script>
