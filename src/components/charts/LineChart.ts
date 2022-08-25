@@ -62,6 +62,15 @@ export default defineComponent({
 		const chartOptions = {
 			responsive: true,
 			maintainAspectRatio: false,
+			plugins: {
+				legend: {
+					display: false,
+					// labels: {
+					// 	color: "rgb(255, 99, 132)",
+					// 	display: "flex",
+					// },
+				},
+			},
 		};
 
 		return () =>

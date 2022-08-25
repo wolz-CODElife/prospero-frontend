@@ -92,7 +92,7 @@
 </template>
 
 <script setup>
-import { computed, onMounted } from "vue";
+import { computed } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
 import { useRouter } from "vue-router";
 import Stats from "./Stats.vue";

@@ -24,6 +24,8 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			tokenList: [],
 
+			allTxns: [],
+
 			overview: [
 				{
 					asset: {
@@ -92,12 +94,11 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			isError: false,
 
-			isPortfolioAcceptingNewInvestors:false,
+			isPortfolioAcceptingNewInvestors: false,
 
 			portfolioFundFee:0,
-			 
-			lineChartData:{},
 
+			lineChartData : []
 
 		};
 	},
@@ -195,6 +196,16 @@ export const usePortfolios = defineStore("Portfolios", {
 			return state.myPortfolios.filter(
 				(portfolio) => portfolio.wallet_type === "Leader"
 			);
+		},
+
+		filteredTxnList(state) {
+			if (state.activeFilter === "All") {
+				return state.allTxns;
+			} else {
+				return state.allTxns.filter(
+					(txn) => txn.type === state.activeFilter
+				);
+			}
 		},
 	},
 });
