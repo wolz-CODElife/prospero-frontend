@@ -36,7 +36,7 @@
 					</div>
 
 					<!-- Line chart  -->
-					<LineChart :chart-data="chartData" v-else />
+					<LineChart :chart-data="portfolioStore.lineChartData" v-else />
 				</div>
 
 				<!--Table  -->
@@ -54,7 +54,6 @@ import Table from "@/components/dashboard/Table.vue";
 import LineChart from "@/components/charts/LineChart.ts";
 import Loader from "@/components/Loader.vue";
 import { usePortfolios } from "@/stores/Portfolios";
-import { getLeaderBoardDataOverTime, getMyPortfoliosDataOverTime} from "@/api";
 /*
 getLeaderBoardDataOverTime and getMyPortfoliosDataOverTime both return an array of objects for the line charts.
 Each objects key is the prospero wallet address, which is then an array of that wallets total value, profits and user invested over time.
@@ -107,7 +106,10 @@ const portfolioStore = usePortfolios();
 
 // const DATA_COUNT = 7;
 // const NUMBER_CFG = { count: DATA_COUNT, min: -100, max: 100 };
-
+//const chartData = ref({
+//	portfolioStore.lineChartData
+//});
+/*
 const chartData = ref({
 	labels: [
 		"2014",
@@ -131,4 +133,5 @@ const chartData = ref({
 		},
 	],
 });
+*/
 </script>

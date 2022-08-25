@@ -8,6 +8,7 @@ import {
 	getMyUSDDepositsTotal,
 	getMyROITotal,
 	getMyROITotalPercentage,
+	getLineChartData
 } from "@/api";
 
 export const usePortfolios = defineStore("Portfolios", {
@@ -94,6 +95,9 @@ export const usePortfolios = defineStore("Portfolios", {
 			isPortfolioAcceptingNewInvestors:false,
 
 			portfolioFundFee:0,
+			 
+			lineChartData:{},
+
 
 		};
 	},
@@ -109,7 +113,9 @@ export const usePortfolios = defineStore("Portfolios", {
 				this.activeOverview.deposits = await getMyUSDDepositsTotal();
 				this.activeOverview.roi.value = await getMyROITotal();
 				this.activeOverview.roi.percent = await getMyROITotalPercentage();
-
+				//this.lineChartData = getLineChartData("all portfolios", "0xe2accfbaa0840d31b552971c30e7003e69cb3f39")
+				//this.xAxisLineChart = getAxisDataForLineChart("all portfolios", "0xe2accfbaa0840d31b552971c30e7003e69cb3f39", "x")
+				//this.yAxisLineChart = getAxisDataForLineChart("all portfolios", "0xe2accfbaa0840d31b552971c30e7003e69cb3f39", "y")
 				this.isLoading = false;
 				console.log("got all and my portfolios");
 			} catch (error) {
@@ -126,6 +132,8 @@ export const usePortfolios = defineStore("Portfolios", {
 			this.selectedPortfolio = val;
 			this.activeHeader = "right";
 			updateSelectedWallet(val.prosperoWalletAddress);
+			this.lineChartData = getLineChartData(this.activePortfolioType, val.prosperoWalletAddress)
+
 		},
 
 		toggleActiveHeader() {

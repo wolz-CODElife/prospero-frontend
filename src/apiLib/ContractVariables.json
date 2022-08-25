@@ -1,7 +1,7 @@
 {
-  "wavaxAddressFakeFuji":"0xce8120250f0cebc513487f339258b78067ac2de9",
-  "factoryAddress":"0x5E6eFBEcEb565dB7e3660B2B27690EE687Dc9Fb3",
-  "prosperoPricesAddress":"0x5036d9D48344a0E032C68d858D257102D1BCde24",
-  "pricesLibraryAddress":"0x1e1aE51Be91B2aE1Ba66eE04154143f6b1F3B61c",
-  "subnetHelperContractAddress":"0xD52C96Cc98096893650aAcE4F780DABF66D57438"
+  "wavaxAddressFakeFuji":"0x6e2f2fb8fd84d5873156791e1897aa8b20ba05c6",
+  "factoryAddress":"0xD7AAC90edb742F966Afc13285eb93A19481Cce1b",
+  "prosperoPricesAddress":"0x4a47861aC70F5Cc0903576F1dA05920eE28B8069",
+  "pricesLibraryAddress":"0x4929d3B836cfE2C504Cf2ad6993A490cfB49A287",
+  "subnetHelperContractAddress":"0x4fA1104C13Fef731Bd6700258e91F3e02AaEad27"
 }
