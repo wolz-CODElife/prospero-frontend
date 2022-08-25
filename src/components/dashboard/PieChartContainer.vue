@@ -92,17 +92,13 @@ const portfolioStore = usePortfolios();
 // ])
 
 const chartData = ref({
-	labels: ["VueJs", "EmberJs", "ReactJs", "AngularJs", "NewFramework"],
+	labels: ["VueJs", "EmberJs"],
 	datasets: [
 		{
-			backgroundColor: [
-				"#7262C5",
-				"#2854D7",
-				"#BB97CD",
-				"#8BC663",
-				"#9A8D5B",
-			],
-			data: [30, 180, 30, 60, 60],
+			backgroundColor: ["#7262C5", "#2854D7"],
+			data: portfolioStore.selectedPortfolio.portfolioObject.map((item) => {
+				return parseFloat(displayPerc(item.percentage).replace("%", ""));
+			}),
 		},
 	],
 });
