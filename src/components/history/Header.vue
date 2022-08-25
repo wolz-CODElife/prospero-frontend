@@ -67,14 +67,7 @@ import { usePortfolios } from "@/stores/Portfolios";
 
 const portfolioStore = usePortfolios();
 
-const toDate = ref("");
-
 const fromDate = ref("22-07-22");
 
-watch(
-	() => toDate.value,
-	() => {
-		console.log(toDate.value);
-	}
-);
+const toDate = ref("22-08-22");
 </script>
