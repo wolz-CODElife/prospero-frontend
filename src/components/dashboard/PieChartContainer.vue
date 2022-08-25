@@ -90,15 +90,15 @@ const portfolioStore = usePortfolios();
 // const pieChartPlugins = ref([
 
 // ])
-
+// portfolioStore.selectedPortfolio.portfolioObject.map((item) => {
+// 				return parseFloat(displayPerc(item.percentage).replace("%", ""));
+// 			}),
 const chartData = ref({
 	labels: ["VueJs", "EmberJs"],
 	datasets: [
 		{
 			backgroundColor: ["#7262C5", "#2854D7"],
-			data: portfolioStore.selectedPortfolio.portfolioObject.map((item) => {
-				return parseFloat(displayPerc(item.percentage).replace("%", ""));
-			}),
+			data: ["23", "77"],
 		},
 	],
 });
