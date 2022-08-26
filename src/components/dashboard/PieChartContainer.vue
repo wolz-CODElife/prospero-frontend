@@ -40,6 +40,11 @@
 									<div class="text-[12px]">
 										{{ displayPerc(portfolio.percentage) }}
 									</div>
+
+									<div
+										class="h-[10px] w-full"
+										:style="{ backgroundColor: portfolio.color }"
+									></div>
 								</div>
 							</div>
 						</div>
@@ -105,20 +110,26 @@ const portfolioStore = usePortfolios();
 // });
 
 const realChartData = computed(() => {
-	let chartData = []
+	let chartData = [];
 	for (const item in portfolioStore.selectedPortfolio.portfolioObject) {
-		chartData.push(portfolioStore.selectedPortfolio.portfolioObject[item])
-		}
+		chartData.push(portfolioStore.selectedPortfolio.portfolioObject[item]);
+	}
 	return {
-		labels: chartData.map((item) => { return item.name}),
+		labels: chartData.map((item) => {
+			return item.name;
+		}),
 		datasets: [
 			{
-				backgroundColor: chartData.map(() => { return `#${Math.floor(Math.random()*16777215).toString(16)}`}),
-				data: chartData.map((item) => { return parseFloat(displayPerc(item.percentage).replace("%", ""))}),
+				backgroundColor: chartData.map((portfolio) => {
+					return portfolio.color;
+				}),
+				data: chartData.map((item) => {
+					return parseFloat(displayPerc(item.percentage).replace("%", ""));
+				}),
 			},
 		],
-	}
-})
+	};
+});
 
 function displayPerc(perc) {
 	return (perc * 100).toFixed(1) + "%";
