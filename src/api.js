@@ -5,13 +5,7 @@ var factoryAddress = contractVariables.factoryAddress;
 var prosperoPricesAddress = contractVariables.prosperoPricesAddress;
 var pricesLibraryAddress = contractVariables.pricesLibraryAddress;
 var subnetHelperContractAddress = contractVariables.subnetHelperContractAddress;
-/*
-var wavaxAddressFakeFuji="0x686bdcc79ec7f849669f3f908feb767f7c8d5b56"
-var factoryAddress="0x1F3C45Cb6bDb9fe86686DEc9003A64DfF38b4652"
-var prosperoPricesAddress="0xbd90c371c3524e86659291892B76820599633da9"
-var pricesLibraryAddress="0x81D8Ed70151e7Ce3d36D2256F629f6862aC2A457"
-var subnetHelperContractAddress="0x4A6cc169c359Fc340bAc1aEb973625CD64CEFdf7"
-*/
+
 //OBJECTS
 var leaderBoardData = []; //leader board portfolios
 var myWallets = {}; //my wallets either as a portfolio manager or investor
@@ -24,7 +18,7 @@ var eventBlocksAlreadyHandledFinishedMethod = []; //to do - remove me?  Unused?
 var withdrawTableData = []; //for withdraw table
 var leaderBoardDataOverTime = {}; //historical chart data leaderboard
 var myPortfoliosDataOverTime = {}; //historical chart data my portfolios
-
+var latestPrices = {};//tokens address : price
 //TO DO - have this updated on UI
 var selectedProsperoWalletAddress; //="0x4cc4b88c622ee9b2c9007a6aea014a093c2fefc5"//CHANGE
 var myWallets = 0;
@@ -708,7 +702,7 @@ async function getHistoricalPricesUpdateChartsData() {
 		leaderBoardDataOverTime[thisProsperoWalletAddressLB] = [];
 	}
 
-	console.log("Dates:" + JSON.stringify(dates, null, 2));
+	//console.log("Dates:" + JSON.stringify(dates, null, 2));
 
 	//lastUsdInvested = 0;
 	//lastBalancesInPort = [];
@@ -717,11 +711,11 @@ async function getHistoricalPricesUpdateChartsData() {
 	//1) found in graph data.
 	//2) not found in graph data and there has never been any graph data on it, profit is 0.
 	//3) already found in graph data, not found now, use last usdInvested and lastBalanacesInPort to determine value of port with the price of the tokens on that day.
-	console.log("lbDDD:"+JSON.stringify(lbData,null,2));
+	//console.log("lbDDD:"+JSON.stringify(lbData,null,2));
 
 	var d = new Date();
 	var todaysDateFormatted = (d.getMonth()+1) +"-"+ d.getDate() +"-"+ d.getFullYear();
-	console.log("todaysDateFormatted:"+todaysDateFormatted);
+	//console.log("todaysDateFormatted:"+todaysDateFormatted);
 
 	for (var i = 0; i < lbData.length; i++) {
 		//To Do function:
@@ -730,6 +724,7 @@ async function getHistoricalPricesUpdateChartsData() {
 		thisProsperoWalletAddressLB = thisProsperoWalletAddressLB.toLowerCase();
 		var thisLeaderEOA = lbData[i]["leaderEOA"];
 		var walletName = lbData[i]["walletName"];
+		//console.log("wallet name****:"+walletName);
 		var finalValueLeader = lbData[i]["portfolioObject"]["totalValue"];
 		var finalUsdInvestedLeader = lbData[i]["portfolioObject"]["totalUsd"];
 		var finalProfitLeader = lbData[i]["portfolioObject"]["profit"];
@@ -748,10 +743,10 @@ async function getHistoricalPricesUpdateChartsData() {
 				indexOfUser != -1 &&
 				thisProsperoWalletAddress == thisProsperoWalletAddressLB
 			) {
-				console.log("leader is here");
+				////console.log("leader is here");
 				leadersGraphData.push(thisGraphData);
 			} else {
-				console.log("leader not here or not this add");
+				////console.log("leader not here or not this add");
 			}
 		}
 
@@ -775,22 +770,6 @@ async function getHistoricalPricesUpdateChartsData() {
 					latestTimeOfThatDay = leadersGraphData[f]["intVars"][4];
 				}
 
-				/*thisDateFormatted=thisDateFormatted*1000;
-				thisDateFormatted = new Date(thisDateFormatted);
-				thisDateFormatted = (thisDateFormatted.getMonth()+1) +"-"+ thisDateFormatted.getDate() +"-"+ thisDateFormatted.getFullYear();
-				
-				if (date == dateFromDatesArray){
-					if (leadersGraphData[f]['intVars'][4]>latestTimeOfThatDay){
-						oneToAdd=JSON.parse(JSON.stringify(leadersGraphData[f]));
-						oneToAdd['dateFormatted']=dateFromDatesArray;
-					}
-					console.log("FOUND MATCH")
-					latestTimeOfThatDay = leadersGraphData[f]['intVars'][4];
-				}
-			}
-			if (oneToAdd != null){
-				datesWithDataSorted.push(oneToAdd)
-			}*/
 			}
 			if (oneToAdd != null) {
 				datesWithDataSorted.push(oneToAdd);
@@ -798,9 +777,9 @@ async function getHistoricalPricesUpdateChartsData() {
 			}
 		}
 
-		console.log(
-			"datesWithDataSorted:" + JSON.stringify(datesWithDataSorted, null, 2)
-		);
+		//console.log(
+		//	"datesWithDataSorted:" + JSON.stringify(datesWithDataSorted, null, 2)
+		//);
 		var datesWithDataNew = [];
 		var lastBalancesNew = [];
 		var lastTokensNew = [];
@@ -827,27 +806,24 @@ async function getHistoricalPricesUpdateChartsData() {
 					datesWithDataSortedOBJ[dateFromDatesArray]["addressVars"][1];
 				leaderAddressHere = leaderAddressHere.toLowerCase();
 			}
-			var profitCalc = calcProfitWithDate(lastBalancesNew, lastTokensNew, lastUsersNew, lastPercentages, lastUsdInvestedNew, leaderAddressHere,  dateFromDatesArray, todaysDateFormatted);
+			var profitCalc = calcProfitWithDate(lastBalancesNew, lastTokensNew, lastUsersNew, lastPercentages, lastUsdInvestedNew, leaderAddressHere,  dateFromDatesArray, todaysDateFormatted, lbData[i]);
 			profitCalc['date']=dateFromDatesArray;
 			lineGraphCalcDataSub.push(profitCalc)
 		}
 		lineGraphCalcData[thisProsperoWalletAddressLB] = lineGraphCalcDataSub;
 	}
-	console.log(
-		"lineGraphCalcData:" + JSON.stringify(lineGraphCalcData, null, 2)
-	);
+	//console.log(
+	//	"lineGraphCalcData:" + JSON.stringify(lineGraphCalcData, null, 2)
+	//);
 }
 
 
 
-function calcProfitWithDate(balances, tokens, users, percentages, usdInvested,  leaderAddress, thisDate, todaysDateFormatted){
+function calcProfitWithDate(balances, tokens, users, percentages, usdInvested,  leaderAddress, thisDate, todaysDateFormatted, portfolioObj){
 	var profitLeader = 0;
 	var profitPercLeader = 0;
 	var profitUser = 0;
 	var profitPercUser = 0;
-
-	
-
 	if (users.length==0){
 		var objToReturn =
 		{
@@ -857,7 +833,6 @@ function calcProfitWithDate(balances, tokens, users, percentages, usdInvested,  
 			profitPercUser:profitPercUser,
 			totalValueUser:0,
 			totalValueLeader:0
-
 		};
 		return objToReturn;
 	} else {
@@ -865,13 +840,16 @@ function calcProfitWithDate(balances, tokens, users, percentages, usdInvested,  
 		var indexOfLeader = getIndexOfUser(users, leaderAddress);
 		var objToReturn = {};
 		if (indexOfUser != -1) {
-			//if (thisDate == thisDateFormatted){
-			//	var thisPort = myWallets[]
-
-			//}
-
-
-
+			if (todaysDateFormatted == thisDate){
+				//console.log("RIGHT HERE.......")
+				var userPortObj = myWallets[portfolioObj.prosperoWalletAddress]
+				//console.log("userPortObj:"+JSON.stringify(userPortObj,null,2))
+				objToReturn['profitUser']=userPortObj.profit
+				objToReturn['totalValueUser']=userPortObj['portfolioObject']['totalValue']
+				objToReturn['usdInvestedUser']=userPortObj['portfolioObject']['totalUsd']
+				objToReturn['profitPercUser']=userPortObj.profitPercentage
+				//console.log("objToReturn:"+JSON.stringify(objToReturn,null,2))
+			}else{
 			var userPercentage = percentages[indexOfUser] / USD_SCALE
 			var usdInvestedUser = usdInvested[indexOfUser]
 			usdInvestedUser = usdInvestedUser / USD_SCALE
@@ -880,21 +858,29 @@ function calcProfitWithDate(balances, tokens, users, percentages, usdInvested,  
 			objToReturn['totalValueUser']=profitCalcObjUser.totalValue
 			objToReturn['usdInvestedUser']=usdInvestedUser
 			objToReturn['profitPercUser']=profitCalcObjUser.profitPerc
+			}
 		}else{
 			objToReturn['profitUser']=0
 			objToReturn['profitPercUser']=0
 			objToReturn['totalValueUser']=0
 		}
 		if (indexOfLeader!=-1){
-			var userPercentage = percentages[indexOfLeader] / USD_SCALE
-			var usdInvestedUser = usdInvested[indexOfLeader]
-			usdInvestedUser = usdInvestedUser / USD_SCALE
-			var profitCalcObj = calcJustProfitObj(tokens, balances, userPercentage, usdInvestedUser, thisDate, todaysDateFormatted)
-			objToReturn['profitLeader']=profitCalcObj.profit
-			objToReturn['totalValueLeader']=profitCalcObj.totalValue
-			objToReturn['usdInvestedLeader']=usdInvestedUser
-			objToReturn['profitPercLeader']=profitCalcObj.profitPerc
-
+			
+			if (todaysDateFormatted == thisDate){
+				objToReturn['profitLeader']=portfolioObj.profit
+				objToReturn['totalValueLeader']=portfolioObj['portfolioObject']['totalValue']
+				objToReturn['usdInvestedLeader']=portfolioObj['portfolioObject']['totalUsd']
+				objToReturn['profitPercLeader']=portfolioObj.profitPercentage
+			}else{
+				var userPercentage = percentages[indexOfLeader] / USD_SCALE
+				var usdInvestedUser = usdInvested[indexOfLeader]
+				usdInvestedUser = usdInvestedUser / USD_SCALE
+				var profitCalcObj = calcJustProfitObj(tokens, balances, userPercentage, usdInvestedUser, thisDate, todaysDateFormatted)
+				objToReturn['profitLeader']=profitCalcObj.profit
+				objToReturn['totalValueLeader']=profitCalcObj.totalValue
+				objToReturn['usdInvestedLeader']=usdInvestedUser
+				objToReturn['profitPercLeader']=profitCalcObj.profitPerc
+			}
 		}else{
 			objToReturn['profitLeader']=0
 			objToReturn['profitPercLeader']=0
@@ -905,7 +891,7 @@ function calcProfitWithDate(balances, tokens, users, percentages, usdInvested,  
 }
 
 function calcJustProfitObj(tokens, balances, userPercentage, usdInvested, thisDate, todaysDateFormatted){
-	console.log("calcJustProfitObj tokens:"+tokens+" balances: "+userPercentage+" usdInvested: "+usdInvested);
+	//console.log("calcJustProfitObj tokens:"+tokens+" balances: "+userPercentage+" usdInvested: "+usdInvested);
 	if ((usdInvested == 0) ||  (userPercentage==0) || (balances.length==0)){
 		return{
 			profit:0,
@@ -913,49 +899,55 @@ function calcJustProfitObj(tokens, balances, userPercentage, usdInvested, thisDa
 			totalValue:0
 		}
 	}
-	console.log(" ");
+	//console.log(" ");
 	var valueOfEachToken = [];
 	var totalValue = 0;
+
 	for (var i = 0; i < tokens.length; i++) {
 		var addLowerCase = tokens[i];
 		addLowerCase = addLowerCase.toLowerCase();
-		console.log("******addLowerCase:" + addLowerCase);
-		console.log("thisDate:" + thisDate);
+		//console.log("******addLowerCase:" + addLowerCase);
+		//console.log("thisDate:" + thisDate);
 
 		var price = historicalPricesObject[addLowerCase][thisDate];
-		if (todaysDateFormatted == thisDate){
+		//if (todaysDateFormatted == thisDate){
 			//console.log("TTT:"+JSON.stringify(tokens[i],null,2))
 			//console.log("getting todays price")
 			//alert("have to get price here")
-		}
+			//right here 
+			//var price = getUSDValue_MINE()
+		//}
+		var priceNow = latestPrices[tokens[i]];
+		//console.log("MY PRICE:"+priceNow);
 		if (price == null || price == undefined || price == ""){
-			alert("NO PRICE");
-			return;
+			//alert("NO PRICE");
+			//return;
 		}
 		var thisBal = balances[i];
-		console.log("thisBAL BEFORE:" + thisBal);
+		//console.log("thisBAL BEFORE:" + thisBal);
 		thisBal = thisBal / USD_SCALE;
-		console.log(
-			"**** price:" +
-				price +
-				" thisBal:" +
-				thisBal +
-				" userPercentage:" +
-				userPercentage
-		);
+		//console.log(
+	//		"**** price:" +
+	//			price +
+	//			" thisBal:" +
+	//			thisBal +
+	//			" userPercentage:" +
+	//			userPercentage
+	//	);
 		var value = price * thisBal * userPercentage;
-		console.log("value:" + value);
+		//console.log("value:" + value);
 		valueOfEachToken.push(value);
 		totalValue = totalValue + value;
 	}
-	console.log("TV*:		  " + totalValue);
-	console.log("usdInvested*:" + usdInvested);
+	
+	//console.log("TV*:		  " + totalValue);
+	//console.log("usdInvested*:" + usdInvested);
 
 	var profit = totalValue - usdInvested;
-	console.log("profit*:	 :" + profit);
+	//console.log("profit*:	 :" + profit);
 
 	var profitPerc = profit / usdInvested;
-	console.log("profitPerc* :" + profitPerc);
+	//console.log("profitPerc* :" + profitPerc);
 
 	return {
 		profit: profit,
@@ -3535,7 +3527,11 @@ async function updatePrices() {
 				var thisToken = tokenArray[i];
 				address = thisToken.address;
 				allAddresses.push(address);
+
 			}
+			console.log("prosperoPricesAddress:"+prosperoPricesAddress)
+			console.log("allAddresses:"+allAddresses)
+
 			var prosperoPrices = new web3.eth.Contract(
 				ProsperoPricesJson.abi,
 				prosperoPricesAddress
@@ -3544,10 +3540,15 @@ async function updatePrices() {
 				.getPrices(allAddresses)
 				.call({ from: EOAAddress });
 			for (var i = 0; i < prosperoPrices.length; i++) {
+				console.log("TOKEN NAME:"+tokenArray[i]['name'])
+				console.log("ADD:"+ tokenArray[i]["address"]);
+				console.log("p:"+ prosperoPrices[i])
+
 				var prosperoPrice = BigNumber(prosperoPrices[i] + "");
 				var usdBN = BigNumber(USD_SCALE + "");
 				prosperoPrice = prosperoPrice.dividedBy(usdBN);
 				tokenArray[i]["price"] = prosperoPrice;
+				latestPrices[tokenArray[i]['address']]=prosperoPrice;
 				var lowerCaseCAdd = tokenArray[i]["cChainAddress"];
 				var wavaxLowerC = WAVAX_COIN_ADDRESS.toLowerCase();
 				//console.log("lowerCaseCAdd:"+lowerCaseCAdd)
