@@ -98,7 +98,7 @@ const chartData = ref({
 	datasets: [
 		{
 			backgroundColor: ["#7262C5", "#2854D7"],
-			data: ["23", "77"],
+			data: [23, 77],
 		},
 	],
 });

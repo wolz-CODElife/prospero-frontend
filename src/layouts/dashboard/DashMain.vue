@@ -18,25 +18,25 @@
 				<!-- Line chart container  -->
 				<div class="bg-[#191A20] row-span-2">
 					<!-- Loading  -->
-					<div
+					<!-- <div
 						v-if="portfolioStore.isLoading"
 						class="flex flex-col h-full items-center justify-center"
 					>
 						<Loader />
-					</div>
+					</div> -->
 
 					<!-- Error  -->
-					<div
+					<!-- <div
 						v-else-if="
 							portfolioStore.isError ||
 							portfolioStore.allPortfolios.length === 0
 						"
 					>
 						<p>An error occured</p>
-					</div>
+					</div> -->
 
 					<!-- Line chart  -->
-					<LineChart :chart-data="portfolioStore.lineChartData" v-else />
+					<LineChart :chart-data="portfolioStore.lineChartData" />
 				</div>
 
 				<!--Table  -->
