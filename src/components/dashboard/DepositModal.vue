@@ -261,18 +261,19 @@ async function depositToPortfolio() {
 
 	try {
 		let res = await handleDepositType();
-		if (!res.success) {
-			loading.value = false;
-			error.value = true;
-			errorMsg.value = res.error;
-			console.log(errorMsg.value);
-		} else {
+		console.log(res);
+		if (res.success) {
 			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas.toFixed(2);
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
 			loading.value = false;
 			// portfolioStore.myPortfolios.push(portfolioStore.selectedPortfolio);
 			await initializeApi();
 			await portfolioStore.getPortfolios();
+		} else {
+			loading.value = false;
+			error.value = true;
+			errorMsg.value = res.error;
+			console.log(errorMsg.value);
 		}
 	} catch (err) {
 		loading.value = false;
