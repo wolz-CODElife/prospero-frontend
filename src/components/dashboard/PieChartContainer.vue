@@ -13,7 +13,7 @@
 			</button>
 
 			<!-- Directions  -->
-			<div class="col-span-10 h-[108px]">
+			<div class="col-span-10 h-[108px] overflow-x-auto">
 				<DashDir
 					empty-selected-card-classes="h-full flex flex-col gap-y-[14px] justify-center items-center"
 					arrow-class="-rotate-45"
@@ -64,7 +64,7 @@
 		<div class="mt-[90px]">
 			<PieChart
 				v-if="portfolioStore.selectedPortfolio.name"
-				:chart-data="chartData"
+				:chart-data="realChartData"
 			/>
 
 			<img
@@ -93,15 +93,32 @@ const portfolioStore = usePortfolios();
 // portfolioStore.selectedPortfolio.portfolioObject.map((item) => {
 // 				return parseFloat(displayPerc(item.percentage).replace("%", ""));
 // 			}),
-const chartData = ref({
-	labels: ["VueJs", "EmberJs"],
-	datasets: [
-		{
-			backgroundColor: ["#7262C5", "#2854D7"],
-			data: [23, 77],
-		},
-	],
-});
+
+// let chartData = ref({
+// 	labels: ["", ""],
+// 	datasets: [
+// 		{
+// 			backgroundColor: ["#7262C5", "#2854D7"],
+// 			data: [30, 60],
+// 		},
+// 	],
+// });
+
+const realChartData = computed(() => {
+	let chartData = []
+	for (const item in portfolioStore.selectedPortfolio.portfolioObject) {
+		chartData.push(portfolioStore.selectedPortfolio.portfolioObject[item])
+		}
+	return {
+		labels: chartData.map((item) => { return item.name}),
+		datasets: [
+			{
+				backgroundColor: chartData.map(() => { return `#${Math.floor(Math.random()*16777215).toString(16)}`}),
+				data: chartData.map((item) => { return parseFloat(displayPerc(item.percentage).replace("%", ""))}),
+			},
+		],
+	}
+})
 
 function displayPerc(perc) {
 	return (perc * 100).toFixed(1) + "%";
