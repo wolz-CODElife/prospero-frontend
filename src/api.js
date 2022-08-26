@@ -343,6 +343,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			tokenObj["price"] = aTokenObject["price"];
 			tokenObj["usdValue"] = usdThisUserThisToken;
 			tokenObj["symbol"] = aTokenObject["symbol"];
+			tokenObj["color"] = aTokenObject["color"];
 			tokenObj["twentyFourHour"] = aTokenObject["twentyFourHour"];
 			tokenObj["image"] = aTokenObject["logoURI"];
 			tokenObj["decimals"] = aTokenObject["decimals"];
@@ -1125,6 +1126,8 @@ async function updateHistoryChartsDataObject(
 		});
 	}
 }
+
+
 
 function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
 	whichPortfolios = whichPortfolios.toLowerCase();
@@ -4104,7 +4107,6 @@ async function makeRandomColorArray() {
 			Math.random() * (235 - 52 + 1) + 52
 		)})`;
 		tokenArray[i]["color"] = randomRGB;
-		//console.log("COLOR:"+DApp.tokenArray[i]['color'])
 	}
 }
 function getUsdScale() {
