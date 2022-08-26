@@ -115,8 +115,8 @@ const realChartData = computed(() => {
 		labels: chartData.map((item) => { return item.name}),
 		datasets: [
 			{
-				backgroundColor: chartData.map(() => { return `#${Math.floor(Math.random()*16777215).toString(16)}`}),
-				borderColor: chartData.map((item) => { return item.color}),
+				backgroundColor: chartData.map((item) => { return item.color}),
+				borderColor: chartData.map((item) => { return item.color}), // "transparent"/ "#000"
 				data: chartData.map((item) => { return parseFloat(displayPerc(item.percentage).replace("%", ""))}),
 			},
 		],
