@@ -9,7 +9,9 @@ import {
 	getMyROITotal,
 	getMyROITotalPercentage,
 	getLineChartData,
-	initializeApi
+	initializeApi,
+	getAllTxns,
+	getTotalWithdrawals
 } from "@/api";
 
 
@@ -26,24 +28,7 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			tokenList: [],
 
-			allTxns: [
-				{
-					type: "Deposit",
-					portfolioName: "AFS1000 🔱",
-					time: "17:05",
-					date: "22-07-22",
-					snowtraceLink: "https://google.com",
-					amount: 200,
-				},
-				{
-					type: "Withdrawal",
-					portfolioName: "Lou",
-					time: "17:05",
-					date: "22-07-22",
-					snowtraceLink: "https://google.com",
-					amount: 100,
-				},
-			],
+			allTxns: [],
 
 			overview: [
 				{
@@ -187,8 +172,11 @@ export const usePortfolios = defineStore("Portfolios", {
 				this.myPortfolios = await getMyPortfoliosDataForTable();
 				this.activeOverview.holdings = await getMyHoldings();
 				this.activeOverview.deposits = await getMyUSDDepositsTotal();
+				this.activeOverview.withdrawals = await getTotalWithdrawals();
+
 				this.activeOverview.roi.value = await getMyROITotal();
 				this.activeOverview.roi.percent = await getMyROITotalPercentage();
+				this.allTxns = getAllTxns();
 				//this.lineChartData = getLineChartData("all portfolios", "0xe2accfbaa0840d31b552971c30e7003e69cb3f39")
 				//this.xAxisLineChart = getAxisDataForLineChart("all portfolios", "0xe2accfbaa0840d31b552971c30e7003e69cb3f39", "x")
 				//this.yAxisLineChart = getAxisDataForLineChart("all portfolios", "0xe2accfbaa0840d31b552971c30e7003e69cb3f39", "y")

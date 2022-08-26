@@ -85,7 +85,7 @@
 						<div class="border-l border-[#2D3035] pl-[10px]">
 							<h2 class="text-[#868C9D] text-[14px]">Withdrawals</h2>
 							<h3 class="text-white text-[16px]">
-								${{ portfolioStore.activeOverview?.withdrawals }}
+								{{ portfolioStore.activeOverview?.withdrawals }}
 							</h3>
 						</div>
 					</div>

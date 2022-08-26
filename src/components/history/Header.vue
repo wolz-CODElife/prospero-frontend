@@ -10,7 +10,7 @@
 				<div>
 					<h2 class="text-[#868C9D] text-[14px]">My holdings</h2>
 					<h3 class="text-white text-[24px]">
-						${{ portfolioStore.activeOverview?.holdings }}
+						{{ portfolioStore.activeOverview?.holdings }}
 					</h3>
 				</div>
 
@@ -18,7 +18,7 @@
 				<div class="border-l border-[#2D3035] pl-[10px]">
 					<h2 class="text-[#868C9D] text-[14px]">Total Deposits</h2>
 					<h3 class="text-white text-[24px]">
-						${{ portfolioStore.activeOverview?.deposits }}
+						{{ portfolioStore.activeOverview?.deposits }}
 					</h3>
 				</div>
 
@@ -26,7 +26,7 @@
 				<div class="border-l border-[#2D3035] pl-[10px]">
 					<h2 class="text-[#868C9D] text-[14px]">Total Withdrawals</h2>
 					<h3 class="text-white text-[24px]">
-						${{ portfolioStore.activeOverview?.withdrawals }}
+						{{ portfolioStore.activeOverview?.withdrawals }}
 					</h3>
 				</div>
 			</div>

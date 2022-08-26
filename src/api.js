@@ -5,7 +5,7 @@ var factoryAddress = contractVariables.factoryAddress;
 var prosperoPricesAddress = contractVariables.prosperoPricesAddress;
 var pricesLibraryAddress = contractVariables.pricesLibraryAddress;
 var subnetHelperContractAddress = contractVariables.subnetHelperContractAddress;
-
+var SnowtraceDeploymentLocation = "https://testnet.snowtrace.io/tx/"//To do - automatically set
 //OBJECTS
 var leaderBoardData = []; //leader board portfolios
 var myWallets = {}; //my wallets either as a portfolio manager or investor
@@ -19,6 +19,7 @@ var withdrawTableData = []; //for withdraw table
 var leaderBoardDataOverTime = {}; //historical chart data leaderboard
 var myPortfoliosDataOverTime = {}; //historical chart data my portfolios
 var latestPrices = {};//tokens address : price
+var withdrawDepositDataForHistory=[]
 //TO DO - have this updated on UI
 var selectedProsperoWalletAddress; //="0x4cc4b88c622ee9b2c9007a6aea014a093c2fefc5"//CHANGE
 var myWallets = 0;
@@ -96,9 +97,10 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 	myPortfolioDataForTable = [];
 	//leaderBoardUITableObject=[];
 	//leaderBoardData=[];
-	var lastUsdDeposited = 0;
-	var myWithdrawTotals = 0;
-	var allWithdrawals=[]
+	var lastUsdDepositedForWithdrawDeposit = 0;
+	withdrawDepositDataForHistory=[]
+	myWithdrawTotals = 0;
+	myHoldingsTotal = 0;
 	//console.log("graphData.length:"+graphData.length)
 	for (var i = 0; i < graphData.length; i++) {
 		var graphItem = graphData[i];
@@ -111,49 +113,93 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 
 		var users = graphItem["users"];
 		var msgSender = graphItem["addressVars"][0];
+		msgSender = msgSender.toLowerCase();
 		var eoaALower = EOAAddress.toLowerCase();
 		var indexOfUser = -1;
 		if (msgSender == EOAAddress) {
 			//console.log('found sender...')
-			if (methodType == WITHDRAW_SWAP || methodType == WITHDRAW_ALL) {
-				//console.log('found WD...')
+			if (methodType == DEPOSIT_THEN_REBALANCE || methodType == LEADER_STRAIGHT_DEPOSIT) {
 				if (users.indexOf(eoaALower) != -1) {
 					indexOfUser = users.indexOf(eoaALower);
 				}
 				if (users.indexOf(EOAAddress) != -1) {
 					indexOfUser = users.indexOf(EOAAddress);
 				}
-				/*for (var f = 0; f < users.length; f++) {
-					var thisUsersAddress = users[f];
-					//console.log("thisUsersAddress:"+thisUsersAddress)
-					thisUsersAddress = thisUsersAddress.toLowerCase();
-					if (thisUsersAddress == eoaALower) {
-						console.log('found index...')
-						indexOfUser = f;
-					}
-				}*/
-				//console.log("indexOfUser:" + indexOfUser);
-
-				if (indexOfUser != -1) {
-					var usdDeposited = usdInvested[indexOfUser];
-					if (usdDeposited < lastUsdDeposited) {
-						myWithdrawTotals =
-							myWithdrawTotals + (lastUsdDeposited - usdDeposited);
-					}
-					lastUsdDeposited = usdDeposited;
-					/*
-					var withdrawalDepObject = {
-						name:graphItem["walletName"],
-						type:"withdrawal",
-						time:formatTimeForHistory(graphItem['intVars'][4])
-
-					}
-					*/
-					
+				if (indexOfUser == -1) {
+					alert("Error - index of user is -1");
 				}
+				//if (indexOfUser != -1) {
+					var usdDeposited = usdInvested[indexOfUser];
+					//if (usdDeposited > lastUsdDepositedForWithdrawDeposit) {
+						//myHoldingsTotal =
+						//	myHoldingsTotal + (usdDeposited - lastUsdDepositedForWithdrawDeposit);
+							var tx = graphItem['id']
+					tx = tx.substring(0,tx.length-2)
+					tx = SnowtraceDeploymentLocation + tx;
+
+					var t = formatTimeForHistory(graphItem['intVars'][4])
+					var amt = ((usdDeposited - lastUsdDepositedForWithdrawDeposit)/USD_SCALE);
+					amt = amt.toFixed(2);
+					var withdrawalDepObject = {
+						portfolioName:graphItem["walletName"],
+						type:"Deposit",
+						unixTime:graphItem['intVars'][4],
+						time:t.time,
+						date:t.date,
+						snowtraceLink:tx,
+						amount:amt,
+						numberOfSwaps:"-",
+						numberOfTransfer:"-"
+					}
+					withdrawDepositDataForHistory.push(withdrawalDepObject)
+					lastUsdDepositedForWithdrawDeposit = usdDeposited;
+					//}
+				//}
+
+			}
+
+			if (methodType == WITHDRAW_SWAP || methodType == WITHDRAW_ALL) {
+				console.log('found WD...')
+				if (users.indexOf(eoaALower) != -1) {
+					indexOfUser = users.indexOf(eoaALower);
+				}
+				if (users.indexOf(EOAAddress) != -1) {
+					indexOfUser = users.indexOf(EOAAddress);
+				}
+				if (indexOfUser == -1) {
+					alert("Error - index of user is -1");
+				}
+				//if (indexOfUser != -1) {
+					var usdDeposited = usdInvested[indexOfUser];
+					//if (usdDeposited < lastUsdDepositedForWithdrawDeposit) {
+						myWithdrawTotals =
+							myWithdrawTotals + (lastUsdDepositedForWithdrawDeposit - usdDeposited);
+					var tx = graphItem['id']
+					tx = tx.substring(0,tx.length-2)
+					tx = SnowtraceDeploymentLocation + tx;
+					var t = formatTimeForHistory(graphItem['intVars'][4])
+					var amt = ((lastUsdDepositedForWithdrawDeposit - usdDeposited) / USD_SCALE);
+					amt = amt.toFixed(2) ;
+					var withdrawalDepObject = {
+						portfolioName:graphItem["walletName"],
+						type:"Withdrawal",
+						unixTime:graphItem['intVars'][4],
+						time:t.time,
+						date:t.date,
+						snowtraceLink:tx,
+						amount:amt,
+						numberOfSwaps:"-",
+						numberOfTransfer:"-"
+					}
+					withdrawDepositDataForHistory.push(withdrawalDepObject)
+					lastUsdDepositedForWithdrawDeposit = usdDeposited;
+
+					//}
+					
+				//}
 			}
 		}
-		myWithdrawTotals = myWithdrawTotals / USD_SCALE;
+		
 		//console.log("myWithdrawTotals:"+myWithdrawTotals);
 
 		//var methodType = intVars[]
@@ -179,6 +225,12 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			}
 		}
 	}
+	myWithdrawTotals = myWithdrawTotals / USD_SCALE;
+	myHoldingsTotal = myHoldingsTotal / USD_SCALE;
+	
+	withdrawDepositDataForHistory.sort((a, b) => a.unixTime < b.unixTime ? -1 : 1)
+
+	console.log('withdrawDepositDataForHistory:'+JSON.stringify(withdrawDepositDataForHistory,null,2))
 	//console.log("leaderBoardDataNew:"+JSON.stringify(leaderBoardDataNew,null,2));
 	var cntrLB = 0;
 	var cntrMyWallets = 0;
@@ -309,6 +361,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		}
 
 		//myHoldingsTotal
+	
 		if (indexOfUser >= 0) {
 			//console.log('calc myHolding')
 			for (var i = 0; i < tokens.length; i++) {
@@ -828,7 +881,31 @@ async function getHistoricalPricesUpdateChartsData() {
 	//);
 }
 
+function getAllTxns(){
+	return withdrawDepositDataForHistory;
+}
 
+
+function formatTimeForHistory(thisTime){
+	var date = new Date(thisTime*1000);
+ 	var datePart = date.toLocaleDateString("en-US");
+	var timePart = date.toLocaleTimeString('en-US')
+	var amOrPm = timePart.substring(timePart.length-2, timePart.length)
+	timePart=timePart.substring(0,timePart.length-6 )
+	//timePart=timePart.substring(-2)
+
+	 // Hours part from the timestamp
+	 /*
+	 var hours = date.getHours();
+	 var minutes = "0" + date.getMinutes();
+	 var seconds = "0" + date.getSeconds();
+	 var formattedTime = hours + ':' + minutes.substr(-2)
+	 */
+	return {
+		time:timePart + " " + amOrPm,
+		date:datePart
+	}
+}
 
 function calcProfitWithDate(balances, tokens, users, percentages, usdInvested,  leaderAddress, thisDate, todaysDateFormatted, portfolioObj){
 	var profitLeader = 0;
@@ -1279,11 +1356,24 @@ async function getMyHoldings() {
 	//return myHoldingsTotal;
 }
 
+async function getTotalWithdrawals() {
+	console.log("getTotalWithdrawals:"+myWithdrawTotals);
+	myWithdrawTotals=Number(myWithdrawTotals+"");
+	myWithdrawTotals = Math.abs(myWithdrawTotals);
+	myWithdrawTotals = myWithdrawTotals.toFixed(2);
+	return "$"+	myWithdrawTotals;
+
+	//myUSDDepositsTotal = "$" + myUSDDepositsTotal + ""
+	//console.log("myUSDDepositsTotal:"+myUSDDepositsTotal)
+	//return myUSDDepositsTotal;
+}
+
 async function getMyUSDDepositsTotal() {
 	console.log("myUSDDepositsTotal:"+myUSDDepositsTotal);
 	myUSDDepositsTotal=Number(myUSDDepositsTotal+"");
+	myUSDDepositsTotal = Math.abs(myUSDDepositsTotal);
 	myUSDDepositsTotal = myUSDDepositsTotal.toFixed(2);
-	return formatNegPositiveWithDollar(myUSDDepositsTotal);
+	return "$"+myUSDDepositsTotal;
 
 	//myUSDDepositsTotal = "$" + myUSDDepositsTotal + ""
 	//console.log("myUSDDepositsTotal:"+myUSDDepositsTotal)
@@ -1518,12 +1608,10 @@ async function handleDepositType() {
 		console.log(" UI_JOIN_THEN_DEPOSIT");
 		var res = await joinPortfolioThenDeposit();
 		console.log("res:"+JSON.stringify(res,null,2))
-
 	} else if (UIStatus == UI_DEPOSIT_MY_PORTFOLIO) {
 		console.log("UI_DEPOSIT_MY_PORTFOLIO");
 		var res = await deposit();
 		console.log("res:"+JSON.stringify(res,null,2))
-
 	} else {
 		console.log("ERROR - no UI STATUS FOUND");
 	}
@@ -2262,6 +2350,8 @@ async function getGraphData() {
       }
       `,
 		});
+		//console.log ("RESULT**: \n", JSON.stringify(result,null,2));
+
 		//console.log ("Query result: \n", result.data.data.latestBalancesFactories);
 		graphData = result.data.data.latestBalancesFactories;
 		for (var i = 0; i < graphData.length; i++) {
@@ -4174,4 +4264,6 @@ export {
 	updateNewInvestors,
 	updatePercentageFee,
 	getLineChartData,
+	getAllTxns,
+	getTotalWithdrawals,
 };

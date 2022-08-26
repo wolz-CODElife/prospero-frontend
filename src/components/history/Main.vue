@@ -70,7 +70,8 @@
 							/>
 						</svg>
 					</span>
-					4 Swap(s) and 1 Transfer(s)
+					{{txn.numberOfSwaps}} Swap(s) and {{txn.numberOfTransfer}} Transfer(s)
+					
 				</h6>
 			</div>
 
