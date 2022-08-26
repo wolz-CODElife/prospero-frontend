@@ -24,7 +24,24 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			tokenList: [],
 
-			allTxns: [],
+			allTxns: [
+				{
+					type: "Deposit",
+					portfolioName: "AFS1000 🔱",
+					time: "17:05",
+					date: "22-07-22",
+					snowtraceLink: "https://google.com",
+					amount: 200,
+				},
+				{
+					type: "Withdrawal",
+					portfolioName: "Lou",
+					time: "17:05",
+					date: "22-07-22",
+					snowtraceLink: "https://google.com",
+					amount: 100,
+				},
+			],
 
 			overview: [
 				{
@@ -99,6 +116,8 @@ export const usePortfolios = defineStore("Portfolios", {
 			portfolioFundFee: 0,
 
 			lineChartData: {},
+
+			activeFilter: "All",
 		};
 	},
 
@@ -222,14 +241,14 @@ export const usePortfolios = defineStore("Portfolios", {
 				(item) => item.asset.name === asset
 			);
 		},
+
+		updateFilter(filter) {
+			this.activeFilter = filter;
+			console.log("kachi see active filter", this.activeFilter);
+		},
 	},
 
 	getters: {
-		// createdPortfolios(state) {
-		// 	return state.myPortfolios.filter(
-		// 		(portfolio) => portfolio.created === true
-		// 	);
-		// },
 		joinedPortfolios(state) {
 			return state.myPortfolios.filter(
 				(portfolio) => portfolio.wallet_type === "Leader"
@@ -240,9 +259,9 @@ export const usePortfolios = defineStore("Portfolios", {
 			if (state.activeFilter === "All") {
 				return state.allTxns;
 			} else {
-				return state.allTxns.filter(
-					(txn) => txn.type === state.activeFilter
-				);
+				return state.allTxns.filter((txn) => {
+					txn.type === state.activeFilter;
+				});
 			}
 		},
 	},

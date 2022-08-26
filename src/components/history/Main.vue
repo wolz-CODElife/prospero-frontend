@@ -7,7 +7,7 @@
 				<Filters
 					:filters="historyFilters"
 					v-model="portfolioStore.activeFilter"
-					@update-filter="updateFilter"
+					@update-filter="portfolioStore.updateFilter"
 				/>
 			</div>
 		</div>
@@ -17,14 +17,15 @@
 		<div
 			class="mx-[30px] my-[15px] flex justify-between items-center bg-[#2D3035] pr-[20px]"
 			v-for="(txn, i) in portfolioStore.filteredTxnList"
+			:key="i"
 		>
 			<div
 				class="py-[15px] px-[22px]"
-				:class="[txn.type === 'deposit' ? 'bg-[#54AC68]' : 'bg-[#B34B4B]']"
+				:class="[txn.type === 'Deposit' ? 'bg-[#54AC68]' : 'bg-[#B34B4B]']"
 			>
 				<h5 class="uppercase text-white text-[14px] mb-[12px]">
-					<span v-if="txn.type === 'deposit'">Deposit</span>
-					<span v-if="txn.type === 'withdrawal'">Withdrawal</span>
+					<span v-if="txn.type === 'Deposit'">Deposit</span>
+					<span v-else-if="txn.type === 'Withdrawal'">Withdrawal</span>
 				</h5>
 				<h6 class="text-white">
 					<span>{{ txn.time }}</span>
@@ -32,12 +33,12 @@
 				</h6>
 			</div>
 
-			<div>
+			<div class="py-[14px]">
 				<h5 class="uppercase text-white text-[14px] mb-[12px]">
 					{{ txn.portfolioName }}
 				</h5>
-				<h6 class="text-[14px] text-[#868C9D]">
-					<span v-if="txn.type === 'deposit'"
+				<h6 class="text-[14px] text-[#868C9D] flex items-center gap-[4px]">
+					<span v-if="txn.type === 'Deposit'"
 						><svg
 							width="16"
 							height="11"
@@ -53,7 +54,7 @@
 							/>
 						</svg>
 					</span>
-					<span v-else-if="txn.type === 'withdrawal'"
+					<span v-else-if="txn.type === 'Withdrawal'"
 						><svg
 							width="16"
 							height="11"
@@ -69,13 +70,12 @@
 							/>
 						</svg>
 					</span>
-					{{ swapCount(txn) }} Swap(s) and
-					{{ transferCount(txn) }} Transfer(s)
+					4 Swap(s) and 1 Transfer(s)
 				</h6>
 			</div>
 
 			<a
-				class="text-[#868C9D] text-[12px]"
+				class="text-[#868C9D] text-[12px] flex gap-[7px] items-center"
 				:href="txn.snowtraceLink"
 				target="_blank"
 			>
@@ -118,15 +118,11 @@ import { usePortfolios } from "@/stores/Portfolios";
 const portfolioStore = usePortfolios();
 
 // onMounted(() => {
-// 	activeFilter.value = "All";
+// 	portfolioStore.activeFilter = "All";
 // 	console.log(activeFilter.value);
 // });
 
-const historyFilters = ref(["All", "Deposits", "Withdrawals"]);
-
-function updateFilter(filter) {
-	portfolioStore.activeFilter = filter;
-}
+const historyFilters = ref(["All", "Deposit", "Withdrawal"]);
 
 // const activeFilter = ref("");
 </script>
