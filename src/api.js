@@ -724,6 +724,10 @@ async function getHistoricalPricesUpdateChartsData() {
 	//3) already found in graph data, not found now, use last usdInvested and lastBalanacesInPort to determine value of port with the price of the tokens on that day.
 	console.log("lbDDD:"+JSON.stringify(lbData,null,2));
 
+	var d = new Date();
+	var todaysDateFormatted = (d.getMonth()+1) +"-"+ d.getDate() +"-"+ d.getFullYear();
+	console.log("todaysDateFormatted:"+todaysDateFormatted);
+
 	for (var i = 0; i < lbData.length; i++) {
 		//To Do function:
 		var thisAddObj = {}
@@ -818,7 +822,7 @@ async function getHistoricalPricesUpdateChartsData() {
 				leaderAddressHere = datesWithDataSortedOBJ[dateFromDatesArray]['addressVars'][1];
 				leaderAddressHere = leaderAddressHere.toLowerCase();
 			}
-			var profitCalc = calcProfitWithDate(lastBalancesNew, lastTokensNew, lastUsersNew, lastPercentages, lastUsdInvestedNew, leaderAddressHere,  dateFromDatesArray);
+			var profitCalc = calcProfitWithDate(lastBalancesNew, lastTokensNew, lastUsersNew, lastPercentages, lastUsdInvestedNew, leaderAddressHere,  dateFromDatesArray, todaysDateFormatted);
 			profitCalc['date']=dateFromDatesArray;
 			lineGraphCalcDataSub.push(profitCalc)
 		}
@@ -830,15 +834,12 @@ async function getHistoricalPricesUpdateChartsData() {
 
 
 
-function calcProfitWithDate(balances, tokens, users, percentages, usdInvested,  leaderAddress, thisDate){
+function calcProfitWithDate(balances, tokens, users, percentages, usdInvested,  leaderAddress, thisDate, todaysDateFormatted){
 	var profitLeader = 0;
 	var profitPercLeader = 0;
 	var profitUser= 0;
 	var profitPercUser = 0;
-	var d = new Date();
-	var thisDateFormatted = new Date(d);
-	thisDateFormatted = (thisDateFormatted.getMonth()+1) +"-"+ thisDateFormatted.getDate() +"-"+ thisDateFormatted.getFullYear();
-	console.log("ddd:"+thisDateFormatted);
+
 	
 
 	if (users.length==0){
@@ -878,7 +879,7 @@ function calcProfitWithDate(balances, tokens, users, percentages, usdInvested,  
 			var userPercentage = percentages[indexOfUser] / USD_SCALE
 			var usdInvestedUser = usdInvested[indexOfUser]
 			usdInvestedUser = usdInvestedUser / USD_SCALE
-			var profitCalcObjUser = calcJustProfitObj(tokens, balances, userPercentage, usdInvestedUser, thisDate)
+			var profitCalcObjUser = calcJustProfitObj(tokens, balances, userPercentage, usdInvestedUser, thisDate, todaysDateFormatted)
 			objToReturn['profitUser']=profitCalcObjUser.profit
 			objToReturn['totalValueUser']=profitCalcObjUser.totalValue
 			objToReturn['usdInvestedUser']=usdInvestedUser
@@ -892,7 +893,7 @@ function calcProfitWithDate(balances, tokens, users, percentages, usdInvested,  
 			var userPercentage = percentages[indexOfLeader] / USD_SCALE
 			var usdInvestedUser = usdInvested[indexOfLeader]
 			usdInvestedUser = usdInvestedUser / USD_SCALE
-			var profitCalcObj = calcJustProfitObj(tokens, balances, userPercentage, usdInvestedUser, thisDate)
+			var profitCalcObj = calcJustProfitObj(tokens, balances, userPercentage, usdInvestedUser, thisDate, todaysDateFormatted)
 			objToReturn['profitLeader']=profitCalcObj.profit
 			objToReturn['totalValueLeader']=profitCalcObj.totalValue
 			objToReturn['usdInvestedLeader']=usdInvestedUser
@@ -910,7 +911,7 @@ function calcProfitWithDate(balances, tokens, users, percentages, usdInvested,  
 
 }
 
-function calcJustProfitObj(tokens, balances, userPercentage, usdInvested, thisDate){
+function calcJustProfitObj(tokens, balances, userPercentage, usdInvested, thisDate, todaysDateFormatted){
 	console.log("calcJustProfitObj tokens:"+tokens+" balances: "+userPercentage+" usdInvested: "+usdInvested);
 	if ((usdInvested == 0) ||  (userPercentage==0) || (balances.length==0)){
 		return{
@@ -929,6 +930,11 @@ function calcJustProfitObj(tokens, balances, userPercentage, usdInvested, thisDa
 		console.log("thisDate:"+thisDate);
 
 		var price = historicalPricesObject[addLowerCase][thisDate];
+		if (todaysDateFormatted == thisDate){
+			//console.log("TTT:"+JSON.stringify(tokens[i],null,2))
+			//console.log("getting todays price")
+			//alert("have to get price here")
+		}
 		if (price == null || price == undefined || price == ""){
 			alert("NO PRICE");
 			return;
