@@ -40,6 +40,7 @@
 									<div class="text-[12px]">
 										{{ displayPerc(portfolio.percentage) }}
 									</div>
+									<div class="h-[10px] w-full p-[5px]" :style="{'background-color': portfolio.color}"></div>
 								</div>
 							</div>
 						</div>
@@ -109,11 +110,13 @@ const realChartData = computed(() => {
 	for (const item in portfolioStore.selectedPortfolio.portfolioObject) {
 		chartData.push(portfolioStore.selectedPortfolio.portfolioObject[item])
 		}
+		
 	return {
 		labels: chartData.map((item) => { return item.name}),
 		datasets: [
 			{
 				backgroundColor: chartData.map(() => { return `#${Math.floor(Math.random()*16777215).toString(16)}`}),
+				borderColor: chartData.map((item) => { return item.color}),
 				data: chartData.map((item) => { return parseFloat(displayPerc(item.percentage).replace("%", ""))}),
 			},
 		],
