@@ -203,6 +203,8 @@ import { onMounted, computed, ref } from "vue";
 import Modal from "../Modal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
 import Loader from "../Loader.vue";
+import { useRouter } from "vue-router";
+const { currentRoute } = useRouter();
 
 const portfolioStore = usePortfolios();
 
@@ -253,6 +255,9 @@ async function getTokenList() {
 }
 
 async function depositToPortfolio() {
+	//currentRoute.push('/')
+	//router.push({ name: 'user', params: { username: 'erina' } })
+
 	firstView.value = false;
 	secondView.value = true;
 
@@ -263,19 +268,24 @@ async function depositToPortfolio() {
 		let res = await handleDepositType();
 		console.log(res);
 		if (res.success) {
+			console.log("success is true");
 			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas.toFixed(2);
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
+			error.value = false;
 			loading.value = false;
+			await portfolioStore.loadData();
 			// portfolioStore.myPortfolios.push(portfolioStore.selectedPortfolio);
-			await initializeApi();
-			await portfolioStore.getPortfolios();
+			//await initializeApi();
+			//await portfolioStore.getPortfolios();
 		} else {
+			console.log("success is false");
 			loading.value = false;
 			error.value = true;
 			errorMsg.value = res.error;
 			console.log(errorMsg.value);
 		}
 	} catch (err) {
+		console.log("exception err:"+err)
 		loading.value = false;
 		error.value = true;
 	}

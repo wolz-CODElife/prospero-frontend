@@ -366,14 +366,16 @@ function updateUIStatusAPICaller(uiType) {
 async function doWithdraw() {
 	//to do - add tokens swapping into
 	try {
-		//console.log("Do Withdraw function works amount:"+JSON.stringify(amount,null,2));
+		console.log("Do Withdraw function works amount:"+JSON.stringify(amount,null,2));
 		console.log("doWithdraw amount.value:" + amount.value);
-		const res = await withdraw([], amount.value);
+		const res = await withdraw([], 2);
 		console.log(res);
 		if (res.success) {
 			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
+			error.value = false;
 			loading.value = false;
+			await portfolioStore.loadData();
 		} else {
 			error.value = true;
 			console.log(success.error);

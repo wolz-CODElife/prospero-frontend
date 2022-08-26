@@ -14,7 +14,7 @@ var tokenArray = require("./apiLib/Tokens.json"); //set of tokens we use
 var balancesInEoa = []; //used in deposits
 var eventBlocksAlreadyHandledLatestBalances = [];
 var eventBlocksAlreadyHandledFinishedMethod = []; //to do - remove me?  Unused?
-
+var depositsAndWithdrawals=[];
 var withdrawTableData = []; //for withdraw table
 var leaderBoardDataOverTime = {}; //historical chart data leaderboard
 var myPortfoliosDataOverTime = {}; //historical chart data my portfolios
@@ -98,10 +98,11 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 	//leaderBoardData=[];
 	var lastUsdDeposited = 0;
 	var myWithdrawTotals = 0;
+	var allWithdrawals=[]
 	//console.log("graphData.length:"+graphData.length)
 	for (var i = 0; i < graphData.length; i++) {
 		var graphItem = graphData[i];
-		//console.log("graphItem:"+JSON.stringify(graphItem,null,2))
+		console.log("graphItem:"+JSON.stringify(graphItem,null,2))
 		var intVars = graphItem["intVars"];
 		var usdInvested = graphItem["usdInvested"];
 
@@ -140,6 +141,15 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 							myWithdrawTotals + (lastUsdDeposited - usdDeposited);
 					}
 					lastUsdDeposited = usdDeposited;
+					/*
+					var withdrawalDepObject = {
+						name:graphItem["walletName"],
+						type:"withdrawal",
+						time:formatTimeForHistory(graphItem['intVars'][4])
+
+					}
+					*/
+					
 				}
 			}
 		}
@@ -1176,7 +1186,7 @@ function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
 		//if ((thisPort[i].usdInvested>0) && (thisPort[i].value>0)){
 		chartDataToReturnLabels.push(thisPort[i].date);
 		if (whichPortfolios == "all portfolios") {
-			chartDataToReturnYAxis.push(thisPort[i].totalValueLeader);
+			chartDataToReturnYAxis.push(thisPort[i].profitPercLeader);
 		} else if (whichPortfolios == "my portfolios") {
 			chartDataToReturnYAxis.push(thisPort[i].totalValueUser);
 		}
@@ -1262,16 +1272,16 @@ async function getMyHoldings() {
 	console.log("myHoldingsTotal:" + myHoldingsTotal);
 	myHoldingsTotal = Number(myHoldingsTotal + "");
 	console.log("myHoldingsTotal:" + myHoldingsTotal);
-
 	myHoldingsTotal = myHoldingsTotal.toFixed(2);
 	return formatNegPositiveWithDollar(myHoldingsTotal);
-
 	//myHoldingsTotal = "$" + myHoldingsTotal + ""
 	//console.log("myHoldingsTotal:"+myHoldingsTotal)
 	//return myHoldingsTotal;
 }
 
 async function getMyUSDDepositsTotal() {
+	console.log("myUSDDepositsTotal:"+myUSDDepositsTotal);
+	myUSDDepositsTotal=Number(myUSDDepositsTotal+"");
 	myUSDDepositsTotal = myUSDDepositsTotal.toFixed(2);
 	return formatNegPositiveWithDollar(myUSDDepositsTotal);
 
@@ -1281,6 +1291,7 @@ async function getMyUSDDepositsTotal() {
 }
 
 async function getMyROITotal() {
+	myROITotal=Number(myROITotal+"")
 	myROITotal = myROITotal.toFixed(2);
 	return formatNegPositiveWithDollar(myROITotal);
 	//myROITotal = "$" + myROITotal + ""
@@ -1289,6 +1300,7 @@ async function getMyROITotal() {
 }
 
 async function getMyROITotalPercentage() {
+	myROITotalPercentage=Number(myROITotalPercentage+"")
 	myROITotalPercentage = myROITotalPercentage.toFixed(2);
 	myROITotalPercentage = myROITotalPercentage + "%";
 	console.log("myROITotalPercentage:" + myROITotalPercentage);
@@ -1501,12 +1513,17 @@ async function handleDepositType() {
 	if (UIStatus == UI_CREATE_THEN_DEPOSIT) {
 		console.log("UI_CREATE_THEN_DEPOSIT");
 		var res = await createPortfolioThenDeposit();
+		console.log("res:"+JSON.stringify(res,null,2))
 	} else if (UIStatus == UI_JOIN_THEN_DEPOSIT) {
 		console.log(" UI_JOIN_THEN_DEPOSIT");
 		var res = await joinPortfolioThenDeposit();
+		console.log("res:"+JSON.stringify(res,null,2))
+
 	} else if (UIStatus == UI_DEPOSIT_MY_PORTFOLIO) {
 		console.log("UI_DEPOSIT_MY_PORTFOLIO");
 		var res = await deposit();
+		console.log("res:"+JSON.stringify(res,null,2))
+
 	} else {
 		console.log("ERROR - no UI STATUS FOUND");
 	}
@@ -2271,11 +2288,12 @@ function getIndexOfUser(arrayOfAddresses, userAddress) {
 	return -1;
 }
 
+const delay = (n) => new Promise( r => setTimeout(r, n*1000));
 //withdraw - kachi
 //tokenSwappingInto is an array of addresses swapping into, can only be of length 1 or 0.  So if you are
 //not swapping into any tokens, just have an empty array - []
 async function withdraw(tokenSwappingInto, amountToWithdraw) {
-	//console.log("SETTING AMOUNT TO WITHDRAW FOR TESTING TO 1");
+	console.log("withdraw:"+tokenSwappingInto+" amountToWithdraw:"+amountToWithdraw);
 	//amountToWithdraw="1"
 	console.log(
 		"withdraw called:" +
@@ -2350,6 +2368,8 @@ async function withdraw(tokenSwappingInto, amountToWithdraw) {
 			EOAAddress,
 			false
 		);
+		delay(3);
+
 		console.log("valueOfUsersPortfolioBefore:" + valueOfUsersPortfolioBefore);
 		console.log("valueOfUsersPortfolioAfter :" + valueOfUsersPortfolioAfter);
 		var success = false;
@@ -2410,6 +2430,8 @@ async function withdraw(tokenSwappingInto, amountToWithdraw) {
 		return { success: false, error: e };
 	}
 }
+
+
 
 //for manage portfolio (rebalanceing) - kachi
 //tokenAddressesToRemix is an array of string token addresses
@@ -2653,6 +2675,8 @@ async function deposit() {
 		if (!status.success) {
 			return status;
 		}
+
+		delay(3);
 
 		var valueOfUsersPortfolioAfter = await getValueOfUsersPortfolio(
 			selectedProsperoWalletAddress,

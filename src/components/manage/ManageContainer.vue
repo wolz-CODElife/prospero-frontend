@@ -312,12 +312,15 @@ async function doSaveAllocation() {
 		//console.log("selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
 
 		let res = await rebalance(percentages, tokenAddressesToRemix, selectedProsperoWalletAddress);
+		console.log("res here1:"+res);
 		if (!res.success) {
 			loading.value = false;
 			error.value = true;
 			errorMsg.value = res.error;
 			console.log(errorMsg.value);
 		} else {
+			error.value = false;
+			loading.value = false;
 			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas.toFixed(2);
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
 		}

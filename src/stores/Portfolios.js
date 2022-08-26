@@ -9,7 +9,9 @@ import {
 	getMyROITotal,
 	getMyROITotalPercentage,
 	getLineChartData,
+	initializeApi
 } from "@/api";
+
 
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
@@ -123,6 +125,25 @@ export const usePortfolios = defineStore("Portfolios", {
 
 	actions: {
 		// Fill empty portfolio list with an API call
+
+		async loadData(){
+			try {
+				console.log("calling loadData");
+				await initializeApi();
+				this.isLoading = true;
+				try {
+					await this.getPortfolios();
+					this.isLoading = false;
+				} catch (error) {
+					this.isLoading = false;
+					this .isError = true;
+					console.log("get portfolios error", error);
+				}
+			} catch (error) {
+				console.log("init error", error);
+			}
+		},
+
 		async getPortfolios() {
 			this.isLoading = true;
 			this.lineChartData = {
