@@ -37,11 +37,11 @@
 							class="bg-[#6FCF97] bg-opacity-20 text-[#6FCF97] text-[10px] p-[6px]"
 							>Managing</span
 						>
-						<span
+						<!-- <span
 							v-if="portfolio.wallet_type === 'Trailer'"
 							class="bg-[#6FCF97] bg-opacity-20 text-[#6FCF97] text-[10px] p-[6px]"
 							>Investing</span
-						>
+						> -->
 					</td>
 					<td class="border-r border-r-[#2D3035]">
 						{{ portfolio.fee }}
