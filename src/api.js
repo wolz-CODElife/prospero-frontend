@@ -717,7 +717,11 @@ async function getHistoricalPricesUpdateChartsData() {
 	//1) found in graph data.
 	//2) not found in graph data and there has never been any graph data on it, profit is 0.
 	//3) already found in graph data, not found now, use last usdInvested and lastBalanacesInPort to determine value of port with the price of the tokens on that day.
-	console.log("lbDDD:" + JSON.stringify(lbData, null, 2));
+	console.log("lbDDD:"+JSON.stringify(lbData,null,2));
+
+	var d = new Date();
+	var todaysDateFormatted = (d.getMonth()+1) +"-"+ d.getDate() +"-"+ d.getFullYear();
+	console.log("todaysDateFormatted:"+todaysDateFormatted);
 
 	for (var i = 0; i < lbData.length; i++) {
 		//To Do function:
@@ -823,17 +827,9 @@ async function getHistoricalPricesUpdateChartsData() {
 					datesWithDataSortedOBJ[dateFromDatesArray]["addressVars"][1];
 				leaderAddressHere = leaderAddressHere.toLowerCase();
 			}
-			var profitCalc = calcProfitWithDate(
-				lastBalancesNew,
-				lastTokensNew,
-				lastUsersNew,
-				lastPercentages,
-				lastUsdInvestedNew,
-				leaderAddressHere,
-				dateFromDatesArray
-			);
-			profitCalc["date"] = dateFromDatesArray;
-			lineGraphCalcDataSub.push(profitCalc);
+			var profitCalc = calcProfitWithDate(lastBalancesNew, lastTokensNew, lastUsersNew, lastPercentages, lastUsdInvestedNew, leaderAddressHere,  dateFromDatesArray, todaysDateFormatted);
+			profitCalc['date']=dateFromDatesArray;
+			lineGraphCalcDataSub.push(profitCalc)
 		}
 		lineGraphCalcData[thisProsperoWalletAddressLB] = lineGraphCalcDataSub;
 	}
@@ -842,38 +838,26 @@ async function getHistoricalPricesUpdateChartsData() {
 	);
 }
 
-function calcProfitWithDate(
-	balances,
-	tokens,
-	users,
-	percentages,
-	usdInvested,
-	leaderAddress,
-	thisDate
-) {
+
+
+function calcProfitWithDate(balances, tokens, users, percentages, usdInvested,  leaderAddress, thisDate, todaysDateFormatted){
 	var profitLeader = 0;
 	var profitPercLeader = 0;
 	var profitUser = 0;
 	var profitPercUser = 0;
-	var d = new Date();
-	var thisDateFormatted = new Date(d);
-	thisDateFormatted =
-		thisDateFormatted.getMonth() +
-		1 +
-		"-" +
-		thisDateFormatted.getDate() +
-		"-" +
-		thisDateFormatted.getFullYear();
-	console.log("ddd:" + thisDateFormatted);
 
-	if (users.length == 0) {
-		var objToReturn = {
-			profitLeader: profitLeader,
-			profitPercLeader: profitPercLeader,
-			profitUser: profitUser,
-			profitPercUser: profitPercUser,
-			totalValueUser: 0,
-			totalValueLeader: 0,
+	
+
+	if (users.length==0){
+		var objToReturn =
+		{
+			profitLeader:profitLeader,
+			profitPercLeader:profitPercLeader,
+			profitUser:profitUser,
+			profitPercUser:profitPercUser,
+			totalValueUser:0,
+			totalValueLeader:0
+
 		};
 		return objToReturn;
 	} else {
@@ -886,70 +870,48 @@ function calcProfitWithDate(
 
 			//}
 
-			var userPercentage = percentages[indexOfUser] / USD_SCALE;
-			var usdInvestedUser = usdInvested[indexOfUser];
-			usdInvestedUser = usdInvestedUser / USD_SCALE;
-			var profitCalcObjUser = calcJustProfitObj(
-				tokens,
-				balances,
-				userPercentage,
-				usdInvestedUser,
-				thisDate
-			);
-			objToReturn["profitUser"] = profitCalcObjUser.profit;
-			objToReturn["totalValueUser"] = profitCalcObjUser.totalValue;
-			objToReturn["usdInvestedUser"] = usdInvestedUser;
-			objToReturn["profitPercUser"] = profitCalcObjUser.profitPerc;
-		} else {
-			objToReturn["profitUser"] = 0;
-			objToReturn["profitPercUser"] = 0;
-			objToReturn["totalValueUser"] = 0;
+
+
+			var userPercentage = percentages[indexOfUser] / USD_SCALE
+			var usdInvestedUser = usdInvested[indexOfUser]
+			usdInvestedUser = usdInvestedUser / USD_SCALE
+			var profitCalcObjUser = calcJustProfitObj(tokens, balances, userPercentage, usdInvestedUser, thisDate, todaysDateFormatted)
+			objToReturn['profitUser']=profitCalcObjUser.profit
+			objToReturn['totalValueUser']=profitCalcObjUser.totalValue
+			objToReturn['usdInvestedUser']=usdInvestedUser
+			objToReturn['profitPercUser']=profitCalcObjUser.profitPerc
+		}else{
+			objToReturn['profitUser']=0
+			objToReturn['profitPercUser']=0
+			objToReturn['totalValueUser']=0
 		}
-		if (indexOfLeader != -1) {
-			var userPercentage = percentages[indexOfLeader] / USD_SCALE;
-			var usdInvestedUser = usdInvested[indexOfLeader];
-			usdInvestedUser = usdInvestedUser / USD_SCALE;
-			var profitCalcObj = calcJustProfitObj(
-				tokens,
-				balances,
-				userPercentage,
-				usdInvestedUser,
-				thisDate
-			);
-			objToReturn["profitLeader"] = profitCalcObj.profit;
-			objToReturn["totalValueLeader"] = profitCalcObj.totalValue;
-			objToReturn["usdInvestedLeader"] = usdInvestedUser;
-			objToReturn["profitPercLeader"] = profitCalcObj.profitPerc;
-		} else {
-			objToReturn["profitLeader"] = 0;
-			objToReturn["profitPercLeader"] = 0;
-			objToReturn["totalValueLeader"] = 0;
+		if (indexOfLeader!=-1){
+			var userPercentage = percentages[indexOfLeader] / USD_SCALE
+			var usdInvestedUser = usdInvested[indexOfLeader]
+			usdInvestedUser = usdInvestedUser / USD_SCALE
+			var profitCalcObj = calcJustProfitObj(tokens, balances, userPercentage, usdInvestedUser, thisDate, todaysDateFormatted)
+			objToReturn['profitLeader']=profitCalcObj.profit
+			objToReturn['totalValueLeader']=profitCalcObj.totalValue
+			objToReturn['usdInvestedLeader']=usdInvestedUser
+			objToReturn['profitPercLeader']=profitCalcObj.profitPerc
+
+		}else{
+			objToReturn['profitLeader']=0
+			objToReturn['profitPercLeader']=0
+			objToReturn['totalValueLeader']=0
 		}
 		return objToReturn;
 	}
 }
 
-function calcJustProfitObj(
-	tokens,
-	balances,
-	userPercentage,
-	usdInvested,
-	thisDate
-) {
-	console.log(
-		"calcJustProfitObj tokens:" +
-			tokens +
-			" balances: " +
-			userPercentage +
-			" usdInvested: " +
-			usdInvested
-	);
-	if (usdInvested == 0 || userPercentage == 0 || balances.length == 0) {
-		return {
-			profit: 0,
-			profitPerc: 0,
-			totalValue: 0,
-		};
+function calcJustProfitObj(tokens, balances, userPercentage, usdInvested, thisDate, todaysDateFormatted){
+	console.log("calcJustProfitObj tokens:"+tokens+" balances: "+userPercentage+" usdInvested: "+usdInvested);
+	if ((usdInvested == 0) ||  (userPercentage==0) || (balances.length==0)){
+		return{
+			profit:0,
+			profitPerc:0,
+			totalValue:0
+		}
 	}
 	console.log(" ");
 	var valueOfEachToken = [];
@@ -961,7 +923,12 @@ function calcJustProfitObj(
 		console.log("thisDate:" + thisDate);
 
 		var price = historicalPricesObject[addLowerCase][thisDate];
-		if (price == null || price == undefined || price == "") {
+		if (todaysDateFormatted == thisDate){
+			//console.log("TTT:"+JSON.stringify(tokens[i],null,2))
+			//console.log("getting todays price")
+			//alert("have to get price here")
+		}
+		if (price == null || price == undefined || price == ""){
 			alert("NO PRICE");
 			return;
 		}
