@@ -189,13 +189,13 @@ export const usePortfolios = defineStore("Portfolios", {
 			}
 		},
 
-		doSelectPortfolio(val) {
+		async doSelectPortfolio(val) {
 			console.log(
 				"doSelectPortfolio called with val:" + JSON.stringify(val, null, 2)
 			);
 			this.selectedPortfolio = val;
 			this.activeHeader = "right";
-			updateSelectedWallet(val.prosperoWalletAddress);
+			await updateSelectedWallet(val.prosperoWalletAddress);
 			this.lineChartData = getLineChartData(
 				this.activePortfolioType,
 				val.prosperoWalletAddress

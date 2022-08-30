@@ -26,6 +26,8 @@
 				<h5 class="uppercase text-white text-[14px] mb-[12px]">
 					<span v-if="txn.type === 'Deposit'">Deposit</span>
 					<span v-else-if="txn.type === 'Withdrawal'">Withdrawal</span>
+					<span v-else-if="txn.type === 'Manager Rebalance'">Manager Rebalance</span>
+					<span v-else-if="txn.type === 'Manager Deposit'">Manager Deposit</span>
 				</h5>
 				<h6 class="text-white">
 					<span>{{ txn.time }}</span>
@@ -100,8 +102,10 @@
 					</svg>
 				</span>
 			</a>
-
-			<span class="text-[16px] text-white">${{ txn.amount }}</span>
+			<span v-if="txn.type === 'Deposit'"><span class="text-[16px] text-white">{{ txn.amount }}</span></span>
+			<span v-else-if="txn.type === 'Withdrawal'"><span class="text-[16px] text-white">{{ txn.amount }}</span></span>
+			<span v-else-if="txn.type === 'Manager Deposit'"><span class="text-[16px] text-white"></span></span>
+			<span v-else-if="txn.type === 'Manager Rebalance'"><span class="text-[16px] text-white"></span></span>
 
 			<div class="bg-[#868C9D] text-white text-[12px] py-[10px] px-[12px]">
 				Completed <span class="text-white">✔️</span>

@@ -113,21 +113,59 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 
 		var users = graphItem["users"];
 		var msgSender = graphItem["addressVars"][0];
+		var leaderAddressHere = graphItem["addressVars"][1];
+		var prospWalletAddressHere = graphItem["addressVars"][2];
+		prospWalletAddressHere = prospWalletAddressHere.toLowerCase();
+		leaderAddressHere = leaderAddressHere.toLowerCase();
 		msgSender = msgSender.toLowerCase();
 		var eoaALower = EOAAddress.toLowerCase();
 		var indexOfUser = -1;
-		if (msgSender == EOAAddress) {
-			//console.log('found sender...')
-			if (methodType == DEPOSIT_THEN_REBALANCE || methodType == LEADER_STRAIGHT_DEPOSIT) {
-				if (users.indexOf(eoaALower) != -1) {
-					indexOfUser = users.indexOf(eoaALower);
+		console.log('selectedProsperoWalletAddress:'+selectedProsperoWalletAddress)
+		console.log('prospWalletAddressHere:'+prospWalletAddressHere)
+		console.log("msgSender:"+msgSender);
+		console.log("eoaALower:"+eoaALower);
+
+		if (prospWalletAddressHere == selectedProsperoWalletAddress){
+			console.log("methodType:"+methodType)
+
+		if ((methodType == LEADER_SWAP) || (methodType == LEADER_STRAIGHT_DEPOSIT)) {
+			var rebalType = ""
+			if (methodType == LEADER_SWAP){
+				rebalType = "Manager Rebalance"
+			}else if (methodType == LEADER_STRAIGHT_DEPOSIT){
+				rebalType = "Manager Deposit"
+			}
+
+			console.log("GOT SWAP....")
+				var tx = graphItem['id']
+				tx = tx.substring(0,tx.length-2)
+				tx = SnowtraceDeploymentLocation + tx;
+				var t = formatTimeForHistory(graphItem['intVars'][4])
+				var withdrawalDepObject = {
+					portfolioName:graphItem["walletName"],
+					type:rebalType,
+					unixTime:graphItem['intVars'][4],
+					time:t.time,
+					date:t.date,
+					snowtraceLink:tx,
+					amount:"-",
+					numberOfSwaps:intVars[intVars.length-2],
+					numberOfTransfer:intVars[intVars.length-1]
 				}
-				if (users.indexOf(EOAAddress) != -1) {
-					indexOfUser = users.indexOf(EOAAddress);
-				}
+				withdrawDepositDataForHistory.push(withdrawalDepObject)
+		}else if (msgSender == eoaALower) {
+			console.log('found sender...')
+			if (users.indexOf(eoaALower) != -1) {
+				indexOfUser = users.indexOf(eoaALower);
+			}
+			if (users.indexOf(EOAAddress) != -1) {
+				indexOfUser = users.indexOf(EOAAddress);
+			}
+			if (methodType == DEPOSIT_THEN_REBALANCE) {
 				if (indexOfUser == -1) {
 					alert("Error - index of user is -1");
 				}
+				var rebalType = "Deposit"
 				//if (indexOfUser != -1) {
 					var usdDeposited = usdInvested[indexOfUser];
 					//if (usdDeposited > lastUsdDepositedForWithdrawDeposit) {
@@ -136,36 +174,35 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 							var tx = graphItem['id']
 					tx = tx.substring(0,tx.length-2)
 					tx = SnowtraceDeploymentLocation + tx;
-
+					console.log("GI:"+JSON.stringify(graphItem,null,2));
 					var t = formatTimeForHistory(graphItem['intVars'][4])
 					var amt = ((usdDeposited - lastUsdDepositedForWithdrawDeposit)/USD_SCALE);
-					amt = amt.toFixed(2);
+					if (amt<0){
+						amt = Math.abs(amt);
+						amt = "-$"+amt.toFixed(2)
+					}else{
+						amt = "+$"+amt.toFixed(2)
+					}
+					var intVars = graphItem['intVars'];
 					var withdrawalDepObject = {
 						portfolioName:graphItem["walletName"],
-						type:"Deposit",
+						type:rebalType,
 						unixTime:graphItem['intVars'][4],
 						time:t.time,
 						date:t.date,
 						snowtraceLink:tx,
 						amount:amt,
-						numberOfSwaps:"-",
-						numberOfTransfer:"-"
+						numberOfSwaps:intVars[intVars.length-2],
+						numberOfTransfer:intVars[intVars.length-1]
 					}
 					withdrawDepositDataForHistory.push(withdrawalDepObject)
 					lastUsdDepositedForWithdrawDeposit = usdDeposited;
 					//}
 				//}
 
-			}
-
-			if (methodType == WITHDRAW_SWAP || methodType == WITHDRAW_ALL) {
+			} else if (methodType == WITHDRAW_SWAP || methodType == WITHDRAW_ALL) {
 				console.log('found WD...')
-				if (users.indexOf(eoaALower) != -1) {
-					indexOfUser = users.indexOf(eoaALower);
-				}
-				if (users.indexOf(EOAAddress) != -1) {
-					indexOfUser = users.indexOf(EOAAddress);
-				}
+				
 				if (indexOfUser == -1) {
 					alert("Error - index of user is -1");
 				}
@@ -179,7 +216,12 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 					tx = SnowtraceDeploymentLocation + tx;
 					var t = formatTimeForHistory(graphItem['intVars'][4])
 					var amt = ((lastUsdDepositedForWithdrawDeposit - usdDeposited) / USD_SCALE);
-					amt = amt.toFixed(2) ;
+					if (amt<0){
+						amt = Math.abs(amt);
+						amt = "-$"+amt.toFixed(2)
+					}else{
+						amt = "+$"+amt.toFixed(2)
+					}
 					var withdrawalDepObject = {
 						portfolioName:graphItem["walletName"],
 						type:"Withdrawal",
@@ -188,8 +230,8 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 						date:t.date,
 						snowtraceLink:tx,
 						amount:amt,
-						numberOfSwaps:"-",
-						numberOfTransfer:"-"
+						numberOfSwaps:intVars[intVars.length-2],
+						numberOfTransfer:intVars[intVars.length-1]
 					}
 					withdrawDepositDataForHistory.push(withdrawalDepObject)
 					lastUsdDepositedForWithdrawDeposit = usdDeposited;
@@ -199,6 +241,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 				//}
 			}
 		}
+	}
 		
 		//console.log("myWithdrawTotals:"+myWithdrawTotals);
 
@@ -1251,7 +1294,7 @@ function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
 	var chartDataToReturnYAxis = [];
 
 	var thisPort = lineGraphCalcData[prosperoWalletAddressSelected];
-	console.log("thisPort*:" + JSON.stringify(thisPort, null, 2));
+	//console.log("thisPort*:" + JSON.stringify(thisPort, null, 2));
 	var justGotAZero = true;
 	/*
 				objToReturn['profitUser']=profitCalcObjUser.profit
@@ -1852,7 +1895,7 @@ async function getChartDataSelectedMyPortfolio() {
 }
 function getLeadersPortfolioForAddress(prosperoWalletAddress) {
 	console.log("getLeadersPortfolioForAddress:" + prosperoWalletAddress);
-	console.log("LBD:" + JSON.stringify(leaderBoardData, null, 2));
+	//console.log("LBD:" + JSON.stringify(leaderBoardData, null, 2));
 	for (var i = 0; i < leaderBoardData.length; i++) {
 		var thisProsperoWalletAddress =
 			leaderBoardData[i]["prosperoWalletAddress"];
@@ -2093,7 +2136,10 @@ async function updateAmount(amount, tokenAddress) {
 async function updateSelectedProsperoWalletAddress(address) {
 	console.log("*updateSelectedProsperoWallet called with address:" + address);
 	selectedProsperoWalletAddress = address;
+	//await convertGraphDataToLeaderBoardAndMyWalletsData();
+
 }
+/*
 async function initNewEventListener() {
 	console.log("initNewEventListener");
 	if (prosperoFactoryEventsInstance == null) {
@@ -2151,7 +2197,7 @@ async function initNewEventListener() {
 				console.log("methodType:" + methodType);
 				console.log("eoaAddressMsgSender:" + eoaAddressMsgSender);
 				console.log("event.blockNumber:" + event.blockNumber);
-				console.log(
+				console.log(got LatestBalancesFactory
 					"blockNumWhenWebAppLaunched:" + blockNumWhenWebAppLaunched
 				);
 				console.log("walletWaitingForEOA:" + walletWaitingForEOA);
@@ -2174,22 +2220,7 @@ async function initNewEventListener() {
 				var alertString = "Error - no methodType found.";
 
 				//CREATE AND FOLLOW DOES NOT FIRE - REMOVE?
-				/*if (methodType==CREATE_WALLET){
-        if (EOAAddress == eoaAddressMsgSender){
-         //console.log("received event of created wallet - it is the wallet the user was waiting for, doing nothing.")
-          //walletWaitingForEOA="";
-          return;
-        }
-        alertString ="A new Prospero wallet has been created, refreshing page now."
-      }else if (methodType==FOLLOW_WALLET){
-        if (EOAAddress == eoaAddressMsgSender){
-         //console.log("received event of created wallet - it is the wallet the user was waiting for, doing nothing.")
-          //walletWaitingForEOA="";
-          return;
-        }
-        alertString ="A Prospero wallet has recently been followed, refreshing page now."
-      }else 
-      */
+			
 				if (methodType == LEADER_SWAP) {
 					alertString =
 						"A rebalance has just completed on a Prospero wallet, refreshing page now.";
@@ -2297,7 +2328,7 @@ async function initNewEventListener() {
 		);
 	}
 }
-
+*/
 async function getGraphData() {
 	//console.log("getGraphData")
 	var prspUrl = "https://api.thegraph.com/subgraphs/name/lapat/prospero"; // https://thegraph.com/explorer/subgraph/uniswap/uniswap-v2
@@ -3006,8 +3037,7 @@ if (!isSubnet){
 	balancesInEoa = thisBalancesInEoa;
 	return thisBalancesInEoa;
 }
-
-function updateSelectedWallet(prosperoWalletAddress) {
+async function updateSelectedWallet(prosperoWalletAddress) {
 	console.log("updateSelectedWallet called with:" + prosperoWalletAddress);
 	selectedProsperoWalletAddress = prosperoWalletAddress;
 	var portfolio = getLeadersPortfolioForAddress(selectedProsperoWalletAddress);
@@ -3021,6 +3051,8 @@ function updateSelectedWallet(prosperoWalletAddress) {
 		//console.log("updateUIFieldValuesMyPortfolioMyPortfolio")
 		//updateUIFieldValuesMyPortfolioMyPortfolio();
 	}
+	await convertGraphDataToLeaderBoardAndMyWalletsData();
+
 }
 
 async function joinPortfolio() {
