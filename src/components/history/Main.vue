@@ -21,7 +21,7 @@
 		>
 			<div
 				class="py-[15px] px-[22px]"
-				:class="[txn.type === 'Deposit' ? 'bg-[#54AC68]' : 'bg-[#B34B4B]']"
+				:class="[txn.type === 'Deposit' ? 'bg-[#54AC68]' : txn.type === 'Withdrawal' ? 'bg-[#B34B4B]' : 'bg-[#015B58]']"
 			>
 				<h5 class="uppercase text-white text-[14px] mb-[12px]">
 					<span v-if="txn.type === 'Deposit'">Deposit</span>
