@@ -301,11 +301,12 @@ export const usePortfolios = defineStore("Portfolios", {
 
 		filteredTxnList(state) {
 			if (state.activeFilter === "All") {
+				console.log("All Txns are -", state.allTxns);
 				return state.allTxns;
 			} else {
-				return state.allTxns.filter((txn) => {
-					txn.type === state.activeFilter;
-				});
+				return state.allTxns.filter(
+					(txn) => txn.type === state.activeFilter
+				);
 			}
 		},
 	},
