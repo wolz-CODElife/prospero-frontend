@@ -2,8 +2,13 @@
 	<div class="h-full w-full bg-[#191A20] border border-[#2D3035] p-[30px]">
 		<div
 			v-if="loading"
-			class="flex flex-col h-[75vh] items-center justify-center"
+			class="flex flex-col h-[75vh] justify-center items-center gap-[30px] text-center my-[20px]"
 		>
+			<img
+				src="https://i.postimg.cc/tJMqnqDk/image.png"
+				alt=""
+				class="mx-auto max-w-[90px] object-contain animate-pulse"
+			/>
 			<Loader />
 		</div>
 
@@ -147,7 +152,7 @@
 			<img
 				src="https://i.postimg.cc/tJMqnqDk/image.png"
 				alt=""
-				class="mx-auto max-w-[90px] object-contain"
+				class="mx-auto max-w-[90px] object-contain animate-pulse"
 			/>
 			<Loader />
 		</div>
@@ -285,7 +290,7 @@ async function depositToPortfolio() {
 			console.log(errorMsg.value);
 		}
 	} catch (err) {
-		console.log("exception err:"+err)
+		console.log("exception err:" + err);
 		loading.value = false;
 		error.value = true;
 	}
