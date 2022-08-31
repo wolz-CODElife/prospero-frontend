@@ -129,7 +129,7 @@
 				class="bg-[#868C9D] text-white text-[12px] flex gap-x-[10px] items-center py-[10px] px-[12px]"
 			>
 				Completed
-				<span class="text-white"
+				<span
 					><svg
 						width="18"
 						height="14"
@@ -140,7 +140,8 @@
 						<path
 							fill-rule="evenodd"
 							clip-rule="evenodd"
-							d="M5.6 10.85L1.4 6.65L0 8.05L5.6 13.65L17.6 1.65L16.2 0.25L5.6 10.85V10.85Z"
+							d="M5.6 10.85L1.4 6.65L0 8.05L5.6 13.65L17.6 1.65L16.2 0.25L5.6 10.85Z"
+							fill="white"
 						/>
 					</svg>
 				</span>
