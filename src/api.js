@@ -565,7 +565,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			myPortfolioDataForTable.push(leaderBoardDataObject);
 		}
 	}
-	selectedProsperoWalletAddress = firstWallet;
+	//selectedProsperoWalletAddress = firstWallet;
 
 	myWallets = myWalletsDataFinal;
 
@@ -1719,9 +1719,46 @@ function updateUIStatus(newUIStatusType) {
 function updateNewWalletVariables(walletName, fundFee) {
 	newWalletObject = { walletName: walletName, fundFee: fundFee };
 }
+async function shouldShowApprove(){
+
+}
+
+function getDepositStatus(){
+	return UIStatus;
+}
+
+async function getDepositMessageOne(){
+	//right here
+	var msg = ""
+	if (UIStatus == UI_CREATE_THEN_DEPOSIT) {
+		console.log("UI_CREATE_THEN_DEPOSIT");
+		msg = "Before you can deposit, you need to 'create' a wallet on the blockchain."
+	} else if (UIStatus == UI_JOIN_THEN_DEPOSIT) {
+		msg = "Before you can deposit, you need to 'follow' a wallet on the blockchain."
+	} else if (UIStatus == UI_DEPOSIT_MY_PORTFOLIO) {
+	} else {
+		console.log("ERROR - no UI STATUS FOUND");
+	}
+}
+
+async function getDepositMessageTwo(){
+	//right here
+	var msg = ""
+	if (UIStatus == UI_CREATE_THEN_DEPOSIT) {
+		console.log("UI_CREATE_THEN_DEPOSIT");
+		msg = "Before you can deposit, you need to 'create' a wallet on the blockchain."
+	} else if (UIStatus == UI_JOIN_THEN_DEPOSIT) {
+		msg = "Before you can deposit, you need to 'follow' a wallet on the blockchain."
+	} else if (UIStatus == UI_DEPOSIT_MY_PORTFOLIO) {
+	} else {
+		console.log("ERROR - no UI STATUS FOUND");
+	}
+}
 
 async function handleDepositType() {
 	console.log("handleDepositType UIStatus:" + UIStatus);
+
+	console.log("selectedProsperoWalletAddress:"+selectedProsperoWalletAddress);
 	if (UIStatus == UI_CREATE_THEN_DEPOSIT) {
 		console.log("UI_CREATE_THEN_DEPOSIT");
 		var res = await createPortfolioThenDeposit();
@@ -1740,6 +1777,36 @@ async function handleDepositType() {
 	console.log("done handleDeposit");
 
 	return res;
+}
+
+async function createPortfolioHelper(){
+	console.log("newWalletObject: " + JSON.stringify(newWalletObject, null, 2));
+	var status = await createPortfolio(
+		newWalletObject.walletName,
+		newWalletObject.fundFee
+	);
+	if (!status.success) {
+		console.log("createPortfolio fail.");
+		//walletWaitingForEOA="";
+		return status;
+	}
+	if (status.prosperoWalletAddressCreated == null) {
+		console.log(
+			"****** prosperoWalletAddressCreated is null - problem ***** "
+		);
+	} else {
+		console.log(
+			"prosperoWalletAddressCreated is NOT null, continuing... walletAddress:" +
+				status.prosperoWalletAddressCreated
+		);
+		selectedProsperoWalletAddress = status.prosperoWalletAddressCreated;
+	}
+	return status;
+}
+
+async function depositHelper(){
+	var status = await deposit();
+	return status;
 }
 
 async function createPortfolioThenDeposit() {
@@ -2212,12 +2279,7 @@ async function updateAmount(amount, tokenAddress) {
 	}
 }
 //To do - update once you know how to do the selected leader board
-async function updateSelectedProsperoWalletAddress(address) {
-	console.log("*updateSelectedProsperoWallet called with address:" + address);
-	selectedProsperoWalletAddress = address;
-	//await convertGraphDataToLeaderBoardAndMyWalletsData();
 
-}
 /*
 async function initNewEventListener() {
 	console.log("initNewEventListener");
@@ -2488,7 +2550,7 @@ function getIndexOfUser(arrayOfAddresses, userAddress) {
 	return -1;
 }
 
-const delay = (n) => new Promise( r => setTimeout(r, n*1000));
+const sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitTimeInMs));
 //withdraw - kachi
 //tokenSwappingInto is an array of addresses swapping into, can only be of length 1 or 0.  So if you are
 //not swapping into any tokens, just have an empty array - []
@@ -2568,7 +2630,7 @@ async function withdraw(tokenSwappingInto, amountToWithdraw) {
 			EOAAddress,
 			false
 		);
-		delay(3);
+		await sleep(4500)
 
 		console.log("valueOfUsersPortfolioBefore:" + valueOfUsersPortfolioBefore);
 		console.log("valueOfUsersPortfolioAfter :" + valueOfUsersPortfolioAfter);
@@ -2747,9 +2809,8 @@ async function rebalance(
 	}
 }
 async function shouldApprove() {
-	//console.log("shouldApprove called");
+	console.log("shouldApprove called");
 	var total = 0;
-	var numberOfDeposits = 0;
 	var tokens = [];
 	var amounts = [];
 	var avaxValue = 0;
@@ -2787,12 +2848,14 @@ async function shouldApprove() {
 	); //UPDATE
 	return shouldApprove;
 }
+
+
+
 async function deposit() {
 	//await getInfoSubnetHelperContract();
 	console.log("deposit");
 	//TESTING
 	var total = 0;
-	var numberOfDeposits = 0;
 	var tokens = [];
 	var amounts = [];
 	var avaxValue = 0;
@@ -2876,8 +2939,7 @@ async function deposit() {
 			return status;
 		}
 
-		delay(3);
-
+		await sleep(4000)
 		var valueOfUsersPortfolioAfter = await getValueOfUsersPortfolio(
 			selectedProsperoWalletAddress,
 			EOAAddress,
@@ -2885,7 +2947,17 @@ async function deposit() {
 		);
 		console.log("valueOfUsersPortfolioBefore:" + valueOfUsersPortfolioBefore);
 		console.log("valueOfUsersPortfolioAfter :" + valueOfUsersPortfolioAfter);
-		var success = false;
+		if (
+			Number(valueOfUsersPortfolioAfter) <=
+			Number(valueOfUsersPortfolioBefore)
+		){
+			alert("Value of the portfolio is not more after the deposit.   Before value:" +
+			valueOfUsersPortfolioBefore +
+			" after:" +
+			valueOfUsersPortfolioAfter
+			+" This may be because the transaction is still pending.")
+		}
+		/*var success = false;
 		if (
 			Number(valueOfUsersPortfolioAfter) >
 			Number(valueOfUsersPortfolioBefore)
@@ -2901,7 +2973,7 @@ async function deposit() {
 					" after:" +
 					valueOfUsersPortfolioAfter,
 			};
-		}
+		}*/
 		return status;
 	} catch (exception) {
 		console.error("exception deposit:" + JSON.stringify(exception, null, 2));
@@ -2918,6 +2990,7 @@ async function depositContract(
 ) {
 	var gasUsed = {};
 	try {
+		console.log("depositContract selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
 		var prosperoWalletInstance = await new ethers.Contract(
 			selectedProsperoWalletAddress,
 			ProsperoWalletJson.abi,
@@ -2977,7 +3050,7 @@ async function shouldApproveDepositing(
 	amounts,
 	selectedProsperoWalletAddress
 ) {
-	//console.log("shouldApproveDepositing")
+	console.log("shouldApproveDepositing")
 	var zeroBn = BigNumber("0");
 	for (var k = 0; k < tokens.length; k++) {
 		var thisTokenInstance = await new ethers.Contract(
@@ -2995,7 +3068,7 @@ async function shouldApproveDepositing(
 		//console.log("all:"+bnAllowance)
 
 		if (bnAmountInWeiToDeposit.isGreaterThan(bnAllowance)) {
-			//console.log("NOT ENOUGH APPROVED")
+			console.log("NOT ENOUGH APPROVED")
 			return true;
 		}
 	}
@@ -4021,7 +4094,7 @@ async function createMyWalletsDataAndUIObject() {
 	}
 	console.log("myWallets:" + JSON.stringify(myWallets, null, 2));
 	console.log("setting first wallet to prosperoWalletAddress");
-	selectedProsperoWalletAddress = firstWallet;
+	//selectedProsperoWalletAddress = firstWallet;
 	//myWallets=myWallets;
 	await updateMyPortfoliosDataForTable();
 }
@@ -4078,35 +4151,7 @@ async function updateMyPortfoliosDataForTable() {
 	//return myPortfolioDataForTable
 }
 
-async function getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd() {
-	//var selectedProsperoWalletAddress=selectedProsperoWalletAddress
-	//console.log("getSelectedWalletFromMyWallets_updateSelectedPrspWalletAdd selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
-	var thisPortfolio = null;
-	if (
-		selectedProsperoWalletAddress != undefined &&
-		selectedProsperoWalletAddress != null &&
-		selectedProsperoWalletAddress != ""
-	) {
-		if (myWallets.hasOwnProperty(selectedProsperoWalletAddress)) {
-			//console.log('has it')
-			thisPortfolio = myWallets[selectedProsperoWalletAddress];
-		}
-	}
-	if (thisPortfolio == null) {
-		//console.log("myWallets does not have:"+selectedProsperoWalletAddress+" going with the last one.")
-		//console.log("myWallets:"+JSON.stringify(myWallets,null,2))
 
-		for (var key in myWallets) {
-			if (myWallets.hasOwnProperty(key)) {
-				thisPortfolio = myWallets[key];
-			}
-			selectedProsperoWalletAddress = key.toLowerCase();
-		}
-	}
-	//console.log("--selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
-	//console.log('returning:'+JSON.stringify(thisPortfolio,null,2))
-	return thisPortfolio;
-}
 async function updateBalanceToEighteenDecimalsIfNeeded(balance, tokenAddress) {
 	if (tokenAddress == "0x1d308089a2d1ced3f1ce36b1fcaf815b07217be3") {
 		return balance;
@@ -4360,7 +4405,6 @@ export {
 	getValuesOverTimeForMyPortfolioAddress,
 	getValuesOverTimeForLinechartMyPortfolioAddress,
 	getMyPortfoliosDataForTable,
-	shouldApprove,
 	createPortfolioThenDeposit,
 	updateSelectedWallet,
 	updateUIStatus,
@@ -4379,4 +4423,8 @@ export {
 	getLineChartData,
 	getAllTxns,
 	getTotalWithdrawals,
+	getDepositStatus,
+	createPortfolioHelper,
+	depositHelper,
+	shouldApprove
 };

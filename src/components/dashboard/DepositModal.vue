@@ -1,9 +1,10 @@
 <template>
-	<div class="h-full w-full bg-[#191A20] border border-[#2D3035] p-[30px]">
+	<div class="h-full w-full bg-[#191A20] border border-[#2D3035] p-[30px]  text-white">
 		<div
 			v-if="loading"
 			class="flex flex-col h-[75vh] items-center justify-center"
 		>
+
 			<Loader />
 		</div>
 
@@ -118,16 +119,17 @@
 		</div>
 	</div>
 
+
+
 	<Modal @close="$emit('goBack'), closeViews()" v-if="firstView">
 		<!--  Approve Required  -->
 		<div
 			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
 		>
 			<img src="@/assets/img/caution.svg" alt="" class="w-[62px] h-[62px]" />
-			<h1 class="text-[20px] uppercase">Approve required</h1>
+			<h1 class="text-[20px] uppercase">Action Required</h1>
 			<p class="text-[16px]">
-				Before you can use Prospero, you need to approve the tokens to be
-				transferred.
+				Before you can deposit, you will potentially have to confirm several transactions with your wallet.
 			</p>
 			<button
 				class="btn btn-primary w-full"
@@ -137,6 +139,8 @@
 			</button>
 		</div>
 	</Modal>
+
+
 
 	<Modal @close="$emit('goBack'), closeViews()" v-if="secondView">
 		<!-- Loading  -->
@@ -149,6 +153,9 @@
 				alt=""
 				class="mx-auto max-w-[90px] object-contain"
 			/>
+			<p class="text-[16px] text-white">
+				{{portfolioStore.depositMessage}}
+			</p>
 			<Loader />
 		</div>
 
@@ -198,7 +205,7 @@
 </template>
 
 <script setup>
-import { getBalancesInEoa, handleDepositType, updateApiTokenList } from "@/api";
+import { getBalancesInEoa, handleDepositType, updateApiTokenList, 	getDepositStatus, createPortfolioHelper, depositHelper, joinPortfolio, shouldApprove } from "@/api";
 import { onMounted, computed, ref } from "vue";
 import Modal from "../Modal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
@@ -263,14 +270,72 @@ async function depositToPortfolio() {
 
 	console.log("depositToPortfolio called");
 	loading.value = true;
+	var UI_CREATE_THEN_DEPOSIT = 1;
+	var UI_JOIN_THEN_DEPOSIT = 2;
+	var UI_DEPOSIT_MY_PORTFOLIO = 3;
 
 	try {
-		let res = await handleDepositType();
+		var res;
+		var depositType = getDepositStatus();
+		console.log("depositType:"+depositType)
+		if (depositType == UI_CREATE_THEN_DEPOSIT){
+			console.log("UI_CREATE_THEN_DEPOSIT")
+			portfolioStore.depositMessage="Before you deposit you have to create your wallet on the blockhain."
+			res = await createPortfolioHelper();
+			if (!res.success){
+				loading.value = false;
+				error.value = true;
+				errorMsg.value = res.error;
+				console.log(errorMsg.value);
+				return;
+			}
+
+			var shouldShowApproveMessage = await shouldApprove();
+			if (shouldShowApproveMessage){
+				portfolioStore.depositMessage="Wallet created successfully!  Before you deposit you have to approve the tokens to be transferred."
+			}else{
+				portfolioStore.depositMessage="Wallet created successfully!  Confirm the transaction to deposit your tokens."
+			}
+			res = await depositHelper();
+
+		}else if (depositType == UI_JOIN_THEN_DEPOSIT){
+			console.log("UI_JOIN_THEN_DEPOSIT")
+
+			portfolioStore.depositMessage="Before you deposit you have to join the wallet on the blockhain."
+			res= await joinPortfolio();
+			if (!res.success){
+				loading.value = false;
+				error.value = true;
+				errorMsg.value = res.error;
+				console.log(errorMsg.value);
+				return;
+			}
+
+			var shouldShowApproveMessage = await shouldApprove();
+			if (shouldShowApproveMessage){
+				portfolioStore.depositMessage="Wallet joined successfully!  Before you deposit you have to approve the tokens to be transferred."
+			}else{
+				portfolioStore.depositMessage="Wallet joined successfully!  Confirm the transaction to deposit your tokens."
+			}
+			res = await depositHelper();
+		}else if (depositType == UI_DEPOSIT_MY_PORTFOLIO){
+			console.log("UI_DEPOSIT_MY_PORTFOLIO")
+
+			var shouldShowApproveMessage = await shouldApprove();
+			if (shouldShowApproveMessage){
+				console.log("should approve - 1");
+				portfolioStore.depositMessage="Before you deposit you have to approve the tokens to be transferred."
+			}else{
+				console.log("should approve - 2");
+				portfolioStore.depositMessage=" Confirm the transaction to deposit your tokens."
+
+			}
+			res = await depositHelper();
+		}
+		//let res = await handleDepositType(portfolioStore);
 		console.log(res);
 		if (res.success) {
-			console.log("success is true");
 			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas.toFixed(2);
-			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
 			error.value = false;
 			loading.value = false;
 			await portfolioStore.loadData();
@@ -283,11 +348,14 @@ async function depositToPortfolio() {
 			error.value = true;
 			errorMsg.value = res.error;
 			console.log(errorMsg.value);
+			alert(res.error);
 		}
 	} catch (err) {
 		console.log("exception err:"+err)
 		loading.value = false;
 		error.value = true;
+		alert(res.error);
+
 	}
 	console.log("done");
 }

@@ -105,6 +105,8 @@ export const usePortfolios = defineStore("Portfolios", {
 			lineChartData: {},
 
 			activeFilter: "All",
+
+			depositMessage:"",
 		};
 	},
 
