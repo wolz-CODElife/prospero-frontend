@@ -11,9 +11,8 @@ import {
 	getLineChartData,
 	initializeApi,
 	getAllTxns,
-	getTotalWithdrawals
+	getTotalWithdrawals,
 } from "@/api";
-
 
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
@@ -102,36 +101,7 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			portfolioFundFee: 0,
 
-			lineChartData: {},
-
-			activeFilter: "All",
-		};
-	},
-
-	actions: {
-		// Fill empty portfolio list with an API call
-
-		async loadData(){
-			try {
-				console.log("calling loadData");
-				await initializeApi();
-				this.isLoading = true;
-				try {
-					await this.getPortfolios();
-					this.isLoading = false;
-				} catch (error) {
-					this.isLoading = false;
-					this .isError = true;
-					console.log("get portfolios error", error);
-				}
-			} catch (error) {
-				console.log("init error", error);
-			}
-		},
-
-		async getPortfolios() {
-			this.isLoading = true;
-			this.lineChartData = {
+			lineChartData: {
 				labels: [
 					"8-6-2022",
 					"8-7-2022",
@@ -163,10 +133,76 @@ export const usePortfolios = defineStore("Portfolios", {
 							0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 						],
 						tension: 0.3,
-						hoverRadius: 40,
+						hoverRadius: 5,
+						pointHoverBackgroundColor: "#000",
 					},
 				],
-			};
+			},
+
+			activeFilter: "All",
+		};
+	},
+
+	actions: {
+		// Fill empty portfolio list with an API call
+
+		async loadData() {
+			try {
+				console.log("calling loadData");
+				await initializeApi();
+				this.isLoading = true;
+				try {
+					await this.getPortfolios();
+					this.isLoading = false;
+				} catch (error) {
+					this.isLoading = false;
+					this.isError = true;
+					console.log("get portfolios error", error);
+				}
+			} catch (error) {
+				console.log("init error", error);
+			}
+		},
+
+		async getPortfolios() {
+			this.isLoading = true;
+			// this.lineChartData = {
+			// 	labels: [
+			// 		"8-6-2022",
+			// 		"8-7-2022",
+			// 		"8-8-2022",
+			// 		"8-9-2022",
+			// 		"8-10-2022",
+			// 		"8-11-2022",
+			// 		"8-12-2022",
+			// 		"8-13-2022",
+			// 		"8-14-2022",
+			// 		"8-15-2022",
+			// 		"8-16-2022",
+			// 		"8-17-2022",
+			// 		"8-18-2022",
+			// 		"8-19-2022",
+			// 		"8-20-2022",
+			// 		"8-21-2022",
+			// 		"8-22-2022",
+			// 		"8-23-2022",
+			// 		"8-24-2022",
+			// 		"8-25-2022",
+			// 	],
+			// 	datasets: [
+			// 		{
+			// 			label: "ALL",
+			// 			backgroundColor: "#00ff00",
+			// 			borderColor: "#00ff00",
+			// 			data: [
+			// 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			// 			],
+			// 			tension: 0.3,
+			// 			hoverRadius: 5,
+			// 			pointHoverBackgroundColor: "#000",
+			// 		},
+			// 	],
+			// };
 			try {
 				this.allPortfolios = await getLeaderBoardDataForTable();
 				this.myPortfolios = await getMyPortfoliosDataForTable();
@@ -200,7 +236,6 @@ export const usePortfolios = defineStore("Portfolios", {
 				this.activePortfolioType,
 				val.prosperoWalletAddress
 			);
-			console.log("Kachi see this", this.lineChartData);
 		},
 
 		toggleActiveHeader() {
