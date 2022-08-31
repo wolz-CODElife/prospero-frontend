@@ -17,24 +17,6 @@
 			<div class="col-span-8 grid grid-rows-5 gap-[10px]">
 				<!-- Line chart container  -->
 				<div class="bg-[#191A20] row-span-2">
-					<!-- Loading  -->
-					<!-- <div
-						v-if="portfolioStore.isLoading"
-						class="flex flex-col h-full items-center justify-center"
-					>
-						<Loader />
-					</div> -->
-
-					<!-- Error  -->
-					<!-- <div
-						v-else-if="
-							portfolioStore.isError ||
-							portfolioStore.allPortfolios.length === 0
-						"
-					>
-						<p>An error occured</p>
-					</div> -->
-
 					<!-- Line chart  -->
 					<LineChart :chart-data="portfolioStore.lineChartData" />
 				</div>
@@ -54,6 +36,9 @@ import Table from "@/components/dashboard/Table.vue";
 import LineChart from "@/components/charts/LineChart.ts";
 import Loader from "@/components/Loader.vue";
 import { usePortfolios } from "@/stores/Portfolios";
+
+const portfolioStore = usePortfolios();
+
 /*
 getLeaderBoardDataOverTime and getMyPortfoliosDataOverTime both return an array of objects for the line charts.
 Each objects key is the prospero wallet address, which is then an array of that wallets total value, profits and user invested over time.
@@ -100,38 +85,5 @@ myPortfoliosDataOverTime:{
     }...........
   ]
 ]
-*/
-
-const portfolioStore = usePortfolios();
-
-// const DATA_COUNT = 7;
-// const NUMBER_CFG = { count: DATA_COUNT, min: -100, max: 100 };
-//const chartData = ref({
-//	portfolioStore.lineChartData
-//});
-/*
-const chartData = ref({
-	labels: [
-		"2014",
-		"2015",
-		"2016",
-		"2017",
-		"2018",
-		"2019",
-		"2020",
-		"2021",
-		"2022",
-	],
-	datasets: [
-		{
-			label: "ALL",
-			backgroundColor: "#00ff00",
-			borderColor: "#00ff00",
-			data: [20, 24, 28, 32, 20, 40, 28, 48, 52],
-			tension: 0.3,
-			hoverRadius: 40,
-		},
-	],
-});
 */
 </script>
