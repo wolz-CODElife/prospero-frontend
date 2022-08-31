@@ -2849,7 +2849,137 @@ async function shouldApprove() {
 	return shouldApprove;
 }
 
+async function approveAndDeposit(shouldTryToApprove){
+	//await getInfoSubnetHelperContract();
+	console.log("deposit");
+	//TESTING
+	var total = 0;
+	var tokens = [];
+	var amounts = [];
+	var avaxValue = 0;
+	var foundOneAmtAboveZero = false;
+	for (var i = 0; i < balancesInEoa.length; i++) {
+		var thisDepositingObj = balancesInEoa[i];
+		//console.log(
+		//	"thisDepositingObj:" + JSON.stringify(thisDepositingObj, null, 2)
+		//);
+		var usdAmountEnteredByUser = thisDepositingObj["usdAmountEnteredByUser"];
+		usdAmountEnteredByUser = Number(usdAmountEnteredByUser);
+		if (usdAmountEnteredByUser > 0) {
+			console.log("thisDepositingObj.name:" + thisDepositingObj.name);
+			//var weiAmount = await getWeiAmount(usdAmountEnteredByUser, thisDepositingObj.address)
+			var amountInEth = usdAmountEnteredByUser / thisDepositingObj.price;
+			amountInEth = amountInEth.toFixed(16);
+			console.log("amountInEth:" + amountInEth);
+			var weiAmt = web3.utils.toWei(amountInEth + "", "ether");
+			console.log("weiAmt1:" + weiAmt);
+			weiAmt = await updateBalanceFromEighteenDecimalsIfNeeded(
+				weiAmt,
+				thisDepositingObj.address
+			);
+			console.log("weiAmt2:" + weiAmt);
+			if (thisDepositingObj.name == NativeTokenName) {
+				//console.log("WEI:"+thisDepositingObj.weiDepositing)
+				avaxValue = weiAmt + "";
+			} else {
+				tokens.push(thisDepositingObj.address);
+				amounts.push(weiAmt + "");
+			}
+			foundOneAmtAboveZero = true;
+		}
+	}
+	if (!foundOneAmtAboveZero) {
+		console.log("Use did not enter any amounts to be deposited.");
+		return {
+			success: false,
+			error: "You did not enter any amounts to be deposited.",
+		};
+	}
+	//await getAmountsDepositing();
+	//add tokens and amountss
+	if (shouldTryToApprove==true){
+	var shouldApproveTheTokens = await shouldApprove();
+	if (shouldApproveTheTokens) {
+		console.log("SHOW APPROVE DIALOUGE");
+		var status = await approveDepositing(
+			tokens,
+			amounts,
+			selectedProsperoWalletAddress
+		); //UPDATE
+		return status;
+	} else {
+		console.log("Nothing to approve, everything good");
+		return {success:true}
+	}
+}
 
+	var gasEstimate;
+	var shouldJustDeposit = 0;
+	var firstTimeString = "";
+	var methodType = 0;
+	console.log("tokens:" + tokens);
+	console.log("amounts:" + amounts);
+	console.log("avaxValue:" + avaxValue);
+	console.log("methodType:" + methodType);
+	try {
+		var valueOfUsersPortfolioBefore = await getValueOfUsersPortfolio(
+			selectedProsperoWalletAddress,
+			EOAAddress,
+			false
+		);
+		var status = await depositContract(
+			tokens,
+			amounts,
+			methodType,
+			avaxValue,
+			selectedProsperoWalletAddress
+		);
+		if (!status.success) {
+			return status;
+		}
+
+		await sleep(4000)
+		var valueOfUsersPortfolioAfter = await getValueOfUsersPortfolio(
+			selectedProsperoWalletAddress,
+			EOAAddress,
+			false
+		);
+		console.log("valueOfUsersPortfolioBefore:" + valueOfUsersPortfolioBefore);
+		console.log("valueOfUsersPortfolioAfter :" + valueOfUsersPortfolioAfter);
+		if (
+			Number(valueOfUsersPortfolioAfter) <=
+			Number(valueOfUsersPortfolioBefore)
+		){
+			console.error("Value of the portfolio is not more after the deposit.   Before value:" +
+			valueOfUsersPortfolioBefore +
+			" after:" +
+			valueOfUsersPortfolioAfter
+			+" This may be because the transaction is still pending.")
+		}
+		/*var success = false;
+		if (
+			Number(valueOfUsersPortfolioAfter) >
+			Number(valueOfUsersPortfolioBefore)
+		) {
+			success = true;
+		}
+		if (!success) {
+			return {
+				success: false,
+				error:
+					"Value of the portfolio is not more after the deposit, before value:" +
+					valueOfUsersPortfolioBefore +
+					" after:" +
+					valueOfUsersPortfolioAfter,
+			};
+		}*/
+		return status;
+	} catch (exception) {
+		console.error("exception deposit:" + JSON.stringify(exception, null, 2));
+		console.error("exception deposit:" + exception);
+		return { success: false, error: exception };
+	}
+}
 
 async function deposit() {
 	//await getInfoSubnetHelperContract();
@@ -4426,5 +4556,6 @@ export {
 	getDepositStatus,
 	createPortfolioHelper,
 	depositHelper,
-	shouldApprove
+	shouldApprove,
+	approveAndDeposit
 };

@@ -205,7 +205,7 @@
 </template>
 
 <script setup>
-import { getBalancesInEoa, handleDepositType, updateApiTokenList, 	getDepositStatus, createPortfolioHelper, depositHelper, joinPortfolio, shouldApprove } from "@/api";
+import { getBalancesInEoa, handleDepositType, updateApiTokenList, 	getDepositStatus, createPortfolioHelper, depositHelper, joinPortfolio, shouldApprove, approveAndDeposit } from "@/api";
 import { onMounted, computed, ref } from "vue";
 import Modal from "../Modal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
@@ -293,10 +293,19 @@ async function depositToPortfolio() {
 			var shouldShowApproveMessage = await shouldApprove();
 			if (shouldShowApproveMessage){
 				portfolioStore.depositMessage="Wallet created successfully!  Before you deposit you have to approve the tokens to be transferred."
+				res = await approveAndDeposit(true);
+				if (!res.success){
+				loading.value = false;
+				error.value = true;
+				errorMsg.value = res.error;
+				console.log(errorMsg.value);
+				return;
+				}
+				portfolioStore.depositMessage="Tokens approved successfully!  Confirm the transaction to deposit your tokens."
 			}else{
 				portfolioStore.depositMessage="Wallet created successfully!  Confirm the transaction to deposit your tokens."
 			}
-			res = await depositHelper();
+				res = await approveAndDeposit(false);
 
 		}else if (depositType == UI_JOIN_THEN_DEPOSIT){
 			console.log("UI_JOIN_THEN_DEPOSIT")
@@ -314,10 +323,20 @@ async function depositToPortfolio() {
 			var shouldShowApproveMessage = await shouldApprove();
 			if (shouldShowApproveMessage){
 				portfolioStore.depositMessage="Wallet joined successfully!  Before you deposit you have to approve the tokens to be transferred."
+				res = await approveAndDeposit(true)
+				if (!res.success){
+				loading.value = false;
+				error.value = true;
+				errorMsg.value = res.error;
+				console.log(errorMsg.value);
+				return;
+				}
+				portfolioStore.depositMessage="Tokens approved successfully!  Confirm the transaction to deposit your tokens."
+
 			}else{
 				portfolioStore.depositMessage="Wallet joined successfully!  Confirm the transaction to deposit your tokens."
 			}
-			res = await depositHelper();
+				res = await approveAndDeposit(false)
 		}else if (depositType == UI_DEPOSIT_MY_PORTFOLIO){
 			console.log("UI_DEPOSIT_MY_PORTFOLIO")
 
@@ -325,12 +344,21 @@ async function depositToPortfolio() {
 			if (shouldShowApproveMessage){
 				console.log("should approve - 1");
 				portfolioStore.depositMessage="Before you deposit you have to approve the tokens to be transferred."
+				res = await approveAndDeposit(true)
+				if (!res.success){
+				loading.value = false;
+				error.value = true;
+				errorMsg.value = res.error;
+				console.log(errorMsg.value);
+				return;
+				}
+				portfolioStore.depositMessage="Tokens approved successfully!  Confirm the transaction to deposit your tokens."
+				res = await approveAndDeposit(false)
 			}else{
 				console.log("should approve - 2");
 				portfolioStore.depositMessage=" Confirm the transaction to deposit your tokens."
-
+				res = await approveAndDeposit(false)
 			}
-			res = await depositHelper();
 		}
 		//let res = await handleDepositType(portfolioStore);
 		console.log(res);
