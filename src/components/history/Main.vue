@@ -91,7 +91,7 @@
 
 			<!-- View on explorer -->
 			<a
-				class="text-[#868C9D] text-[12px] col-span-2 flex gap-[7px] items-center"
+				class="text-[#868C9D] hover:text-white text-[12px] col-span-2 flex gap-[7px] items-center"
 				:href="txn.snowtraceLink"
 				target="_blank"
 			>
@@ -125,8 +125,25 @@
 			</span>
 
 			<!-- Status - completed -->
-			<div class="bg-[#868C9D] text-white text-[12px] py-[10px] px-[12px]">
-				Completed <span class="text-white">✔️</span>
+			<div
+				class="bg-[#868C9D] text-white text-[12px] flex gap-x-[10px] items-center py-[10px] px-[12px]"
+			>
+				Completed
+				<span class="text-white"
+					><svg
+						width="18"
+						height="14"
+						viewBox="0 0 18 14"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							fill-rule="evenodd"
+							clip-rule="evenodd"
+							d="M5.6 10.85L1.4 6.65L0 8.05L5.6 13.65L17.6 1.65L16.2 0.25L5.6 10.85V10.85Z"
+						/>
+					</svg>
+				</span>
 			</div>
 		</div>
 	</div>
@@ -153,5 +170,9 @@ const historyFilters = ref(["All", "Deposit", "Withdrawal"]);
 <style lang="postcss">
 .f-right span {
 	@apply text-[16px] text-white float-right;
+}
+
+a:hover span svg path {
+	fill: white;
 }
 </style>
