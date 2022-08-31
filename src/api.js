@@ -954,21 +954,27 @@ for (var f=0;f<leaderBoardData.length;f++){
 			d7 = d7.toFixed(2)+"%"
 			//console.log("got 7 d7:"+d7)
 			leaderBoardData[f]["d7"]=d7
-			myWallets[thisProspWalletAddress]["d7"]=d7;
+			if (myWallets.hasOwnProperty(thisProspWalletAddress)){
+				myWallets[thisProspWalletAddress]["d7"]=d7;
+			}
 		}
 		if (i==((thislineGraphCalcData.length-1)-30)){
 			d30=thisObj['profitPercUser'];
 			d30 = d30.toFixed(2)+"%"
 			//console.log("got 30 d30:"+d30)
 			leaderBoardData[f]["d30"]=d30
-			myWallets[thisProspWalletAddress]["d30"]=d30;
+			if (myWallets.hasOwnProperty(thisProspWalletAddress)){
+				myWallets[thisProspWalletAddress]["d30"]=d30;
+			}
 
 		}if (i==((thislineGraphCalcData.length-1)-90)){
 			d90=thisObj['profitPercUser'];
 			d90 = d90.toFixed(2)+"%"
 			//console.log("got 90 d90:"+d90)
 			leaderBoardData[f]["d90"]=d90
-			myWallets[thisProspWalletAddress]["d90"]=d90;
+			if (myWallets.hasOwnProperty(thisProspWalletAddress)){
+				myWallets[thisProspWalletAddress]["d90"]=d90;
+			}
 
 
 		}
