@@ -216,12 +216,12 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 					tx = SnowtraceDeploymentLocation + tx;
 					var t = formatTimeForHistory(graphItem['intVars'][4])
 					var amt = ((lastUsdDepositedForWithdrawDeposit - usdDeposited) / USD_SCALE);
-					if (amt<0){
-						amt = Math.abs(amt);
+					//if (amt<0){
+					//	amt = Math.abs(amt);
 						amt = "-$"+amt.toFixed(2)
-					}else{
-						amt = "+$"+amt.toFixed(2)
-					}
+					//}else{
+					//	amt = "+$"+amt.toFixed(2)
+					//}
 					var withdrawalDepObject = {
 						portfolioName:graphItem["walletName"],
 						type:"Withdrawal",
@@ -1380,14 +1380,23 @@ function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
 			objToReturn['totalValueUser']=profitCalcObjUser.totalValue
 			objToReturn['usdInvestedUser']=usdInvestedUser
 			objToReturn['profitPercUser']=profitCalcObjUser.profitPerc
-			*/
-	for (var i = thisPort.length; i < thisPort.length; i++) {
+			*/	
+			var allPortValuBefore = -1;
+			var myPortValueBefore = -1;
+	for (var i =0; i < thisPort.length; i++) {
 		//if ((thisPort[i].usdInvested>0) && (thisPort[i].value>0)){
-		chartDataToReturnLabels.push(thisPort[i].date);
 		if (whichPortfolios == "all portfolios") {
+			//if (thisPort[i].profitPercLeader == 0  && thisPort[i].profitPercLeader==allPortValuBefore){
+
+			//}else{
+			chartDataToReturnLabels.push(thisPort[i].date);
 			chartDataToReturnYAxis.push(thisPort[i].profitPercLeader);
+		//	}
+			allPortValuBefore = thisPort[i].profitPercLeader
 		} else if (whichPortfolios == "my portfolios") {
+			chartDataToReturnLabels.push(thisPort[i].date);
 			chartDataToReturnYAxis.push(thisPort[i].totalValueUser);
+			//myPortValueBefore = thisPort[i].totalValueUser;
 		}
 		//justGotAZero=false;
 		//}else if (thisPort[i].usdInvested==0 && thisPort[i].value==0){
@@ -1411,9 +1420,9 @@ function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
 				tension: 0.3,
 				hoverRadius: 40,
 			},
-		],
+		]
 	};
-	console.log("CHART DATA:" + JSON.stringify(chartData, null, 2));
+	//console.log("CHART DATA:" + JSON.stringify(chartData, null, 2));
 	return chartData;
 }
 
@@ -2555,7 +2564,7 @@ const sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitT
 //tokenSwappingInto is an array of addresses swapping into, can only be of length 1 or 0.  So if you are
 //not swapping into any tokens, just have an empty array - []
 async function withdraw(tokenSwappingInto, amountToWithdraw) {
-	console.log("withdraw:"+tokenSwappingInto+" amountToWithdraw:"+amountToWithdraw);
+	console.log("withdraw:"+tokenSwappingInto+" amountToWithdraw:"+amountToWithdraw+" selectedProsperoWalletAddress:"+selectedProsperoWalletAddress);
 	//amountToWithdraw="1"
 	console.log(
 		"withdraw called:" +
