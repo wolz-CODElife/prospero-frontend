@@ -102,14 +102,15 @@ function goBack() {
 	createView.value = false;
 }
 
-function redirect() {
+async function redirect() {
+	console.log("redirect called");
 	// if (joinView.value) {
 	portfolioStore.activeMode = "join";
 	portfolioStore.activePortfolioType = "My Portfolios";
 	joinView.value = false;
 	createView.value = false;
-	portfolioStore.getPortfolios();
-	portfolioStore.reset();
+	await portfolioStore.loadData();
+	//portfolioStore.reset();
 
 	// } else {
 	// 	portfolioStore.activeMode = "create";

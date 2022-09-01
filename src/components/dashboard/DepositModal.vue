@@ -376,13 +376,13 @@ async function depositToPortfolio() {
 			error.value = true;
 			errorMsg.value = res.error;
 			console.log(errorMsg.value);
-			alert(res.error);
+			//alert(res.error);
 		}
 	} catch (err) {
 		console.log("exception err:"+err)
 		loading.value = false;
 		error.value = true;
-		alert(res.error);
+		//alert(res.error);
 
 	}
 	console.log("done");

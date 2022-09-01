@@ -104,34 +104,4 @@ myPortfoliosDataOverTime:{
 
 const portfolioStore = usePortfolios();
 
-// const DATA_COUNT = 7;
-// const NUMBER_CFG = { count: DATA_COUNT, min: -100, max: 100 };
-//const chartData = ref({
-//	portfolioStore.lineChartData
-//});
-/*
-const chartData = ref({
-	labels: [
-		"2014",
-		"2015",
-		"2016",
-		"2017",
-		"2018",
-		"2019",
-		"2020",
-		"2021",
-		"2022",
-	],
-	datasets: [
-		{
-			label: "ALL",
-			backgroundColor: "#00ff00",
-			borderColor: "#00ff00",
-			data: [20, 24, 28, 32, 20, 40, 28, 48, 52],
-			tension: 0.3,
-			hoverRadius: 40,
-		},
-	],
-});
-*/
 </script>

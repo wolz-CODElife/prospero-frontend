@@ -1474,45 +1474,6 @@ function getLineChartData(whichPortfolios, prosperoWalletAddressSelected, whichC
 	return chartData;
 }
 
-/*
- "0x78bbd8f530fb2f6119509869158b15310592e4f0": [
-    {
-      "date": "8-24-2021",
-      "profit": 0,
-      "value": 0,
-      "usdInvested": 0
-    },
-    {
-      "date": "8-25-2021",
-      "profit": 0,
-      "value": 0,
-      "usdInvested": 0
-    }...........
-
-{
-	labels: [
-		"2014",
-		"2015",
-		"2016",
-		"2017",
-		"2018",
-		"2019",
-		"2020",
-		"2021",
-		"2022",
-	],
-	datasets: [
-		{
-			label: "ALL",
-			backgroundColor: "#00ff00",
-			borderColor: "#00ff00",
-			data: [20, 24, 28, 32, 20, 40, 28, 48, 52],
-			tension: 0.3,
-			hoverRadius: 40,
-		},
-	],
-}
-*/
 
 function multipleBN(valOne, valTwo) {
 	//console.log("valOne:"+valOne);
@@ -2849,13 +2810,9 @@ async function rebalance(
 				tokenAddressesToRemix
 			);
 		if (!areGoalPercentagesAndActualClose) {
-			console.log("Current percentages do not match goal percentages.");
-
-			return {
-				success: false,
-				error: "Current percentages do not match goal percentages.",
-			};
+			console.error("Current percentages do not match goal percentages.");
 		}
+		console.log("success - returning succss true")
 		return { success: true, gasUsed: gasUsed };
 	} catch (exception) {
 		console.error(
