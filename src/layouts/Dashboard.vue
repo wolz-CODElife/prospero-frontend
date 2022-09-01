@@ -126,11 +126,6 @@ async function redirect() {
 	}
 	console.log("thisPort:"+JSON.stringify(thisPort,null,2));
 	await portfolioStore.doSelectPortfolio(thisPort)
-	//portfolioStore.selectedPortfolio
-	//portfolioStore.reset();
-	// } else {
-	// 	portfolioStore.activeMode = "create";
-	// 	portfolioStore.firstCreateView = false;
-	// }
+
 }
 </script>

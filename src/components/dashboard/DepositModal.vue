@@ -295,11 +295,11 @@ async function depositToPortfolio() {
 				portfolioStore.depositMessage="Wallet created successfully!  Before you deposit you have to approve the tokens to be transferred."
 				res = await approveAndDeposit(true);
 				if (!res.success){
-				loading.value = false;
-				error.value = true;
-				errorMsg.value = res.error;
-				console.log(errorMsg.value);
-				return;
+					loading.value = false;
+					error.value = true;
+					errorMsg.value = res.error;
+					console.log(errorMsg.value);
+					return;
 				}
 				portfolioStore.depositMessage="Tokens approved successfully!  Confirm the transaction to deposit your tokens."
 			}else{
