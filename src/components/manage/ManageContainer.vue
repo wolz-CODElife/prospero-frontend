@@ -148,6 +148,9 @@
 				<h1 class="text-[20px] text-center uppercase">
 					Unable to save allocation
 				</h1>
+				<p>
+					{{errorMessage}}
+				</p>
 			</div>
 
 			<!-- Successful -->
@@ -167,7 +170,7 @@
 				</p>
 
 				<button
-					@click="closeAllocationModal"
+					@click="successCloseAllocationModal"
 					class="btn btn-primary uppercase mx-auto"
 				>
 					Thanks
@@ -181,10 +184,12 @@
 import { ref, computed } from "vue";
 import SelectToken from "./SelectToken.vue";
 import Modal from "../Modal.vue";
-
+import Dashboard from "@/layouts/Dashboard.vue";
 import SelectPortfolio from "./SelectPortfolio.vue";
 import { usePortfolios } from "@/stores/Portfolios";
 import { rebalance, getTokenArray, updateNewInvestors, updatePercentageFee} from "@/api";
+import { useRouter } from "vue-router";
+import router from "@/router/index.js";
 
 
 
@@ -202,6 +207,7 @@ const saveAllocationModal = ref(false);
 
 const fundFee = ref(portfolioStore.portfolioFundFee);
 
+const errorMessage = ref("SHIT");
 
 const disableSaveAllocation = computed(
 	() => totalAllocation.value < 100 || totalAllocation.value > 100
@@ -221,16 +227,14 @@ const totalAllocation = computed(() => {
 	}, 0);
 });
 
+
 async function doSaveAllocation() {
 
-	//fundFee
 
-	//right here
 	console.log("doSaveAllocation");
 	console.log("portfolioStore.acceptingNewInvestors:"+portfolioStore.isPortfolioAcceptingNewInvestors);
 	console.log("portfolioStore.portfolioFundFee:"+portfolioStore.portfolioFundFee);
 	console.log("portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal:"+portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal);
-
 	var selectedProsperoWalletAddress = portfolioStore.selectedPortfolio.prosperoWalletAddress;
 
 	if (portfolioStore.isPortfolioAcceptingNewInvestors != portfolioStore.selectedPortfolio.acceptingNewInvestorsOriginal){
@@ -246,7 +250,6 @@ async function doSaveAllocation() {
 		}
 		console.log('done with updateNewInvestors')
 	}
-
 	//if the portfolio fee is less than the original
 	if (portfolioStore.portfolioFundFee < portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal){
 		console.log("****")
@@ -269,11 +272,6 @@ async function doSaveAllocation() {
 	}else if (portfolioStore.portfolioFundFee > portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal){
 		console.error("show error - new percentage fee has to be less.")
 	}
-	//console.log("portfolioStore:"+JSON.stringify(portfolioStore,null,2));
-	//console.log("alloation list:"+JSON.stringify(portfolioStore.allocationList,null,2));
-	//console.log("newList:"+JSON.stringify(portfolioStore.tokenList,null,2))
-	//newList
-	//portfolioStore.tokenList -- 
 	var tokenAddressesToRemix=[];
 	var percentages = [];
 	var newTokensAlloc = portfolioStore.allocationList
@@ -283,62 +281,124 @@ async function doSaveAllocation() {
 		var perc = Number(token.allocation);
 		//console.log('perc:'+perc)
 		if (perc > 0){
-			//console.log('token.allocation:'+token.allocation)
-			//var usdScale = getUsdScale();
-			//console.log("USD:"+usdScale);
-
-			//var formattedPercForApi = usdScale * (Number(token.allocation) / 100);
-			//console.log("formattedPercForApi:"+formattedPercForApi);
-
 			percentages.push(Number(token.allocation));
 			tokenAddressesToRemix.push(token.address);
 		}
 	}
-	//console.log("perc len:"+percentages.length)
-	//console.log("tokenAddressesToRemix len:"+tokenAddressesToRemix.length)
-
-	//console.log("percentages		  :"+JSON.stringify(percentages,null,2))
-	//console.log("tokenAddressesToRemix:"+JSON.stringify(tokenAddressesToRemix,null,2))
-
 	if (percentages.length != tokenAddressesToRemix.length){
 		console.error("percentages and tokenAddressesToRemix length are different!");
 		return;
 	}
 
 	try {
-		//console.log("calling rebalance with:")
-		//console.log("percentages		  :"+percentages)
-		//console.log("tokenAddressesToRemix:"+tokenAddressesToRemix)
-		//console.log("selectedProsperoWalletAddress:"+selectedProsperoWalletAddress)
-
+		console.log("calling rebalance with:")
 		let res = await rebalance(percentages, tokenAddressesToRemix, selectedProsperoWalletAddress);
-		console.log("res here1:"+res);
+		console.log("res here1:"+JSON.stringify(res,null,2));
 		if (!res.success) {
+			console.log('not success')
 			loading.value = false;
 			error.value = true;
-			errorMsg.value = res.error;
-			console.log(errorMsg.value);
+			//errorMsg.value = res.error;
+			//alert(res.error);//to do - need an error message box here 
+			errorMessage.value=res.error
+			//console.log(errorMsg.value);
 		} else {
+			console.log("success is good")
 			error.value = false;
 			loading.value = false;
-			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas.toFixed(2);
-			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
+			success.value = true;
+			//usdAmountOfGas.value = res.gasUsed.usdAmountOfGas.toFixed(2);
+			//console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
 		}
 	} catch (err) {
+		console.log('err true');
 		loading.value = false;
 		error.value = true;
+		success.value = false;
+
 	}
 
 	saveAllocationModal.value = true;
-	success.value = true;
 	console.log("done");
 }
-
 
 
 function closeAllocationModal() {
 	saveAllocationModal.value = false;
 }
+
+async function successCloseAllocationModal() {
+	console.log("closeAllocationModal called");
+	saveAllocationModal.value = false;
+	console.log("MMMMM:"+JSON.stringify(portfolioStore.selectedManagePortfolio,null,2));
+	portfolioStore.activePortfolioType = "My Portfolios";
+
+	var selectedPortAddress = portfolioStore.selectedManagePortfolio.prosperoWalletAddress;
+	console.log('selectedPortAddress:'+selectedPortAddress)
+	await portfolioStore.loadData();
+	console.log('portfolioStore.myPortfolios:'+JSON.stringify(portfolioStore.myPortfolios,null,2))
+	var port;
+	for ( var i =0;i<portfolioStore.myPortfolios.length;i++){
+		port = portfolioStore.myPortfolios[i];
+		console.log("port:"+JSON.stringify(port,null,2))
+		if (port.prosperoWalletAddress == selectedPortAddress){
+			console.log('found it...')
+			portfolioStore.selectedManagePortfolio=port;
+			break;
+		}
+	}
+
+	portfolioStore.selectedManagePortfolio=port;
+	portfolioStore.selectedPortfolio = port;
+	portfolioStore.activePortfolioType = "My Portfolios";
+	await portfolioStore.doSelectPortfolio(port);
+	console.log('set...')
+	
+
+	portfolioStore.allocationList=[];
+	var portfolio = portfolioStore.selectedManagePortfolio;
+	portfolioStore.portfolioFundFee = portfolio.leaderPercentageFee;
+	portfolioStore.isPortfolioAcceptingNewInvestors = portfolio.acceptingNewInvestors;
+	var port = portfolio['portfolioObject'];
+	for (var tokenAddress in port) {
+		if (tokenAddress.length == 42){
+			var token = port[tokenAddress];
+			token['address'] = tokenAddress;
+			token['allocation']=token.percentage;
+			token['allocation']=token['allocation'].toFixed(2);
+			token['allocation']=parseInt(token['allocation']*100);
+			token['mc']=0;
+			token['d7']=0;
+			token['d30']=0;
+			token['d90']=0;
+			token['y1']=0;
+			token['icon']=token.image;
+			portfolioStore.allocationList.push(token);
+		}
+	}
+	var currentAllocationList = portfolioStore.allocationList;
+	var tokenList = getTokenArray();
+	var newTokenList = []
+	for (var i =0;i<tokenList.length;i++){
+		var thisToken = tokenList[i];
+		var foundItAlready = false;
+		for (var j=0;j<currentAllocationList.length;j++){
+			var thisAllocationToken = currentAllocationList[j];
+			if (thisAllocationToken.address == thisToken.address){
+				foundItAlready=true;
+			}
+		}
+		if (!foundItAlready){
+			thisToken['icon']=thisToken.logoURI;
+			newTokenList.push(thisToken)
+		}
+	}
+	portfolioStore.tokenList=newTokenList;
+	success.value = false;
+
+}
+
+
 
 function newList(amt, name) {
 	console.log("newList:"+name);

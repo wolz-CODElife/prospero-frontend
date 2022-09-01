@@ -304,7 +304,7 @@ async function depositToPortfolio() {
 				portfolioStore.depositMessage =
 					"Wallet created successfully!  Before you deposit you have to approve the tokens to be transferred.";
 				res = await approveAndDeposit(true);
-				if (!res.success) {
+				if (!res.success){
 					loading.value = false;
 					error.value = true;
 					errorMsg.value = res.error;
@@ -393,13 +393,13 @@ async function depositToPortfolio() {
 			error.value = true;
 			errorMsg.value = res.error;
 			console.log(errorMsg.value);
-			alert(res.error);
+			//alert(res.error);
 		}
 	} catch (err) {
 		console.log("exception err:" + err);
 		loading.value = false;
 		error.value = true;
-		alert(res.error);
+		//alert(res.error);
 	}
 	console.log("done");
 }
