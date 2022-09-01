@@ -99,6 +99,15 @@
 				>
 					An error occured loading portfolio
 				</div>
+				<!-- <div v-else>
+					<div v-if="portfolioStore.activePortfolioType === 'All Portfolios'">
+          
+          </div>
+
+          <div v-else>
+
+          </div>
+				</div> -->
 
 				<!-- All Portfolios / My Portfolios Tables -->
 				<TableComponent
@@ -366,7 +375,9 @@ function updateUIStatusAPICaller(uiType) {
 async function doWithdraw() {
 	//to do - add tokens swapping into
 	try {
-		console.log("Do Withdraw function works amount:"+JSON.stringify(amount,null,2));
+		console.log(
+			"Do Withdraw function works amount:" + JSON.stringify(amount, null, 2)
+		);
 		console.log("doWithdraw amount.value:" + amount.value);
 		const res = await withdraw([], 2);
 		console.log(res);
