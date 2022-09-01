@@ -102,18 +102,30 @@ function goBack() {
 	createView.value = false;
 }
 
-function redirect() {
+async function redirect() {
+	console.log("redirect called");
 	// if (joinView.value) {
+	console.log("****this.selectedPortfolio:"+JSON.stringify(portfolioStore.selectedPortfolio,null,2));
+
 	portfolioStore.activeMode = "join";
 	portfolioStore.activePortfolioType = "My Portfolios";
 	joinView.value = false;
 	createView.value = false;
-	portfolioStore.getPortfolios();
-	portfolioStore.reset();
+	var theProspWalletAddressSelectedBefore = portfolioStore.selectedPortfolio.prosperoWalletAddress;
+	
+	await portfolioStore.loadData();
+	
+	for (var i =0;i<portfolioStore.myPortfolios.length;i++){
+		var thisPort = portfolioStore.myPortfolios[i]
+		if (thisPort.prosperoWalletAddress == theProspWalletAddressSelectedBefore)
+		{
+			console.log('****found it****')
+			portfolioStore.selectedPortfolio=thisPort;
+			break;
+		}
+	}
+	console.log("thisPort:"+JSON.stringify(thisPort,null,2));
+	await portfolioStore.doSelectPortfolio(thisPort)
 
-	// } else {
-	// 	portfolioStore.activeMode = "create";
-	// 	portfolioStore.firstCreateView = false;
-	// }
 }
 </script>

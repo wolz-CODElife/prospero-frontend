@@ -29,35 +29,17 @@ import { getTokenArray } from "@/api";
 const portfolioStore = usePortfolios();
 
 function returnNameUpdateSelectedPortfolio(portfolio){
-	/*
-	console.log("PORT:"+JSON.stringify(portfolio,null,2));
-	portfolioStore.selectedPortfolio=portfolio;
-	portfolioStore.allocationList=[];
-	var port = portfolio['portfolioObject'];
-	console.log("port:"+JSON.stringify(port,null,2));
-
-	for (var tokenAddress in port) {
-		if (tokenAddress.length == 42){
-		var token = port[tokenAddress];
-		token['address'] = tokenAddress;
-		token['allocation']=token.percentage;
-		token['mc']=0;
-		token['d7']=0;
-		token['d30']=0;
-		token['d90']=0;
-		token['y1']=0;
-		token['icon']=token.image;
-		portfolioStore.allocationList.push(token);
-		}
-	}
-	console.log("allocation list:"+JSON.stringify(portfolioStore.allocationList,null,2));
-*/
 	return portfolio.name;
 }
 
-function onClickedPort(portfolio) {
+async function onClickedPort(portfolio) {
 	console.log("onClickedPort");
 	console.log("PORT:"+JSON.stringify(portfolio,null,2));
+
+	//Do this for line chart
+	portfolioStore.activePortfolioType = "My Portfolios";
+	await portfolioStore.doSelectPortfolio(portfolio);
+
 	portfolioStore.selectedPortfolio=portfolio;
 	portfolioStore.allocationList=[];
 	
@@ -65,20 +47,14 @@ function onClickedPort(portfolio) {
 	portfolioStore.isPortfolioAcceptingNewInvestors = portfolio.acceptingNewInvestors;
 	console.log("portfolio.leaderPercentageFee:"+portfolio.leaderPercentageFee);
 	console.log("portfolio.acceptingNewInvestors:"+portfolio.acceptingNewInvestors);
-
-	//portf
 	var port = portfolio['portfolioObject'];
-	//console.log("port:"+JSON.stringify(port,null,2));
-	//
-	//var tokenList = portfolioStore.tokenList;
-
 	for (var tokenAddress in port) {
 		if (tokenAddress.length == 42){
 		var token = port[tokenAddress];
 		token['address'] = tokenAddress;
 		token['allocation']=token.percentage;
 		token['allocation']=token['allocation'].toFixed(2);
-		token['allocation']=token['allocation']*100;
+		token['allocation']=parseInt(token['allocation']*100);
 		token['mc']=0;
 		token['d7']=0;
 		token['d30']=0;
@@ -92,10 +68,7 @@ function onClickedPort(portfolio) {
 	var currentAllocationList = portfolioStore.allocationList;
 	
 	var tokenList = getTokenArray();
-	//portfolioStore.tokenList=[];
 	var newTokenList = []
-	//console.log("tokenList:"+JSON.stringify(tokenList,null,2));
-	
 		
 		for (var i =0;i<tokenList.length;i++){
 			var thisToken = tokenList[i];
@@ -112,28 +85,7 @@ function onClickedPort(portfolio) {
 		}
 	}
 	portfolioStore.tokenList=newTokenList;
-	/*
-	var currentAllocationList = portfolioStore.allocationList;
-	for (var j=0;j<currentAllocationList.length;j++){
-		var thisAllocationToken = currentAllocationList[j];
-	}
-	//portfolioStore.tokenList
-	var finalTokenList = []
-	for (var i =0;i<tokenList.length;i++){
-		var thisToken = tokenList[i];
-		var foundItAlready = false;
-		for (var j=0;j<currentAllocationList.length;j++){
-			var thisAllocationToken = currentAllocationList[j];
-			if (thisAllocationToken.address == thisToken.address){
-				foundItAlready=true;
-			}
-		}
-		if (!foundItAlready){
-			finalTokenList.push(thisToken);
-		}
-		*/
-	//console.log("token list:"+JSON.stringify(portfolioStore.tokenList,null,2));
-	//console.log("allocation list:"+JSON.stringify(portfolioStore.allocationList,null,2));
+	
 }
 
 defineProps({
