@@ -133,7 +133,7 @@ export const usePortfolios = defineStore("Portfolios", {
 
 		async getPortfolios() {
 			this.isLoading = true;
-			this.lineChartData = {
+			/*this.lineChartData = {
 				labels: [
 					"8-6-2022",
 					"8-7-2022",
@@ -169,6 +169,7 @@ export const usePortfolios = defineStore("Portfolios", {
 					},
 				],
 			};
+			*/
 			try {
 				this.allPortfolios = await getLeaderBoardDataForTable();
 				this.myPortfolios = await getMyPortfoliosDataForTable();
