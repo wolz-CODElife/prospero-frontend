@@ -101,7 +101,42 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			portfolioFundFee: 0,
 
+<<<<<<< HEAD
 			lineChartData: {
+=======
+			lineChartData: {},
+
+			activeFilter: "All",
+
+			depositMessage:"",
+		};
+	},
+
+	actions: {
+		// Fill empty portfolio list with an API call
+
+		async loadData(){
+			try {
+				console.log("calling loadData");
+				await initializeApi();
+				this.isLoading = true;
+				try {
+					await this.getPortfolios();
+					this.isLoading = false;
+				} catch (error) {
+					this.isLoading = false;
+					this .isError = true;
+					console.log("get portfolios error", error);
+				}
+			} catch (error) {
+				console.log("init error", error);
+			}
+		},
+
+		async getPortfolios() {
+			this.isLoading = true;
+			this.lineChartData = {
+>>>>>>> 6eb37381bf8898c3124a0b9be42aee8312c0996f
 				labels: [
 					"8-6-2022",
 					"8-7-2022",
