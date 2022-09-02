@@ -224,8 +224,6 @@
 						icon="https://i.postimg.cc/Gm3tbWcH/image.png"
 						@withdraw-action="enableDirect"
 					/>
-					{{ amount }}
-					{{ singleToken }}
 				</div>
 
 				<!-- Withdrawal Modal  -->
@@ -235,6 +233,9 @@
 					@doWithdraw="doWithdraw"
 					:mode="withdrawMode"
 					:firstView="firstView"
+					:secondView="secondView"
+					:loading="loading"
+					:error="error"
 					v-model:amount="amount"
 					v-model:singleToken="singleToken"
 				/>
@@ -304,6 +305,8 @@ const success = ref(false);
 const withdrawMode = ref("");
 
 const firstView = ref(true);
+
+const secondView = ref(false);
 
 const portfolioName = ref("");
 
@@ -378,14 +381,14 @@ function updateUIStatusAPICaller(uiType) {
 }
 
 async function doWithdraw() {
-	//to do - add tokens swapping into
-	// console.log("**myAmount:"+JSON.stringify(myAmount,null,2));
+	firstView.value = false;
+	secondView.value = true;
+	loading.value = true;
 
 	try {
 		console.log("withdrawal amount: ", parseFloat(amount.value));
-
 		const res = await withdraw([], parseFloat(amount.value));
-		console.log(res);
+		loading.value = false;
 		if (res.success) {
 			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
@@ -393,19 +396,15 @@ async function doWithdraw() {
 			loading.value = false;
 			await portfolioStore.loadData();
 		} else {
-			error.value = true;
-			console.log(success.error);
 			loading.value = false;
+			error.value = true;
+			console.log(res.error);
 		}
-		withdrawMode.value = "";
 	} catch (error) {
+		loading.value = false;
 		error.value = true;
 		console.log(error);
-		loading.value = false;
-		withdrawMode.value = "";
 	}
-	firstView.value = false;
-	error.value = false;
 }
 
 function enableSwap() {
@@ -419,7 +418,13 @@ function enableDirect() {
 }
 
 function closeWithdrawalModal() {
+	firstView.value = true;
+	secondView.value = false;
+	loading.value = false;
+	error.value = false;
 	withdrawMode.value = "";
+	amount.value = "";
+	singleToken.value = "";
 }
 
 function reset() {

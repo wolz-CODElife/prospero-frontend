@@ -54,7 +54,7 @@
 		</div>
 	</Modal>
 
-	<Modal @close="$emit('close')" v-else>
+	<Modal @close="$emit('close')" v-if="props.secondView">
 		<!-- Loading  -->
 		<div
 			v-if="props.loading"
@@ -118,7 +118,10 @@ const props = defineProps({
 	singleToken: String,
 	mode: String,
 	firstView: Boolean,
+	secondView: Boolean,
 	usdAmountofGas: String,
+	loading: Boolean,
+	error: Boolean,
 });
 
 defineEmits(["update:amount", "update:singleToken", "close", "doWithdraw"]);
