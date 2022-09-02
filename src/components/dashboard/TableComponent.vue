@@ -180,6 +180,11 @@ function clearSearch() {
 }
 
 function updateShowingPortfolios() {
+	filteredPortfolios.value = props.portfolioList.slice(
+		(currentPage.value - 1) * 4,
+		currentPage.value * 4
+	);
+
 	// if (
 	//   currentPage.value <= props.portfolioList.length / 4 &&
 	//   currentPage.value > 1
@@ -190,11 +195,6 @@ function updateShowingPortfolios() {
 	// } else {
 	//   filteredPortfolios.value = props.portfolioList.slice(4).reverse();
 	// }
-
-	filteredPortfolios.value = props.portfolioList.slice(
-		(currentPage.value - 1) * 4,
-		currentPage.value * 4
-	);
 }
 
 function updateSearchedPortfolios(event) {

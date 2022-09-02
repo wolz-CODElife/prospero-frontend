@@ -1,10 +1,11 @@
 <template>
-	<div class="h-full w-full bg-[#191A20] border border-[#2D3035] p-[30px]  text-white">
+	<div
+		class="h-full w-full bg-[#191A20] border border-[#2D3035] p-[30px] text-white"
+	>
 		<div
 			v-if="loading"
-			class="flex flex-col h-[75vh] items-center justify-center"
+			class="flex flex-col h-[75vh] justify-center items-center gap-[30px] text-center my-[20px]"
 		>
-
 			<Loader />
 		</div>
 
@@ -119,8 +120,6 @@
 		</div>
 	</div>
 
-
-
 	<Modal @close="$emit('goBack'), closeViews()" v-if="firstView">
 		<!--  Approve Required  -->
 		<div
@@ -129,7 +128,8 @@
 			<img src="@/assets/img/caution.svg" alt="" class="w-[62px] h-[62px]" />
 			<h1 class="text-[20px] uppercase">Action Required</h1>
 			<p class="text-[16px]">
-				Before you can deposit, you will potentially have to confirm several transactions with your wallet.
+				Before you can deposit, you will potentially have to confirm several
+				transactions with your wallet.
 			</p>
 			<button
 				class="btn btn-primary w-full"
@@ -140,8 +140,6 @@
 		</div>
 	</Modal>
 
-
-
 	<Modal @close="$emit('goBack'), closeViews()" v-if="secondView">
 		<!-- Loading  -->
 		<div
@@ -151,10 +149,10 @@
 			<img
 				src="https://i.postimg.cc/tJMqnqDk/image.png"
 				alt=""
-				class="mx-auto max-w-[90px] object-contain"
+				class="mx-auto max-w-[90px] object-contain animate-pulse"
 			/>
 			<p class="text-[16px] text-white">
-				{{portfolioStore.depositMessage}}
+				{{ portfolioStore.depositMessage }}
 			</p>
 			<Loader />
 		</div>
@@ -205,7 +203,17 @@
 </template>
 
 <script setup>
-import { getBalancesInEoa, handleDepositType, updateApiTokenList, 	getDepositStatus, createPortfolioHelper, depositHelper, joinPortfolio, shouldApprove, approveAndDeposit } from "@/api";
+import {
+	getBalancesInEoa,
+	handleDepositType,
+	updateApiTokenList,
+	getDepositStatus,
+	createPortfolioHelper,
+	depositHelper,
+	joinPortfolio,
+	shouldApprove,
+	approveAndDeposit,
+} from "@/api";
 import { onMounted, computed, ref } from "vue";
 import Modal from "../Modal.vue";
 import { usePortfolios } from "@/stores/Portfolios";
@@ -277,12 +285,13 @@ async function depositToPortfolio() {
 	try {
 		var res;
 		var depositType = getDepositStatus();
-		console.log("depositType:"+depositType)
-		if (depositType == UI_CREATE_THEN_DEPOSIT){
-			console.log("UI_CREATE_THEN_DEPOSIT")
-			portfolioStore.depositMessage="Before you deposit you have to create your wallet on the blockhain."
+		console.log("depositType:" + depositType);
+		if (depositType == UI_CREATE_THEN_DEPOSIT) {
+			console.log("UI_CREATE_THEN_DEPOSIT");
+			portfolioStore.depositMessage =
+				"Before you deposit you have to create your wallet on the blockhain.";
 			res = await createPortfolioHelper();
-			if (!res.success){
+			if (!res.success) {
 				loading.value = false;
 				error.value = true;
 				errorMsg.value = res.error;
@@ -291,8 +300,9 @@ async function depositToPortfolio() {
 			}
 
 			var shouldShowApproveMessage = await shouldApprove();
-			if (shouldShowApproveMessage){
-				portfolioStore.depositMessage="Wallet created successfully!  Before you deposit you have to approve the tokens to be transferred."
+			if (shouldShowApproveMessage) {
+				portfolioStore.depositMessage =
+					"Wallet created successfully!  Before you deposit you have to approve the tokens to be transferred.";
 				res = await approveAndDeposit(true);
 				if (!res.success){
 					loading.value = false;
@@ -301,18 +311,20 @@ async function depositToPortfolio() {
 					console.log(errorMsg.value);
 					return;
 				}
-				portfolioStore.depositMessage="Tokens approved successfully!  Confirm the transaction to deposit your tokens."
-			}else{
-				portfolioStore.depositMessage="Wallet created successfully!  Confirm the transaction to deposit your tokens."
+				portfolioStore.depositMessage =
+					"Tokens approved successfully!  Confirm the transaction to deposit your tokens.";
+			} else {
+				portfolioStore.depositMessage =
+					"Wallet created successfully!  Confirm the transaction to deposit your tokens.";
 			}
-				res = await approveAndDeposit(false);
+			res = await approveAndDeposit(false);
+		} else if (depositType == UI_JOIN_THEN_DEPOSIT) {
+			console.log("UI_JOIN_THEN_DEPOSIT");
 
-		}else if (depositType == UI_JOIN_THEN_DEPOSIT){
-			console.log("UI_JOIN_THEN_DEPOSIT")
-
-			portfolioStore.depositMessage="Before you deposit you have to join the wallet on the blockhain."
-			res= await joinPortfolio();
-			if (!res.success){
+			portfolioStore.depositMessage =
+				"Before you deposit you have to join the wallet on the blockhain.";
+			res = await joinPortfolio();
+			if (!res.success) {
 				loading.value = false;
 				error.value = true;
 				errorMsg.value = res.error;
@@ -321,43 +333,48 @@ async function depositToPortfolio() {
 			}
 
 			var shouldShowApproveMessage = await shouldApprove();
-			if (shouldShowApproveMessage){
-				portfolioStore.depositMessage="Wallet joined successfully!  Before you deposit you have to approve the tokens to be transferred."
-				res = await approveAndDeposit(true)
-				if (!res.success){
-				loading.value = false;
-				error.value = true;
-				errorMsg.value = res.error;
-				console.log(errorMsg.value);
-				return;
+			if (shouldShowApproveMessage) {
+				portfolioStore.depositMessage =
+					"Wallet joined successfully!  Before you deposit you have to approve the tokens to be transferred.";
+				res = await approveAndDeposit(true);
+				if (!res.success) {
+					loading.value = false;
+					error.value = true;
+					errorMsg.value = res.error;
+					console.log(errorMsg.value);
+					return;
 				}
-				portfolioStore.depositMessage="Tokens approved successfully!  Confirm the transaction to deposit your tokens."
-
-			}else{
-				portfolioStore.depositMessage="Wallet joined successfully!  Confirm the transaction to deposit your tokens."
+				portfolioStore.depositMessage =
+					"Tokens approved successfully!  Confirm the transaction to deposit your tokens.";
+			} else {
+				portfolioStore.depositMessage =
+					"Wallet joined successfully!  Confirm the transaction to deposit your tokens.";
 			}
-				res = await approveAndDeposit(false)
-		}else if (depositType == UI_DEPOSIT_MY_PORTFOLIO){
-			console.log("UI_DEPOSIT_MY_PORTFOLIO")
+			res = await approveAndDeposit(false);
+		} else if (depositType == UI_DEPOSIT_MY_PORTFOLIO) {
+			console.log("UI_DEPOSIT_MY_PORTFOLIO");
 
 			var shouldShowApproveMessage = await shouldApprove();
-			if (shouldShowApproveMessage){
+			if (shouldShowApproveMessage) {
 				console.log("should approve - 1");
-				portfolioStore.depositMessage="Before you deposit you have to approve the tokens to be transferred."
-				res = await approveAndDeposit(true)
-				if (!res.success){
-				loading.value = false;
-				error.value = true;
-				errorMsg.value = res.error;
-				console.log(errorMsg.value);
-				return;
+				portfolioStore.depositMessage =
+					"Before you deposit you have to approve the tokens to be transferred.";
+				res = await approveAndDeposit(true);
+				if (!res.success) {
+					loading.value = false;
+					error.value = true;
+					errorMsg.value = res.error;
+					console.log(errorMsg.value);
+					return;
 				}
-				portfolioStore.depositMessage="Tokens approved successfully!  Confirm the transaction to deposit your tokens."
-				res = await approveAndDeposit(false)
-			}else{
+				portfolioStore.depositMessage =
+					"Tokens approved successfully!  Confirm the transaction to deposit your tokens.";
+				res = await approveAndDeposit(false);
+			} else {
 				console.log("should approve - 2");
-				portfolioStore.depositMessage=" Confirm the transaction to deposit your tokens."
-				res = await approveAndDeposit(false)
+				portfolioStore.depositMessage =
+					" Confirm the transaction to deposit your tokens.";
+				res = await approveAndDeposit(false);
 			}
 		}
 		//let res = await handleDepositType(portfolioStore);
@@ -379,11 +396,10 @@ async function depositToPortfolio() {
 			//alert(res.error);
 		}
 	} catch (err) {
-		console.log("exception err:"+err)
+		console.log("exception err:" + err);
 		loading.value = false;
 		error.value = true;
 		//alert(res.error);
-
 	}
 	console.log("done");
 }

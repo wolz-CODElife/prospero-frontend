@@ -17,24 +17,6 @@
 			<div class="col-span-8 grid grid-rows-5 gap-[10px]">
 				<!-- Line chart container  -->
 				<div class="bg-[#191A20] row-span-2">
-					<!-- Loading  -->
-					<!-- <div
-						v-if="portfolioStore.isLoading"
-						class="flex flex-col h-full items-center justify-center"
-					>
-						<Loader />
-					</div> -->
-
-					<!-- Error  -->
-					<!-- <div
-						v-else-if="
-							portfolioStore.isError ||
-							portfolioStore.allPortfolios.length === 0
-						"
-					>
-						<p>An error occured</p>
-					</div> -->
-
 					<!-- Line chart  -->
 					<LineChart :chart-data="portfolioStore.lineChartData" />
 				</div>
@@ -54,6 +36,9 @@ import Table from "@/components/dashboard/Table.vue";
 import LineChart from "@/components/charts/LineChart.ts";
 import Loader from "@/components/Loader.vue";
 import { usePortfolios } from "@/stores/Portfolios";
+
+const portfolioStore = usePortfolios();
+
 /*
 getLeaderBoardDataOverTime and getMyPortfoliosDataOverTime both return an array of objects for the line charts.
 Each objects key is the prospero wallet address, which is then an array of that wallets total value, profits and user invested over time.
@@ -101,7 +86,4 @@ myPortfoliosDataOverTime:{
   ]
 ]
 */
-
-const portfolioStore = usePortfolios();
-
 </script>

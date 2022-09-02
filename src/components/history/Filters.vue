@@ -1,6 +1,4 @@
 <template>
-	<!-- todo: convert array to object fpr active class -->
-	<!--  -->
 	<li
 		v-for="filter in filters"
 		:key="filter"

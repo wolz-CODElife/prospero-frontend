@@ -15,19 +15,30 @@
 		<hr class="border-[#2D3035]" />
 
 		<div
-			class="mx-[30px] my-[15px] flex justify-between items-center bg-[#2D3035] pr-[20px]"
+			class="mx-[30px] my-[15px] grid grid-cols-8 gap-x-[44px] justify-between items-center bg-[#2D3035] pr-[20px]"
 			v-for="(txn, i) in portfolioStore.filteredTxnList"
 			:key="i"
 		>
+			<!-- Type meta  -->
 			<div
-				class="py-[15px] px-[22px]"
-				:class="[txn.type === 'Deposit' ? 'bg-[#54AC68]' : txn.type === 'Withdrawal' ? 'bg-[#B34B4B]' : 'bg-[#015B58]']"
+				class="py-[15px] px-[22px] col-span-2"
+				:class="[
+					txn.type === 'Deposit'
+						? 'bg-[#54AC68]'
+						: txn.type === 'Withdrawal'
+						? 'bg-[#B34B4B]'
+						: 'bg-[#015B58]',
+				]"
 			>
 				<h5 class="uppercase text-white text-[14px] mb-[12px]">
 					<span v-if="txn.type === 'Deposit'">Deposit</span>
 					<span v-else-if="txn.type === 'Withdrawal'">Withdrawal</span>
-					<span v-else-if="txn.type === 'Manager Rebalance'">Manager Rebalance</span>
-					<span v-else-if="txn.type === 'Manager Deposit'">Manager Deposit</span>
+					<span v-else-if="txn.type === 'Manager Rebalance'"
+						>Manager Rebalance</span
+					>
+					<span v-else-if="txn.type === 'Manager Deposit'"
+						>Manager Deposit</span
+					>
 				</h5>
 				<h6 class="text-white">
 					<span>{{ txn.time }}</span>
@@ -35,7 +46,8 @@
 				</h6>
 			</div>
 
-			<div class="py-[14px]">
+			<!-- Name meta  -->
+			<div class="py-[14px] col-span-2">
 				<h5 class="uppercase text-white text-[14px] mb-[12px]">
 					{{ txn.portfolioName }}
 				</h5>
@@ -72,13 +84,14 @@
 							/>
 						</svg>
 					</span>
-					{{txn.numberOfSwaps}} Swap(s) and {{txn.numberOfTransfer}} Transfer(s)
-					
+					{{ txn.numberOfSwaps }} Swap(s) and
+					{{ txn.numberOfTransfer }} Transfer(s)
 				</h6>
 			</div>
 
+			<!-- View on explorer -->
 			<a
-				class="text-[#868C9D] text-[12px] flex gap-[7px] items-center"
+				class="text-[#868C9D] hover:text-white text-[12px] col-span-2 flex gap-[7px] items-center"
 				:href="txn.snowtraceLink"
 				target="_blank"
 			>
@@ -102,13 +115,36 @@
 					</svg>
 				</span>
 			</a>
-			<span v-if="txn.type === 'Deposit'"><span class="text-[16px] text-white">{{ txn.amount }}</span></span>
-			<span v-else-if="txn.type === 'Withdrawal'"><span class="text-[16px] text-white">{{ txn.amount }}</span></span>
-			<span v-else-if="txn.type === 'Manager Deposit'"><span class="text-[16px] text-white"></span></span>
-			<span v-else-if="txn.type === 'Manager Rebalance'"><span class="text-[16px] text-white"></span></span>
 
-			<div class="bg-[#868C9D] text-white text-[12px] py-[10px] px-[12px]">
-				Completed <span class="text-white">✔️</span>
+			<!-- Amount  -->
+			<span class="f-right">
+				<span v-if="txn.type === 'Deposit'">{{ txn.amount }}</span>
+				<span v-else-if="txn.type === 'Withdrawal'">{{ txn.amount }}</span>
+				<span v-else-if="txn.type === 'Manager Deposit'"></span>
+				<span v-else-if="txn.type === 'Manager Rebalance'"></span>
+			</span>
+
+			<!-- Status - completed -->
+			<div
+				class="bg-[#868C9D] text-white text-[12px] flex gap-x-[10px] items-center py-[10px] px-[12px]"
+			>
+				Completed
+				<span
+					><svg
+						width="18"
+						height="14"
+						viewBox="0 0 18 14"
+						fill="none"
+						xmlns="http://www.w3.org/2000/svg"
+					>
+						<path
+							fill-rule="evenodd"
+							clip-rule="evenodd"
+							d="M5.6 10.85L1.4 6.65L0 8.05L5.6 13.65L17.6 1.65L16.2 0.25L5.6 10.85Z"
+							fill="white"
+						/>
+					</svg>
+				</span>
 			</div>
 		</div>
 	</div>
@@ -131,3 +167,13 @@ const historyFilters = ref(["All", "Deposit", "Withdrawal"]);
 
 // const activeFilter = ref("");
 </script>
+
+<style lang="postcss">
+.f-right span {
+	@apply text-[16px] text-white float-right;
+}
+
+a:hover span svg path {
+	fill: white;
+}
+</style>
