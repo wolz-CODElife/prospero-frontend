@@ -16,7 +16,7 @@
 
 			<div class="col-span-8 grid grid-rows-5 gap-[10px]">
 				<!-- Line chart container  -->
-				<div class="bg-[#191A20] row-span-2">
+				<div class="bg-[#191A20] row-span-2 p-[20px]">
 					<!-- Line chart  -->
 					<LineChart :chart-data="portfolioStore.lineChartData" />
 				</div>

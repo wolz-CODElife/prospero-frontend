@@ -13,9 +13,8 @@
 					>
 					<input
 						type="text"
-						name="amount"
-						id="amount"
-						v-model="myAmount"
+						:value="amount"
+						@input="$emit('update:amount', $event.target.value)"
 						placeholder="$0"
 						class="pt-[16px] pb-[6px] pl-[16px] w-full bg-black text-white text-[14px] border border-black focus:outline-none focus:border-[#00ff00]"
 					/>
@@ -31,10 +30,8 @@
 					<!-- todo: change to select  -->
 					<input
 						type="text"
-						name="token"
-						id="token"
 						:value="singleToken"
-						@input="(e) => (singleToken = e.target.value)"
+						@input="$emit('update:singleToken', $event.target.value)"
 						placeholder="Select"
 						class="pt-[16px] pb-[6px] pl-[16px] w-full bg-black text-white text-[14px] border border-black focus:outline-none focus:border-[#00ff00]"
 					/>
@@ -79,9 +76,7 @@
 			v-else-if="props.error"
 			class="flex flex-col justify-center items-center gap-[30px] text-white text-center my-[20px]"
 		>
-			<h1 class="text-[20px] text-center uppercase">
-				Unable to swap into one token
-			</h1>
+			<h1 class="text-[20px] text-center uppercase">Unable to withdraw</h1>
 		</div>
 
 		<!-- Successful -->
@@ -98,14 +93,14 @@
 
 			<!-- todo: replace this w real values -->
 			<p class="text-[16px]">
-				$10.00 has been sent to you. Wait a few moments for the tokens to
-				transfer and reflect in your wallet. Gas used ${{
-					portfolioStore.selectedPortfolio.name
+				${{ props.amount }} has been sent to you. Wait a few moments for the
+				tokens to transfer and reflect in your wallet. Gas used ${{
+					props.usdAmountOfGas
 				}}
 			</p>
 
 			<button
-				@click="$emit('closeWithdrawalModal')"
+				@click="$emit('close')"
 				class="btn btn-primary uppercase w-full"
 			>
 				Take me to home
@@ -115,7 +110,6 @@
 </template>
 
 <script setup>
-import { ref, computed } from "vue";
 import Modal from "../Modal.vue";
 import WithdrawalOverview from "../withdrawal/WithdrawalOverview.vue";
 
@@ -124,11 +118,8 @@ const props = defineProps({
 	singleToken: String,
 	mode: String,
 	firstView: Boolean,
+	usdAmountofGas: String,
 });
 
-
-
-const totalAmtToWithdraw = ref("");
-
-const disableWithdraw = computed(() => totalAmtToWithdraw.value <= 0);
+defineEmits(["update:amount", "update:singleToken", "close", "doWithdraw"]);
 </script>
