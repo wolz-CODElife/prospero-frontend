@@ -202,7 +202,7 @@
 					class="px-[20px]"
 				>
 					<!-- Choose withdraw type  -->
-					<WithdrawalPrompt
+					<WithdrawalPromptSwap
 						:title="wcOne.title"
 						:desc="wcOne.desc"
 						icon="https://i.postimg.cc/05pNHQs8/image.png"
@@ -252,7 +252,10 @@ import {
 	getTokenListForManageUI,
 } from "@/api";
 import WithdrawalPrompt from "../withdrawal/WithdrawalPrompt.vue";
+import WithdrawalPromptSwap from "../withdrawal/WithdrawalPromptSwap.vue";
+
 import WithdrawalModal from "../withdrawal/WithdrawalModal.vue";
+import { myAmount } from "../withdrawal/WithdrawalModal.vue";
 import { useRouter } from "vue-router";
 import ManageContainer from "../manage/ManageContainer.vue";
 import TableComponent from "./TableComponent.vue";
@@ -365,6 +368,11 @@ function updateUIStatusAPICaller(uiType) {
 
 async function doWithdraw() {
 	//to do - add tokens swapping into
+	console.log("**myAmount:"+JSON.stringify(myAmount,null,2));
+
+	console.log("myAmount:"+myAmount.value);
+		console.log("myAmount:"+myAmount);
+
 	try {
 		console.log("Do Withdraw function works amount:"+JSON.stringify(amount,null,2));
 		console.log("doWithdraw amount.value:" + amount.value);

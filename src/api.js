@@ -2542,7 +2542,7 @@ async function getGraphData() {
 		});
 		//console.log ("RESULT**: \n", JSON.stringify(result,null,2));
 
-		//console.log ("Query result: \n", result.data.data.latestBalancesFactories);
+		console.log ("Query result: \n", JSON.stringify(result.data.data.latestBalancesFactories, null,2));
 		graphData = result.data.data.latestBalancesFactories;
 		for (var i = 0; i < graphData.length; i++) {
 			var graphItem = graphData[i];
