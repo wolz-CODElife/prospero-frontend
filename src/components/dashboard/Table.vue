@@ -224,6 +224,8 @@
 						icon="https://i.postimg.cc/Gm3tbWcH/image.png"
 						@withdraw-action="enableDirect"
 					/>
+					{{ amount }}
+					{{ singleToken }}
 				</div>
 
 				<!-- Withdrawal Modal  -->
@@ -231,9 +233,9 @@
 					v-if="withdrawMode !== ''"
 					@close="closeWithdrawalModal"
 					@doWithdraw="doWithdraw"
-					mode="withdrawMode"
-					firstView="firstView"
-					v-model="amount"
+					:mode="withdrawMode"
+					:firstView="firstView"
+					v-model:amount="amount"
 					v-model:singleToken="singleToken"
 				/>
 			</div>
@@ -261,7 +263,10 @@ import {
 	getTokenListForManageUI,
 } from "@/api";
 import WithdrawalPrompt from "../withdrawal/WithdrawalPrompt.vue";
+// import WithdrawalPromptSwap from "../withdrawal/WithdrawalPromptSwap.vue";
+
 import WithdrawalModal from "../withdrawal/WithdrawalModal.vue";
+// import { myAmount } from "../withdrawal/WithdrawalModal.vue";
 import { useRouter } from "vue-router";
 import ManageContainer from "../manage/ManageContainer.vue";
 import TableComponent from "./TableComponent.vue";
@@ -350,13 +355,13 @@ function toggleDisabled() {
 	}
 }
 
-const disableWithdraw = computed(() => {
-	if (swap.value) {
-		!amount.value || !singleToken.value;
-	} else {
-		!amount.value;
-	}
-});
+// const disableWithdraw = computed(() => {
+// 	if (swap.value) {
+// 		!amount.value || !singleToken.value;
+// 	} else {
+// 		!amount.value;
+// 	}
+// });
 
 function updateNameAndFeeApi() {
 	console.log(
@@ -374,12 +379,12 @@ function updateUIStatusAPICaller(uiType) {
 
 async function doWithdraw() {
 	//to do - add tokens swapping into
+	// console.log("**myAmount:"+JSON.stringify(myAmount,null,2));
+
 	try {
-		console.log(
-			"Do Withdraw function works amount:" + JSON.stringify(amount, null, 2)
-		);
-		console.log("doWithdraw amount.value:" + amount.value);
-		const res = await withdraw([], 2);
+		console.log("withdrawal amount: ", parseFloat(amount.value));
+
+		const res = await withdraw([], parseFloat(amount.value));
 		console.log(res);
 		if (res.success) {
 			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
@@ -405,7 +410,7 @@ async function doWithdraw() {
 
 function enableSwap() {
 	withdrawMode.value = "swap";
-	console.log("works.....swap");
+	console.log("works.....swap", withdrawMode.value);
 }
 
 function enableDirect() {
@@ -415,7 +420,6 @@ function enableDirect() {
 
 function closeWithdrawalModal() {
 	withdrawMode.value = "";
-	reset();
 }
 
 function reset() {

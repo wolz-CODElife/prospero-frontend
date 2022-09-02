@@ -9,7 +9,7 @@
 			<Loader />
 		</div>
 
-		<div v-else-if="error">Error loading Tokens in your Wallet</div>
+		<!-- <div v-else-if="error">Error loading Tokens in your Wallet</div> -->
 
 		<div v-else>
 			<!-- Go BACK -->
@@ -304,7 +304,7 @@ async function depositToPortfolio() {
 				portfolioStore.depositMessage =
 					"Wallet created successfully!  Before you deposit you have to approve the tokens to be transferred.";
 				res = await approveAndDeposit(true);
-				if (!res.success){
+				if (!res.success) {
 					loading.value = false;
 					error.value = true;
 					errorMsg.value = res.error;
