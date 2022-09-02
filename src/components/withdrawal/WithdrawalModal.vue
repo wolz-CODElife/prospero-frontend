@@ -126,7 +126,6 @@ const props = defineProps({
 	firstView: Boolean,
 });
 
-const myAmount = ref("");
 
 
 const totalAmtToWithdraw = ref("");
