@@ -389,9 +389,14 @@ async function doWithdraw() {
 		console.log("withdrawal amount: ", parseFloat(amount.value));
 		const res = await withdraw([], parseFloat(amount.value));
 		loading.value = false;
+		console.log("RES:"+JSON.stringify(res,null,2));
 		if (res.success) {
 			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
+			if (usdAmountOfGas!=0){
+				usdAmountOfGas= usdAmountOfGas.toFixed(2);
+			}
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
+			props.usdAmountOfGas=usdAmountOfGas;
 			error.value = false;
 			loading.value = false;
 			await portfolioStore.loadData();

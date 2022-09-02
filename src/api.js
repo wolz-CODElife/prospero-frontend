@@ -104,7 +104,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 	//console.log("graphData.length:"+graphData.length)
 	for (var i = 0; i < graphData.length; i++) {
 		var graphItem = graphData[i];
-		console.log("graphItem:" + JSON.stringify(graphItem, null, 2));
+		//console.log("graphItem:" + JSON.stringify(graphItem, null, 2));
 		var intVars = graphItem["intVars"];
 		var usdInvested = graphItem["usdInvested"];
 
@@ -878,7 +878,6 @@ async function getHistoricalPricesUpdateChartsData() {
 		var latestTimeOfThatDay = 0;
 		var datesWithDataSorted = [];
 		var datesWithDataSortedOBJ = {};
-
 		for (var p = 0; p < dates.length; p++) {
 			var dateFromDatesArray = dates[p];
 			var oneToAdd = null;
@@ -1953,7 +1952,7 @@ function daysBetween(date_1, date_2) {
 }
 async function getWithdrawTableData() {
 	withdrawTableData = [];
-	// var portfolio = await getMyWallet();
+	// var portfolio = await getMyWallet(); TAKEN OUT KACHI
 	for (var key in portfolio) {
 		if (keyIsTokenAddress(key)) {
 			var thisObj = portfolio[key];
@@ -1967,7 +1966,7 @@ async function getWithdrawTableData() {
 	return withdrawTableData;
 }
 async function getChartDataSelectedMyPortfolio() {
-	// var portfolio = await getMyWallet();
+	// var portfolio = await getMyWallet(); TAKEN OUT KACHI
 	var percentages = [];
 	var labels = [];
 	var colorArray = [];
@@ -2144,6 +2143,7 @@ function keyIsTokenAddress(key, obj) {
 	return false;
 }
 
+//TAKEN OUT KACHI
 // function getMyWallet() {
 // 	if (
 // 		selectedProsperoWalletAddress == null ||
@@ -2158,7 +2158,7 @@ function keyIsTokenAddress(key, obj) {
 
 //Left side header - Kachi
 async function updateUIFieldValuesMyPortfolioMyPortfolio() {
-	// var portfolio = getMyWallet();
+	// var portfolio = getMyWallet(); TAKEN OUT KACHI
 	var myHoldings = portfolio.totalValue;
 	var usdInvested = portfolio.usdInvested;
 	var deposits = portfolio.totalUsd;
@@ -2614,27 +2614,21 @@ async function withdraw(tokenSwappingInto, amountToWithdraw) {
 		console.log("valueOfUsersPortfolioAfter :" + valueOfUsersPortfolioAfter);
 		var success = false;
 		if (
-			Number(valueOfUsersPortfolioAfter) <
+			Number(valueOfUsersPortfolioAfter) >=
 			Number(valueOfUsersPortfolioBefore)
 		) {
-			success = true;
-		}
-		if (!success) {
-			console.log(
+			console.error(
 				"Error withdraw - Value of the portfolio is not less after the withdraw, before value:" +
 					valueOfUsersPortfolioBefore +
 					" after:" +
 					valueOfUsersPortfolioAfter
 			);
-			return {
-				success: false,
-				error:
-					"Value of the portfolio is not less after the withdraw, before value:" +
-					valueOfUsersPortfolioBefore +
-					" after:" +
-					valueOfUsersPortfolioAfter,
-			};
 		}
+		return{
+			success:true,
+			gasUsed:gasUsed
+		}
+		
 
 		if (tokenSwappingInto.length == 1) {
 			var balSwappingIntoTokenAfter = await otherToken.methods
@@ -3228,6 +3222,9 @@ async function approveDepositing(
 	return { success: true };
 }
 
+const sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitTimeInMs));
+
+
 async function getBalancesInEoa() {
 	console.log("getBalancesInEoa");
 
@@ -3793,14 +3790,14 @@ async function initializeDataObjects() {
 	//await createMyWalletsDataAndUIObject();
 	//console.log('called createMyWalletsDataAndUIObject ');
 
-	// var port = await getMyWallet();
+	// var port = await getMyWallet(); TAKEN OUT KACHI
 
 	//await getHistoricalPricesUpdateChartsData();
 	//console.log('called getHistoricalPricesUpdateChartsData');
 
 	//await getBalancesInEoa();
 	await getHistoricalPricesUpdateChartsData();
-	// await updateProfitPercentages();
+	// await updateProfitPercentages();TAKEN OUT KACHI
 
 	console.log("done initializeApi");
 	return { success: true };
