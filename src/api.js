@@ -1422,7 +1422,6 @@ function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
 	return chartData;
 }
 
-
 function multipleBN(valOne, valTwo) {
 	//console.log("valOne:"+valOne);
 	//console.log("valTwo:"+valTwo);
@@ -1954,7 +1953,7 @@ function daysBetween(date_1, date_2) {
 }
 async function getWithdrawTableData() {
 	withdrawTableData = [];
-	var portfolio = await getMyWallet();
+	// var portfolio = await getMyWallet();
 	for (var key in portfolio) {
 		if (keyIsTokenAddress(key)) {
 			var thisObj = portfolio[key];
@@ -1968,7 +1967,7 @@ async function getWithdrawTableData() {
 	return withdrawTableData;
 }
 async function getChartDataSelectedMyPortfolio() {
-	var portfolio = await getMyWallet();
+	// var portfolio = await getMyWallet();
 	var percentages = [];
 	var labels = [];
 	var colorArray = [];
@@ -2145,21 +2144,21 @@ function keyIsTokenAddress(key, obj) {
 	return false;
 }
 
-function getMyWallet() {
-	if (
-		selectedProsperoWalletAddress == null ||
-		selectedProsperoWalletAddress == undefined ||
-		selectedProsperoWalletAddress == ""
-	) {
-		console.error("** error selectedProsperoWalletAddress is empty **");
-		return;
-	}
-	return myWallets[selectedProsperoWalletAddress];
-}
+// function getMyWallet() {
+// 	if (
+// 		selectedProsperoWalletAddress == null ||
+// 		selectedProsperoWalletAddress == undefined ||
+// 		selectedProsperoWalletAddress == ""
+// 	) {
+// 		console.error("** error selectedProsperoWalletAddress is empty **");
+// 		return;
+// 	}
+// 	return myWallets[selectedProsperoWalletAddress];
+// }
 
 //Left side header - Kachi
 async function updateUIFieldValuesMyPortfolioMyPortfolio() {
-	var portfolio = getMyWallet();
+	// var portfolio = getMyWallet();
 	var myHoldings = portfolio.totalValue;
 	var usdInvested = portfolio.usdInvested;
 	var deposits = portfolio.totalUsd;
@@ -2768,7 +2767,7 @@ async function rebalance(
 		if (!areGoalPercentagesAndActualClose) {
 			console.error("Current percentages do not match goal percentages.");
 		}
-		console.log("success - returning succss true")
+		console.log("success - returning succss true");
 		return { success: true, gasUsed: gasUsed };
 	} catch (exception) {
 		console.error(
@@ -3791,14 +3790,14 @@ async function initializeDataObjects() {
 	//await createMyWalletsDataAndUIObject();
 	//console.log('called createMyWalletsDataAndUIObject ');
 
-	var port = await getMyWallet();
+	// var port = await getMyWallet();
 
 	//await getHistoricalPricesUpdateChartsData();
 	//console.log('called getHistoricalPricesUpdateChartsData');
 
 	//await getBalancesInEoa();
 	await getHistoricalPricesUpdateChartsData();
-	await updateProfitPercentages();
+	// await updateProfitPercentages();
 
 	console.log("done initializeApi");
 	return { success: true };
@@ -3846,13 +3845,9 @@ async function initializeBlockchainConnection() {
 		console.error("Could not find wallet");
 		return { success: false, error: "Could not find wallet" };
 	}
-	//udates selectedProsperoWalletAddres to last wallet on init
-	//getMyWallet();
-	//console.log('set eoaAddress')
 	ethersProvider = await new ethers.providers.Web3Provider(window.ethereum);
 	ethersSigner = ethersProvider.getSigner();
 	web3 = new Web3(window.ethereum);
-	//console.log("got Web3 version", web3.version);
 
 	ethereum.on("accountsChanged", (accounts) => {
 		console.error("Accounts changed -- reloading....");
