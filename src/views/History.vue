@@ -1,4 +1,4 @@
-<template class="bg-[#191A20]">
+<template>
 	<Header />
 	<Main />
 </template>

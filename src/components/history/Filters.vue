@@ -2,7 +2,7 @@
 	<li
 		v-for="filter in filters"
 		:key="filter"
-		@click="$emit('update-filter', filter)"
+		@click="$emit('updateFilter', filter)"
 		class="hover:text-white uppercase list-none"
 		:class="[
 			filter === portfolioStore.activeFilter
@@ -24,4 +24,6 @@ defineProps({
 		required: true,
 	},
 });
+
+defineEmits(["updateFilter"]);
 </script>

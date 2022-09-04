@@ -257,7 +257,6 @@ export const usePortfolios = defineStore("Portfolios", {
 
 		updateFilter(filter) {
 			this.activeFilter = filter;
-			console.log("kachi see active filter", this.activeFilter);
 		},
 	},
 

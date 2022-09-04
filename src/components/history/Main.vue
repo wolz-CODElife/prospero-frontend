@@ -91,7 +91,7 @@
 
 			<!-- View on explorer -->
 			<a
-				class="text-[#868C9D] hover:text-white text-[12px] col-span-2 flex gap-[7px] items-center"
+				class="text-[#868C9D] hover:text-white text-[12px] col-span-2 flex gap-[4px] items-center"
 				:href="txn.snowtraceLink"
 				target="_blank"
 			>
@@ -126,7 +126,7 @@
 
 			<!-- Status - completed -->
 			<div
-				class="bg-[#868C9D] text-white text-[12px] flex gap-x-[10px] items-center py-[10px] px-[12px]"
+				class="bg-[#868C9D] text-white text-[12px] flex gap-x-[4px] items-center py-[10px] px-[12px]"
 			>
 				Completed
 				<span
@@ -151,21 +151,14 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref } from "vue";
 import Table from "@/components/dashboard/Table.vue";
 import Filters from "./Filters.vue";
 import { usePortfolios } from "@/stores/Portfolios";
 
 const portfolioStore = usePortfolios();
 
-// onMounted(() => {
-// 	portfolioStore.activeFilter = "All";
-// 	console.log(activeFilter.value);
-// });
-
 const historyFilters = ref(["All", "Deposit", "Withdrawal"]);
-
-// const activeFilter = ref("");
 </script>
 
 <style lang="postcss">
