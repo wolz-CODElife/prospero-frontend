@@ -239,6 +239,8 @@ const tokenList = ref([]);
 
 let usdAmountOfGas = ref("");
 
+defineEmits(["goBack", "redirect"]);
+
 onMounted(() => {
 	getTokenList();
 });
