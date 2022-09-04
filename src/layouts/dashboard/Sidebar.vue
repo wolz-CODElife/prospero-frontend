@@ -8,7 +8,7 @@
 				<img
 					src="https://i.postimg.cc/HsKSt0Cp/image.png"
 					alt=""
-					class="mx-auto w-[150px]"
+					class="mx-auto w-[100px]"
 				/>
 
 				<!-- QUARTERLY PERFORMANCE BONUS POOL -->
