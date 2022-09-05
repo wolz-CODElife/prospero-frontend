@@ -87,9 +87,10 @@
 					</div>
 				</div>
 
-				<!-- Skeleton table -->
+				<!-- Loading Portfolios - Skeleton table -->
 				<TableSkeleton v-if="portfolioStore.isLoading" />
 
+				<!-- Error  -->
 				<div
 					v-else-if="
 						portfolioStore.isError ||
@@ -99,15 +100,6 @@
 				>
 					An error occured loading portfolio
 				</div>
-				<!-- <div v-else>
-					<div v-if="portfolioStore.activePortfolioType === 'All Portfolios'">
-          
-          </div>
-
-          <div v-else>
-
-          </div>
-				</div> -->
 
 				<!-- All Portfolios / My Portfolios Tables -->
 				<TableComponent
@@ -238,6 +230,7 @@
 					:error="error"
 					v-model:amount="amount"
 					v-model:singleToken="singleToken"
+					:usdAmountOfGas="usdAmountOfGas"
 				/>
 			</div>
 		</div>
@@ -267,7 +260,6 @@ import WithdrawalPrompt from "../withdrawal/WithdrawalPrompt.vue";
 // import WithdrawalPromptSwap from "../withdrawal/WithdrawalPromptSwap.vue";
 
 import WithdrawalModal from "../withdrawal/WithdrawalModal.vue";
-// import { myAmount } from "../withdrawal/WithdrawalModal.vue";
 import { useRouter } from "vue-router";
 import ManageContainer from "../manage/ManageContainer.vue";
 import TableComponent from "./TableComponent.vue";
@@ -320,19 +312,21 @@ const tabs = ref(["All Portfolios", "My Portfolios"]);
 
 const disabled = ref(true);
 
+const usdAmountOfGas = ref(0);
+
 const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
 
-function getTokenListForManage() {
-	console.log("getTokenListForManage");
-	try {
-		tokenList.value = getTokenListForManageUI();
-		console.log("getTokenListForManage token list is:", tokenList.value);
-	} catch (error) {
-		console.log(error);
-	}
-}
+// function getTokenListForManage() {
+// 	console.log("getTokenListForManage");
+// 	try {
+// 		tokenList.value = getTokenListForManageUI();
+// 		console.log("getTokenListForManage token list is:", tokenList.value);
+// 	} catch (error) {
+// 		console.log(error);
+// 	}
+// }
 
 function toggleDisabled() {
 	if (portfolioStore.activePortfolioType === "All Portfolios") {
@@ -344,12 +338,6 @@ function toggleDisabled() {
 			)
 		) {
 			disabled.value = true;
-			//setTimeout(() => {
-			//	alert(
-			//		"You've already joined ",
-			//		portfolioStore.selectedPortfolio.name
-			//	);
-			//}, 500);
 		} else {
 			disabled.value = false;
 		}
@@ -375,11 +363,11 @@ function updateNameAndFeeApi() {
 	);
 	updateNewWalletVariables(portfolioName.value, fundFee.value);
 }
+
 function updateUIStatusAPICaller(uiType) {
 	console.log("updateUIStatusAPICaller with type:" + uiType);
 	updateUIStatus(uiType);
 }
-
 async function doWithdraw() {
 	firstView.value = false;
 	secondView.value = true;
@@ -389,14 +377,13 @@ async function doWithdraw() {
 		console.log("withdrawal amount: ", parseFloat(amount.value));
 		const res = await withdraw([], parseFloat(amount.value));
 		loading.value = false;
-		console.log("RES:"+JSON.stringify(res,null,2));
+		console.log("RES:" + JSON.stringify(res, null, 2));
 		if (res.success) {
-			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
-			if (usdAmountOfGas!=0){
-				usdAmountOfGas= usdAmountOfGas.toFixed(2);
+			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas;
+			if (usdAmountOfGas.value != 0) {
+				usdAmountOfGas.value = usdAmountOfGas.value.toFixed(2);
 			}
-			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
-			props.usdAmountOfGas=usdAmountOfGas;
+			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
 			error.value = false;
 			loading.value = false;
 			await portfolioStore.loadData();
@@ -452,6 +439,7 @@ watch(
 	() => {
 		success.value = false;
 		portfolioStore.reset();
+		portfolioStore.resetLineChart();
 	}
 );
 </script>

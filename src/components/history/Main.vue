@@ -1,7 +1,7 @@
 <template>
 	<div>
-		<div class="flex justify-between items-center m-[30px] mb-[15px]">
-			<h2 class="text-[20px] text-white uppercase">Account History</h2>
+		<div class="flex justify-between items-center mx-[30px] my-[15px]">
+			<h2 class="text-[16px] text-white uppercase">Account History</h2>
 
 			<div class="flex gap-[30px]">
 				<Filters
@@ -21,7 +21,7 @@
 		>
 			<!-- Type meta  -->
 			<div
-				class="py-[15px] px-[22px] col-span-2"
+				class="py-[15px] px-[24px] col-span-2"
 				:class="[
 					txn.type === 'Deposit'
 						? 'bg-[#54AC68]'
@@ -30,7 +30,7 @@
 						: 'bg-[#015B58]',
 				]"
 			>
-				<h5 class="uppercase text-white text-[14px] mb-[12px]">
+				<h5 class="uppercase text-white text-[12px] mb-[12px]">
 					<span v-if="txn.type === 'Deposit'">Deposit</span>
 					<span v-else-if="txn.type === 'Withdrawal'">Withdrawal</span>
 					<span v-else-if="txn.type === 'Manager Rebalance'"
@@ -41,17 +41,17 @@
 					>
 				</h5>
 				<h6 class="text-white">
-					<span>{{ txn.time }}</span>
-					<span class="ml-[4px]">{{ txn.date }}</span>
+					<span class="text-[10px]">{{ txn.time }}</span>
+					<span class="ml-[4px] text-[10px]">{{ txn.date }}</span>
 				</h6>
 			</div>
 
 			<!-- Name meta  -->
 			<div class="py-[14px] col-span-2">
-				<h5 class="uppercase text-white text-[14px] mb-[12px]">
+				<h5 class="uppercase text-white text-[12px] mb-[12px]">
 					{{ txn.portfolioName }}
 				</h5>
-				<h6 class="text-[14px] text-[#868C9D] flex items-center gap-[4px]">
+				<h6 class="text-[12px] text-[#868C9D] flex items-center gap-[4px]">
 					<span v-if="txn.type === 'Deposit'"
 						><svg
 							width="16"
@@ -91,7 +91,7 @@
 
 			<!-- View on explorer -->
 			<a
-				class="text-[#868C9D] hover:text-white text-[12px] col-span-2 flex gap-[7px] items-center"
+				class="text-[#868C9D] hover:text-white text-[10px] col-span-2 flex gap-[4px] items-center"
 				:href="txn.snowtraceLink"
 				target="_blank"
 			>
@@ -126,7 +126,7 @@
 
 			<!-- Status - completed -->
 			<div
-				class="bg-[#868C9D] text-white text-[12px] flex gap-x-[10px] items-center py-[10px] px-[12px]"
+				class="bg-[#868C9D] text-white text-[12px] flex gap-x-[4px] items-center min-w-fit px-[4px] py-[10px]"
 			>
 				Completed
 				<span
@@ -151,26 +151,19 @@
 </template>
 
 <script setup>
-import { ref, computed, onMounted } from "vue";
+import { ref } from "vue";
 import Table from "@/components/dashboard/Table.vue";
 import Filters from "./Filters.vue";
 import { usePortfolios } from "@/stores/Portfolios";
 
 const portfolioStore = usePortfolios();
 
-// onMounted(() => {
-// 	portfolioStore.activeFilter = "All";
-// 	console.log(activeFilter.value);
-// });
-
 const historyFilters = ref(["All", "Deposit", "Withdrawal"]);
-
-// const activeFilter = ref("");
 </script>
 
 <style lang="postcss">
 .f-right span {
-	@apply text-[16px] text-white float-right;
+	@apply text-[12px] text-white float-right;
 }
 
 a:hover span svg path {

@@ -62,7 +62,6 @@
 					<tr
 						v-for="(token, i) in tokenList"
 						key="i"
-						@click="enableDeposit(i)"
 						class="text-white text-left mx-[28px] border-b border-b-[#2D3035]"
 					>
 						<td class="flex items-center px-[28px] mt-[10px]">
@@ -238,6 +237,8 @@ const secondView = ref(false);
 const tokenList = ref([]);
 
 let usdAmountOfGas = ref("");
+
+defineEmits(["goBack", "redirect"]);
 
 onMounted(() => {
 	getTokenList();
