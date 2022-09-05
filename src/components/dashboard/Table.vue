@@ -87,9 +87,10 @@
 					</div>
 				</div>
 
-				<!-- Skeleton table -->
+				<!-- Loading Portfolios - Skeleton table -->
 				<TableSkeleton v-if="portfolioStore.isLoading" />
 
+				<!-- Error  -->
 				<div
 					v-else-if="
 						portfolioStore.isError ||
@@ -99,15 +100,6 @@
 				>
 					An error occured loading portfolio
 				</div>
-				<!-- <div v-else>
-					<div v-if="portfolioStore.activePortfolioType === 'All Portfolios'">
-          
-          </div>
-
-          <div v-else>
-
-          </div>
-				</div> -->
 
 				<!-- All Portfolios / My Portfolios Tables -->
 				<TableComponent
@@ -267,7 +259,6 @@ import WithdrawalPrompt from "../withdrawal/WithdrawalPrompt.vue";
 // import WithdrawalPromptSwap from "../withdrawal/WithdrawalPromptSwap.vue";
 
 import WithdrawalModal from "../withdrawal/WithdrawalModal.vue";
-// import { myAmount } from "../withdrawal/WithdrawalModal.vue";
 import { useRouter } from "vue-router";
 import ManageContainer from "../manage/ManageContainer.vue";
 import TableComponent from "./TableComponent.vue";
@@ -324,15 +315,15 @@ const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
 
-function getTokenListForManage() {
-	console.log("getTokenListForManage");
-	try {
-		tokenList.value = getTokenListForManageUI();
-		console.log("getTokenListForManage token list is:", tokenList.value);
-	} catch (error) {
-		console.log(error);
-	}
-}
+// function getTokenListForManage() {
+// 	console.log("getTokenListForManage");
+// 	try {
+// 		tokenList.value = getTokenListForManageUI();
+// 		console.log("getTokenListForManage token list is:", tokenList.value);
+// 	} catch (error) {
+// 		console.log(error);
+// 	}
+// }
 
 function toggleDisabled() {
 	if (portfolioStore.activePortfolioType === "All Portfolios") {
@@ -344,12 +335,6 @@ function toggleDisabled() {
 			)
 		) {
 			disabled.value = true;
-			//setTimeout(() => {
-			//	alert(
-			//		"You've already joined ",
-			//		portfolioStore.selectedPortfolio.name
-			//	);
-			//}, 500);
 		} else {
 			disabled.value = false;
 		}
@@ -375,6 +360,7 @@ function updateNameAndFeeApi() {
 	);
 	updateNewWalletVariables(portfolioName.value, fundFee.value);
 }
+
 function updateUIStatusAPICaller(uiType) {
 	console.log("updateUIStatusAPICaller with type:" + uiType);
 	updateUIStatus(uiType);
@@ -447,6 +433,7 @@ watch(
 	() => {
 		success.value = false;
 		portfolioStore.reset();
+		portfolioStore.resetLineChart();
 	}
 );
 </script>
