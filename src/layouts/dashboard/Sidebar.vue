@@ -60,11 +60,6 @@
 							activePath === nav.link ? 'bg-[#005A57]' : 'bg-[#2D3035]',
 						]"
 					>
-						<!-- <button
-          @click="changeRoute()"
-          >
-
-          </button> -->
 						<RouterLink
 							:to="nav.link"
 							class="flex items-center gap-x-[16px] text-[16px] nav-title"
@@ -124,13 +119,6 @@ const navs = ref([
 		icon: "https://i.postimg.cc/VNcydzLS/image.png",
 	},
 ]);
-
-// const colon = computed(() => {
-
-//   if (countdown.value[2]) {
-//     return
-//   }
-// })
 
 const countdown = ref([
 	{
