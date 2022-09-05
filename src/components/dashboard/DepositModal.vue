@@ -3,13 +3,15 @@
 		class="h-full w-full bg-[#191A20] border border-[#2D3035] p-[30px] text-white"
 	>
 		<div
-			v-if="loading"
+			v-if="portfolioStore.isLoading"
 			class="flex flex-col h-[75vh] justify-center items-center gap-[30px] text-center my-[20px]"
 		>
 			<Loader />
 		</div>
 
-		<!-- <div v-else-if="error">Error loading Tokens in your Wallet</div> -->
+		<div v-else-if="portfolioStore.isError">
+			Error loading Tokens in your Wallet
+		</div>
 
 		<div v-else>
 			<!-- Go BACK -->
@@ -60,7 +62,7 @@
 				</thead>
 				<tbody>
 					<tr
-						v-for="(token, i) in tokenList"
+						v-for="(token, i) in portfolioStore.tokenList"
 						key="i"
 						class="text-white text-left mx-[28px] border-b border-b-[#2D3035]"
 					>
@@ -203,7 +205,6 @@
 
 <script setup>
 import {
-	getBalancesInEoa,
 	handleDepositType,
 	updateApiTokenList,
 	getDepositStatus,
@@ -215,33 +216,24 @@ import {
 } from "@/api";
 import { onMounted, computed, ref } from "vue";
 import Modal from "../Modal.vue";
-import { usePortfolios } from "@/stores/Portfolios";
 import Loader from "../Loader.vue";
 import { useRouter } from "vue-router";
-const { currentRoute } = useRouter();
+import { usePortfolios } from "@/stores/Portfolios";
 
 const portfolioStore = usePortfolios();
-
+const { currentRoute } = useRouter();
 const loading = ref(false);
-
 const error = ref(false);
-
 const errorMsg = ref("");
-
 const success = ref(false);
-
 const firstView = ref(false);
-
 const secondView = ref(false);
-
-const tokenList = ref([]);
-
 let usdAmountOfGas = ref("");
 
 defineEmits(["goBack", "redirect"]);
 
 onMounted(() => {
-	getTokenList();
+	portfolioStore.getTokenList();
 });
 
 function toggleView() {
@@ -257,17 +249,6 @@ function closeViews() {
 function closeModal() {
 	portfolioStore.depositDialog = false;
 	portfolioStore.goBack();
-}
-async function getTokenList() {
-	try {
-		loading.value = true;
-		tokenList.value = await getBalancesInEoa();
-		loading.value = false;
-	} catch (error) {
-		loading.value = false;
-		error.value = true;
-		console.log(error);
-	}
 }
 
 async function depositToPortfolio() {
@@ -406,7 +387,7 @@ async function depositToPortfolio() {
 }
 
 async function add(amt, name) {
-	let newTokenList = tokenList.value.map((token) => {
+	let newTokenList = portfolioStore.tokenList.map((token) => {
 		if (token.name === name) {
 			token = { ...token, usdAmountEnteredByUser: parseFloat(amt) };
 			console.log("TOKEN:" + JSON.stringify(token, null, 2));
@@ -415,13 +396,13 @@ async function add(amt, name) {
 	});
 	updateApiTokenList(newTokenList);
 
-	tokenList.value = newTokenList;
+	portfolioStore.tokenList = newTokenList;
 
-	console.log(tokenList.value);
+	console.log(portfolioStore.tokenList);
 }
 
 const totalAmtToDeposit = computed(() => {
-	return tokenList.value.reduce((accumulator, currentValue) => {
+	return portfolioStore.tokenList.reduce((accumulator, currentValue) => {
 		if (!(parseFloat(currentValue.usdAmountEnteredByUser) > 0)) {
 			return accumulator + 0;
 		} else {
@@ -438,7 +419,7 @@ function slice(str, total, start) {
 const disableDeposit = computed(() => totalAmtToDeposit.value <= 0);
 
 const totalAvailable = computed(() => {
-	return tokenList.value.reduce((accumulator, currentValue) => {
+	return portfolioStore.tokenList.reduce((accumulator, currentValue) => {
 		if (!(parseFloat(currentValue.available) > 0)) {
 			return accumulator + 0;
 		} else {
