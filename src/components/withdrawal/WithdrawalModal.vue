@@ -27,14 +27,19 @@
 						class="-top-[12px] z-50 absolute ml-[14px] uppercase text-white text-[10px] bg-black px-[8px] py-[4px] -mb-[16px]"
 						>SELECT THE SINGLE TOKEN YOU ARE WITHDRAWING INTO</label
 					>
-					<!-- todo: change to select  -->
-					<input
-						type="text"
+
+					<select
 						:value="singleToken"
 						@input="$emit('update:singleToken', $event.target.value)"
-						placeholder="Select"
 						class="pt-[16px] pb-[6px] pl-[16px] w-full bg-black text-white text-[14px] border border-black focus:outline-none focus:border-[#00ff00]"
-					/>
+					>
+						<option
+							v-for="token in portfolioStore.tokenList"
+							:value="token.address"
+						>
+							{{ token.name }}
+						</option>
+					</select>
 				</div>
 
 				<!-- Withdraw  -->
@@ -110,8 +115,12 @@
 </template>
 
 <script setup>
+import { onMounted } from "vue";
 import Modal from "../Modal.vue";
 import WithdrawalOverview from "../withdrawal/WithdrawalOverview.vue";
+import { usePortfolios } from "@/stores/Portfolios";
+
+const portfolioStore = usePortfolios();
 
 const props = defineProps({
 	amount: String,
@@ -125,4 +134,9 @@ const props = defineProps({
 });
 
 defineEmits(["update:amount", "update:singleToken", "close", "doWithdraw"]);
+
+onMounted(() => {
+	portfolioStore.getTokenList();
+	console.log(portfolioStore.tokenList);
+});
 </script>

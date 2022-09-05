@@ -12,6 +12,7 @@ import {
 	initializeApi,
 	getAllTxns,
 	getTotalWithdrawals,
+	getBalancesInEoa,
 } from "@/api";
 import { data } from "autoprefixer";
 
@@ -200,6 +201,18 @@ export const usePortfolios = defineStore("Portfolios", {
 				//this.yAxisLineChart = getAxisDataForLineChart("all portfolios", "0xe2accfbaa0840d31b552971c30e7003e69cb3f39", "y")
 				this.isLoading = false;
 				console.log("got all and my portfolios");
+			} catch (error) {
+				this.isLoading = false;
+				this.isError = true;
+				console.log(error);
+			}
+		},
+
+		async getTokenList() {
+			this.isLoading = true;
+			try {
+				this.tokenList = await getBalancesInEoa();
+				this.isLoading = false;
 			} catch (error) {
 				this.isLoading = false;
 				this.isError = true;
