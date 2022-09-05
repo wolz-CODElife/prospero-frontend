@@ -3,7 +3,7 @@
 		v-for="filter in filters"
 		:key="filter"
 		@click="$emit('updateFilter', filter)"
-		class="hover:text-white uppercase list-none"
+		class="hover:text-white uppercase list-none text-[12px]"
 		:class="[
 			filter === portfolioStore.activeFilter
 				? 'text-white'
