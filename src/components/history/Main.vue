@@ -91,7 +91,7 @@
 
 			<!-- View on explorer -->
 			<a
-				class="text-[#868C9D] hover:text-white text-[10px] col-span-2 flex gap-[4px] items-center"
+				class="util uppercase text-[#868C9D] hover:text-white text-[10px] col-span-2 flex gap-[4px] items-center"
 				:href="txn.snowtraceLink"
 				target="_blank"
 			>
@@ -126,7 +126,7 @@
 
 			<!-- Status - completed -->
 			<div
-				class="bg-[#868C9D] text-white text-[12px] flex gap-x-[4px] items-center min-w-fit px-[4px] py-[10px]"
+				class="bg-[#868C9D] text-white text-[12px] flex gap-x-[8px] items-center justify-center min-w-fit px-[4px] py-[10px]"
 			>
 				Completed
 				<span
@@ -166,7 +166,7 @@ const historyFilters = ref(["All", "Deposit", "Withdrawal"]);
 	@apply text-[12px] text-white float-right;
 }
 
-a:hover span svg path {
+.util:hover span svg path {
 	fill: white;
 }
 </style>

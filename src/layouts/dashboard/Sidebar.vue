@@ -46,7 +46,7 @@
 				</div>
 
 				<!-- Wallet Address  -->
-				<WalletAddress :address="address" @doLogout="logoutWallet" />
+				<WalletAddress :address="address" />
 
 				<div class="bg-[#2D3035] my-[40px] h-[1px]" />
 
@@ -146,10 +146,10 @@ onMounted(() => {
 	});
 });
 
-async function logoutWallet() {
-	await disconnectWallet();
-	window.location.replace("/");
-}
+// async function logoutWallet() {
+// 	await disconnectWallet();
+// 	window.location.replace("/");
+// }
 
 function toggleMobileNav() {
 	mobileNavShowing.value = !mobileNavShowing.value;
