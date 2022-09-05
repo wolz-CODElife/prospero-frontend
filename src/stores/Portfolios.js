@@ -13,6 +13,7 @@ import {
 	getAllTxns,
 	getTotalWithdrawals,
 } from "@/api";
+import { data } from "autoprefixer";
 
 export const usePortfolios = defineStore("Portfolios", {
 	state: () => {
@@ -146,11 +147,23 @@ export const usePortfolios = defineStore("Portfolios", {
 			activeFilter: "All",
 
 			depositMessage: "",
+
+			fromDate: "",
+
+			toDate: "",
 		};
 	},
 
 	actions: {
-		// Fill empty portfolio list with an API call
+		resetLineChart() {
+			this.lineChartData.datasets[0].data = [
+				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
+			];
+		},
+
+		reset() {
+			this.selectedPortfolio = {};
+		},
 
 		async loadData() {
 			try {
@@ -235,10 +248,6 @@ export const usePortfolios = defineStore("Portfolios", {
 			this.activeMode = "join";
 			portfolioStore.tableView = true;
 			portfolioStore.firstCreateView = true;
-		},
-
-		reset() {
-			this.selectedPortfolio = {};
 		},
 
 		goBack() {
