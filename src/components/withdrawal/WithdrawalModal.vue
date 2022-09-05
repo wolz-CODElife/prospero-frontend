@@ -119,7 +119,7 @@ const props = defineProps({
 	mode: String,
 	firstView: Boolean,
 	secondView: Boolean,
-	usdAmountofGas: String,
+	usdAmountofGas: Number,
 	loading: Boolean,
 	error: Boolean,
 });

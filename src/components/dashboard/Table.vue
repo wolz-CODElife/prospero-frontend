@@ -230,6 +230,7 @@
 					:error="error"
 					v-model:amount="amount"
 					v-model:singleToken="singleToken"
+					:usdAmountOfGas="usdAmountOfGas"
 				/>
 			</div>
 		</div>
@@ -311,6 +312,8 @@ const tabs = ref(["All Portfolios", "My Portfolios"]);
 
 const disabled = ref(true);
 
+const usdAmountOfGas = ref(0);
+
 const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
@@ -365,7 +368,6 @@ function updateUIStatusAPICaller(uiType) {
 	console.log("updateUIStatusAPICaller with type:" + uiType);
 	updateUIStatus(uiType);
 }
-
 async function doWithdraw() {
 	firstView.value = false;
 	secondView.value = true;
@@ -375,9 +377,13 @@ async function doWithdraw() {
 		console.log("withdrawal amount: ", parseFloat(amount.value));
 		const res = await withdraw([], parseFloat(amount.value));
 		loading.value = false;
+		console.log("RES:" + JSON.stringify(res, null, 2));
 		if (res.success) {
-			var usdAmountOfGas = res.gasUsed.usdAmountOfGas;
-			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
+			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas;
+			if (usdAmountOfGas.value != 0) {
+				usdAmountOfGas.value = usdAmountOfGas.value.toFixed(2);
+			}
+			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
 			error.value = false;
 			loading.value = false;
 			await portfolioStore.loadData();
