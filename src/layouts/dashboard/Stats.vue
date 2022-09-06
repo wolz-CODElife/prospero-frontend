@@ -64,8 +64,11 @@ function getProfit(portObject) {
 	if (profit == 0) {
 		return 0;
 	}
+	if (isNaN(profit)){
 
-	profit = profit.toFixed(2);
+	}else{
+		profit = profit.toFixed(2);
+	}
 
 	return profit;
 }

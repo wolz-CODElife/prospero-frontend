@@ -496,24 +496,48 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		}
 
 		var profitUsd = leadersValue - leadersUsdInvested;
-		var profitPercentage = profitUsd / leadersUsdInvested;
+		leaderBoardDataObject["leadersUsdInvested"] = leadersUsdInvested;
+		leaderBoardDataObject["leadersValue"] = leadersValue;
+		var profitPercentage;
+		if (leadersUsdInvested<1){
+			profitPercentage = 0;
+		}else{
+			profitPercentage = profitUsd / leadersUsdInvested;
+
+		}
 		portfolioObject["totalValue"] = leadersValue;
 		portfolioObject["totalUsd"] = leadersUsdInvested;
+		
 		var profitLeader = profitUsd;
 		var profitPercentageLeader = profitPercentage;
 
 		if (indexOfUser >= 0 && indexOfUser != indexOfLeader) {
-			profitUsd = usersValue - usersUsdInvested;
-			profitPercentage = profitUsd / usersUsdInvested;
-			portfolioObject["totalValue"] = usersValue;
-			portfolioObject["totalUsd"] = usersUsdInvested;
+			if (usersUsdInvested<1){
+				profitUsd = 0
+				profitPercentage= 0
+				portfolioObject["totalValue"] = usersValue;
+				portfolioObject["totalUsd"] = usersUsdInvested;
+				portfolioObject["usersUsdInvested"] = usersUsdInvested;
+			}else{
+				profitUsd = usersValue - usersUsdInvested;
+				profitPercentage = profitUsd / usersUsdInvested;
+				portfolioObject["totalValue"] = usersValue;
+				portfolioObject["totalUsd"] = usersUsdInvested;
+				portfolioObject["usersUsdInvested"] = usersUsdInvested;
+			}
+
 		}
 
 		portfolioObject["profit"] = profitUsd;
-
-		leaderBoardDataObject["y1"] = profitPercentage.toFixed(2);
+		if (profitPercentage==0){
+			leaderBoardDataObject["y1"] = 0
+			leaderBoardDataObject["profitPercentage"] = leaderBoardDataObject["y1"]
+		}else{
+			leaderBoardDataObject["y1"] = profitPercentage.toFixed(2);
+			leaderBoardDataObject["profitPercentage"] = profitPercentage;
+		}
 		leaderBoardDataObject["y1"] = leaderBoardDataObject["y1"] + "%";
-		leaderBoardDataObject["profitPercentage"] = profitPercentage;
+
 		leaderBoardDataObject["name"] = thisGraphItem["walletName"];
 		leaderBoardDataObject["fee"] = leaderFundFee; //TO DO - need to add this
 		leaderBoardDataObject["d7"] = 0;
@@ -568,7 +592,9 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			//portfolioObject["totalUsd"] = leadersUsdInvested;
 			//var profitLeader = profitUsd;
 			//var profitPercentageLeader = profitPercentage;
-			leaderBoardDataObjectCOPY["y1"] = profitPercentageLeader.toFixed(2);
+			if (profitPercentageLeader!="-"){
+				leaderBoardDataObjectCOPY["y1"] = profitPercentageLeader.toFixed(2);
+			}
 			//leaderBoardDataObjectCOPY["y1"]  = leaderBoardDataObjectCOPY["y1"]  + "%";
 			leaderBoardDataObjectCOPY["profitPercentage"] = profitPercentageLeader;
 			//leaderBoardDataObject
@@ -849,7 +875,7 @@ async function getHistoricalPricesUpdateChartsData() {
 		thisProsperoWalletAddressLB = thisProsperoWalletAddressLB.toLowerCase();
 		var thisLeaderEOA = lbData[i]["leaderEOA"];
 		var walletName = lbData[i]["walletName"];
-		//console.log("wallet name****:"+walletName);
+		console.log("wallet name****:"+walletName);
 		var finalValueLeader = lbData[i]["portfolioObject"]["totalValue"];
 		var finalUsdInvestedLeader = lbData[i]["portfolioObject"]["totalUsd"];
 		var finalProfitLeader = lbData[i]["portfolioObject"]["profit"];
@@ -1002,6 +1028,7 @@ function calcProfitWithDate(
 	var profitUser = 0;
 	var profitPercUser = 0;
 	if (users.length == 0) {
+		console.log('a')
 		var objToReturn = {
 			profitLeader: profitLeader,
 			profitPercLeader: profitPercLeader,
@@ -1016,16 +1043,34 @@ function calcProfitWithDate(
 		var indexOfLeader = getIndexOfUser(users, leaderAddress);
 		var objToReturn = {};
 		if (indexOfUser != -1) {
+			//console.log('c')
+			//console.log("todaysDateFormatted:"+todaysDateFormatted)
+			//console.log("thisDate:"+thisDate)
+
 			if (todaysDateFormatted == thisDate) {
-				//console.log("RIGHT HERE.......")
+				//console.log('3')
+				//console.log(" todaysDateFormatted == thisDate RIGHT HERE.......")
 				var userPortObj = myWallets[portfolioObj.prosperoWalletAddress];
-				//console.log("userPortObj:"+JSON.stringify(userPortObj,null,2))
-				objToReturn["profitUser"] = userPortObj.profit;
-				objToReturn["totalValueUser"] =
-					userPortObj["portfolioObject"]["totalValue"];
-				objToReturn["usdInvestedUser"] =
-					userPortObj["portfolioObject"]["totalUsd"];
-				objToReturn["profitPercUser"] = userPortObj.profitPercentage;
+				if (userPortObj["portfolioObject"]["totalUsd"] <1 && userPortObj["portfolioObject"]["totalValue"]>0) {
+					//console.log('e')
+					//console.log("0 USD but TV>0")
+					userPortObj["portfolioObject"]["totalUsd"] = userPortObj["portfolioObject"]["totalUsd"];
+					objToReturn["profitUser"] = 0;
+					objToReturn["totalValueUser"] = userPortObj["portfolioObject"]["totalValue"];
+					objToReturn["usdInvestedUser"] = userPortObj["portfolioObject"]["totalUsd"];
+					objToReturn["profitPercUser"] = 0;
+				}else if ( userPortObj["portfolioObject"]["totalValue"]==0) {
+					userPortObj["portfolioObject"]["totalUsd"] = userPortObj["portfolioObject"]["totalUsd"]
+					objToReturn["profitUser"] = 0;
+					objToReturn["totalValueUser"] = 0;
+					objToReturn["profitPercUser"] = 0;
+				}else{
+					//console.log("userPortObj:"+JSON.stringify(userPortObj,null,2))
+					objToReturn["profitUser"] = userPortObj.profit;
+					objToReturn["totalValueUser"] = userPortObj["portfolioObject"]["totalValue"];
+					objToReturn["usdInvestedUser"] = userPortObj["portfolioObject"]["totalUsd"];
+					objToReturn["profitPercUser"] = userPortObj.profitPercentage;
+				}
 				//console.log("objToReturn:"+JSON.stringify(objToReturn,null,2))
 			} else {
 				var userPercentage = percentages[indexOfUser] / USD_SCALE;
@@ -1045,19 +1090,29 @@ function calcProfitWithDate(
 				objToReturn["profitPercUser"] = profitCalcObjUser.profitPerc;
 			}
 		} else {
+			console.log('i')
+
 			objToReturn["profitUser"] = 0;
 			objToReturn["profitPercUser"] = 0;
 			objToReturn["totalValueUser"] = 0;
 		}
 		if (indexOfLeader != -1) {
-			if (todaysDateFormatted == thisDate) {
+			console.log('j')
+
+			/*if (todaysDateFormatted == thisDate) {
+				console.log('k')
+
+				console.log("setting....")
 				objToReturn["profitLeader"] = portfolioObj.profit;
 				objToReturn["totalValueLeader"] =
 					portfolioObj["portfolioObject"]["totalValue"];
 				objToReturn["usdInvestedLeader"] =
 					portfolioObj["portfolioObject"]["totalUsd"];
-				objToReturn["profitPercLeader"] = portfolioObj.profitPercentage;
+				objToReturn["profitPercLeader"] = portfolioObj.profit;
 			} else {
+				*/
+				console.log('l')
+
 				var userPercentage = percentages[indexOfLeader] / USD_SCALE;
 				var usdInvestedUser = usdInvested[indexOfLeader];
 				usdInvestedUser = usdInvestedUser / USD_SCALE;
@@ -1073,13 +1128,15 @@ function calcProfitWithDate(
 				objToReturn["totalValueLeader"] = profitCalcObj.totalValue;
 				objToReturn["usdInvestedLeader"] = usdInvestedUser;
 				objToReturn["profitPercLeader"] = profitCalcObj.profitPerc;
-			}
+			//}
 		} else {
+			console.log('m')
+
 			objToReturn["profitLeader"] = 0;
 			objToReturn["profitPercLeader"] = 0;
 			objToReturn["totalValueLeader"] = 0;
 		}
-		//console.log("objToReturn:"+JSON.stringify(objToReturn,null,2))
+		console.log("*objToReturn:"+JSON.stringify(objToReturn,null,2))
 
 		return objToReturn;
 	}
@@ -1093,8 +1150,8 @@ function calcJustProfitObj(
 	thisDate,
 	todaysDateFormatted
 ) {
-	//console.log("calcJustProfitObj tokens:"+tokens+" balances: "+userPercentage+" usdInvested: "+usdInvested);
-	if (usdInvested == 0 || userPercentage == 0 || balances.length == 0) {
+	console.log("calcJustProfitObj tokens:"+tokens+" balances: "+userPercentage+" usdInvested: "+usdInvested);
+	if (userPercentage == 0 || balances.length == 0) {
 		return {
 			profit: 0,
 			profitPerc: 0,
@@ -1144,11 +1201,16 @@ function calcJustProfitObj(
 
 	//console.log("TV*:		  " + totalValue);
 	//console.log("usdInvested*:" + usdInvested);
-
 	var profit = totalValue - usdInvested;
+	var profitPerc;// = profit / usdInvested;
+
+	if (usdInvested < 1){
+		profitPerc = "-";
+	}else{
+		profitPerc = profit / usdInvested;
+	}
 	//console.log("profit*:	 :" + profit);
 
-	var profitPerc = profit / usdInvested;
 	//console.log("profitPerc* :" + profitPerc);
 
 	return {
@@ -1373,8 +1435,11 @@ function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
 			*/
 	var allPortValuBefore = -1;
 	var myPortValueBefore = -1;
+	console.log("****PORT:"+JSON.stringify(thisPort[thisPort.length-1],null,2));
+
 	for (var i = 0; i < thisPort.length; i++) {
-		//if ((thisPort[i].usdInvested>0) && (thisPort[i].value>0)){
+		//if ((parseFloat(thisPort[i].usdInvested)>0) || (parseFloat(thisPort[i].totalValueUser)>0)){
+		//}
 		if (whichPortfolios == "all portfolios") {
 			//if (thisPort[i].profitPercLeader == 0  && thisPort[i].profitPercLeader==allPortValuBefore){
 
@@ -4413,12 +4478,12 @@ async function returnTrueIfPercentagesAreLessAndClose(
 							" for address:" +
 							thisToken
 					);
-					alert(
-						"**** Percentage for swap was off by more than 1.5%, difference is:" +
-							diff +
-							" for address:" +
-							thisToken
-					);
+					//alert(
+					//	"**** Percentage for swap was off by more than 1.5%, difference is:" +
+					//		diff +
+					//		" for address:" +
+					//		thisToken
+					//);
 					return false;
 				}
 			}

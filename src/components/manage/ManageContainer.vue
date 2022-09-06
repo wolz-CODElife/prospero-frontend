@@ -153,6 +153,8 @@
 				</p>
 			</div>
 
+	
+
 			<!-- Successful -->
 			<div
 				v-else
@@ -236,15 +238,19 @@ async function doSaveAllocation() {
 	console.log("portfolioStore.portfolioFundFee:"+portfolioStore.portfolioFundFee);
 	console.log("portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal:"+portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal);
 	var selectedProsperoWalletAddress = portfolioStore.selectedPortfolio.prosperoWalletAddress;
+	//var moreThanOneConfirmationNeeded = false;
+	//if (portfolioStore.isPortfolioAcceptingNewInvestors != portfolioStore.selectedPortfolio.acceptingNewInvestorsOriginal){
+	//}
+	loading.value = true;
 
 	if (portfolioStore.isPortfolioAcceptingNewInvestors != portfolioStore.selectedPortfolio.acceptingNewInvestorsOriginal){
 		console.log("Waiting for acceptingNewInvestors API call to finish....possible info modal here?")
 		console.log("acceptingNewInvestors has changed - calling API");
 		var result  = await updateNewInvestors(selectedProsperoWalletAddress, portfolioStore.isPortfolioAcceptingNewInvestors);
 		if (!result.success){
-			loading.value = false;
 			error.value = true;
 			console.error(result.error);
+			loading.value
 			//to do - add error message here 
 			return;
 		}
@@ -317,7 +323,7 @@ async function doSaveAllocation() {
 		success.value = false;
 
 	}
-
+	loading.value = false;
 	saveAllocationModal.value = true;
 	console.log("done");
 }

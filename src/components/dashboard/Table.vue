@@ -372,7 +372,12 @@ async function doWithdraw() {
 	firstView.value = false;
 	secondView.value = true;
 	loading.value = true;
-
+	console.log('singleToken:'+singleToken.value);
+	if (singleToken.value=="" || (amount.value =="" || (parseFloat(amount.value) <=0))){
+		loading.value = false;
+		error.value = true;
+	}
+	var tokens = [singleToken.value];
 	try {
 		console.log("withdrawal amount: ", parseFloat(amount.value));
 		const res = await withdraw([], parseFloat(amount.value));
@@ -381,7 +386,8 @@ async function doWithdraw() {
 		if (res.success) {
 			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas;
 			if (usdAmountOfGas.value != 0) {
-				usdAmountOfGas.value = usdAmountOfGas.value.toFixed(2);
+				//usdAmountOfGas.value = usdAmountOfGas.value.toFixed(2);
+				props.usdAmountOfGas = usdAmountOfGas.value.toFixed(2);
 			}
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
 			error.value = false;
