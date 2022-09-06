@@ -396,7 +396,7 @@ async function doWithdraw() {
 				usdAmountOfGas= usdAmountOfGas.toFixed(2);
 			}
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas);
-			props.usdAmountOfGas=usdAmountOfGas;
+			//props.usdAmountOfGas=usdAmountOfGas;
 			error.value = false;
 			loading.value = false;
 			await portfolioStore.loadData();
@@ -411,6 +411,9 @@ async function doWithdraw() {
 		console.log(error);
 	}
 }
+
+
+
 
 function enableSwap() {
 	withdrawMode.value = "swap";

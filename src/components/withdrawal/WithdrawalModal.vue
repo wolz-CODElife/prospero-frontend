@@ -125,4 +125,8 @@ const props = defineProps({
 });
 
 defineEmits(["update:amount", "update:singleToken", "close", "doWithdraw"]);
+
+
+
+
 </script>
