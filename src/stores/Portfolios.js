@@ -105,47 +105,8 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			portfolioFundFee: 0,
 
-			lineChartData: {
-				labels: [
-					"8-6-2022",
-					"8-7-2022",
-					"8-8-2022",
-					"8-9-2022",
-					"8-10-2022",
-					"8-11-2022",
-					"8-12-2022",
-					"8-13-2022",
-					"8-14-2022",
-					"8-15-2022",
-					"8-16-2022",
-					"8-17-2022",
-					"8-18-2022",
-					"8-19-2022",
-					"8-20-2022",
-					"8-21-2022",
-					"8-22-2022",
-					"8-23-2022",
-					"8-24-2022",
-					"8-25-2022",
-				],
-				datasets: [
-					{
-						label: "ALL",
-						backgroundColor: "#00ff00",
-						borderColor: "#00ff00",
-						data: [
-							0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-						],
-						tension: 0.3,
-						hoverRadius: 5,
-						pointHoverBackgroundColor: "#000",
-						pointHoverBorderWidth: 6,
-						pointRadius: 0,
-						pointHitRadius: 4,
-						pointHoverRadius: 4,
-					},
-				],
-			},
+			lineChartData: {},
+				
 
 			activeFilter: "All",
 
@@ -205,6 +166,8 @@ export const usePortfolios = defineStore("Portfolios", {
 				this.activeOverview.roi.value = await getMyROITotal();
 				this.activeOverview.roi.percent = await getMyROITotalPercentage();
 				this.allTxns = getAllTxns();
+				this.lineChartData = getLineChartData("all my holdings", "");
+
 				//this.lineChartData = getLineChartData("all portfolios", "0xe2accfbaa0840d31b552971c30e7003e69cb3f39")
 				//this.xAxisLineChart = getAxisDataForLineChart("all portfolios", "0xe2accfbaa0840d31b552971c30e7003e69cb3f39", "x")
 				//this.yAxisLineChart = getAxisDataForLineChart("all portfolios", "0xe2accfbaa0840d31b552971c30e7003e69cb3f39", "y")
@@ -242,13 +205,24 @@ export const usePortfolios = defineStore("Portfolios", {
 			);
 		},
 
-		toggleActiveHeader() {
+		async toggleActiveHeader() {
 			if (this.activeHeader === "left") {
 				this.activeHeader = "right";
+				console.log('on left mmoving right');
 				this.reset();
+				//if (this.selectedPortfolio!=undefined){
+				//await updateSelectedWallet(this.selectedPortfolio);
+				//this.lineChartData = getLineChartData(
+				//	this.activePortfolioType,
+				//	this.selectedPortfolio.prosperoWalletAddress
+				//);
+				//}
 			} else {
+				console.log('on right, going left...')
 				this.activeHeader = "left";
+				this.lineChartData = getLineChartData("all my holdings", "");
 			}
+
 		},
 
 		changeActivePortfolioType() {

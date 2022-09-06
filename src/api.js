@@ -1391,6 +1391,38 @@ async function updateHistoryChartsDataObject(
 }
 
 function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
+	if (whichPortfolios == "all my holdings"){
+		console.log('all my holdings...')
+
+	var chartDataToReturnLabels = [];
+	var chartDataToReturnYAxis = [];
+	var firstOne = true;
+	for (let prospWalletAddress in lineGraphCalcData) {
+		console.log("prospWalletAddress:"+prospWalletAddress)
+	 
+	var thisPort = lineGraphCalcData[prospWalletAddress];
+
+	var allPortValuBefore = -1;
+	var myPortValueBefore = -1;
+	//console.log("****PORT:"+JSON.stringify(thisPort[thisPort.length-1],null,2));
+	if (firstOne==true){
+		console.log('111')
+
+		for (var i = 0; i < thisPort.length; i++) {
+			chartDataToReturnLabels.push(thisPort[i].date);
+			chartDataToReturnYAxis.push(thisPort[i].totalValueUser);
+		}
+		firstOne=false;
+	}else{
+		console.log('222')
+		for (var i = 0; i < thisPort.length; i++) {
+			chartDataToReturnYAxis[i]=chartDataToReturnYAxis[i] + thisPort[i].totalValueUser
+			//chartDataToReturnYAxis.push(thisPort[i].totalValueUser);
+		}
+	}
+}
+
+	}else {
 	whichPortfolios = whichPortfolios.toLowerCase();
 	whichPortfolios = whichPortfolios.trim();
 	prosperoWalletAddressSelected = prosperoWalletAddressSelected.toLowerCase();
@@ -1410,7 +1442,6 @@ function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
 		alert("wrong whichPortfolios used.");
 		return;
 	}
-
 	if (!chartDataToUse.hasOwnProperty(prosperoWalletAddressSelected)) {
 		console.error(
 			"Error: chartDataToUse does not have prosperoWalletAddressSelected"
@@ -1425,45 +1456,27 @@ function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
 	var chartDataToReturnYAxis = [];
 
 	var thisPort = lineGraphCalcData[prosperoWalletAddressSelected];
-	//console.log("thisPort*:" + JSON.stringify(thisPort, null, 2));
 	var justGotAZero = true;
-	/*
-				objToReturn['profitUser']=profitCalcObjUser.profit
-			objToReturn['totalValueUser']=profitCalcObjUser.totalValue
-			objToReturn['usdInvestedUser']=usdInvestedUser
-			objToReturn['profitPercUser']=profitCalcObjUser.profitPerc
-			*/
+
 	var allPortValuBefore = -1;
 	var myPortValueBefore = -1;
-	console.log("****PORT:"+JSON.stringify(thisPort[thisPort.length-1],null,2));
+	//console.log("****PORT:"+JSON.stringify(thisPort[thisPort.length-1],null,2));
 
 	for (var i = 0; i < thisPort.length; i++) {
-		//if ((parseFloat(thisPort[i].usdInvested)>0) || (parseFloat(thisPort[i].totalValueUser)>0)){
-		//}
 		if (whichPortfolios == "all portfolios") {
-			//if (thisPort[i].profitPercLeader == 0  && thisPort[i].profitPercLeader==allPortValuBefore){
-
-			//}else{
 			chartDataToReturnLabels.push(thisPort[i].date);
 			chartDataToReturnYAxis.push(thisPort[i].profitPercLeader);
-			//	}
 			allPortValuBefore = thisPort[i].profitPercLeader;
 		} else if (whichPortfolios == "my portfolios") {
 			chartDataToReturnLabels.push(thisPort[i].date);
 			chartDataToReturnYAxis.push(thisPort[i].totalValueUser);
-			//myPortValueBefore = thisPort[i].totalValueUser;
 		}
-		//justGotAZero=false;
-		//}else if (thisPort[i].usdInvested==0 && thisPort[i].value==0){
-		//if (justGotAZero==true){
 
-		//}else{
-		//chartDataToReturnLabels.push(thisPort[i].date);
-		//chartDataToReturnYAxis.push(thisPort[i].value);
-		//justGotAZero=true;
-		//}
-		//}
 	}
+}
+//console.log('chartDataToReturnYAxis:'+JSON.stringify(chartDataToReturnYAxis,null,2))
+//console.log('chartDataToReturnLabels:'+JSON.stringify(chartDataToReturnLabels,null,2))
+
 	var chartData = {
 		labels: chartDataToReturnLabels,
 		datasets: [

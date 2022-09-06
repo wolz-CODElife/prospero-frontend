@@ -369,14 +369,16 @@ function updateUIStatusAPICaller(uiType) {
 	updateUIStatus(uiType);
 }
 async function doWithdraw() {
+	//portfolioStore.selectedPortfolio
+	console.log("this.selectedPortfolio:"+JSON.stringify(portfolioStore.selectedPortfolio,null,2));
 	firstView.value = false;
 	secondView.value = true;
 	loading.value = true;
 	console.log('singleToken:'+singleToken.value);
-	if (singleToken.value=="" || (amount.value =="" || (parseFloat(amount.value) <=0))){
-		loading.value = false;
-		error.value = true;
-	}
+	///if (singleToken.value=="" || (amount.value =="" || (parseFloat(amount.value) <=0))){
+	//	loading.value = false;
+	//	error.value = true;
+	//}
 	var tokens = [singleToken.value];
 	try {
 		console.log("withdrawal amount: ", parseFloat(amount.value));
@@ -392,7 +394,10 @@ async function doWithdraw() {
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
 			error.value = false;
 			loading.value = false;
+			console.log("WD LOAINDG DATA...")
 			await portfolioStore.loadData();
+			console.log("done loading data")
+			//portfolioStore.selectedPortfolio = 
 		} else {
 			loading.value = false;
 			error.value = true;

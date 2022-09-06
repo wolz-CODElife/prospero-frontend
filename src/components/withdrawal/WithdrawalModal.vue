@@ -120,6 +120,10 @@ import Modal from "../Modal.vue";
 import WithdrawalOverview from "../withdrawal/WithdrawalOverview.vue";
 import { usePortfolios } from "@/stores/Portfolios";
 
+async function testFun(){
+	console.log("testFun......")
+}
+
 const portfolioStore = usePortfolios();
 
 const props = defineProps({
