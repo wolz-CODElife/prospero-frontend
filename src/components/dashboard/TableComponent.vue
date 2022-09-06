@@ -138,6 +138,8 @@ const props = defineProps({
 	},
 });
 
+defineEmits(["toggleDisabled"]);
+
 const portfolioStore = usePortfolios();
 const currentPage = ref(1);
 const filteredPortfolios = ref([]);

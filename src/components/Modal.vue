@@ -15,7 +15,7 @@
 				>&#8203;</span
 			>
 			<div
-				class="relative inline-block align-bottom bg-[#1F2127] rounded-lg text-left overflow-hidden shadow-[0_4px_50px_rgba(0,0,0,0.1)] transform transition-all sm:my-[8px] sm:align-middle sm:max-w-[398px] sm:w-full"
+				class="relative inline-block align-bottom bg-[#1F2127] rounded-lg text-left overflow-hidden shadow-[0_4px_50px_rgba(0,0,0,0.1)] transform transition-all sm:my-[8px] sm:align-middle sm:max-w-[498px] sm:w-full"
 			>
 				<div
 					class="bg-[#1F2127] px-[16px] pt-[20px] pb-[24px] sm:p-[24px] sm:pb-[16px]"

@@ -1,7 +1,7 @@
 <template>
 	<div class="relative">
 		<div
-			@click="toggleDropdown"
+			@click="openAccountModal"
 			class="px-[24px] py-[8px] text-white bg-[#2D3035] flex justify-between items-center"
 		>
 			<span class="text-[16px] tracking-wider">
@@ -25,23 +25,26 @@
 			</svg>
 		</div>
 
-		<!-- Logout  -->
-		<ul
+		<!-- Account Modal  -->
+		<AccountModal
 			v-if="open"
-			class="absolute mt-[8px] px-[14px] py-[8px] bg-[#2D3035] cursor-pointer w-full shadow"
-		>
-			<li
-				@click="$emit('doLogout'), (open = false)"
-				class="bg-[#2D3035] hover:bg-opacity-10 text-base text-white px-[12px] py-[4px]"
-			>
-				Logout
-			</li>
-		</ul>
+			:firstView="firstView"
+			:secondView="logOutView"
+			@close="closeAccountModal"
+			@doLogout="logoutWallet"
+		/>
+
+		<!-- <div v-if="open" class="text-white">Opened Modal</div> -->
 	</div>
 </template>
 
 <script setup>
 import { computed, ref } from "vue";
+import AccountModal from "@/components/modals/AccountModal.vue";
+import connect from "@/composables/connect/index";
+
+const { state, disconnectWallet } = connect();
+
 const props = defineProps({
 	address: {
 		type: String,
@@ -49,14 +52,30 @@ const props = defineProps({
 	},
 });
 
+defineEmits(["openModal"]);
+
 const open = ref(false);
+
+const firstView = ref(true);
+
+const logOutView = ref(false);
+
+async function logoutWallet() {
+	await disconnectWallet();
+	window.location.replace("/");
+}
+
+function openAccountModal() {
+	open.value = true;
+	console.log("clicking works. open is: ", open.value);
+}
+
+function closeAccountModal() {
+	open.value = false;
+}
 
 const walletAddress = computed(() => [
 	props.address.slice(0, 6),
 	props.address.slice(-6),
 ]);
-
-function toggleDropdown() {
-	open.value = !open.value;
-}
 </script>

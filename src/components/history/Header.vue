@@ -38,22 +38,20 @@
 				<div class="flex items-center">
 					<h3 class="text-white mr-auto">From</h3>
 					<input
-						type="text"
-						class="py-[8px] pl-[24px] w-[3/4] bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00] focus:bg-white"
+						type="date"
+						class="py-[8px] pl-[24px] w-[3/4] bg-black text-white text-[16px] border border-black focus:outline-none"
 						aria-label="from-date"
-						v-model="fromDate"
-						onfocus="(this.type='date')"
+						v-model="portfolioStore.fromDate"
 					/>
 				</div>
 
 				<div class="flex items-center gap-[12px]">
 					<h3 class="text-white mr-auto">To</h3>
 					<input
-						type="text"
-						class="py-[8px] pl-[24px] w-[3/4] bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00] focus:bg-white"
+						type="date"
+						class="py-[8px] pl-[24px] w-[3/4] bg-black text-white text-[16px] border border-black focus:outline-none"
 						aria-label="to-date"
-						v-model="toDate"
-						onfocus="(this.type='date')"
+						v-model="portfolioStore.toDate"
 					/>
 				</div>
 			</div>
@@ -62,12 +60,7 @@
 </template>
 
 <script setup>
-import { ref, watch } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
 
 const portfolioStore = usePortfolios();
-
-const fromDate = ref("22-07-22");
-
-const toDate = ref("22-08-22");
 </script>

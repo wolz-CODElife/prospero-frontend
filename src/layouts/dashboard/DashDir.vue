@@ -78,10 +78,7 @@
 
 		<div v-else-if="path === 'manage'">
 			<!-- Selected portfolio empty  -->
-			<div
-				v-if="portfolioStore.selectedPortfolio.name === ''"
-				:class="emptySelectedCardClasses"
-			>
+			<div :class="emptySelectedCardClasses">
 				<h2 class="text-[#868C9D] text-center text-[14px] uppercase">
 					Select a portfolio to manage
 				</h2>
@@ -92,7 +89,7 @@
 </template>
 
 <script setup>
-import { computed } from "vue";
+import { computed, onMounted } from "vue";
 import { usePortfolios } from "@/stores/Portfolios";
 import { useRouter } from "vue-router";
 import Stats from "./Stats.vue";
@@ -114,4 +111,8 @@ function slice(str) {
 	if (str.length <= 13) return str;
 	return str.slice(0, 10) + "...";
 }
+
+onMounted(() => {
+	portfolioStore.myPortfolios.length === 1;
+});
 </script>

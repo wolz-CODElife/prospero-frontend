@@ -19,7 +19,7 @@
 					arrow-class="-rotate-45"
 				>
 					<template #selectedPortfolioDisplay>
-						<div class="flex gap-[24px] text-white">
+						<div class="flex gap-[10px] text-white">
 							<div
 								v-for="(portfolio, i) in portfolioStore
 									.selectedPortfolio.portfolioObject"

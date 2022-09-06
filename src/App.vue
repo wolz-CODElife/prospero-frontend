@@ -90,4 +90,8 @@ export default {
 .btn-primary-outline {
 	@apply bg-transparent border border-[#005A57] hover:bg-[#005A57];
 }
+
+.btn-red-outline {
+	@apply bg-transparent border border-[#E95149] hover:bg-[#E95149];
+}
 </style>
