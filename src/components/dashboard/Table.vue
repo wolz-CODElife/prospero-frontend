@@ -387,7 +387,7 @@ async function doWithdraw() {
 			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas;
 			if (usdAmountOfGas.value != 0) {
 				//usdAmountOfGas.value = usdAmountOfGas.value.toFixed(2);
-				props.usdAmountOfGas = usdAmountOfGas.value.toFixed(2);
+				//props.usdAmountOfGas = usdAmountOfGas.value.toFixed(2);
 			}
 			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
 			error.value = false;
