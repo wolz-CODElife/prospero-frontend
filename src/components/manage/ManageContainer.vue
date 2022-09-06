@@ -153,8 +153,6 @@
 				</p>
 			</div>
 
-	
-
 			<!-- Successful -->
 			<div
 				v-else
@@ -188,6 +186,7 @@ import SelectToken from "./SelectToken.vue";
 import Modal from "../Modal.vue";
 import Dashboard from "@/layouts/Dashboard.vue";
 import SelectPortfolio from "./SelectPortfolio.vue";
+
 import { usePortfolios } from "@/stores/Portfolios";
 import { rebalance, getTokenArray, updateNewInvestors, updatePercentageFee} from "@/api";
 import { useRouter } from "vue-router";
@@ -238,19 +237,15 @@ async function doSaveAllocation() {
 	console.log("portfolioStore.portfolioFundFee:"+portfolioStore.portfolioFundFee);
 	console.log("portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal:"+portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal);
 	var selectedProsperoWalletAddress = portfolioStore.selectedPortfolio.prosperoWalletAddress;
-	//var moreThanOneConfirmationNeeded = false;
-	//if (portfolioStore.isPortfolioAcceptingNewInvestors != portfolioStore.selectedPortfolio.acceptingNewInvestorsOriginal){
-	//}
-	loading.value = true;
-
+	
 	if (portfolioStore.isPortfolioAcceptingNewInvestors != portfolioStore.selectedPortfolio.acceptingNewInvestorsOriginal){
 		console.log("Waiting for acceptingNewInvestors API call to finish....possible info modal here?")
 		console.log("acceptingNewInvestors has changed - calling API");
 		var result  = await updateNewInvestors(selectedProsperoWalletAddress, portfolioStore.isPortfolioAcceptingNewInvestors);
 		if (!result.success){
+			loading.value = false;
 			error.value = true;
 			console.error(result.error);
-			loading.value
 			//to do - add error message here 
 			return;
 		}
@@ -323,9 +318,13 @@ async function doSaveAllocation() {
 		success.value = false;
 
 	}
-	loading.value = false;
+
 	saveAllocationModal.value = true;
 	console.log("done");
+
+
+	await loadFreshDataFromApi()
+	console.log('done loadFreshDataFromApi');
 }
 
 
@@ -333,7 +332,165 @@ function closeAllocationModal() {
 	saveAllocationModal.value = false;
 }
 
+
+async function loadFreshDataFromApi() {
+	console.log("loadFreshDataFromApi called");
+	await portfolioStore.loadData();
+	console.log("done with loadData");
+	var selectedPortAddress = portfolioStore.selectedManagePortfolio.prosperoWalletAddress;
+	console.log('selectedPortAddress:'+selectedPortAddress)
+	var port;
+	for ( var i =0;i<portfolioStore.myPortfolios.length;i++){
+		var port = portfolioStore.myPortfolios[i];
+		var thisProspAddress = port.prosperoWalletAddress
+		if (thisProspAddress == selectedPortAddress){
+			break;
+		}
+	}
+	if (port == undefined){
+		alert(' no port found rebalance');
+		return;
+	}
+	//for (var tokenAddress in port) {
+	//	if (tokenAddress.length == 42){
+	//	}
+	//}
+	
+	portfolioStore.selectedManagePortfolio = port;
+	console.log('gonna run onClickedPort');
+	await onClickedPort(port);
+	console.log('done with onClickedPort');
+
+	/*
+	saveAllocationModal.value = false;
+	console.log("MMMMM:"+JSON.stringify(portfolioStore.selectedManagePortfolio,null,2));
+	portfolioStore.activePortfolioType = "My Portfolios";
+
+	var selectedPortAddress = portfolioStore.selectedManagePortfolio.prosperoWalletAddress;
+	console.log('selectedPortAddress:'+selectedPortAddress)
+	await portfolioStore.loadData();
+	console.log('portfolioStore.myPortfolios:'+JSON.stringify(portfolioStore.myPortfolios,null,2))
+	var port;
+	for ( var i =0;i<portfolioStore.myPortfolios.length;i++){
+		port = portfolioStore.myPortfolios[i];
+		console.log("port:"+JSON.stringify(port,null,2))
+		if (port.prosperoWalletAddress == selectedPortAddress){
+			console.log('found it...')
+			portfolioStore.selectedManagePortfolio=port;
+			break;
+		}
+	}
+
+	portfolioStore.selectedManagePortfolio=port;
+	portfolioStore.selectedPortfolio = port;
+	portfolioStore.activePortfolioType = "My Portfolios";
+	await portfolioStore.doSelectPortfolio(port);
+	console.log('set...')
+	
+
+	portfolioStore.allocationList=[];
+	var portfolio = portfolioStore.selectedManagePortfolio;
+	portfolioStore.portfolioFundFee = portfolio.leaderPercentageFee;
+	portfolioStore.isPortfolioAcceptingNewInvestors = portfolio.acceptingNewInvestors;
+	var port = portfolio['portfolioObject'];
+	for (var tokenAddress in port) {
+		if (tokenAddress.length == 42){
+			var token = port[tokenAddress];
+			token['address'] = tokenAddress;
+			token['allocation']=token.percentage;
+			token['allocation']=token['allocation'].toFixed(2);
+			token['allocation']=parseInt(token['allocation']*100);
+			token['mc']=0;
+			token['d7']=0;
+			token['d30']=0;
+			token['d90']=0;
+			token['y1']=0;
+			token['icon']=token.image;
+			portfolioStore.allocationList.push(token);
+		}
+	}
+	var currentAllocationList = portfolioStore.allocationList;
+	var tokenList = getTokenArray();
+	var newTokenList = []
+	for (var i =0;i<tokenList.length;i++){
+		var thisToken = tokenList[i];
+		var foundItAlready = false;
+		for (var j=0;j<currentAllocationList.length;j++){
+			var thisAllocationToken = currentAllocationList[j];
+			if (thisAllocationToken.address == thisToken.address){
+				foundItAlready=true;
+			}
+		}
+		if (!foundItAlready){
+			thisToken['icon']=thisToken.logoURI;
+			newTokenList.push(thisToken)
+		}
+	}
+	portfolioStore.tokenList=newTokenList;
+	success.value = true;
+	*/
+}
+
+
+async function onClickedPort(portfolio) {
+	console.log("onClickedPort");
+	console.log("PORT:"+JSON.stringify(portfolio,null,2));
+
+	//Do this for line chart
+	portfolioStore.activePortfolioType = "My Portfolios";
+	await portfolioStore.doSelectPortfolio(portfolio);
+
+	portfolioStore.selectedPortfolio=portfolio;
+	portfolioStore.allocationList=[];
+	
+	portfolioStore.portfolioFundFee = portfolio.leaderPercentageFee;
+	portfolioStore.isPortfolioAcceptingNewInvestors = portfolio.acceptingNewInvestors;
+	console.log("portfolio.leaderPercentageFee:"+portfolio.leaderPercentageFee);
+	console.log("portfolio.acceptingNewInvestors:"+portfolio.acceptingNewInvestors);
+	var port = portfolio['portfolioObject'];
+	for (var tokenAddress in port) {
+		if (tokenAddress.length == 42){
+		var token = port[tokenAddress];
+		token['address'] = tokenAddress;
+		token['allocation']=token.percentage;
+		token['allocation']=token['allocation'].toFixed(2);
+		token['allocation']=parseInt(token['allocation']*100);
+		token['mc']=0;
+		token['d7']=0;
+		token['d30']=0;
+		token['d90']=0;
+		token['y1']=0;
+		token['icon']=token.image;
+		portfolioStore.allocationList.push(token);
+		
+		}
+	}
+	var currentAllocationList = portfolioStore.allocationList;
+	
+	var tokenList = getTokenArray();
+	var newTokenList = []
+		
+		for (var i =0;i<tokenList.length;i++){
+			var thisToken = tokenList[i];
+			var foundItAlready = false;
+			for (var j=0;j<currentAllocationList.length;j++){
+				var thisAllocationToken = currentAllocationList[j];
+				if (thisAllocationToken.address == thisToken.address){
+					foundItAlready=true;
+				}
+			}
+		if (!foundItAlready){
+			thisToken['icon']=thisToken.logoURI;
+			newTokenList.push(thisToken)
+		}
+	}
+	portfolioStore.tokenList=newTokenList;
+	
+}
+
 async function successCloseAllocationModal() {
+	console.log("do nothing");
+	return;
 	console.log("closeAllocationModal called");
 	saveAllocationModal.value = false;
 	console.log("MMMMM:"+JSON.stringify(portfolioStore.selectedManagePortfolio,null,2));
@@ -403,8 +560,6 @@ async function successCloseAllocationModal() {
 	success.value = false;
 
 }
-
-
 
 function newList(amt, name) {
 	console.log("newList:"+name);

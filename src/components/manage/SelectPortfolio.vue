@@ -9,7 +9,7 @@
 				Select a portfolio to manage
 			</option>
 			<option
-				v-for="(portfolio, i) in portfolioStore.joinedPortfolios"
+				v-for="(portfolio, i) in portfolioStore.myManagingPortfolios"
 				:key="i"
 				:value="portfolio"
 				
@@ -96,6 +96,5 @@ defineProps({
 });
 
 const open = ref(false);
-
 
 </script>

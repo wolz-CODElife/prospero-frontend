@@ -23,6 +23,8 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			myPortfolios: [],
 
+			myManagingPortfolios : [],
+
 			selectedPortfolio: {},
 
 			allocationList: [],
@@ -187,8 +189,15 @@ export const usePortfolios = defineStore("Portfolios", {
 		async getPortfolios() {
 			this.isLoading = true;
 			try {
+				this.myManagingPortfolios = [];
 				this.allPortfolios = await getLeaderBoardDataForTable();
 				this.myPortfolios = await getMyPortfoliosDataForTable();
+				for (var i =0;i<this.myPortfolios.length;i++){
+					var thisPort = this.myPortfolios[i];
+					if (thisPort.wallet_type == "Leader"){
+						this.myManagingPortfolios.push(thisPort)
+					}
+				}
 				this.activeOverview.holdings = await getMyHoldings();
 				this.activeOverview.deposits = await getMyUSDDepositsTotal();
 				this.activeOverview.withdrawals = await getTotalWithdrawals();
