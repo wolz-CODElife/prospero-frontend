@@ -44,6 +44,7 @@ export const usePortfolios = defineStore("Portfolios", {
 					deposits: "0.00",
 					withdrawals: "0.00",
 				},
+
 				{
 					asset: {
 						name: "BTC",
@@ -54,6 +55,7 @@ export const usePortfolios = defineStore("Portfolios", {
 					deposits: "0.00",
 					withdrawals: "0.00",
 				},
+
 				{
 					asset: {
 						name: "AVAX",
@@ -107,7 +109,6 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			lineChartData: {},
 				
-
 			activeFilter: "All",
 
 			depositMessage: "",
@@ -151,6 +152,7 @@ export const usePortfolios = defineStore("Portfolios", {
 			this.isLoading = true;
 			try {
 				this.myManagingPortfolios = [];
+				this.tokenList = await getBalancesInEoa();
 				this.allPortfolios = await getLeaderBoardDataForTable();
 				this.myPortfolios = await getMyPortfoliosDataForTable();
 				for (var i =0;i<this.myPortfolios.length;i++){

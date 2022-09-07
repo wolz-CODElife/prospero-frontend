@@ -140,7 +140,7 @@ const props = defineProps({
 defineEmits(["update:amount", "update:singleToken", "close", "doWithdraw"]);
 
 onMounted(() => {
-	portfolioStore.getTokenList();
+	//portfolioStore.getTokenList();
 	console.log(portfolioStore.tokenList);
 });
 </script>
