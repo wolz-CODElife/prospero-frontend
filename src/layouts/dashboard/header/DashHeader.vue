@@ -112,4 +112,7 @@ import RightHeader from "../header/RightHeader.vue";
 import { usePortfolios } from "@/stores/Portfolios";
 
 const portfolioStore = usePortfolios();
+
+
+
 </script>

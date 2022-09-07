@@ -55,16 +55,18 @@ async function onClickedPort(portfolio) {
 		token['allocation']=token.percentage;
 		token['allocation']=token['allocation'].toFixed(2);
 		token['allocation']=parseInt(token['allocation']*100);
-		token['mc']=0;
-		token['d7']=0;
-		token['d30']=0;
-		token['d90']=0;
-		token['y1']=0;
+		//token['mc']=0;
+		//token['d7']=token['d7'];
+		//token['d30']=token['d30'];
+		//token['d90']=token['d90'];
+		//token['y1']=token['y1'];
 		token['icon']=token.image;
 		portfolioStore.allocationList.push(token);
 		
 		}
 	}
+	console.log("portfolioStore.allocationList:"+JSON.stringify(portfolioStore.allocationList,null,2));
+
 	var currentAllocationList = portfolioStore.allocationList;
 	
 	var tokenList = getTokenArray();
