@@ -1,9 +1,9 @@
 <template>
 	<div>
-		<div class="grid grid-cols-12 h-[190px] text-[#868C9D] bg-black">
+		<div class="grid grid-cols-12 h-[170px] text-[#868C9D] bg-black">
 			<!-- Left side of header  -->
 			<div
-				class="col-span-8 bg-black pl-[30px] py-[10px] border"
+				class="col-span-8 bg-black pl-[30px] border"
 				:class="[
 					portfolioStore.activeHeader === 'left'
 						? 'border-white border-b-0'
@@ -94,11 +94,12 @@
 
 			<!-- Right side of header  -->
 			<div
-				class="col-span-4 bg-black border py-[30px]"
+				class="col-span-4 bg-black border pt-[20px]"
 				:class="[
 					portfolioStore.activeHeader === 'left'
 						? 'border-black border-b-white'
 						: 'border-white border-b-0',
+					h,
 				]"
 			>
 				<RightHeader />
