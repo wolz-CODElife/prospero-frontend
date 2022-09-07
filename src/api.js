@@ -876,7 +876,6 @@ async function getHistoricalPricesUpdateChartsData() {
 
 	var tempTokenAddressToHistoricalPrices = {}
 	for (var i = 0; i < tokenArray.length; i++) {
-		tempTokenAddressToHistoricalPrices[tokenArray[i]['address']]=tokenArray[i];
 
 		tokenArray[i]['d7'] = calcPercChangeForToken(tokenArray[i]['d7'] , tokenArray[i]['price']);
 		tokenArray[i]['d30'] = calcPercChangeForToken(tokenArray[i]['d30'] , tokenArray[i]['price']);
@@ -893,6 +892,8 @@ async function getHistoricalPricesUpdateChartsData() {
 		//console.log("taLower:"+taLower)
 		//console.log("mv:"+mc)
 		tokenArray[i]['mc'] =  mc.toFixed(2);
+		tempTokenAddressToHistoricalPrices[tokenArray[i]['address']]=tokenArray[i];
+
 	}
 
 	console.log("tokenArray:*****:"+JSON.stringify(tokenArray,null,2));
