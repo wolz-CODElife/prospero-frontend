@@ -222,6 +222,7 @@
 				<WithdrawalModal
 					v-if="withdrawMode !== ''"
 					@close="closeWithdrawalModal"
+					@redirect="redirect"
 					@doWithdraw="doWithdraw"
 					:mode="withdrawMode"
 					:firstView="firstView"
@@ -230,7 +231,7 @@
 					:error="error"
 					v-model:amount="amount"
 					v-model:singleToken="singleToken"
-					:usdAmountOfGas="usdAmountOfGas"
+					:fee="gasFee"
 				/>
 			</div>
 		</div>
@@ -312,11 +313,46 @@ const tabs = ref(["All Portfolios", "My Portfolios"]);
 
 const disabled = ref(true);
 
-const usdAmountOfGas = ref(0);
+const gasFee = ref(0);
 
 const disabledDepToPortfolio = computed(
 	() => !portfolioName.value || !fundFee.value
 );
+
+async function doWithdraw() {
+	firstView.value = false;
+	secondView.value = true;
+	loading.value = true;
+	///if (singleToken.value=="" || (amount.value =="" || (parseFloat(amount.value) <=0))){
+	//	loading.value = false;
+	//	error.value = true;
+	//}
+	var tokens = [singleToken.value];
+	try {
+		const res = await withdraw([], parseFloat(amount.value));
+		loading.value = false;
+		if (res.success) {
+			gasFee.value = res.gasUsed.usdAmountOfGas;
+			if (gasFee.value != 0) {
+				gasFee.value = gasFee.value.toFixed(2);
+			}
+			console.log("Gas Fee to show in modal:" + gasFee.value);
+			error.value = false;
+			loading.value = false;
+			console.log("WD LOAINDG DATA...");
+			await portfolioStore.loadData();
+			console.log("done loading data");
+		} else {
+			loading.value = false;
+			error.value = true;
+			console.log(res.error);
+		}
+	} catch (error) {
+		loading.value = false;
+		error.value = true;
+		console.log(error);
+	}
+}
 
 // function getTokenListForManage() {
 // 	console.log("getTokenListForManage");
@@ -368,50 +404,6 @@ function updateUIStatusAPICaller(uiType) {
 	console.log("updateUIStatusAPICaller with type:" + uiType);
 	updateUIStatus(uiType);
 }
-async function doWithdraw() {
-	//portfolioStore.selectedPortfolio
-	console.log("this.selectedPortfolio:"+JSON.stringify(portfolioStore.selectedPortfolio,null,2));
-	firstView.value = false;
-	secondView.value = true;
-	loading.value = true;
-	console.log('singleToken:'+singleToken.value);
-	///if (singleToken.value=="" || (amount.value =="" || (parseFloat(amount.value) <=0))){
-	//	loading.value = false;
-	//	error.value = true;
-	//}
-	var tokens = [singleToken.value];
-	try {
-		console.log("withdrawal amount: ", parseFloat(amount.value));
-		const res = await withdraw([], parseFloat(amount.value));
-		loading.value = false;
-		console.log("RES:" + JSON.stringify(res, null, 2));
-		if (res.success) {
-			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas;
-			if (usdAmountOfGas.value != 0) {
-				//usdAmountOfGas.value = usdAmountOfGas.value.toFixed(2);
-				//props.usdAmountOfGas = usdAmountOfGas.value.toFixed(2);
-			}
-			console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
-			error.value = false;
-			loading.value = false;
-			console.log("WD LOAINDG DATA...")
-			await portfolioStore.loadData();
-			console.log("done loading data")
-			//portfolioStore.selectedPortfolio = 
-		} else {
-			loading.value = false;
-			error.value = true;
-			console.log(res.error);
-		}
-	} catch (error) {
-		loading.value = false;
-		error.value = true;
-		console.log(error);
-	}
-}
-
-
-
 
 function enableSwap() {
 	withdrawMode.value = "swap";
@@ -429,13 +421,6 @@ function closeWithdrawalModal() {
 	loading.value = false;
 	error.value = false;
 	withdrawMode.value = "";
-	amount.value = "";
-	singleToken.value = "";
-}
-
-function reset() {
-	portfolioStore.goBack();
-	firstView.value = true;
 	amount.value = "";
 	singleToken.value = "";
 }

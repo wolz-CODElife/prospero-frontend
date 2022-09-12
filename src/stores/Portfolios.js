@@ -23,7 +23,7 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			myPortfolios: [],
 
-			myManagingPortfolios : [],
+			myManagingPortfolios: [],
 
 			selectedPortfolio: {},
 
@@ -108,7 +108,7 @@ export const usePortfolios = defineStore("Portfolios", {
 			portfolioFundFee: 0,
 
 			lineChartData: {},
-				
+
 			activeFilter: "All",
 
 			depositMessage: "",
@@ -155,10 +155,10 @@ export const usePortfolios = defineStore("Portfolios", {
 				this.tokenList = await getBalancesInEoa();
 				this.allPortfolios = await getLeaderBoardDataForTable();
 				this.myPortfolios = await getMyPortfoliosDataForTable();
-				for (var i =0;i<this.myPortfolios.length;i++){
+				for (var i = 0; i < this.myPortfolios.length; i++) {
 					var thisPort = this.myPortfolios[i];
-					if (thisPort.wallet_type == "Leader"){
-						this.myManagingPortfolios.push(thisPort)
+					if (thisPort.wallet_type == "Leader") {
+						this.myManagingPortfolios.push(thisPort);
 					}
 				}
 				this.activeOverview.holdings = await getMyHoldings();
@@ -210,7 +210,7 @@ export const usePortfolios = defineStore("Portfolios", {
 		async toggleActiveHeader() {
 			if (this.activeHeader === "left") {
 				this.activeHeader = "right";
-				console.log('on left mmoving right');
+				console.log("on left mmoving right");
 				this.reset();
 				//if (this.selectedPortfolio!=undefined){
 				//await updateSelectedWallet(this.selectedPortfolio);
@@ -220,11 +220,10 @@ export const usePortfolios = defineStore("Portfolios", {
 				//);
 				//}
 			} else {
-				console.log('on right, going left...')
+				console.log("on right, going left...");
 				this.activeHeader = "left";
 				this.lineChartData = getLineChartData("all my holdings", "");
 			}
-
 		},
 
 		changeActivePortfolioType() {
