@@ -71,6 +71,7 @@
 				alt=""
 				class="mx-auto max-w-[130px] object-contain animate-pulse"
 			/>
+
 			<h1 class="text-white text-center text-[20px] uppercase">
 				Pending transaction. Please wait for confirmation...
 			</h1>
@@ -100,12 +101,12 @@
 			<p class="text-[16px]">
 				${{ props.amount }} has been sent to you. Wait a few moments for the
 				tokens to transfer and reflect in your wallet. Gas used ${{
-					props.usdAmountOfGas
+					props.fee
 				}}
 			</p>
 
 			<button
-				@click="$emit('close')"
+				@click="$emit('close'), portfolioStore.goBack()"
 				class="btn btn-primary uppercase w-full"
 			>
 				Take me to home
@@ -115,14 +116,10 @@
 </template>
 
 <script setup>
-import { onMounted } from "vue";
+import { onMounted, computed } from "vue";
 import Modal from "../Modal.vue";
 import WithdrawalOverview from "../withdrawal/WithdrawalOverview.vue";
 import { usePortfolios } from "@/stores/Portfolios";
-
-async function testFun(){
-	console.log("testFun......")
-}
 
 const portfolioStore = usePortfolios();
 
@@ -132,12 +129,18 @@ const props = defineProps({
 	mode: String,
 	firstView: Boolean,
 	secondView: Boolean,
-	usdAmountofGas: Number,
+	fee: Number,
 	loading: Boolean,
 	error: Boolean,
 });
 
-defineEmits(["update:amount", "update:singleToken", "close", "doWithdraw"]);
+defineEmits([
+	"update:amount",
+	"update:singleToken",
+	"close",
+	"redirect",
+	"doWithdraw",
+]);
 
 onMounted(() => {
 	//portfolioStore.getTokenList();

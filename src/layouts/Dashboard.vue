@@ -1,7 +1,7 @@
 <template>
 	<div class="grid grid-cols-[300px_1fr] gap-0">
 		<Sidebar class="w-[300px]" />
-		<main class="z-10 bg-[#2D3035] p-[28px] relative">
+		<main class="z-10 bg-[#2D3035] px-[28px] pt-[14px]">
 			<JoinDepositModal
 				v-if="joinView"
 				@go-back="goBack"
@@ -14,7 +14,7 @@
 				@redirect="redirect"
 			/>
 
-			<div v-else class="max-h-[calc(100vh-56px)]">
+			<div v-else class="">
 				<DashHeader />
 
 				<DashMain
@@ -105,27 +105,31 @@ function goBack() {
 async function redirect() {
 	console.log("redirect called");
 	// if (joinView.value) {
-	console.log("****this.selectedPortfolio:"+JSON.stringify(portfolioStore.selectedPortfolio,null,2));
+	console.log(
+		"****this.selectedPortfolio:" +
+			JSON.stringify(portfolioStore.selectedPortfolio, null, 2)
+	);
 
 	portfolioStore.activeMode = "join";
 	portfolioStore.activePortfolioType = "My Portfolios";
 	joinView.value = false;
 	createView.value = false;
-	var theProspWalletAddressSelectedBefore = portfolioStore.selectedPortfolio.prosperoWalletAddress;
-	
+	var theProspWalletAddressSelectedBefore =
+		portfolioStore.selectedPortfolio.prosperoWalletAddress;
+
 	await portfolioStore.loadData();
-	
-	for (var i =0;i<portfolioStore.myPortfolios.length;i++){
-		var thisPort = portfolioStore.myPortfolios[i]
-		if (thisPort.prosperoWalletAddress == theProspWalletAddressSelectedBefore)
-		{
-			console.log('****found it****')
-			portfolioStore.selectedPortfolio=thisPort;
+
+	for (var i = 0; i < portfolioStore.myPortfolios.length; i++) {
+		var thisPort = portfolioStore.myPortfolios[i];
+		if (
+			thisPort.prosperoWalletAddress == theProspWalletAddressSelectedBefore
+		) {
+			console.log("****found it****");
+			portfolioStore.selectedPortfolio = thisPort;
 			break;
 		}
 	}
-	console.log("thisPort:"+JSON.stringify(thisPort,null,2));
-	await portfolioStore.doSelectPortfolio(thisPort)
-
+	console.log("thisPort:" + JSON.stringify(thisPort, null, 2));
+	await portfolioStore.doSelectPortfolio(thisPort);
 }
 </script>

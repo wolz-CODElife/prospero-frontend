@@ -7,7 +7,7 @@
 				>
 					<th class="pl-[20px]">NAME</th>
 					<th class="border-r border-r-[#2D3035]">FEE</th>
-					<th class="pl-[20px]">7D%</th>
+					<th class="pl-[20px]" @click="sortByD7">7D%</th>
 					<th>30D%</th>
 					<th>90D%</th>
 					<th class="pr-[30px]">1YR%</th>
@@ -156,6 +156,13 @@ const resetCurrentPage = () => {
 		currentPage.value * 4
 	);
 };
+
+function sortByD7() {
+	filteredPortfolios.value.sort((a, b) =>
+		a.d7 > b.d7 ? 1 : b.d7 > a.d7 ? -1 : 0
+	);
+	console.log("sort by d7:", filteredPortfolios.value);
+}
 
 watch(
 	() => [props.portfolioList, props.portfolioState],

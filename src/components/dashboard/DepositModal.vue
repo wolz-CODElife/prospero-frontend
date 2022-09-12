@@ -233,7 +233,7 @@ let usdAmountOfGas = ref("");
 defineEmits(["goBack", "redirect"]);
 
 onMounted(() => {
-	//portfolioStore.getTokenList();
+	portfolioStore.getTokenList();
 });
 
 function toggleView() {
