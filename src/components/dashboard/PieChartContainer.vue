@@ -1,5 +1,5 @@
 <template>
-	<div class="row-span-5 bg-[#191A20] px-[28px] py-[20px]">
+	<div class="bg-[#191A20] px-[28px] py-[20px]">
 		<div class="h-[108px] grid grid-cols-12 gap-x-[10px] items-center">
 			<!-- Left button  -->
 			<button
@@ -66,7 +66,7 @@
 
 		<!-- Pie chart  -->
 
-		<div class="mt-[90px]">
+		<div class="mt-[auto]">
 			<PieChart
 				v-if="portfolioStore.selectedPortfolio.name"
 				:chart-data="realChartData"
