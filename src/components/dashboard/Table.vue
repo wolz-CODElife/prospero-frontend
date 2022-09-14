@@ -1,5 +1,5 @@
 <template>
-	<div class="row-span-3 bg-[#191A20] pt-[20px]">
+	<div class="row-span-3 bg-[#191A20] py-[20px]">
 		<!-- This is the view of the 'Table' section of Prospero when the route is on /dashboard  -->
 		<div v-if="path === 'dashboard'">
 			<!-- Join / Deposit View -->

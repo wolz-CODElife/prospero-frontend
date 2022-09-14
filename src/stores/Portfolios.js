@@ -276,11 +276,11 @@ export const usePortfolios = defineStore("Portfolios", {
 		filteredTxnList(state) {
 			if (state.activeFilter === "All") {
 				console.log("All Txns are -", state.allTxns);
-				return state.allTxns;
+				return state.allTxns.slice().reverse();
 			} else {
-				return state.allTxns.filter(
-					(txn) => txn.type === state.activeFilter
-				);
+				return state.allTxns
+					.filter((txn) => txn.type === state.activeFilter)
+					.reverse();
 			}
 		},
 	},

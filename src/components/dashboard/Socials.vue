@@ -1,5 +1,5 @@
 <template>
-	<div class="row-span-1 bg-[#191A20] py-[20px]">
+	<div class="bg-[#191A20] py-[20px]">
 		<!-- Directions  -->
 		<DashDir
 			empty-selected-card-classes="h-full flex gap-[24px] justify-center items-center"

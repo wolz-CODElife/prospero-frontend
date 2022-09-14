@@ -3,10 +3,10 @@
 		class="pt-[10px] border border-t-0 border-b-0 border-white w-full"
 	></div>
 	<div
-		class="border border-t-0 border-white max-h-[calc(100vh-240px)] overflow-y-auto"
+		class="border border-t-0 border-white h-[calc(100vh-210px)] overflow-y-auto"
 	>
-		<div class="w-full grid grid-cols-12 gap-[10px]">
-			<div class="col-span-4 grid grid-rows-5 gap-y-[10px]">
+		<div class="w-full h-full grid grid-cols-12 gap-[10px]">
+			<div class="col-span-4 grid gap-y-[10px]">
 				<!-- Pie chart  -->
 				<PieChartContainer class="" />
 
@@ -16,7 +16,7 @@
 
 			<div class="col-span-8 grid grid-rows-5 gap-[10px]">
 				<!-- Line chart container  -->
-				<div class="bg-[#191A20] row-span-2 p-[20px]">
+				<div class="bg-[#191A20] row-span-2 py-[10px] px-[20px]">
 					<!-- Line chart  -->
 					<LineChart :chart-data="portfolioStore.lineChartData" />
 				</div>
