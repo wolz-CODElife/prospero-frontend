@@ -6,7 +6,30 @@
 					class="text-[#868C9D] text-left border-b border-b-[#2D3035] py-[5px] px-[30px] sticky top-0 bg-[#191A20]"
 				>
 					<th class="pl-[20px]">NAME</th>
-					<th class="border-r border-r-[#2D3035]">FEE</th>
+					<th @click="sortBy('fee')" class="border-r border-r-[#2D3035]">
+						<span class="flex items-center gap-x-[4px]"
+							>FEE
+							<span
+								class="opacity-[0] sort"
+								:class="[
+									sortValue === 'fee' ? 'opacity-[1]' : 'opacity-[0]',
+								]"
+								><svg
+									width="7"
+									height="9"
+									viewBox="0 0 7 9"
+									fill="none"
+									xmlns="http://www.w3.org/2000/svg"
+								>
+									<path
+										fill-rule="evenodd"
+										clip-rule="evenodd"
+										d="M3.5001 8.24986C3.62442 8.24986 3.74365 8.20048 3.83156 8.11257C3.91947 8.02466 3.96885 7.90543 3.96885 7.78111V2.35017L5.98073 4.36299C6.02431 4.40657 6.07605 4.44114 6.133 4.46473C6.18994 4.48831 6.25097 4.50045 6.31261 4.50045C6.37424 4.50045 6.43527 4.48831 6.49221 4.46473C6.54916 4.44114 6.6009 4.40657 6.64448 4.36299C6.68806 4.3194 6.72263 4.26766 6.74622 4.21072C6.76981 4.15378 6.78195 4.09275 6.78195 4.03111C6.78195 3.96948 6.76981 3.90845 6.74622 3.8515C6.72263 3.79456 6.68806 3.74282 6.64448 3.69924L3.83198 0.886736C3.78844 0.843083 3.73671 0.808449 3.67976 0.784818C3.62281 0.761187 3.56176 0.749023 3.5001 0.749023C3.43845 0.749023 3.3774 0.761187 3.32045 0.784818C3.2635 0.808449 3.21177 0.843083 3.16823 0.886736L0.355729 3.69924C0.26771 3.78726 0.218262 3.90663 0.218262 4.03111C0.218262 4.15559 0.26771 4.27497 0.355729 4.36299C0.443748 4.45101 0.563127 4.50045 0.687604 4.50045C0.812081 4.50045 0.931461 4.45101 1.01948 4.36299L3.03135 2.35017V7.78111C3.03135 7.90543 3.08074 8.02466 3.16865 8.11257C3.25656 8.20048 3.37578 8.24986 3.5001 8.24986Z"
+										fill="#868C9D"
+									/>
+								</svg> </span
+						></span>
+					</th>
 					<th @click="sortBy('d7')" class="pl-[20px] hover:cursor-pointer">
 						<span class="flex items-center gap-x-[4px]"
 							>7D%
@@ -241,7 +264,7 @@ const searchQuery = ref("");
 let sortValue = ref("y1");
 
 onMounted(() => {
-	filteredPortfolios.value = props.portfolioList.slice(0, 4);
+	sortBy("y1");
 });
 
 const resetCurrentPage = () => {
@@ -254,14 +277,14 @@ const resetCurrentPage = () => {
 
 function sortBy(cond) {
 	if (sortValue.value === cond) {
-		filteredPortfolios.value.sort((a, b) =>
-			a["y1"] < b["y1"] ? 1 : b["y1"] < a["y1"] ? -1 : 0
-		);
-		sortValue.value = "";
+		filteredPortfolios.value = props.portfolioList
+			.sort((a, b) => (a["y1"] < b["y1"] ? 1 : b["y1"] < a["y1"] ? -1 : 0))
+			.slice(0, 4);
+		sortValue.value = "y1";
 	} else {
-		filteredPortfolios.value.sort((a, b) =>
-			a[cond] < b[cond] ? 1 : b[cond] < a[cond] ? -1 : 0
-		);
+		filteredPortfolios.value = props.portfolioList
+			.sort((a, b) => (a[cond] < b[cond] ? 1 : b[cond] < a[cond] ? -1 : 0))
+			.slice(0, 4);
 		sortValue.value = cond;
 		// console.log(`sort by ${cond}:`, filteredPortfolios.value);
 	}
