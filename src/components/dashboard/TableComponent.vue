@@ -6,7 +6,10 @@
 					class="text-[#868C9D] text-left border-b border-b-[#2D3035] py-[5px] px-[30px] sticky top-0 bg-[#191A20]"
 				>
 					<th class="pl-[20px]">NAME</th>
-					<th @click="sortBy('fee')" class="border-r border-r-[#2D3035]">
+					<th
+						@click="sortBy('fee')"
+						class="border-r border-r-[#2D3035] hover:cursor-pointer"
+					>
 						<span class="flex items-center gap-x-[4px]"
 							>FEE
 							<span
