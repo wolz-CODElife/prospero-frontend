@@ -97,7 +97,7 @@ function getProfitPercentage(portObject) {
 
 function getTotalValue(portObject) {
 	portObject = portObject["portfolioObject"];
-	if (portObject == undefined) {
+	if (portObject == undefined || ((!portObject.hasOwnProperty('totalValue')))) {
 		return 0;
 	}
 	var totalValue = portObject.totalValue;

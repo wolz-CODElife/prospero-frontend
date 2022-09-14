@@ -424,6 +424,8 @@ async function onClickedPort(portfolio) {
 
 async function successCloseAllocationModal() {
 	console.log("do nothing");
+	saveAllocationModal.value = false;
+
 	return;
 	console.log("closeAllocationModal called");
 	saveAllocationModal.value = false;

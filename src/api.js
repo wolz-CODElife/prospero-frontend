@@ -135,7 +135,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 
 	for (var i = 0; i < graphData.length; i++) {
 		var graphItem = graphData[i];
-		//////console.log("graphItem:" + JSON.stringify(graphItem, null, 2));
+		//console.log("graphItem:" + JSON.stringify(graphItem, null, 2));
 		var intVars = graphItem["intVars"];
 		var usdInvested = graphItem["usdInvested"];
 
@@ -498,7 +498,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			}
 			////console.log('done')
 		}
-
+		
 		for (var i = 0; i < tokens.length; i++) {
 			var tokenObj = {};
 			var thisTokenAddress = tokens[i];
@@ -654,12 +654,19 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			//leaderBoardDataObjectCOPY["y1"]  = leaderBoardDataObjectCOPY["y1"]  + "%";
 			leaderBoardDataObjectCOPY["profitPercentage"] = profitPercentageLeader;
 			//leaderBoardDataObject
+			//RIGHT HERE ***
+			//if (leaderPercentage == 0){
+			//	leaderBoardDataObjectCOPY["portfolioObject"] = {}
+			//}
 			leaderBoardDataFinal.push(leaderBoardDataObjectCOPY);
 		} else {
 			////console.log("not adding - leader did not invest yet.");
 		}
-
+		
 		if (indexOfUser >= 0) {
+			if (userPercentage == 0){
+				leaderBoardDataObjectCOPY["portfolioObject"] = {}
+			}
 			myWalletsDataFinal[thisProsperoWalletAddress] = leaderBoardDataObject;
 			myPortfolioDataForTable.push(leaderBoardDataObject);
 		}
@@ -1205,7 +1212,7 @@ function formatPerc(f){
 	if (f=="-"){
 		f = 0
 	}
-	console.log("F:"+f);
+	//console.log("F:"+f);
 	if (f!=0){
 		f=f.toFixed(2)
 	}
