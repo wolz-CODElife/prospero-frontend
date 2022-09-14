@@ -63,6 +63,7 @@ var myUSDDepositsTotal = 0;
 var myROITotal = 0;
 var myROITotalPercentage = 0;
 var myWithdrawTotals = 0;
+var ShouldShowConsoleOutput=true;
 //UI Objects - keys changed and formatted for UI
 var leaderBoardUITableObject;
 var myPortfolioDataForTable;
@@ -81,15 +82,31 @@ var UIStatus;
 var UI_CREATE_THEN_DEPOSIT = 1;
 var UI_JOIN_THEN_DEPOSIT = 2;
 var UI_DEPOSIT_MY_PORTFOLIO = 3;
+
+
+
+
+function getIndexIgnoreCase(str, arrOfStrs){
+	str = str.toLowerCase();
+	for (var i =0;i<arrOfStrs.length;i++){
+		var thisStr = arrOfStrs[i];
+		thisStr = thisStr.toLowerCase();
+		if (thisStr == str){
+			return i;
+		}
+	}
+	return -1;
+}
+
+
 //FUNCTIONS
 //TO DO:
 //get rid of warnings solidity
 //recent transactions (see image )
 //account history (see image )
 //contracts - add no more investors and change % fee for leader
-
 async function convertGraphDataToLeaderBoardAndMyWalletsData() {
-	console.log("convertGraphDataToLeaderBoardAndMyWalletsData");
+	//console.log("convertGraphDataToLeaderBoardAndMyWalletsData");
 	var leaderBoardDataNew = {};
 	var leaderBoardDataFinal = [];
 	var myWalletsDataFinal = {};
@@ -101,10 +118,24 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 	withdrawDepositDataForHistory = [];
 	myWithdrawTotals = 0;
 	myHoldingsTotal = 0;
-	////console.log("graphData.length:"+graphData.length)
+	//////console.log("graphData.length:"+graphData.length)
+
+	graphData.sort(function(a, b) {
+		var intVarsA = a["intVars"];
+		var timeSecondsA = intVarsA[4];
+		var intVarsB = b["intVars"];
+		var timeSecondsB = intVarsB[4];
+
+		// Compare the 2 dates
+		if (timeSecondsA < timeSecondsB) return -1;
+		if (timeSecondsA > timeSecondsB) return 1;
+		return 0;
+	});
+	
+
 	for (var i = 0; i < graphData.length; i++) {
 		var graphItem = graphData[i];
-		////console.log("graphItem:" + JSON.stringify(graphItem, null, 2));
+		//////console.log("graphItem:" + JSON.stringify(graphItem, null, 2));
 		var intVars = graphItem["intVars"];
 		var usdInvested = graphItem["usdInvested"];
 
@@ -120,16 +151,38 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		msgSender = msgSender.toLowerCase();
 		var eoaALower = EOAAddress.toLowerCase();
 		var indexOfUser = -1;
-		//console.log(
+
+
+
+		////console.log(
 		//	"selectedProsperoWalletAddress:" + selectedProsperoWalletAddress
 		//);
-		//console.log("prospWalletAddressHere:" + prospWalletAddressHere);
-		//console.log("msgSender:" + msgSender);
-		//console.log("eoaALower:" + eoaALower);
+		////console.log("prospWalletAddressHere:" + prospWalletAddressHere);
+		////console.log("msgSender:" + msgSender);
+		////console.log("eoaALower:" + eoaALower);
 
 		if (prospWalletAddressHere == selectedProsperoWalletAddress) {
-			//console.log("methodType:" + methodType);
+			////console.log("methodType:" + methodType);
 
+			var lastUsdDepositedUser=BigNumber(0+"");
+			var totalAmountDepositedUser=BigNumber(0+"");
+			var indexOfUserHere = getIndexIgnoreCase(eoaALower, users);
+			if (indexOfUserHere != -1){
+				var usdDeposited = BigNumber(usdInvested[indexOfUserHere]+"");
+				if (usdDeposited.isGreaterThan(lastUsdDepositedUser)){
+					var amtDeposited = usdDeposited.minus(lastUsdDepositedUser);
+					//console.log("usdDeposited	     :"+usdDeposited)
+					//console.log("amtDeposited	     :"+amtDeposited)
+					//console.log("lastUsdDepositedUser :"+lastUsdDepositedUser)
+					totalAmountDepositedUser = BigNumber(amtDeposited.plus(totalAmountDepositedUser)+"")
+					//totalAmountDepositedUser = totalAmountDepositedUser;
+				}
+				//graphItem['totalAmountDepositedUser']=totalAmountDepositedUser;
+				lastUsdDepositedUser = BigNumber(usdInvested[indexOfUserHere]+"");
+			}
+			graphItem['totalAmountDepositedUser']=totalAmountDepositedUser.dividedBy(USD_SCALE)+"";
+
+		
 			if (
 				methodType == LEADER_SWAP ||
 				methodType == LEADER_STRAIGHT_DEPOSIT
@@ -141,7 +194,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 					rebalType = "Manager Deposit";
 				}
 
-				//console.log("GOT SWAP....");
+				////console.log("GOT SWAP....");
 				var tx = graphItem["id"];
 				tx = tx.substring(0, tx.length - 2);
 				tx = SnowtraceDeploymentLocation + tx;
@@ -159,7 +212,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 				};
 				withdrawDepositDataForHistory.push(withdrawalDepObject);
 			} else if (msgSender == eoaALower) {
-				//console.log("found sender...");
+				////console.log("found sender...");
 				if (users.indexOf(eoaALower) != -1) {
 					indexOfUser = users.indexOf(eoaALower);
 				}
@@ -179,7 +232,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 					var tx = graphItem["id"];
 					tx = tx.substring(0, tx.length - 2);
 					tx = SnowtraceDeploymentLocation + tx;
-					//console.log("GI:" + JSON.stringify(graphItem, null, 2));
+					////console.log("GI:" + JSON.stringify(graphItem, null, 2));
 					var t = formatTimeForHistory(graphItem["intVars"][4]);
 					var amt =
 						(usdDeposited - lastUsdDepositedForWithdrawDeposit) /
@@ -210,7 +263,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 					methodType == WITHDRAW_SWAP ||
 					methodType == WITHDRAW_ALL
 				) {
-					//console.log("found WD...");
+					////console.log("found WD...");
 
 					if (indexOfUser == -1) {
 						alert("Error - index of user is -1");
@@ -255,28 +308,28 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			}
 		}
 
-		////console.log("myWithdrawTotals:"+myWithdrawTotals);
+		//////console.log("myWithdrawTotals:"+myWithdrawTotals);
 
 		//var methodType = intVars[]
 		var thisProsperoWalletAddress = graphItem["addressVars"][2];
 		thisProsperoWalletAddress = thisProsperoWalletAddress.toLowerCase();
 		if (!leaderBoardDataNew.hasOwnProperty(thisProsperoWalletAddress)) {
 			leaderBoardDataNew[thisProsperoWalletAddress] = graphItem;
-			////console.log("adding")
+			//////console.log("adding")
 		} else {
-			////console.log('already has.')
+			//////console.log('already has.')
 			var graphItemWeHaveAlready =
 				leaderBoardDataNew[thisProsperoWalletAddress];
 			var timeOfOneWeHave = graphItemWeHaveAlready["intVars"][4];
 			var timeOfThisOne = graphItem["intVars"][4];
-			//console.log("timeOfThisOne  :"+timeOfThisOne)
-			//console.log("timeOfOneWeHave:"+timeOfOneWeHave)
+			////console.log("timeOfThisOne  :"+timeOfThisOne)
+			////console.log("timeOfOneWeHave:"+timeOfOneWeHave)
 
 			if (timeOfThisOne > timeOfOneWeHave) {
-				//console.log("replacing...")
+				////console.log("replacing...")
 				leaderBoardDataNew[thisProsperoWalletAddress] = graphItem;
 			} else {
-				//console.log("Not replacing")
+				////console.log("Not replacing")
 			}
 		}
 	}
@@ -287,11 +340,10 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		a.unixTime < b.unixTime ? -1 : 1
 	);
 
-	//console.log(
+	////console.log(
 	//	"withdrawDepositDataForHistory:" +
-			JSON.stringify(withdrawDepositDataForHistory, null, 2)
+	//JSON.stringify(withdrawDepositDataForHistory, null, 2)
 	//);
-	//console.log("leaderBoardDataNew:"+JSON.stringify(leaderBoardDataNew,null,2));
 	var cntrLB = 0;
 	var cntrMyWallets = 0;
 	var firstWallet = "";
@@ -303,22 +355,22 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		var leaderBoardDataObject = {};
 		var thisProsperoWalletAddress = key;
 		var thisGraphItem = leaderBoardDataNew[key];
-		//console.log("  ")
-		//console.log("WALLET NAME:" + thisGraphItem["walletName"]);
+		////console.log("  ")
+		////console.log("WALLET NAME:" + thisGraphItem["walletName"]);
 		var addressVars = thisGraphItem["addressVars"];
 		var tokens = thisGraphItem["tokens"];
 		var tokenBalances = thisGraphItem["balances"];
 
 		var intVars = thisGraphItem["intVars"];
 		var leaderFundFee = intVars[6];
-		//console.log('leaderFundFee**:'+leaderFundFee);
+		////console.log('leaderFundFee**:'+leaderFundFee);
 		var prosperoFundFee = intVars[7];
 		leaderFundFee = leaderFundFee / USD_SCALE;
-		//console.log('1leaderFundFee:'+leaderFundFee)
+		////console.log('1leaderFundFee:'+leaderFundFee)
 		leaderFundFee = leaderFundFee * 100;
-		//console.log('2leaderFundFee:'+leaderFundFee)
+		////console.log('2leaderFundFee:'+leaderFundFee)
 		leaderFundFee = parseInt(leaderFundFee);
-		//console.log('3leaderFundFee:'+leaderFundFee)
+		////console.log('3leaderFundFee:'+leaderFundFee)
 
 		prosperoFundFee = prosperoFundFee / USD_SCALE;
 		prosperoFundFee = prosperoFundFee * 100;
@@ -357,10 +409,10 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			//wallets
 		}
 
-		//console.log("leadersValue 1:"+thisGraphItem["usersValues"][indexOfLeader])
+		////console.log("leadersValue 1:"+thisGraphItem["usersValues"][indexOfLeader])
 
 		//var leadersValue = thisGraphItem["usersValues"][indexOfLeader] /  USD_SCALE
-		//console.log("leadersValue:"+leadersValue)
+		////console.log("leadersValue:"+leadersValue)
 		//var profitUsd = leadersValue - leadersUsdInvested;
 		var percentageOwnership = thisGraphItem["percentageOwnerships"];
 		var leaderPercentage = percentageOwnership[indexOfLeader];
@@ -377,12 +429,12 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 
 			var totalBal = tokenBalances[i];
 			var thisTokenAddress = tokens[i];
-			//console.log('bal:'+bal)
+			////console.log('bal:'+bal)
 			var usdThisUserThisToken = await getUSDValue_MINE(
 				bal,
 				thisTokenAddress
 			);
-			//console.log('totalBal:'+bal)
+			////console.log('totalBal:'+bal)
 
 			var totalUsdThisToken = await getUSDValue_MINE(
 				totalBal,
@@ -392,9 +444,9 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			leadersValue = leadersValue + usdThisUserThisToken;
 			totalValueAllUsers = totalValueAllUsers + totalUsdThisToken;
 		}
-		//console.log("total leaders value:" + leadersValue);
-		//console.log("totalValueAllUsers:" + totalValueAllUsers);
-		//console.log("indexOfUser:"+indexOfUser);
+		////console.log("total leaders value:" + leadersValue);
+		////console.log("totalValueAllUsers:" + totalValueAllUsers);
+		////console.log("indexOfUser:"+indexOfUser);
 
 		//only calculate if user is a follower here (not the leader)
 		var userPercentage;
@@ -408,43 +460,43 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 				//bal=parseInt(bal);
 				var bal = multipleBN(tokenBalances[i], userPercentage);
 				var thisTokenAddress = tokens[i];
-				//console.log("bal2:" + bal);
+				////console.log("bal2:" + bal);
 
 				var usdThisUserThisToken = await getUSDValue_MINE(
 					bal,
 					thisTokenAddress
 				);
-				//console.log('usdThisUserThisToken:'+usdThisUserThisToken)
+				////console.log('usdThisUserThisToken:'+usdThisUserThisToken)
 				usersValue = usersValue + usdThisUserThisToken;
 			}
-			//console.log("***userValue:"+usersValue)
+			////console.log("***userValue:"+usersValue)
 		}
 
 		//myHoldingsTotal
 
 		if (indexOfUser >= 0) {
-			//console.log('calc myHolding')
+			////console.log('calc myHolding')
 			for (var i = 0; i < tokens.length; i++) {
-				//console.log(" *** ")
-				//console.log("tokenBalances[i]:"+tokenBalances[i])
-				//console.log("userPercentage  :"+userPercentage)
+				////console.log(" *** ")
+				////console.log("tokenBalances[i]:"+tokenBalances[i])
+				////console.log("userPercentage  :"+userPercentage)
 
 				//var bal = tokenBalances[i] * userPercentage + "";
 				var bal = multipleBN(tokenBalances[i], userPercentage);
 
-				//console.log('bal b4:'+bal)
+				////console.log('bal b4:'+bal)
 				//bal=parseInt(bal);
-				//console.log('bal af:'+bal)
+				////console.log('bal af:'+bal)
 				var thisTokenAddress = tokens[i];
 				var usdThisUserThisToken = await getUSDValue_MINE(
 					bal,
 					thisTokenAddress
 				);
-				//console.log('usdThisUserThisToken:'+usdThisUserThisToken)
+				////console.log('usdThisUserThisToken:'+usdThisUserThisToken)
 				//usdThisUserThisToken = usdThisUserThisToken * userPercentage;
 				myHoldingsTotal = myHoldingsTotal + usdThisUserThisToken;
 			}
-			//console.log('done')
+			////console.log('done')
 		}
 
 		for (var i = 0; i < tokens.length; i++) {
@@ -482,15 +534,15 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 					tokenObj["balance"],
 					thisTokenAddress
 				);
-				//console.log("usdThisUserThisToken bf:"+usdThisUserThisToken)
-				//console.log("usdThisUserThisToken bf:"+usdThisUserThisToken)
+				////console.log("usdThisUserThisToken bf:"+usdThisUserThisToken)
+				////console.log("usdThisUserThisToken bf:"+usdThisUserThisToken)
 
 				//var usdThisUserThisToken = usdThisUserThisToken * userPercentage;
-				//console.log("usdThisUserThisToken af:"+usdThisUserThisToken)
+				////console.log("usdThisUserThisToken af:"+usdThisUserThisToken)
 
 				tokenObj["usdValue"] = usdThisUserThisToken;
 				tokenObj["percentage"] = tokenObj["usdValue"] / usersValue;
-				//console.log("tokenObj[percentage]:"+tokenObj["percentage"])
+				////console.log("tokenObj[percentage]:"+tokenObj["percentage"])
 			}
 			portfolioObject[thisTokenAddress] = tokenObj;
 		}
@@ -540,12 +592,16 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 
 		leaderBoardDataObject["name"] = thisGraphItem["walletName"];
 		leaderBoardDataObject["fee"] = leaderFundFee; //TO DO - need to add this
+
 		leaderBoardDataObject["d7"] = 0;
 		leaderBoardDataObject["d30"] = 0;
 		leaderBoardDataObject["d90"] = 0;
 		leaderBoardDataObject["prosperoWalletAddress"] =
 			thisProsperoWalletAddress;
 		leaderBoardDataObject["portfolioObject"] = portfolioObject;
+		//Right Here
+		leaderBoardDataNew[key]["portfolioObject"]=portfolioObject;
+
 		leaderBoardDataObject["profitLeader"] = profitUsd;
 		leaderBoardDataObject["leaderEOA"] = leaderAddress;
 		leaderBoardDataObject["walletName"] = thisGraphItem["walletName"];
@@ -558,7 +614,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		leaderBoardDataObject["acceptingNewInvestorsOriginal"] =
 			acceptingNewInvestors;
 
-		//console.log("NEW LB DATA OBJ:"+JSON.stringify(leaderBoardDataObject,null,2))
+		////console.log("NEW LB DATA OBJ:"+JSON.stringify(leaderBoardDataObject,null,2))
 
 		//Set leader/trailer/or empty if just a leader wallet that you are not a part of
 		if (indexOfUser == indexOfLeader) {
@@ -600,7 +656,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			//leaderBoardDataObject
 			leaderBoardDataFinal.push(leaderBoardDataObjectCOPY);
 		} else {
-			//console.log("not adding - leader did not invest yet.");
+			////console.log("not adding - leader did not invest yet.");
 		}
 
 		if (indexOfUser >= 0) {
@@ -614,19 +670,19 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 
 	//leaderBoardUITableObject = leaderBoardDataFinal;
 	leaderBoardData = leaderBoardDataFinal;
-	//console.log(
+	////console.log(
 	//	"leaderBoardUITableObject:" +
 	//		JSON.stringify(leaderBoardUITableObject, null, 2)
 	//);
 	var dupesCheck = [];
-	//console.log(" ");
-	//console.log("Leader Board Summary:");
-	//console.log("Number Of Wallets:" + leaderBoardUITableObject.length);
+	////console.log(" ");
+	////console.log("Leader Board Summary:");
+	////console.log("Number Of Wallets:" + leaderBoardUITableObject.length);
 	for (var i = 0; i < leaderBoardData.length; i++) {
 		var thisObj = leaderBoardData[i];
-		//console.log("Name:" + thisObj.name);
-		//console.log(" address    :" + thisObj.prosperoWalletAddress);
-		//console.log(" wallet_type:" + thisObj.wallet_type);
+		////console.log("Name:" + thisObj.name);
+		////console.log(" address    :" + thisObj.prosperoWalletAddress);
+		////console.log(" wallet_type:" + thisObj.wallet_type);
 		var prospAd = thisObj.prosperoWalletAddress;
 		prospAd = prospAd.toLowerCase();
 		if (dupesCheck.indexOf(prospAd) > -1) {
@@ -635,14 +691,14 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		dupesCheck.push(prospAd);
 	}
 	dupesCheck = [];
-	//console.log(" ");
-	//console.log("My Wallets Summary:");
-	//console.log("Number Of Wallets:" + myPortfolioDataForTable.length);
+	////console.log(" ");
+	////console.log("My Wallets Summary:");
+	////console.log("Number Of Wallets:" + myPortfolioDataForTable.length);
 	for (var i = 0; i < myPortfolioDataForTable.length; i++) {
 		var thisObj = myPortfolioDataForTable[i];
-		//console.log("Name:" + thisObj.name);
-		//console.log(" address    :" + thisObj.prosperoWalletAddress);
-		//console.log(" wallet_type:" + thisObj.wallet_type);
+		////console.log("Name:" + thisObj.name);
+		////console.log(" address    :" + thisObj.prosperoWalletAddress);
+		////console.log(" wallet_type:" + thisObj.wallet_type);
 		var prospAd = thisObj.prosperoWalletAddress;
 		prospAd = prospAd.toLowerCase();
 		if (dupesCheck.indexOf(prospAd) > -1) {
@@ -653,7 +709,32 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 
 	myROITotal = myHoldingsTotal - myUSDDepositsTotal;
 	myROITotalPercentage = myROITotal / myUSDDepositsTotal;
-	//console.log(" ");
+	////console.log(" ");
+
+}
+
+async function calcNewProfitsForLeaders(){
+	//console.log('historicalPricesObject:'+JSON.stringify(historicalPricesObject,null,2))
+
+	for (var i = 0; i < graphData.length; i++) {
+		var thisGraphItem = graphData[i];
+		var addressVars = thisGraphItem["addressVars"];
+		var tokens = thisGraphItem["tokens"];
+		var tokenBalances = thisGraphItem["balances"];
+		var intVars = thisGraphItem["intVars"];
+		var thisTime = intVars[4]
+		var date = new Date(thisTime * 1000);
+		var datePart = date.toLocaleDateString("en-US");
+		datePart=datePart.replaceAll("/","-");
+		//console.log('datePart:'+datePart)
+		thisGraphItem['date']=datePart;
+		for (var j = 0; j < tokens.length; j++) {
+			var addLowerCase = tokens[j];
+			addLowerCase = addLowerCase.toLowerCase();
+			var priceNowOfToken = historicalPricesObject[addLowerCase][datePart];
+			//console.log('priceOfToken:'+priceNowOfToken);
+		}
+	}
 }
 
 //Variables just used below, to do, fix?
@@ -662,7 +743,7 @@ var lastBalancesInPort = [];
 var lastAddressInPort = [];
 var lineGraphCalcData = {};
 async function getHistoricalPricesUpdateChartsData() {
-	//console.log('getHistoricalPricesUpdateChartsData')
+	////console.log('getHistoricalPricesUpdateChartsData')
 	lastUsdInvested = 0;
 	lastBalancesInPort = [];
 	lastAddressInPort = [];
@@ -676,11 +757,11 @@ async function getHistoricalPricesUpdateChartsData() {
 		day: "numeric",
 	};
 	var formatter = new Intl.DateTimeFormat([], options);
-	////console.log("1 formatter date:" + formatter.format(new Date()));
+	//////console.log("1 formatter date:" + formatter.format(new Date()));
 	var now = new Date(formatter.format(new Date()));
 	var nowFloored = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 	nowFloored = nowFloored.getTime() / 1000;
-	//console.log("nowFloored:"+nowFloored+" maxDate:"+maxDate)
+	////console.log("nowFloored:"+nowFloored+" maxDate:"+maxDate)
 
 	//Only get Coingecko data if we need it, then store it in local storage so we don't have to keep getting it.
 	var foundNullStorageForToken = false;
@@ -691,16 +772,16 @@ async function getHistoricalPricesUpdateChartsData() {
 			foundNullStorageForToken = true;
 		}
 	}
-	//console.log("foundNullStorageForToken:"+foundNullStorageForToken);
+	////console.log("foundNullStorageForToken:"+foundNullStorageForToken);
 	if (nowFloored > maxDate || foundNullStorageForToken == true) {
 	//if (true){
 
-		//console.log("nowFloored>maxDate");
+		////console.log("nowFloored>maxDate");
 		//if (true){
 		for (var i = 0; i < tokenArray.length; i++) {
 			var thisToken = tokenArray[i];
 			localStorage.removeItem(thisToken.id);
-			//console.log("searching...:" + thisToken.id);
+			////console.log("searching...:" + thisToken.id);
 			var hUrl =
 				"https://api.coingecko.com/api/v3/coins/" +
 				thisToken.id +
@@ -708,14 +789,14 @@ async function getHistoricalPricesUpdateChartsData() {
 			var historicalPricesResponseHere = await fetch(hUrl);
 			var priceObjHere = await historicalPricesResponseHere.json();
 			var marketCaps = priceObjHere.market_caps;
-			console.log("marketCaps:"+JSON.stringify(priceObjHere,null,2));
+			//console.log("marketCaps:"+JSON.stringify(priceObjHere,null,2));
 
 			priceObjHere = priceObjHere.prices;
 			//return;
 
 			for (var k = 0; k < priceObjHere.length; k++) {
 				var theDate = new Date(priceObjHere[k][0]);
-				////console.log("t:"+priceObjHere[k][0])
+				//////console.log("t:"+priceObjHere[k][0])
 				var justDate =
 					theDate.getMonth() +
 					1 +
@@ -723,7 +804,7 @@ async function getHistoricalPricesUpdateChartsData() {
 					theDate.getDate() +
 					"-" +
 					theDate.getFullYear();
-				////console.log('justDate:'+justDate)
+				//////console.log('justDate:'+justDate)
 				priceObjHere[k].push(justDate);
 				var maxDateThisObj = priceObjHere[k][0] / 1000;
 				if (maxDateThisObj > maxDate) {
@@ -737,10 +818,10 @@ async function getHistoricalPricesUpdateChartsData() {
 			//market_caps
 			var tokenAddressLower = thisToken.address;
 			tokenAddressLower = tokenAddressLower.toLowerCase();
-			console.log("mc:"+ marketCaps[marketCaps.length-1][1]);
+			//console.log("mc:"+ marketCaps[marketCaps.length-1][1]);
 			var key = tokenAddressLower+"_market_cap"
-			console.log("key...:"+key);
-			//console.log("1111:"+JSON.stringify(marketCaps,null,2));
+			//console.log("key...:"+key);
+			////console.log("1111:"+JSON.stringify(marketCaps,null,2));
 
 			localStorage.setItem(key, marketCaps[marketCaps.length-1][1]);
 			localStorage.setItem(thisToken.id, JSON.stringify(priceObjHere));
@@ -755,22 +836,22 @@ async function getHistoricalPricesUpdateChartsData() {
 		day: "numeric",
 	};
 	var formatter = new Intl.DateTimeFormat([], options);
-	////console.log("2 formatter date:"+formatter.format(new Date()));
+	//////console.log("2 formatter date:"+formatter.format(new Date()));
 	var now = new Date(formatter.format(new Date()));
 	//var nowFloored = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 	//nowFloored = nowFloored.getTime() / 1000;
 
-	////console.log('got them...')
+	//////console.log('got them...')
 	//While we are converting coingecko to dates mm-dd-yyyy, add it to a dates array for later
 	for (var i = 0; i < tokenArray.length; i++) {
 		dates = [];
 		var thisToken = tokenArray[i];
-		////console.log('thisToken.id:'+thisToken.id)
+		//////console.log('thisToken.id:'+thisToken.id)
 		var theStorage = localStorage.getItem(thisToken.id);
 		theStorage = JSON.parse(theStorage);
-		////console.log("theStorage:"+JSON.stringify(theStorage,null,2))
+		//////console.log("theStorage:"+JSON.stringify(theStorage,null,2))
 		//var tokenHistory = JSON.parse(theStorage);
-		//////console.log("thisToken.id:"+thisToken.id+"tokenHistory:"+JSON.stringify(tokenHistory,null,2))
+		////////console.log("thisToken.id:"+thisToken.id+"tokenHistory:"+JSON.stringify(tokenHistory,null,2))
 		var addLowerCase = thisToken.address;
 		addLowerCase = addLowerCase.toLowerCase();
 		historicalPricesObject[addLowerCase] = {};
@@ -779,22 +860,22 @@ async function getHistoricalPricesUpdateChartsData() {
 			justDateHere = justDateHere.trim();
 			var justDateHereD = new Date(justDateHere);
 			justDateHereD = justDateHereD.getTime() / 1000;
-			//////console.log('justDateHereD:'+justDateHereD)
-			//////console.log('nowFloored   :'+nowFloored)
+			////////console.log('justDateHereD:'+justDateHereD)
+			////////console.log('nowFloored   :'+nowFloored)
 			//if (justDateHereD < nowFloored){
 			if (!dates.includes(justDateHere)) {
 				dates.push(justDateHere);
 			} else {
-				////console.log("includes")
+				//////console.log("includes")
 			}
-			////console.log("t:"+theStorage[k][0])
+			//////console.log("t:"+theStorage[k][0])
 			//var justDateHere = (theDate.getMonth()+1) +"-"+ theDate.getDate() +"-"+ theDate.getFullYear();
-			////console.log('justDate:'+justDate)
-			////console.log("addLowerCase:"+addLowerCase)
-			////console.log("theStorage[k][1]:"+theStorage[k][1])
+			//////console.log('justDate:'+justDate)
+			//////console.log("addLowerCase:"+addLowerCase)
+			//////console.log("theStorage[k][1]:"+theStorage[k][1])
 			historicalPricesObject[addLowerCase][justDateHere] = theStorage[k][1];
 			//}else{
-			//////console.log("NOT ADDINa")
+			////////console.log("NOT ADDINa")
 			//}
 		}
 	}
@@ -802,10 +883,10 @@ async function getHistoricalPricesUpdateChartsData() {
 
 
 
-	////console.log("historicalPricesObject:"+JSON.stringify(historicalPricesObject,null,2))
+	//////console.log("historicalPricesObject:"+JSON.stringify(historicalPricesObject,null,2))
 	//Find the value of the portfolio for all the graph data at that date
 	for (var i = 0; i < graphData.length; i++) {
-		////console.log("I;"+i)
+		//////console.log("I;"+i)
 		var graphItem = graphData[i];
 		var timeOfGraph = graphItem["intVars"][4];
 		timeOfGraph = timeOfGraph * 1000;
@@ -837,7 +918,7 @@ async function getHistoricalPricesUpdateChartsData() {
 							" thisAddObj:" +
 							addLowerCase
 					);
-					//console.log("thisAddObj:" + JSON.stringify(thisAddObj, null, 2));
+					////console.log("thisAddObj:" + JSON.stringify(thisAddObj, null, 2));
 				}
 			} else {
 				console.log(
@@ -846,11 +927,11 @@ async function getHistoricalPricesUpdateChartsData() {
 						" thisAddObj:" +
 						addLowerCase
 				);
-				//console.log("thisAddObj:" + JSON.stringify(thisAddObj, null, 2));
+				////console.log("thisAddObj:" + JSON.stringify(thisAddObj, null, 2));
 			}
 		}
-		////console.log("justDateTheGraph:"+justDateTheGraph)
-		////console.log("graphItem:"+JSON.stringify(graphData[i],null,2))
+		//////console.log("justDateTheGraph:"+justDateTheGraph)
+		//////console.log("graphItem:"+JSON.stringify(graphData[i],null,2))
 	}
 	leaderBoardDataOverTime = {};
 	myPortfoliosDataOverTime = {};
@@ -870,7 +951,6 @@ async function getHistoricalPricesUpdateChartsData() {
 	}
 
 
-	//right here 
 	//Each token in token array gets updated with price 7d, 30d...
 	await updateTokenValuesOverTime();
 
@@ -889,16 +969,16 @@ async function getHistoricalPricesUpdateChartsData() {
 		taLower = taLower + "_market_cap"
 		var mc = localStorage.getItem(taLower);
 		mc = mc / 1000000;
-		//console.log("taLower:"+taLower)
-		//console.log("mv:"+mc)
+		////console.log("taLower:"+taLower)
+		////console.log("mv:"+mc)
 		tokenArray[i]['mc'] =  mc.toFixed(2);
 		tempTokenAddressToHistoricalPrices[tokenArray[i]['address']]=tokenArray[i];
 
 	}
 
-	console.log("tokenArray:*****:"+JSON.stringify(tokenArray,null,2));
+	////console.log("tokenArray:*****:"+JSON.stringify(tokenArray,null,2));
 
-	//console.log("UPDATING D....")
+	////console.log("UPDATING D....")
 	
 	for (var i = 0; i < myPortfolioDataForTable.length; i++) {
 		var port = myPortfolioDataForTable[i]['portfolioObject'];
@@ -913,11 +993,11 @@ async function getHistoricalPricesUpdateChartsData() {
 				taLower = taLower + "_market_cap"
 				var mc = localStorage.getItem(taLower);
 				mc = mc / 1000000;
-				//console.log("taLower:"+taLower)
-				//console.log("mv:"+mc)
+				////console.log("taLower:"+taLower)
+				////console.log("mv:"+mc)
 				myPortfolioDataForTable[i]['portfolioObject'][tokenAddress]['mc'] =  mc.toFixed(2);
 			}
-			console.log("p*****:"+JSON.stringify(myPortfolioDataForTable[i]['portfolioObject'][tokenAddress],null,2));
+			//"+JSON.stringify(myPortfolioDataForTable[i]['portfolioObject'][tokenAddress],null,2));
 		}
 	}
 	
@@ -927,12 +1007,12 @@ async function getHistoricalPricesUpdateChartsData() {
 	//1) found in graph data.
 	//2) not found in graph data and there has never been any graph data on it, profit is 0.
 	//3) already found in graph data, not found now, use last usdInvested and lastBalanacesInPort to determine value of port with the price of the tokens on that day.
-	//console.log("lbDDD:"+JSON.stringify(lbData,null,2));
+	////console.log("lbDDD:"+JSON.stringify(lbData,null,2));
 
 	var d = new Date();
 	var todaysDateFormatted =
 		d.getMonth() + 1 + "-" + d.getDate() + "-" + d.getFullYear();
-	//console.log("todaysDateFormatted:"+todaysDateFormatted);
+	////console.log("todaysDateFormatted:"+todaysDateFormatted);
 
 	for (var i = 0; i < lbData.length; i++) {
 		//To Do function:
@@ -941,7 +1021,7 @@ async function getHistoricalPricesUpdateChartsData() {
 		thisProsperoWalletAddressLB = thisProsperoWalletAddressLB.toLowerCase();
 		var thisLeaderEOA = lbData[i]["leaderEOA"];
 		var walletName = lbData[i]["walletName"];
-		//console.log("wallet name****:"+walletName);
+		////console.log("wallet name****:"+walletName);
 		var finalValueLeader = lbData[i]["portfolioObject"]["totalValue"];
 		var finalUsdInvestedLeader = lbData[i]["portfolioObject"]["totalUsd"];
 		var finalProfitLeader = lbData[i]["portfolioObject"]["profit"];
@@ -959,10 +1039,10 @@ async function getHistoricalPricesUpdateChartsData() {
 				indexOfUser != -1 &&
 				thisProsperoWalletAddress == thisProsperoWalletAddressLB
 			) {
-				////console.log("leader is here");
+				//////console.log("leader is here");
 				leadersGraphData.push(thisGraphData);
 			} else {
-				////console.log("leader not here or not this add");
+				//////console.log("leader not here or not this add");
 			}
 		}
 		var latestTimeOfThatDay = 0;
@@ -973,14 +1053,14 @@ async function getHistoricalPricesUpdateChartsData() {
 			var oneToAdd = null;
 			for (var f = 0; f < leadersGraphData.length; f++) {
 				var thisGraphD = JSON.parse(JSON.stringify(leadersGraphData[f]));
-				//console.log("thisGraphD:"+JSON.stringify(thisGraphD,null,2));
+				////console.log("thisGraphD:"+JSON.stringify(thisGraphD,null,2));
 
 				var thisDateFormatted = thisGraphD["date"];
 				if (thisDateFormatted == dateFromDatesArray) {
 					if (leadersGraphData[f]["intVars"][4] > latestTimeOfThatDay) {
 						oneToAdd = JSON.parse(JSON.stringify(leadersGraphData[f]));
 					}
-					//console.log("FOUND MATCH")
+					////console.log("FOUND MATCH")
 					latestTimeOfThatDay = leadersGraphData[f]["intVars"][4];
 				}
 			}
@@ -990,10 +1070,10 @@ async function getHistoricalPricesUpdateChartsData() {
 			}
 		}
 
-		//console.log(
+		////console.log(
 		//	"datesWithDataSorted:" + JSON.stringify(datesWithDataSorted, null, 2)
 		//);
-		//console.log(
+		////console.log(
 		//	"dates:" + JSON.stringify(dates, null, 2)
 		//);
 		var datesWithDataNew = [];
@@ -1036,23 +1116,121 @@ async function getHistoricalPricesUpdateChartsData() {
 			profitCalc["date"] = dateFromDatesArray;
 			lineGraphCalcDataSub.push(profitCalc);
 		}
-		//console.log("thisProsperoWalletAddressLB:"+thisProsperoWalletAddressLB)
-		//console.log("lineGraphCalcDataSub:"+JSON.stringify(lineGraphCalcDataSub,null,2))
-		//console.log(
+		////console.log("thisProsperoWalletAddressLB:"+thisProsperoWalletAddressLB)
+		////console.log("lineGraphCalcDataSub:"+JSON.stringify(lineGraphCalcDataSub,null,2))
+		////console.log(
 		//	"lineGraphCalcData 0:" + JSON.stringify(lineGraphCalcData, null, 2)
 		//);
 		lineGraphCalcData[thisProsperoWalletAddressLB] = lineGraphCalcDataSub;
-		//console.log(
+		////console.log(
 		//	"lineGraphCalcData 1:" + JSON.stringify(lineGraphCalcData, null, 2)
 		//);
 	}
-	//console.log(
+	////console.log(
 	//	"lineGraphCalcData 2:" + JSON.stringify(lineGraphCalcData, null, 2)
 	//);
 }
 
+async function updateD7D30D909FromHistoricalPrices(){
+	//right here
+	//leaderBoardDataOverTime = {};
+	//myWallets
+	//leaderBoardData
+	var dnow = new Date()
+	dnow = new Date(dnow.getTime());
+	var date = new Date();
+	date.setDate(dnow.getDate() - 7);
+	var d7= (date.getMonth() + 1) + '-' + date.getDate() + '-' +  date.getFullYear();
+	
+	date.setDate(dnow.getDate() - 30);
+	var d30= (date.getMonth() + 1) + '-' + date.getDate() + '-' +  date.getFullYear();
+	date.setDate(dnow.getDate() - 90);
+	var d90= (date.getMonth() + 1) + '-' + date.getDate() + '-' +  date.getFullYear();
+	var y1= (dnow.getMonth() + 1) + '-' + dnow.getDate() + '-' +  (dnow.getFullYear() - 1);
+
+	for (var i = 0;i<leaderBoardData.length;i++){
+		var thisProsperoWalletAddress = leaderBoardData[i].prosperoWalletAddress
+		if (!lineGraphCalcData.hasOwnProperty(thisProsperoWalletAddress)){
+			console.error("error - lineGraphCalcData does not has prospWalletAddress");
+			return;
+		}
+		var thisLineGraphCalcDataObj = lineGraphCalcData[thisProsperoWalletAddress];
+		for (var j = 0;j<thisLineGraphCalcDataObj.length;j++){
+			var thisObj = thisLineGraphCalcDataObj[j]
+			if (thisObj.date == d7){
+				leaderBoardData[i]['d7'] = formatPerc(thisObj.profitPercLeader)
+				if (myWallets.hasOwnProperty(thisProsperoWalletAddress)){
+					myWallets[thisProsperoWalletAddress]['d7']=formatPerc(thisObj.profitPercUser)
+				}
+				//myWallets
+			}else if (thisObj.date == d30){
+				leaderBoardData[i]['d30'] = formatPerc(thisObj.profitPercLeader)
+				if (myWallets.hasOwnProperty(thisProsperoWalletAddress)){
+					myWallets[thisProsperoWalletAddress]['d30']=formatPerc(thisObj.profitPercUser)
+				}
+
+			}else if (thisObj.date == d90){
+				leaderBoardData[i]['d90'] = formatPerc(thisObj.profitPercLeader)
+				if (myWallets.hasOwnProperty(thisProsperoWalletAddress)){
+					myWallets[thisProsperoWalletAddress]['d90']=formatPerc(thisObj.profitPercUser)
+				}
+
+			}else if (thisObj.date == y1){
+				leaderBoardData[i]['y1'] = formatPerc(thisObj.profitPercLeader)
+				if (myWallets.hasOwnProperty(thisProsperoWalletAddress)){
+					myWallets[thisProsperoWalletAddress]['y1']=formatPerc(thisObj.profitPercUser)
+				}
+			}
+		}
+	
+		//console.log("thisLineGraphCalcDataObj:"+JSON.stringify(thisLineGraphCalcDataObj,null,2));
+		/*
+		 "0x18af9b818619cb1c12c2982027212416653a016a": [
+    {
+      "profitLeader": 0,
+      "profitPercLeader": 0,
+      "profitUser": 0,
+      "profitPercUser": 0,
+      "totalValueUser": 0,
+      "totalValueLeader": 0,
+      "date": "9-14-2021"
+    },
+    {
+		*/
+	}
+
+}
+
+function formatPerc(f){
+	if (f=="-"){
+		f = 0
+	}
+	console.log("F:"+f);
+	if (f!=0){
+		f=f.toFixed(2)
+	}
+	f = f +"%"
+	return f;
+}
+
+function getProfitPercLineGraphCalcData(date, thisLineGraphCalcDataObj){
+	for (var i = 0;i<thisLineGraphCalcDataObj.length;i++){
+		var thisObj = thisLineGraphCalcDataObj[i]
+		if (thisObj.date == date){
+			return thisObj
+		}
+	}
+
+}
+
+function printIt(msg){
+	if (ShouldShowConsoleOutput){
+		console.log(msg);
+	}
+}
+
 function calcPercChangeForToken(priceDaysAgo, priceToday){
-	console.log("priceDaysAgo:"+priceDaysAgo)
+	//console.log("priceDaysAgo:"+priceDaysAgo)
 	if (priceDaysAgo == priceToday){
 		return 0;
 	}else if (priceDaysAgo == 0){
@@ -1060,66 +1238,66 @@ function calcPercChangeForToken(priceDaysAgo, priceToday){
 	}else if (priceDaysAgo > priceToday){
 		var t = (1 - (priceToday / priceDaysAgo));
 		t = t * 100;
-		console.log("t1:"+t)
+		//console.log("t1:"+t)
 		t = t.toFixed(2);
 		t = "-" + t;
 	}else{
 		var t = (1 - (priceDaysAgo /  priceToday));
 		t = t * 100;
 
-		console.log("t2:"+t)
+		//console.log("t2:"+t)
 		t = t.toFixed(2);
 	}
-	console.log("TTTT:"+t)
+	//console.log("TTTT:"+t)
 	return t
 
 }
 
 
 async function updateTokenValuesOverTime(){
-	console.log('updateTokenValuesOverTime');
+	//console.log('updateTokenValuesOverTime');
 	var dnow = new Date()
 	dnow = new Date(dnow.getTime());
 	//var dnow= (date.getMonth() + 1) + '-' + date.getDate() + '-' +  date.getFullYear();
 	var date = new Date();
 	date.setDate(dnow.getDate() - 7);
 	var d7= (date.getMonth() + 1) + '-' + date.getDate() + '-' +  date.getFullYear();
-	console.log("d7***:"+d7);
+	//console.log("d7***:"+d7);
 
 	date.setDate(dnow.getDate() - 30);
 	var d30= (date.getMonth() + 1) + '-' + date.getDate() + '-' +  date.getFullYear();
-	console.log("d30***:"+d30);
+	//console.log("d30***:"+d30);
 
 	date.setDate(dnow.getDate() - 90);
 	var d90= (date.getMonth() + 1) + '-' + date.getDate() + '-' +  date.getFullYear();
 	
 	var y1= (dnow.getMonth() + 1) + '-' + dnow.getDate() + '-' +  (dnow.getFullYear() - 1);
-	console.log("Y1***:"+y1);
+	//console.log("Y1***:"+y1);
 	
 	for (var i = 0; i < tokenArray.length; i++) {
 		var addLowerCase = tokenArray[i]['address'];
 		addLowerCase = addLowerCase.toLowerCase();
-		//console.log('**addLowerCase:'+addLowerCase);
-		//console.log('*d7:'+d7);
-		//console.log('historicalPricesObject for add:'+JSON.stringify(historicalPricesObject[addLowerCase],null,2));
+		////console.log('**addLowerCase:'+addLowerCase);
+		////console.log('*d7:'+d7);
+		////console.log('historicalPricesObject for add:'+JSON.stringify(historicalPricesObject[addLowerCase],null,2));
 		var price = historicalPricesObject[addLowerCase][d7];
-		//console.log('p:'+price);
+		////console.log('p:'+price);
 		tokenArray[i]['d7']=price;
 		price = historicalPricesObject[addLowerCase][d30];
-		//console.log('p:'+price);
+		////console.log('p:'+price);
 		tokenArray[i]['d30']=price;
 		price = historicalPricesObject[addLowerCase][d90];
-		//console.log('p:'+price);
+		////console.log('p:'+price);
 		tokenArray[i]['d90']=price;
-		//console.log('p:'+price);
+		////console.log('p:'+price);
 		price = historicalPricesObject[addLowerCase][y1];
 		tokenArray[i]['y1']=price;
-		//console.log("P**:"+JSON.stringify(tokenArray[i], null, 2));
+		////console.log("P**:"+JSON.stringify(tokenArray[i], null, 2));
 		price = historicalPricesObject[addLowerCase][dnow];
 		tokenArray[i]['today']=price;
 
 	}
-	console.log("tttt**:"+JSON.stringify(tokenArray, null, 2));
+	//console.log("tttt**:"+JSON.stringify(tokenArray, null, 2));
 
 }
 
@@ -1164,7 +1342,7 @@ function calcProfitWithDate(
 	var profitUser = 0;
 	var profitPercUser = 0;
 	if (users.length == 0) {
-		//console.log('a')
+		////console.log('a')
 		var objToReturn = {
 			profitLeader: profitLeader,
 			profitPercLeader: profitPercLeader,
@@ -1179,17 +1357,17 @@ function calcProfitWithDate(
 		var indexOfLeader = getIndexOfUser(users, leaderAddress);
 		var objToReturn = {};
 		if (indexOfUser != -1) {
-			////console.log('c')
-			////console.log("todaysDateFormatted:"+todaysDateFormatted)
-			//console.log("thisDate:"+thisDate)
+			//////console.log('c')
+			//////console.log("todaysDateFormatted:"+todaysDateFormatted)
+			////console.log("thisDate:"+thisDate)
 
 			if (todaysDateFormatted == thisDate) {
-				//console.log('3')
-				//console.log(" todaysDateFormatted == thisDate RIGHT HERE.......")
+				////console.log('3')
+				////console.log(" todaysDateFormatted == thisDate RIGHT HERE.......")
 				var userPortObj = myWallets[portfolioObj.prosperoWalletAddress];
 				if (userPortObj["portfolioObject"]["totalUsd"] <1 && userPortObj["portfolioObject"]["totalValue"]>0) {
-					//console.log('e')
-					//console.log("0 USD but TV>0")
+					////console.log('e')
+					////console.log("0 USD but TV>0")
 					userPortObj["portfolioObject"]["totalUsd"] = userPortObj["portfolioObject"]["totalUsd"];
 					objToReturn["profitUser"] = 0;
 					objToReturn["totalValueUser"] = userPortObj["portfolioObject"]["totalValue"];
@@ -1201,13 +1379,13 @@ function calcProfitWithDate(
 					objToReturn["totalValueUser"] = 0;
 					objToReturn["profitPercUser"] = 0;
 				}else{
-					//console.log("userPortObj:"+JSON.stringify(userPortObj,null,2))
+					////console.log("userPortObj:"+JSON.stringify(userPortObj,null,2))
 					objToReturn["profitUser"] = userPortObj.profit;
 					objToReturn["totalValueUser"] = userPortObj["portfolioObject"]["totalValue"];
 					objToReturn["usdInvestedUser"] = userPortObj["portfolioObject"]["totalUsd"];
 					objToReturn["profitPercUser"] = userPortObj.profitPercentage;
 				}
-				//console.log("objToReturn:"+JSON.stringify(objToReturn,null,2))
+				////console.log("objToReturn:"+JSON.stringify(objToReturn,null,2))
 			} else {
 				var userPercentage = percentages[indexOfUser] / USD_SCALE;
 				var usdInvestedUser = usdInvested[indexOfUser];
@@ -1226,19 +1404,19 @@ function calcProfitWithDate(
 				objToReturn["profitPercUser"] = profitCalcObjUser.profitPerc;
 			}
 		} else {
-			console.log('i')
+			//console.log('i')
 
 			objToReturn["profitUser"] = 0;
 			objToReturn["profitPercUser"] = 0;
 			objToReturn["totalValueUser"] = 0;
 		}
 		if (indexOfLeader != -1) {
-			//console.log('j')
+			////console.log('j')
 
 			/*if (todaysDateFormatted == thisDate) {
-				console.log('k')
+				//console.log('k')
 
-				console.log("setting....")
+				//console.log("setting....")
 				objToReturn["profitLeader"] = portfolioObj.profit;
 				objToReturn["totalValueLeader"] =
 					portfolioObj["portfolioObject"]["totalValue"];
@@ -1247,7 +1425,7 @@ function calcProfitWithDate(
 				objToReturn["profitPercLeader"] = portfolioObj.profit;
 			} else {
 				*/
-				//console.log('l')
+				////console.log('l')
 
 				var userPercentage = percentages[indexOfLeader] / USD_SCALE;
 				var usdInvestedUser = usdInvested[indexOfLeader];
@@ -1266,13 +1444,13 @@ function calcProfitWithDate(
 				objToReturn["profitPercLeader"] = profitCalcObj.profitPerc;
 			//}
 		} else {
-			////console.log('m')
+			//////console.log('m')
 
 			objToReturn["profitLeader"] = 0;
 			objToReturn["profitPercLeader"] = 0;
 			objToReturn["totalValueLeader"] = 0;
 		}
-		////console.log("*objToReturn:"+JSON.stringify(objToReturn,null,2))
+		//////console.log("*objToReturn:"+JSON.stringify(objToReturn,null,2))
 
 		return objToReturn;
 	}
@@ -1286,7 +1464,7 @@ function calcJustProfitObj(
 	thisDate,
 	todaysDateFormatted
 ) {
-	//console.log("calcJustProfitObj tokens:"+tokens+" balances: "+userPercentage+" usdInvested: "+usdInvested);
+	////console.log("calcJustProfitObj tokens:"+tokens+" balances: "+userPercentage+" usdInvested: "+usdInvested);
 	if (userPercentage == 0 || balances.length == 0) {
 		return {
 			profit: 0,
@@ -1294,34 +1472,33 @@ function calcJustProfitObj(
 			totalValue: 0,
 		};
 	}
-	//console.log(" ");
+	////console.log(" ");
 	var valueOfEachToken = [];
 	var totalValue = 0;
 
 	for (var i = 0; i < tokens.length; i++) {
 		var addLowerCase = tokens[i];
 		addLowerCase = addLowerCase.toLowerCase();
-		//console.log("******addLowerCase:" + addLowerCase);
-		//console.log("thisDate:" + thisDate);
+		////console.log("******addLowerCase:" + addLowerCase);
+		////console.log("thisDate:" + thisDate);
 
 		var price = historicalPricesObject[addLowerCase][thisDate];
 		//if (todaysDateFormatted == thisDate){
-		//console.log("TTT:"+JSON.stringify(tokens[i],null,2))
-		//console.log("getting todays price")
+		////console.log("TTT:"+JSON.stringify(tokens[i],null,2))
+		////console.log("getting todays price")
 		//alert("have to get price here")
-		//right here
 		//var price = getUSDValue_MINE()
 		//}
 		var priceNow = latestPrices[tokens[i]];
-		//console.log("MY PRICE:"+priceNow);
+		////console.log("MY PRICE:"+priceNow);
 		if (price == null || price == undefined || price == "") {
 			//alert("NO PRICE");
 			//return;
 		}
 		var thisBal = balances[i];
-		//console.log("thisBAL BEFORE:" + thisBal);
+		////console.log("thisBAL BEFORE:" + thisBal);
 		thisBal = thisBal / USD_SCALE;
-		//console.log(
+		////console.log(
 		//		"**** price:" +
 		//			price +
 		//			" thisBal:" +
@@ -1330,13 +1507,13 @@ function calcJustProfitObj(
 		//			userPercentage
 		//	);
 		var value = price * thisBal * userPercentage;
-		//console.log("value:" + value);
+		////console.log("value:" + value);
 		valueOfEachToken.push(value);
 		totalValue = totalValue + value;
 	}
 
-	//console.log("TV*:		  " + totalValue);
-	//console.log("usdInvested*:" + usdInvested);
+	////console.log("TV*:		  " + totalValue);
+	////console.log("usdInvested*:" + usdInvested);
 	var profit = totalValue - usdInvested;
 	var profitPerc;// = profit / usdInvested;
 
@@ -1345,9 +1522,9 @@ function calcJustProfitObj(
 	}else{
 		profitPerc = profit / usdInvested;
 	}
-	//console.log("profit*:	 :" + profit);
+	////console.log("profit*:	 :" + profit);
 
-	//console.log("profitPerc* :" + profitPerc);
+	////console.log("profitPerc* :" + profitPerc);
 
 	return {
 		profit: profit,
@@ -1357,16 +1534,16 @@ function calcJustProfitObj(
 }
 
 function compare_time(a, b) {
-	console.log("aL::" + a["intVars"][4]);
-	console.log("bL::" + b["intVars"][4]);
-	console.log("dif:" + (a["intVars"][4] - b["intVars"][4]));
+	//console.log("aL::" + a["intVars"][4]);
+	//console.log("bL::" + b["intVars"][4]);
+	//console.log("dif:" + (a["intVars"][4] - b["intVars"][4]));
 
 	if (a["intVars"][4] < b["intVars"][4]) {
-		console.log("LESS");
+		//console.log("LESS");
 		return -1;
 	}
 	if (a["intVars"][4] > b["intVars"][4]) {
-		console.log("MORE");
+		//console.log("MORE");
 		return 1;
 	}
 	return 0;
@@ -1378,11 +1555,11 @@ async function updateHistoryChartsDataObject(
 	thisDate,
 	userAddress
 ) {
-	//console.log("updateHistoryChartsDataObject")
-	////console.log("dataForHistoryChart:"+JSON.stringify(dataForHistoryChart,null,2))
-	////console.log("thisDate:"+thisDate)
-	////console.log("userAddress:"+userAddress)
-	////console.log("walletAddress:"+walletAddress)
+	////console.log("updateHistoryChartsDataObject")
+	//////console.log("dataForHistoryChart:"+JSON.stringify(dataForHistoryChart,null,2))
+	//////console.log("thisDate:"+thisDate)
+	//////console.log("userAddress:"+userAddress)
+	//////console.log("walletAddress:"+walletAddress)
 	var thisPercentage = 0;
 	var foundIt = false;
 	for (var p = 0; p < graphData.length; p++) {
@@ -1391,22 +1568,22 @@ async function updateHistoryChartsDataObject(
 		thisPercentage = thisGraphData["percentageOwnerships"][indexOfUser];
 		thisPercentage = thisPercentage / USD_SCALE;
 
-		////console.log("thisGraphDat:"+JSON.stringify(thisGraphData,null,2))
+		//////console.log("thisGraphDat:"+JSON.stringify(thisGraphData,null,2))
 		if (!foundIt) {
 			//  addressVars[2] = ProsperoWalletAddress;
 			var thisProsperoWalletAddress = thisGraphData["addressVars"][2];
 			thisProsperoWalletAddress = thisProsperoWalletAddress.toLowerCase();
-			////console.log('thisProsperoWalletAddress:'+thisProsperoWalletAddress)
-			////console.log('found address ****')
+			//////console.log('thisProsperoWalletAddress:'+thisProsperoWalletAddress)
+			//////console.log('found address ****')
 			if (
 				thisProsperoWalletAddress == walletAddress &&
 				thisGraphData["date"] == thisDate
 			) {
-				////console.log("found wallet and date")
+				//////console.log("found wallet and date")
 
-				////console.log('indexOfUser:'+indexOfUser)
+				//////console.log('indexOfUser:'+indexOfUser)
 				if (indexOfUser == -1) {
-					////console.log("could not find user")
+					//////console.log("could not find user")
 					//console.error("updateHistoryChartsDataObject indexOfUser==-1")
 					//alert("can not find user")
 					dataForHistoryChart[walletAddress].push({
@@ -1427,22 +1604,22 @@ async function updateHistoryChartsDataObject(
 
 					var thisUV = 0;
 					for (var f = 0; f < theseAddresses.length; f++) {
-						////console.log('f:'+f)
+						//////console.log('f:'+f)
 						var addLowerCase = theseAddresses[f];
 						addLowerCase = addLowerCase.toLowerCase();
-						//console.log('**theseBalances[f]:'+theseBalances[f]);
+						////console.log('**theseBalances[f]:'+theseBalances[f]);
 
 						var balance = theseBalances[f];
-						//console.log('balance:'+balance);
+						////console.log('balance:'+balance);
 						var price = historicalPricesObject[addLowerCase][thisDate];
-						//console.log("P here:"+price);
+						////console.log("P here:"+price);
 						var value = balance * price;
 						value = value * thisPercentage;
 						thisUV = thisUV + value;
 					}
 
 					//thisUV  = thisUV / USD_SCALE;
-					////console.log(" uv arr:"+thisGraphData["usersValues"]);
+					//////console.log(" uv arr:"+thisGraphData["usersValues"]);
 					lastUsdInvested = thisGraphData["usdInvested"][indexOfUser];
 					lastAddressInPort = thisGraphData["tokens"];
 					lastBalancesInPort = JSON.parse(
@@ -1478,24 +1655,24 @@ async function updateHistoryChartsDataObject(
 			value: 0,
 			usdInvested: 0,
 		});
-		////console.log("adding 2 thisDate:"+thisDate)
+		//////console.log("adding 2 thisDate:"+thisDate)
 	} else if (!foundIt && lastUsdInvested > 0) {
-		////console.log("calculating:")
-		////console.log("lastUsdInvested  :"+lastUsdInvested)
-		////console.log("lastAddressInPort :"+lastAddressInPort)
-		////console.log("lastBalancesInPort:"+lastBalancesInPort)
+		//////console.log("calculating:")
+		//////console.log("lastUsdInvested  :"+lastUsdInvested)
+		//////console.log("lastAddressInPort :"+lastAddressInPort)
+		//////console.log("lastBalancesInPort:"+lastBalancesInPort)
 		var totalValue = 0;
 		for (var f = 0; f < lastAddressInPort.length; f++) {
-			////console.log('f:'+f)
+			//////console.log('f:'+f)
 			var addLowerCase = lastAddressInPort[f];
 			addLowerCase = addLowerCase.toLowerCase();
-			//console.log('**lastBalancesInPort[f]:'+lastBalancesInPort[f]);
+			////console.log('**lastBalancesInPort[f]:'+lastBalancesInPort[f]);
 
 			var balance = lastBalancesInPort[f];
-			//console.log('balance:'+balance);
+			////console.log('balance:'+balance);
 			var price = historicalPricesObject[addLowerCase][thisDate];
-			//console.log("P here:"+price);
-			//console.log("thisPercentage:"+thisPercentage);
+			////console.log("P here:"+price);
+			////console.log("thisPercentage:"+thisPercentage);
 			var value = balance * price;
 			value = value * thisPercentage;
 			if (value < 0.0001) {
@@ -1503,19 +1680,19 @@ async function updateHistoryChartsDataObject(
 			} else {
 				//value = noNotation(value);
 			}
-			//console.log("value:"+value)
-			//console.log("TV b4:"+totalValue)
+			////console.log("value:"+value)
+			////console.log("TV b4:"+totalValue)
 
 			totalValue = totalValue + value;
-			//console.log("TV af:"+totalValue)
+			////console.log("TV af:"+totalValue)
 		}
-		//console.log("TV:"+totalValue)
-		//console.log("lastUsdInvested:"+lastUsdInvested)
+		////console.log("TV:"+totalValue)
+		////console.log("lastUsdInvested:"+lastUsdInvested)
 		var profit = totalValue - lastUsdInvested;
 		profit = noNotation(profit);
-		//console.log("profit:"+profit)
+		////console.log("profit:"+profit)
 
-		////console.log("TV af***:"+tvToUse);
+		//////console.log("TV af***:"+tvToUse);
 
 		dataForHistoryChart[walletAddress].push({
 			date: thisDate,
@@ -1528,21 +1705,21 @@ async function updateHistoryChartsDataObject(
 
 function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
 	if (whichPortfolios == "all my holdings"){
-		//console.log('all my holdings...')
+		////console.log('all my holdings...')
 
 	var chartDataToReturnLabels = [];
 	var chartDataToReturnYAxis = [];
 	var firstOne = true;
 	for (let prospWalletAddress in lineGraphCalcData) {
-		//console.log("prospWalletAddress:"+prospWalletAddress)
+		////console.log("prospWalletAddress:"+prospWalletAddress)
 	 
 	var thisPort = lineGraphCalcData[prospWalletAddress];
 
 	var allPortValuBefore = -1;
 	var myPortValueBefore = -1;
-	//console.log("****PORT:"+JSON.stringify(thisPort[thisPort.length-1],null,2));
+	////console.log("****PORT:"+JSON.stringify(thisPort[thisPort.length-1],null,2));
 	if (firstOne==true){
-		//console.log('111')
+		////console.log('111')
 
 		for (var i = 0; i < thisPort.length; i++) {
 			chartDataToReturnLabels.push(thisPort[i].date);
@@ -1550,7 +1727,7 @@ function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
 		}
 		firstOne=false;
 	}else{
-		//console.log('222')
+		////console.log('222')
 		for (var i = 0; i < thisPort.length; i++) {
 			chartDataToReturnYAxis[i]=chartDataToReturnYAxis[i] + thisPort[i].totalValueUser
 			//chartDataToReturnYAxis.push(thisPort[i].totalValueUser);
@@ -1590,7 +1767,7 @@ function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
 
 	var allPortValuBefore = -1;
 	var myPortValueBefore = -1;
-	//console.log("****PORT:"+JSON.stringify(thisPort[thisPort.length-1],null,2));
+	////console.log("****PORT:"+JSON.stringify(thisPort[thisPort.length-1],null,2));
 
 	for (var i = 0; i < thisPort.length; i++) {
 		if (whichPortfolios == "all portfolios") {
@@ -1604,8 +1781,8 @@ function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
 
 	}
 }
-//console.log('chartDataToReturnYAxis:'+JSON.stringify(chartDataToReturnYAxis,null,2))
-//console.log('chartDataToReturnLabels:'+JSON.stringify(chartDataToReturnLabels,null,2))
+////console.log('chartDataToReturnYAxis:'+JSON.stringify(chartDataToReturnYAxis,null,2))
+////console.log('chartDataToReturnLabels:'+JSON.stringify(chartDataToReturnLabels,null,2))
 
 	var chartData = {
 		labels: chartDataToReturnLabels,
@@ -1625,13 +1802,13 @@ function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
 			},
 		],
 	};
-	//console.log("CHART DATA:" + JSON.stringify(chartData, null, 2));
+	////console.log("CHART DATA:" + JSON.stringify(chartData, null, 2));
 	return chartData;
 }
 
 function multipleBN(valOne, valTwo) {
-	//console.log("valOne:"+valOne);
-	//console.log("valTwo:"+valTwo);
+	////console.log("valOne:"+valOne);
+	////console.log("valTwo:"+valTwo);
 	var valOne = BigNumber(valOne);
 	var valTwo = BigNumber(valTwo);
 	var valFinal = valOne.multipliedBy(valTwo);
@@ -1640,37 +1817,37 @@ function multipleBN(valOne, valTwo) {
 }
 
 async function getMyHoldings() {
-	//console.log("myHoldingsTotal:" + myHoldingsTotal);
+	////console.log("myHoldingsTotal:" + myHoldingsTotal);
 	myHoldingsTotal = Number(myHoldingsTotal + "");
-	//console.log("myHoldingsTotal:" + myHoldingsTotal);
+	////console.log("myHoldingsTotal:" + myHoldingsTotal);
 	myHoldingsTotal = myHoldingsTotal.toFixed(2);
 	return formatNegPositiveWithDollar(myHoldingsTotal);
 	//myHoldingsTotal = "$" + myHoldingsTotal + ""
-	//console.log("myHoldingsTotal:"+myHoldingsTotal)
+	////console.log("myHoldingsTotal:"+myHoldingsTotal)
 	//return myHoldingsTotal;
 }
 
 async function getTotalWithdrawals() {
-	console.log("getTotalWithdrawals:" + myWithdrawTotals);
+	//console.log("getTotalWithdrawals:" + myWithdrawTotals);
 	myWithdrawTotals = Number(myWithdrawTotals + "");
 	myWithdrawTotals = Math.abs(myWithdrawTotals);
 	myWithdrawTotals = myWithdrawTotals.toFixed(2);
 	return "$" + myWithdrawTotals;
 
 	//myUSDDepositsTotal = "$" + myUSDDepositsTotal + ""
-	//console.log("myUSDDepositsTotal:"+myUSDDepositsTotal)
+	////console.log("myUSDDepositsTotal:"+myUSDDepositsTotal)
 	//return myUSDDepositsTotal;
 }
 
 async function getMyUSDDepositsTotal() {
-	console.log("myUSDDepositsTotal:" + myUSDDepositsTotal);
+	//console.log("myUSDDepositsTotal:" + myUSDDepositsTotal);
 	myUSDDepositsTotal = Number(myUSDDepositsTotal + "");
 	myUSDDepositsTotal = Math.abs(myUSDDepositsTotal);
 	myUSDDepositsTotal = myUSDDepositsTotal.toFixed(2);
 	return "$" + myUSDDepositsTotal;
 
 	//myUSDDepositsTotal = "$" + myUSDDepositsTotal + ""
-	//console.log("myUSDDepositsTotal:"+myUSDDepositsTotal)
+	////console.log("myUSDDepositsTotal:"+myUSDDepositsTotal)
 	//return myUSDDepositsTotal;
 }
 
@@ -1679,7 +1856,7 @@ async function getMyROITotal() {
 	myROITotal = myROITotal.toFixed(2);
 	return formatNegPositiveWithDollar(myROITotal);
 	//myROITotal = "$" + myROITotal + ""
-	//console.log("myROITotal:"+myROITotal)
+	////console.log("myROITotal:"+myROITotal)
 	//return myROITotal;
 }
 
@@ -1687,7 +1864,7 @@ async function getMyROITotalPercentage() {
 	myROITotalPercentage = Number(myROITotalPercentage + "");
 	myROITotalPercentage = myROITotalPercentage.toFixed(2);
 	myROITotalPercentage = myROITotalPercentage + "%";
-	//console.log("myROITotalPercentage:" + myROITotalPercentage);
+	////console.log("myROITotalPercentage:" + myROITotalPercentage);
 	return myROITotalPercentage;
 }
 
@@ -1701,7 +1878,7 @@ function formatNegPositiveWithDollar(amt) {
 }
 
 async function updateNewInvestors(prosperoWalletAddress, allowNewInvestors) {
-	//console.log(
+	////console.log(
 	//	"updateNewInvestors api call with allowNewInvestors:" +
 	//		allowNewInvestors +
 	//		" prosperoWalletAddress:" +
@@ -1718,28 +1895,28 @@ async function updateNewInvestors(prosperoWalletAddress, allowNewInvestors) {
 				from: EOAAddress,
 			})
 			.on("error", function (error, receipt) {
-				console.log("error updateAllowNewInvestors:" + error);
+				//console.log("error updateAllowNewInvestors:" + error);
 			})
 			.on("transactionHash", function (transactionHash) {
-				//console.log("transactionhash:"+transactionHash)
+				////console.log("transactionhash:"+transactionHash)
 			})
 			.on("receipt", function (receipt) {
-				//console.log("got receipt:"+JSON.stringify(receipt,null,2))
-				//console.log(receipt.contractAddress) // contains the new contract address
+				////console.log("got receipt:"+JSON.stringify(receipt,null,2))
+				////console.log(receipt.contractAddress) // contains the new contract address
 			})
 			.on("confirmation", function (confirmationNumber, receipt) {
-				//console.log("conf:"+JSON.stringify(receipt,null,2))
+				////console.log("conf:"+JSON.stringify(receipt,null,2))
 			});
 	} catch (e) {
-		console.log("updateNewInvestors exception:" + e);
+		//console.log("updateNewInvestors exception:" + e);
 		return { success: false, error: e };
 	}
-	console.log("done - success");
+	//console.log("done - success");
 	return { success: true };
 }
 
 async function updatePercentageFee(prosperoWalletAddress, newPercFee) {
-	//console.log(
+	////console.log(
 	//	" updatePercentageFee:" +
 	//		newPercFee +
 	//		" prosperoWalletAddress:" +
@@ -1748,7 +1925,7 @@ async function updatePercentageFee(prosperoWalletAddress, newPercFee) {
 	newPercFee = newPercFee / 100;
 	newPercFee = multipleBN(newPercFee, USD_SCALE);
 	newPercFee = noNotation(newPercFee);
-	//console.log("new perc fee after:" + newPercFee);
+	////console.log("new perc fee after:" + newPercFee);
 	try {
 		var ProsperoWalletInstance = new web3.eth.Contract(
 			ProsperoWalletJson.abi,
@@ -1760,34 +1937,34 @@ async function updatePercentageFee(prosperoWalletAddress, newPercFee) {
 				from: EOAAddress,
 			})
 			.on("error", function (error, receipt) {
-				console.log("error updatePercentageFee:" + error);
+				//console.log("error updatePercentageFee:" + error);
 			})
 			.on("transactionHash", function (transactionHash) {
-				//console.log("transactionhash:"+transactionHash)
+				////console.log("transactionhash:"+transactionHash)
 			})
 			.on("receipt", function (receipt) {
-				//console.log("got receipt:"+JSON.stringify(receipt,null,2))
-				//console.log(receipt.contractAddress) // contains the new contract address
+				////console.log("got receipt:"+JSON.stringify(receipt,null,2))
+				////console.log(receipt.contractAddress) // contains the new contract address
 			})
 			.on("confirmation", function (confirmationNumber, receipt) {
-				//console.log("conf:"+JSON.stringify(receipt,null,2))
+				////console.log("conf:"+JSON.stringify(receipt,null,2))
 			});
 	} catch (e) {
-		console.log("updatePercentageFee exception:" + e);
+		//console.log("updatePercentageFee exception:" + e);
 		return { success: false, error: e };
 	}
-	console.log("done - success");
+	//console.log("done - success");
 	return { success: true };
 }
 
 //manage - kachi
 function getTokenListForManageUI() {
-	console.log("getTokenListForManageUI");
+	//console.log("getTokenListForManageUI");
 	if (
 		selectedProsperoWalletAddress == null ||
 		selectedProsperoWalletAddress == undefined
 	) {
-		console.log("selectedProsperoWalletAddress is null");
+		//console.log("selectedProsperoWalletAddress is null");
 		return [{}];
 		return;
 	}
@@ -1855,20 +2032,19 @@ function getTokenListForManageUI() {
 }
 
 function getTokenArray() {
-	//console.log("tokena**:"+JSON.stringify(tokenArray,null,2))
+	////console.log("tokena**:"+JSON.stringify(tokenArray,null,2))
 	return tokenArray;
 }
 
 function getTokenListForManagePortfolio() {
-	//right here
-	console.log("getTokenListForManagePortfolio");
+	//console.log("getTokenListForManagePortfolio");
 	var tokens = [];
 	for (var i = 0; i < tokenArray.length; i++) {
 		var thisToken = tokenArray[i];
 		thisToken["icon"] = thisToken["logoURI"];
 		tokens.push(thisToken);
 	}
-	console.log("tokens:" + JSON.stringify(tokens, null, 2));
+	//console.log("tokens:" + JSON.stringify(tokens, null, 2));
 	return tokens;
 }
 function keyIsTokenAddressNew(aKey) {
@@ -1884,7 +2060,7 @@ function keyIsTokenAddressNew(aKey) {
 }
 
 function updateUIStatus(newUIStatusType) {
-	console.log("updateUIStatus called with:" + newUIStatusType);
+	//console.log("updateUIStatus called with:" + newUIStatusType);
 	UIStatus = newUIStatusType;
 }
 
@@ -1898,10 +2074,9 @@ function getDepositStatus() {
 }
 
 async function getDepositMessageOne() {
-	//right here
 	var msg = "";
 	if (UIStatus == UI_CREATE_THEN_DEPOSIT) {
-		console.log("UI_CREATE_THEN_DEPOSIT");
+		//console.log("UI_CREATE_THEN_DEPOSIT");
 		msg =
 			"Before you can deposit, you need to 'create' a wallet on the blockchain.";
 	} else if (UIStatus == UI_JOIN_THEN_DEPOSIT) {
@@ -1909,15 +2084,14 @@ async function getDepositMessageOne() {
 			"Before you can deposit, you need to 'follow' a wallet on the blockchain.";
 	} else if (UIStatus == UI_DEPOSIT_MY_PORTFOLIO) {
 	} else {
-		console.log("ERROR - no UI STATUS FOUND");
+		//console.log("ERROR - no UI STATUS FOUND");
 	}
 }
 
 async function getDepositMessageTwo() {
-	//right here
 	var msg = "";
 	if (UIStatus == UI_CREATE_THEN_DEPOSIT) {
-		console.log("UI_CREATE_THEN_DEPOSIT");
+		//console.log("UI_CREATE_THEN_DEPOSIT");
 		msg =
 			"Before you can deposit, you need to 'create' a wallet on the blockchain.";
 	} else if (UIStatus == UI_JOIN_THEN_DEPOSIT) {
@@ -1925,44 +2099,44 @@ async function getDepositMessageTwo() {
 			"Before you can deposit, you need to 'follow' a wallet on the blockchain.";
 	} else if (UIStatus == UI_DEPOSIT_MY_PORTFOLIO) {
 	} else {
-		console.log("ERROR - no UI STATUS FOUND");
+		//console.log("ERROR - no UI STATUS FOUND");
 	}
 }
 
 async function handleDepositType() {
-	console.log("handleDepositType UIStatus:" + UIStatus);
+	//console.log("handleDepositType UIStatus:" + UIStatus);
 
-	console.log(
-		"selectedProsperoWalletAddress:" + selectedProsperoWalletAddress
-	);
+	//console.log(
+	//	"selectedProsperoWalletAddress:" + selectedProsperoWalletAddress
+	//);
 	if (UIStatus == UI_CREATE_THEN_DEPOSIT) {
-		console.log("UI_CREATE_THEN_DEPOSIT");
+		//console.log("UI_CREATE_THEN_DEPOSIT");
 		var res = await createPortfolioThenDeposit();
-		console.log("res:" + JSON.stringify(res, null, 2));
+		//console.log("res:" + JSON.stringify(res, null, 2));
 	} else if (UIStatus == UI_JOIN_THEN_DEPOSIT) {
-		console.log(" UI_JOIN_THEN_DEPOSIT");
+		//console.log(" UI_JOIN_THEN_DEPOSIT");
 		var res = await joinPortfolioThenDeposit();
-		console.log("res:" + JSON.stringify(res, null, 2));
+		//console.log("res:" + JSON.stringify(res, null, 2));
 	} else if (UIStatus == UI_DEPOSIT_MY_PORTFOLIO) {
-		console.log("UI_DEPOSIT_MY_PORTFOLIO");
+		//console.log("UI_DEPOSIT_MY_PORTFOLIO");
 		var res = await deposit();
-		console.log("res:" + JSON.stringify(res, null, 2));
+		//console.log("res:" + JSON.stringify(res, null, 2));
 	} else {
-		console.log("ERROR - no UI STATUS FOUND");
+		//console.log("ERROR - no UI STATUS FOUND");
 	}
-	console.log("done handleDeposit");
+	//console.log("done handleDeposit");
 
 	return res;
 }
 
 async function createPortfolioHelper() {
-	console.log("newWalletObject: " + JSON.stringify(newWalletObject, null, 2));
+	//console.log("newWalletObject: " + JSON.stringify(newWalletObject, null, 2));
 	var status = await createPortfolio(
 		newWalletObject.walletName,
 		newWalletObject.fundFee
 	);
 	if (!status.success) {
-		console.log("createPortfolio fail.");
+		//console.log("createPortfolio fail.");
 		//walletWaitingForEOA="";
 		return status;
 	}
@@ -1971,10 +2145,10 @@ async function createPortfolioHelper() {
 			"****** prosperoWalletAddressCreated is null - problem ***** "
 		);
 	} else {
-		console.log(
-			"prosperoWalletAddressCreated is NOT null, continuing... walletAddress:" +
-				status.prosperoWalletAddressCreated
-		);
+		//console.log(
+		//	"prosperoWalletAddressCreated is NOT null, continuing... walletAddress:" +
+		//		status.prosperoWalletAddressCreated
+		//);
 		selectedProsperoWalletAddress = status.prosperoWalletAddressCreated;
 	}
 	return status;
@@ -1986,18 +2160,18 @@ async function depositHelper() {
 }
 
 async function createPortfolioThenDeposit() {
-	console.log("createPortfolioThenDeposit, setting walletWaitingForEOA");
-	console.log("EOAAddress:" + EOAAddress);
+	//console.log("createPortfolioThenDeposit, setting walletWaitingForEOA");
+	//console.log("EOAAddress:" + EOAAddress);
 	//walletWaitingForEOA=EOAAddress;
 	//walletWaitingForEOA=walletWaitingForEOA.toLowerCase();
-	//console.log("walletWaitingForEOA:"+walletWaitingForEOA)
-	console.log("newWalletObject: " + JSON.stringify(newWalletObject, null, 2));
+	////console.log("walletWaitingForEOA:"+walletWaitingForEOA)
+	//console.log("newWalletObject: " + JSON.stringify(newWalletObject, null, 2));
 	var status = await createPortfolio(
 		newWalletObject.walletName,
 		newWalletObject.fundFee
 	);
 	if (!status.success) {
-		console.log("createPortfolio fail.");
+		//console.log("createPortfolio fail.");
 		//walletWaitingForEOA="";
 		return status;
 	}
@@ -2006,10 +2180,10 @@ async function createPortfolioThenDeposit() {
 			"****** prosperoWalletAddressCreated is null - problem ***** "
 		);
 	} else {
-		console.log(
-			"prosperoWalletAddressCreated is NOT null, continuing... walletAddress:" +
-				status.prosperoWalletAddressCreated
-		);
+		//console.log(
+		//	"prosperoWalletAddressCreated is NOT null, continuing... walletAddress:" +
+		//		status.prosperoWalletAddressCreated
+		//);
 		selectedProsperoWalletAddress = status.prosperoWalletAddressCreated;
 	}
 	//reset it if it was set
@@ -2019,10 +2193,10 @@ async function createPortfolioThenDeposit() {
 }
 
 async function joinPortfolioThenDeposit() {
-	console.log("joinPortfolioThenDeposit");
+	//console.log("joinPortfolioThenDeposit");
 	var status = await joinPortfolio();
 	if (!status.success) {
-		console.log("joinPortfolio fail.");
+		//console.log("joinPortfolio fail.");
 		return status;
 	}
 	//reset it if it was set
@@ -2032,21 +2206,21 @@ async function joinPortfolioThenDeposit() {
 }
 
 async function getValuesOverTimeForLeaderAddress(prosperoWalletAddress) {
-	//console.log("getValuesOverTimeForLeaderAddress")
+	////console.log("getValuesOverTimeForLeaderAddress")
 	var returned = getValuesOverTimeHelper(
 		leaderBoardDataOverTime,
 		prosperoWalletAddress
 	);
-	//console.log("ret:"+JSON.stringify(returned,null,2))
+	////console.log("ret:"+JSON.stringify(returned,null,2))
 	return returned;
 }
 async function getValuesOverTimeForMyPortfolioAddress(prosperoWalletAddress) {
-	//console.log("getValuesOverTimeForMyPortfolioAddress")
+	////console.log("getValuesOverTimeForMyPortfolioAddress")
 	var returned = getValuesOverTimeHelper(
 		myPortfoliosDataOverTime,
 		prosperoWalletAddress
 	);
-	//console.log("ret:"+JSON.stringify(returned,null,2))
+	////console.log("ret:"+JSON.stringify(returned,null,2))
 	return returned;
 }
 function getValuesOverTimeHelper(dataOverTimeObj, prosperoWalletAddress) {
@@ -2061,14 +2235,14 @@ function getValuesOverTimeHelper(dataOverTimeObj, prosperoWalletAddress) {
 			);
 			//({date:thisDate, profit: profit, value:thisGraphData["usersValues"][indexOfUser], usdInvested:thisGraphData["usdInvested"][indexOfUser]})
 			dataOverTimeObjCopy.reverse();
-			//console.log(" dataOverTimeObjCopy:"+JSON.stringify(dataOverTimeObjCopy,null,2))
+			////console.log(" dataOverTimeObjCopy:"+JSON.stringify(dataOverTimeObjCopy,null,2))
 			for (var i = 0; i < dataOverTimeObjCopy.length; i++) {
 				//var val = dataOverTimeObjCopy[i]['value']/USD_SCALE
 				//var usdInvested = dataOverTimeObjCopy[i]['usdInvested']/USD_SCALE
 				//var profit = val - usdInvested
-				//console.log("DDD:"+JSON.stringify(dataOverTimeObjCopy[i],null,2))
+				////console.log("DDD:"+JSON.stringify(dataOverTimeObjCopy[i],null,2))
 				var profit = dataOverTimeObjCopy[i]["profit"] / USD_SCALE;
-				//console.log("profit:"+profit)
+				////console.log("profit:"+profit)
 				//if (proifit != 0){
 				// profit = profit.toFixed(2)
 				//}
@@ -2087,7 +2261,7 @@ function getValuesOverTimeHelper(dataOverTimeObj, prosperoWalletAddress) {
 			}
 		}
 	}
-	//console.log(" valuesOverTime:"+JSON.stringify(valuesOverTime,null,2))
+	////console.log(" valuesOverTime:"+JSON.stringify(valuesOverTime,null,2))
 	return valuesOverTime;
 }
 //numberOfDays = number of days (number)
@@ -2095,26 +2269,26 @@ async function getValuesOverTimeForLinechartLeaderboardAddress(
 	prosperoWalletAddress,
 	numberOfDays
 ) {
-	//console.log("getValuesOverTimeForLeaderboardAddress")
+	////console.log("getValuesOverTimeForLeaderboardAddress")
 	var returned = getValuesOverTimeForLineChartHelper(
 		leaderBoardDataOverTime,
 		prosperoWalletAddress,
 		numberOfDays
 	);
-	//console.log("ret:"+JSON.stringify(returned,null,2))
+	////console.log("ret:"+JSON.stringify(returned,null,2))
 	return returned;
 }
 async function getValuesOverTimeForLinechartMyPortfolioAddress(
 	prosperoWalletAddress,
 	numberOfDays
 ) {
-	//console.log("getValuesOverTimeForLinechartMyPortfolioAddress")
+	////console.log("getValuesOverTimeForLinechartMyPortfolioAddress")
 	var returned = getValuesOverTimeForLineChartHelper(
 		myPortfoliosDataOverTime,
 		prosperoWalletAddress,
 		numberOfDays
 	);
-	//console.log("ret:"+JSON.stringify(returned,null,2))
+	////console.log("ret:"+JSON.stringify(returned,null,2))
 	return returned;
 }
 function getValuesOverTimeForLineChartHelper(
@@ -2134,7 +2308,7 @@ function getValuesOverTimeForLineChartHelper(
 			//({date:thisDate, profit: profit, value:thisGraphData["usersValues"][indexOfUser], usdInvested:thisGraphData["usdInvested"][indexOfUser]})
 			dataOverTimeObjCopy.reverse();
 			var tempData = [];
-			//console.log(" dataOverTimeObjCopy:"+JSON.stringify(dataOverTimeObjCopy,null,2))
+			////console.log(" dataOverTimeObjCopy:"+JSON.stringify(dataOverTimeObjCopy,null,2))
 			for (var i = 0; i < dataOverTimeObjCopy.length; i++) {
 				if (i <= numberOfDays) {
 					var dObjToAdd = {
@@ -2147,7 +2321,7 @@ function getValuesOverTimeForLineChartHelper(
 				}
 			}
 			tempData.reverse();
-			//console.log(" tempData:"+JSON.stringify(tempData,null,2))
+			////console.log(" tempData:"+JSON.stringify(tempData,null,2))
 			return tempData;
 		}
 	}
@@ -2168,9 +2342,9 @@ async function getWithdrawTableData() {
 			withdrawTableData.push(thisObj);
 		}
 	}
-	console.log(
-		"withdrawTableData:" + JSON.stringify(withdrawTableData, null, 2)
-	);
+	//console.log(
+	//	"withdrawTableData:" + JSON.stringify(withdrawTableData, null, 2)
+	//);
 	return withdrawTableData;
 }
 async function getChartDataSelectedMyPortfolio() {
@@ -2212,32 +2386,31 @@ async function getChartDataSelectedMyPortfolio() {
 		colorArray: colorArray,
 		images: images,
 	};
-	console.log("dataToReturn:" + JSON.stringify(dataToReturn, null, 2));
+	//console.log("dataToReturn:" + JSON.stringify(dataToReturn, null, 2));
 	return dataToReturn;
 }
 function getLeadersPortfolioForAddress(prosperoWalletAddress) {
-	console.log("getLeadersPortfolioForAddress:" + prosperoWalletAddress);
-	//console.log("LBD:" + JSON.stringify(leaderBoardData, null, 2));
+	//console.log("getLeadersPortfolioForAddress:" + prosperoWalletAddress);
+	////console.log("LBD:" + JSON.stringify(leaderBoardData, null, 2));
 	for (var i = 0; i < leaderBoardData.length; i++) {
 		var thisProsperoWalletAddress =
 			leaderBoardData[i]["prosperoWalletAddress"];
 		thisProsperoWalletAddress = thisProsperoWalletAddress.toLowerCase();
 		prosperoWalletAddress = prosperoWalletAddress.toLowerCase();
-		//console.log("prosperoWalletAddress    :"+prosperoWalletAddress)
-		//console.log("thisProsperoWalletAddress:"+thisProsperoWalletAddress)
+		////console.log("prosperoWalletAddress    :"+prosperoWalletAddress)
+		////console.log("thisProsperoWalletAddress:"+thisProsperoWalletAddress)
 
 		if (thisProsperoWalletAddress == prosperoWalletAddress) {
 			return leaderBoardData[i];
 		}
 	}
-	//right here
 	for (var i = 0; i < myPortfolioDataForTable.length; i++) {
 		var thisProsperoWalletAddress =
 			myPortfolioDataForTable[i]["prosperoWalletAddress"];
 		thisProsperoWalletAddress = thisProsperoWalletAddress.toLowerCase();
 		prosperoWalletAddress = prosperoWalletAddress.toLowerCase();
-		//console.log("prosperoWalletAddress    :"+prosperoWalletAddress)
-		//console.log("thisProsperoWalletAddress:"+thisProsperoWalletAddress)
+		////console.log("prosperoWalletAddress    :"+prosperoWalletAddress)
+		////console.log("thisProsperoWalletAddress:"+thisProsperoWalletAddress)
 
 		if (thisProsperoWalletAddress == prosperoWalletAddress) {
 			return myPortfolioDataForTable[i];
@@ -2290,7 +2463,7 @@ async function getChartDataSelectedLeader() {
 		colorArray: colorArray,
 		images: images,
 	};
-	console.log("dataToReturn:" + JSON.stringify(dataToReturn, null, 2));
+	//console.log("dataToReturn:" + JSON.stringify(dataToReturn, null, 2));
 
 	return dataToReturn;
 	/*
@@ -2380,7 +2553,7 @@ async function updateUIFieldValuesMyPortfolioMyPortfolio() {
 	//WITHDRAWS TOTAL BELOW
 	for (var i = 0; i < graphData.length; i++) {
 		var graphItem = graphData[i];
-		//console.log("graphItem:"+JSON.stringify(graphItem,null,2))
+		////console.log("graphItem:"+JSON.stringify(graphItem,null,2))
 		var addressVars = graphItem.addressVars;
 		var intVars = graphItem.intVars;
 		var users = graphItem.users;
@@ -2390,23 +2563,23 @@ async function updateUIFieldValuesMyPortfolioMyPortfolio() {
 		var indexOfUser = -1;
 		var usdInvested = graphItem.usdInvested;
 		msgSender = msgSender.toLowerCase();
-		//console.log("*msgSender :"+msgSender)
-		//console.log("*methodType:"+methodType)
+		////console.log("*msgSender :"+msgSender)
+		////console.log("*methodType:"+methodType)
 		var eoaALower = EOAAddress.toLowerCase();
 		if (msgSender == EOAAddress) {
-			//console.log('found sender...')
+			////console.log('found sender...')
 			if (methodType == WITHDRAW_SWAP || methodType == WITHDRAW_ALL) {
-				//console.log('found WD...')
+				////console.log('found WD...')
 				for (var f = 0; f < users.length; f++) {
 					var thisUsersAddress = users[f];
-					//console.log("thisUsersAddress:"+thisUsersAddress)
+					////console.log("thisUsersAddress:"+thisUsersAddress)
 					thisUsersAddress = thisUsersAddress.toLowerCase();
 					if (thisUsersAddress == eoaALower) {
-						//console.log('found index...')
+						////console.log('found index...')
 						indexOfUser = f;
 					}
 				}
-				console.log("indexOfUser:" + indexOfUser);
+				//console.log("indexOfUser:" + indexOfUser);
 
 				if (indexOfUser != -1) {
 					var usdDeposited = usdInvested[indexOfUser];
@@ -2418,7 +2591,7 @@ async function updateUIFieldValuesMyPortfolioMyPortfolio() {
 			}
 		}
 	}
-	console.log("withdraws:" + withdraws);
+	//console.log("withdraws:" + withdraws);
 	if (withdraws > 0) {
 		withdraws = withdraws / USD_SCALE;
 		withdraw = withdraws.toFixed(2);
@@ -2440,12 +2613,12 @@ function updateApiTokenList(newTokenList) {
 	balancesInEoa = newTokenList;
 }
 async function updateAmount(amount, tokenAddress) {
-	console.log(
-		"updateAmount called with amount:" +
-			amount +
-			" tokenAddress:" +
-			tokenAddress
-	);
+	//console.log(
+	//	"updateAmount called with amount:" +
+	//		amount +
+	//		" tokenAddress:" +
+	//		tokenAddress
+	//);
 	for (var i = 0; i < balancesInEoa.length; i++) {
 		var thisDepositingObj = balancesInEoa[i];
 		if (
@@ -2457,16 +2630,16 @@ async function updateAmount(amount, tokenAddress) {
 }
 //To do - update once you know how to do the selected leader board
 async function updateSelectedProsperoWalletAddress(address) {
-	console.log("*updateSelectedProsperoWallet called with address:" + address);
+	//console.log("*updateSelectedProsperoWallet called with address:" + address);
 	selectedProsperoWalletAddress = address;
 	//await convertGraphDataToLeaderBoardAndMyWalletsData();
 }
 /*
 async function initNewEventListener() {
-	console.log("initNewEventListener");
+	//console.log("initNewEventListener");
 	if (prosperoFactoryEventsInstance == null) {
 		alreadyListeningToFactoryEvents = true;
-		console.log("setting .on in initNewEventListener");
+		//console.log("setting .on in initNewEventListener");
 		prosperoFactoryEventsInstance = await new ethers.Contract(
 			factoryAddress,
 			ProsperoBeaconFactoryJson.abi,
@@ -2487,8 +2660,8 @@ async function initNewEventListener() {
 				profilePictureUrl,
 				event
 			) => {
-				console.log("got LatestBalancesFactory");
-				console.log(
+				//console.log("got LatestBalancesFactory");
+				//console.log(
 					" LatestBalancesFactory event:" +
 						" " +
 						tokens +
@@ -2516,13 +2689,13 @@ async function initNewEventListener() {
 				var eoaAddressMsgSender = addressVars[0];
 				eoaAddressMsgSender = eoaAddressMsgSender.toLowerCase();
 				var myEoaAddress = EOAAddress.toLowerCase();
-				console.log("methodType:" + methodType);
-				console.log("eoaAddressMsgSender:" + eoaAddressMsgSender);
-				console.log("event.blockNumber:" + event.blockNumber);
-				console.log(got LatestBalancesFactory
+				//console.log("methodType:" + methodType);
+				//console.log("eoaAddressMsgSender:" + eoaAddressMsgSender);
+				//console.log("event.blockNumber:" + event.blockNumber);
+				//console.log(got LatestBalancesFactory
 					"blockNumWhenWebAppLaunched:" + blockNumWhenWebAppLaunched
 				);
-				console.log("walletWaitingForEOA:" + walletWaitingForEOA);
+				//console.log("walletWaitingForEOA:" + walletWaitingForEOA);
 
 				if (event.blockNumber <= blockNumWhenWebAppLaunched) {
 					return;
@@ -2548,7 +2721,7 @@ async function initNewEventListener() {
 						"A rebalance has just completed on a Prospero wallet, refreshing page now.";
 				} else if (methodType == DEPOSIT_THEN_REBALANCE) {
 					if (EOAAddress == eoaAddressMsgSender) {
-						console.log(
+						//console.log(
 							"received event of created wallet - it is the wallet the user was waiting for, doing nothing."
 						);
 						//walletWaitingForEOA="";
@@ -2564,7 +2737,7 @@ async function initNewEventListener() {
 						"A withdraw swap has just been completed on a Prospero wallet, refreshing page now.";
 				} else if (methodType == LEADER_STRAIGHT_DEPOSIT) {
 					if (EOAAddress == eoaAddressMsgSender) {
-						console.log(
+						//console.log(
 							"received event of created wallet - it is the wallet the user was waiting for, doing nothing."
 						);
 						//walletWaitingForEOA="";
@@ -2586,7 +2759,7 @@ async function initNewEventListener() {
 				prosperoWalletAddress,
 				event
 			) => {
-				console.log(
+				//console.log(
 					"got FinishedMethodFactory" +
 						" " +
 						methodType +
@@ -2612,13 +2785,13 @@ async function initNewEventListener() {
 					event.blockNumber + ""
 				);
 				eoaAddressMsgSender = eoaAddressMsgSender.toLowerCase();
-				console.log("walletWaitingForEOA:" + walletWaitingForEOA);
-				console.log("eoaAddressMsgSender:" + eoaAddressMsgSender);
+				//console.log("walletWaitingForEOA:" + walletWaitingForEOA);
+				//console.log("eoaAddressMsgSender:" + eoaAddressMsgSender);
 
 				var alertString = "Error - no methodType found.";
 				if (methodType == CREATE_WALLET) {
 					if (EOAAddress == eoaAddressMsgSender) {
-						console.log(
+						//console.log(
 							"received event of created wallet - it is the wallet the user was waiting for, doing nothing."
 						);
 						//walletWaitingForEOA="";
@@ -2631,7 +2804,7 @@ async function initNewEventListener() {
 						"A new Prospero wallet has been created, refreshing page now.";
 				} else if (methodType == FOLLOW_WALLET) {
 					if (EOAAddress == eoaAddressMsgSender) {
-						console.log(
+						//console.log(
 							"received event of created wallet - it is the wallet the user was waiting for, doing nothing."
 						);
 						//walletWaitingForEOA="";
@@ -2652,7 +2825,7 @@ async function initNewEventListener() {
 }
 */
 async function getGraphData() {
-	//console.log("getGraphData")
+	////console.log("getGraphData")
 	var prspUrl = "https://api.thegraph.com/subgraphs/name/lapat/prospero"; // https://thegraph.com/explorer/subgraph/uniswap/uniswap-v2
 	/*
   address[] tokens,
@@ -2703,19 +2876,19 @@ async function getGraphData() {
       }
       `,
 		});
-		//console.log ("RESULT**: \n", JSON.stringify(result,null,2));
+		////console.log ("RESULT**: \n", JSON.stringify(result,null,2));
 
-		//console.log(
+		////console.log(
 		//	"Query result: \n",
 		//	JSON.stringify(result.data.data.latestBalancesFactories, null, 2)
 		//);
 		graphData = result.data.data.latestBalancesFactories;
 		for (var i = 0; i < graphData.length; i++) {
 			var graphItem = graphData[i];
-			//console.log("graphItem:"+JSON.stringify(graphItem,null,2))
+			////console.log("graphItem:"+JSON.stringify(graphItem,null,2))
 		}
 	} catch (err) {
-		console.log("error getGraphData:" + err);
+		//console.log("error getGraphData:" + err);
 		return { success: false, error: err };
 	}
 	return { success: true };
@@ -2739,9 +2912,9 @@ const delay = (n) => new Promise((r) => setTimeout(r, n * 1000));
 //tokenSwappingInto is an array of addresses swapping into, can only be of length 1 or 0.  So if you are
 //not swapping into any tokens, just have an empty array - []
 async function withdraw(tokenSwappingInto, amountToWithdraw) {
-	console.log(
-		"withdraw:" + tokenSwappingInto + " amountToWithdraw:" + amountToWithdraw
-	);
+	//console.log(
+	//	"withdraw:" + tokenSwappingInto + " amountToWithdraw:" + amountToWithdraw
+	//);
 	//amountToWithdraw="1"
 	console.log(
 		"withdraw called:" +
@@ -2750,21 +2923,21 @@ async function withdraw(tokenSwappingInto, amountToWithdraw) {
 			amountToWithdraw
 	);
 	try {
-		console.log("1");
+		//console.log("1");
 		var valueOfUsersPortfolioBefore = await getValueOfUsersPortfolio(
 			selectedProsperoWalletAddress,
 			EOAAddress,
 			false
 		);
-		console.log(
-			"valueOfUsersPortfolio before:" + valueOfUsersPortfolioBefore
-		);
+		//console.log(
+		//	"valueOfUsersPortfolio before:" + valueOfUsersPortfolioBefore
+		//);
 		amountToWithdraw = amountToWithdraw * USD_SCALE;
 		amountToWithdraw = noNotation(amountToWithdraw);
 		amountToWithdraw = parseInt(amountToWithdraw);
 		amountToWithdraw = noNotation(amountToWithdraw);
 
-		console.log("amountScaled:" + amountToWithdraw);
+		//console.log("amountScaled:" + amountToWithdraw);
 		var otherToken;
 		var balSwappingIntoTokenBefore;
 		if (tokenSwappingInto.length > 0) {
@@ -2775,7 +2948,7 @@ async function withdraw(tokenSwappingInto, amountToWithdraw) {
 			balSwappingIntoTokenBefore = await otherToken.methods
 				.balanceOf(EOAAddress)
 				.call();
-			console.log("token swapping into:" + tokenSwappingInto[0]);
+			//console.log("token swapping into:" + tokenSwappingInto[0]);
 			//  var usdThisUserThisToken = await getUSDValue_MINE(1, tokenSwappingInto[0])//(usdBn.multipliedBy(percentageUserBn))+""
 		}
 		if (tokenSwappingInto.length > 1) {
@@ -2795,22 +2968,22 @@ async function withdraw(tokenSwappingInto, amountToWithdraw) {
 				from: EOAAddress,
 			})
 			.on("error", function (error, receipt) {
-				console.log("withdraw error:" + error);
+				//console.log("withdraw error:" + error);
 				return { success: false, error: error };
 			})
 			.on("transactionHash", function (transactionHash) {
-				//console.log("transactionhash:"+transactionHash)
+				////console.log("transactionhash:"+transactionHash)
 			})
 			.on("receipt", function (receipt) {
-				//console.log("got receipt:"+JSON.stringify(receipt,null,2))
-				////console.logreceipt.contractAddress) // contains the new contract address
+				////console.log("got receipt:"+JSON.stringify(receipt,null,2))
+				//////console.logreceipt.contractAddress) // contains the new contract address
 			})
 			.on("confirmation", function (confirmationNumber, receipt) {
-				//console.log("receipt conf:"+JSON.stringify(receipt,null,2))
+				////console.log("receipt conf:"+JSON.stringify(receipt,null,2))
 			});
 		var cumulativeGasUsed = web3Tx.cumulativeGasUsed;
 		var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
-		console.log("gasUsed:" + JSON.stringify(gasUsed, null, 2));
+		//console.log("gasUsed:" + JSON.stringify(gasUsed, null, 2));
 		var valueOfUsersPortfolioAfter = await getValueOfUsersPortfolio(
 			selectedProsperoWalletAddress,
 			EOAAddress,
@@ -2853,22 +3026,22 @@ async function withdraw(tokenSwappingInto, amountToWithdraw) {
 				successWithdrawSwap = true;
 			}
 			if (!successWithdrawSwap) {
-				console.log(
-					"balSwappingIntoTokenBefore:" + balSwappingIntoTokenBefore
-				);
-				console.log(
-					"balSwappingIntoTokenAfter :" + balSwappingIntoTokenAfter
-				);
-				console.log("withdrawAmt              :" + amountToWithdraw);
+				//console.log(
+				//	"balSwappingIntoTokenBefore:" + balSwappingIntoTokenBefore
+				//);
+				//console.log(
+				//	"balSwappingIntoTokenAfter :" + balSwappingIntoTokenAfter
+				//);
+				//console.log("withdrawAmt              :" + amountToWithdraw);
 				var msg =
 					"Withdraw swap was not successfull, balances did not change.";
-				console.log(msg);
+				//console.log(msg);
 				return { success: false, error: msg };
 			}
 		}
 		return { success: true, gasUsed: gasUsed };
 	} catch (e) {
-		console.log("exception in withdraw" + e);
+		//console.log("exception in withdraw" + e);
 		return { success: false, error: e };
 	}
 }
@@ -2893,7 +3066,7 @@ async function rebalance(
 			EOAAddress,
 			selectedProsperoWalletAddressToRemix
 		);
-	//console.log(
+	////console.log(
 	//		" thisWalletsObjBefore:" + JSON.stringify(thisWalletsObjBefore, null, 2)
 	//);
 	var areDiff = returnTrueIfPercentagesAreDiff(
@@ -2902,7 +3075,7 @@ async function rebalance(
 		tokenAddressesToRemix
 	);
 	if (!areDiff) {
-		console.log("Goal tokens and percentages are the same as current.");
+		//console.log("Goal tokens and percentages are the same as current.");
 		return {
 			success: false,
 			error: "Goal tokens and percentages are the same as current.",
@@ -2914,22 +3087,22 @@ async function rebalance(
 	}
 	if (totalPerc != 100) {
 		var msg = "Percentages do not add up to 100.";
-		console.log(msg);
+		//console.log(msg);
 		return { success: false, error: msg };
 	}
 	try {
 		for (var x = 0; x < percentages.length; x++) {
 			percentages[x] = percentages[x] / 100;
-			//console.log("percentages[x]:"+percentages[x])
+			////console.log("percentages[x]:"+percentages[x])
 			var thisPercBn = BigNumber(percentages[x] + "");
-			//console.log("thisPercBn:"+thisPercBn)
+			////console.log("thisPercBn:"+thisPercBn)
 			var percScaleBn = BigNumber(USD_SCALE + "");
-			//console.log("percScaleBn:"+percScaleBn)
+			////console.log("percScaleBn:"+percScaleBn)
 			var thisFinalPerc = thisPercBn.multipliedBy(percScaleBn);
-			//console.log("thisFinalPerc:"+thisFinalPerc)
+			////console.log("thisFinalPerc:"+thisFinalPerc)
 			percentages[x] = thisFinalPerc;
 		}
-		console.log("percentages formatted:" + percentages);
+		//console.log("percentages formatted:" + percentages);
 		var prosperoWalletInstance = new web3.eth.Contract(
 			ProsperoWalletJson.abi,
 			selectedProsperoWalletAddressToRemix
@@ -2940,29 +3113,29 @@ async function rebalance(
 				from: EOAAddress,
 			})
 			.on("error", function (error, receipt) {
-				console.log("error rebalancePortfolio:" + error);
+				//console.log("error rebalancePortfolio:" + error);
 				return { success: false, error: error };
 			})
 			.on("transactionHash", function (transactionHash) {
-				//console.log("transactionhash:"+transactionHash)
+				////console.log("transactionhash:"+transactionHash)
 			})
 			.on("receipt", function (receipt) {
-				//console.log("got receipt:"+JSON.stringify(receipt,null,2))
-				////console.logreceipt.contractAddress) // contains the new contract address
+				////console.log("got receipt:"+JSON.stringify(receipt,null,2))
+				//////console.logreceipt.contractAddress) // contains the new contract address
 			})
 			.on("confirmation", function (confirmationNumber, receipt) {
-				//console.log("receipt conf:"+JSON.stringify(receipt,null,2))
+				////console.log("receipt conf:"+JSON.stringify(receipt,null,2))
 			});
 		var cumulativeGasUsed = web3Tx.cumulativeGasUsed;
 		var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
-		console.log("gasUsed:" + JSON.stringify(gasUsed, null, 2));
+		//console.log("gasUsed:" + JSON.stringify(gasUsed, null, 2));
 
 		var thisWalletsObj = await getValueOfBalancesOfTokensInPortfolioForUser(
 			null,
 			EOAAddress,
 			selectedProsperoWalletAddressToRemix
 		);
-		//console.log('thisWalletsObj:'+JSON.stringify(thisWalletsObj,null,2))
+		////console.log('thisWalletsObj:'+JSON.stringify(thisWalletsObj,null,2))
 		var areGoalPercentagesAndActualClose =
 			await returnTrueIfPercentagesAreLessAndClose(
 				thisWalletsObj,
@@ -2972,7 +3145,7 @@ async function rebalance(
 		if (!areGoalPercentagesAndActualClose) {
 			console.error("Current percentages do not match goal percentages.");
 		}
-		console.log("success - returning succss true");
+		//console.log("success - returning succss true");
 		return { success: true, gasUsed: gasUsed };
 	} catch (exception) {
 		console.error(
@@ -2983,31 +3156,31 @@ async function rebalance(
 	}
 }
 async function shouldApprove() {
-	console.log("shouldApprove called");
+	//console.log("shouldApprove called");
 	var total = 0;
 	var tokens = [];
 	var amounts = [];
 	var avaxValue = 0;
 	for (var i = 0; i < balancesInEoa.length; i++) {
 		var thisDepositingObj = balancesInEoa[i];
-		//console.log('thisDepositingObj:'+JSON.stringify(thisDepositingObj,null,2))
+		////console.log('thisDepositingObj:'+JSON.stringify(thisDepositingObj,null,2))
 		var usdAmountEnteredByUser = thisDepositingObj["usdAmountEnteredByUser"];
 		usdAmountEnteredByUser = Number(usdAmountEnteredByUser);
 		if (usdAmountEnteredByUser > 0) {
-			//console.log('thisDepositingObj.name:'+thisDepositingObj.name)
+			////console.log('thisDepositingObj.name:'+thisDepositingObj.name)
 			//var weiAmount = await getWeiAmount(usdAmountEnteredByUser, thisDepositingObj.address)
 			var amountInEth = usdAmountEnteredByUser / thisDepositingObj.price;
 			amountInEth = amountInEth.toFixed(16);
-			//console.log('amountInEth:'+amountInEth)
+			////console.log('amountInEth:'+amountInEth)
 			var weiAmt = web3.utils.toWei(amountInEth + "", "ether");
-			//console.log('weiAmt1:'+weiAmt)
+			////console.log('weiAmt1:'+weiAmt)
 			weiAmt = await updateBalanceFromEighteenDecimalsIfNeeded(
 				weiAmt,
 				thisDepositingObj.address
 			);
-			//console.log('weiAmt2:'+weiAmt)
+			////console.log('weiAmt2:'+weiAmt)
 			if (thisDepositingObj.name == NativeTokenName) {
-				// //console.log("WEI:"+thisDepositingObj.weiDepositing)
+				// ////console.log("WEI:"+thisDepositingObj.weiDepositing)
 				avaxValue = weiAmt + "";
 			} else {
 				tokens.push(thisDepositingObj.address);
@@ -3025,7 +3198,7 @@ async function shouldApprove() {
 
 async function approveAndDeposit(shouldTryToApprove) {
 	//await getInfoSubnetHelperContract();
-	console.log("deposit");
+	//console.log("deposit");
 	//TESTING
 	var total = 0;
 	var tokens = [];
@@ -3034,26 +3207,26 @@ async function approveAndDeposit(shouldTryToApprove) {
 	var foundOneAmtAboveZero = false;
 	for (var i = 0; i < balancesInEoa.length; i++) {
 		var thisDepositingObj = balancesInEoa[i];
-		//console.log(
+		////console.log(
 		//	"thisDepositingObj:" + JSON.stringify(thisDepositingObj, null, 2)
 		//);
 		var usdAmountEnteredByUser = thisDepositingObj["usdAmountEnteredByUser"];
 		usdAmountEnteredByUser = Number(usdAmountEnteredByUser);
 		if (usdAmountEnteredByUser > 0) {
-			console.log("thisDepositingObj.name:" + thisDepositingObj.name);
+			//console.log("thisDepositingObj.name:" + thisDepositingObj.name);
 			//var weiAmount = await getWeiAmount(usdAmountEnteredByUser, thisDepositingObj.address)
 			var amountInEth = usdAmountEnteredByUser / thisDepositingObj.price;
 			amountInEth = amountInEth.toFixed(16);
-			console.log("amountInEth:" + amountInEth);
+			//console.log("amountInEth:" + amountInEth);
 			var weiAmt = web3.utils.toWei(amountInEth + "", "ether");
-			console.log("weiAmt1:" + weiAmt);
+			//console.log("weiAmt1:" + weiAmt);
 			weiAmt = await updateBalanceFromEighteenDecimalsIfNeeded(
 				weiAmt,
 				thisDepositingObj.address
 			);
-			console.log("weiAmt2:" + weiAmt);
+			//console.log("weiAmt2:" + weiAmt);
 			if (thisDepositingObj.name == NativeTokenName) {
-				//console.log("WEI:"+thisDepositingObj.weiDepositing)
+				////console.log("WEI:"+thisDepositingObj.weiDepositing)
 				avaxValue = weiAmt + "";
 			} else {
 				tokens.push(thisDepositingObj.address);
@@ -3063,7 +3236,7 @@ async function approveAndDeposit(shouldTryToApprove) {
 		}
 	}
 	if (!foundOneAmtAboveZero) {
-		console.log("Use did not enter any amounts to be deposited.");
+		//console.log("Use did not enter any amounts to be deposited.");
 		return {
 			success: false,
 			error: "You did not enter any amounts to be deposited.",
@@ -3074,7 +3247,7 @@ async function approveAndDeposit(shouldTryToApprove) {
 	if (shouldTryToApprove == true) {
 		var shouldApproveTheTokens = await shouldApprove();
 		if (shouldApproveTheTokens) {
-			console.log("SHOW APPROVE DIALOUGE");
+			//console.log("SHOW APPROVE DIALOUGE");
 			var status = await approveDepositing(
 				tokens,
 				amounts,
@@ -3082,7 +3255,7 @@ async function approveAndDeposit(shouldTryToApprove) {
 			); //UPDATE
 			return status;
 		} else {
-			console.log("Nothing to approve, everything good");
+			//console.log("Nothing to approve, everything good");
 			return { success: true };
 		}
 	}
@@ -3091,10 +3264,10 @@ async function approveAndDeposit(shouldTryToApprove) {
 	var shouldJustDeposit = 0;
 	var firstTimeString = "";
 	var methodType = 0;
-	console.log("tokens:" + tokens);
-	console.log("amounts:" + amounts);
-	console.log("avaxValue:" + avaxValue);
-	console.log("methodType:" + methodType);
+	//console.log("tokens:" + tokens);
+	//console.log("amounts:" + amounts);
+	//console.log("avaxValue:" + avaxValue);
+	//console.log("methodType:" + methodType);
 	try {
 		var valueOfUsersPortfolioBefore = await getValueOfUsersPortfolio(
 			selectedProsperoWalletAddress,
@@ -3118,8 +3291,8 @@ async function approveAndDeposit(shouldTryToApprove) {
 			EOAAddress,
 			false
 		);
-		console.log("valueOfUsersPortfolioBefore:" + valueOfUsersPortfolioBefore);
-		console.log("valueOfUsersPortfolioAfter :" + valueOfUsersPortfolioAfter);
+		//console.log("valueOfUsersPortfolioBefore:" + valueOfUsersPortfolioBefore);
+		//console.log("valueOfUsersPortfolioAfter :" + valueOfUsersPortfolioAfter);
 		if (
 			Number(valueOfUsersPortfolioAfter) <=
 			Number(valueOfUsersPortfolioBefore)
@@ -3159,7 +3332,7 @@ async function approveAndDeposit(shouldTryToApprove) {
 
 async function deposit() {
 	//await getInfoSubnetHelperContract();
-	console.log("deposit");
+	//console.log("deposit");
 	//TESTING
 	var total = 0;
 	var tokens = [];
@@ -3168,26 +3341,26 @@ async function deposit() {
 	var foundOneAmtAboveZero = false;
 	for (var i = 0; i < balancesInEoa.length; i++) {
 		var thisDepositingObj = balancesInEoa[i];
-		//console.log(
+		////console.log(
 		//	"thisDepositingObj:" + JSON.stringify(thisDepositingObj, null, 2)
 		//);
 		var usdAmountEnteredByUser = thisDepositingObj["usdAmountEnteredByUser"];
 		usdAmountEnteredByUser = Number(usdAmountEnteredByUser);
 		if (usdAmountEnteredByUser > 0) {
-			console.log("thisDepositingObj.name:" + thisDepositingObj.name);
+			//console.log("thisDepositingObj.name:" + thisDepositingObj.name);
 			//var weiAmount = await getWeiAmount(usdAmountEnteredByUser, thisDepositingObj.address)
 			var amountInEth = usdAmountEnteredByUser / thisDepositingObj.price;
 			amountInEth = amountInEth.toFixed(16);
-			console.log("amountInEth:" + amountInEth);
+			//console.log("amountInEth:" + amountInEth);
 			var weiAmt = web3.utils.toWei(amountInEth + "", "ether");
-			console.log("weiAmt1:" + weiAmt);
+			//console.log("weiAmt1:" + weiAmt);
 			weiAmt = await updateBalanceFromEighteenDecimalsIfNeeded(
 				weiAmt,
 				thisDepositingObj.address
 			);
-			console.log("weiAmt2:" + weiAmt);
+			//console.log("weiAmt2:" + weiAmt);
 			if (thisDepositingObj.name == NativeTokenName) {
-				//console.log("WEI:"+thisDepositingObj.weiDepositing)
+				////console.log("WEI:"+thisDepositingObj.weiDepositing)
 				avaxValue = weiAmt + "";
 			} else {
 				tokens.push(thisDepositingObj.address);
@@ -3197,7 +3370,7 @@ async function deposit() {
 		}
 	}
 	if (!foundOneAmtAboveZero) {
-		console.log("Use did not enter any amounts to be deposited.");
+		//console.log("Use did not enter any amounts to be deposited.");
 		return {
 			success: false,
 			error: "You did not enter any amounts to be deposited.",
@@ -3207,7 +3380,7 @@ async function deposit() {
 	//add tokens and amountss
 	var shouldApproveTheTokens = await shouldApprove();
 	if (shouldApproveTheTokens) {
-		console.log("SHOW APPROVE DIALOUGE");
+		//console.log("SHOW APPROVE DIALOUGE");
 		var status = await approveDepositing(
 			tokens,
 			amounts,
@@ -3217,17 +3390,17 @@ async function deposit() {
 			return status;
 		}
 	} else {
-		console.log("Nothing to approve, everything good");
+		//console.log("Nothing to approve, everything good");
 	}
 
 	var gasEstimate;
 	var shouldJustDeposit = 0;
 	var firstTimeString = "";
 	var methodType = 0;
-	console.log("tokens:" + tokens);
-	console.log("amounts:" + amounts);
-	console.log("avaxValue:" + avaxValue);
-	console.log("methodType:" + methodType);
+	//console.log("tokens:" + tokens);
+	//console.log("amounts:" + amounts);
+	//console.log("avaxValue:" + avaxValue);
+	//console.log("methodType:" + methodType);
 	try {
 		var valueOfUsersPortfolioBefore = await getValueOfUsersPortfolio(
 			selectedProsperoWalletAddress,
@@ -3251,8 +3424,8 @@ async function deposit() {
 			EOAAddress,
 			false
 		);
-		console.log("valueOfUsersPortfolioBefore:" + valueOfUsersPortfolioBefore);
-		console.log("valueOfUsersPortfolioAfter :" + valueOfUsersPortfolioAfter);
+		//console.log("valueOfUsersPortfolioBefore:" + valueOfUsersPortfolioBefore);
+		//console.log("valueOfUsersPortfolioAfter :" + valueOfUsersPortfolioAfter);
 		if (
 			Number(valueOfUsersPortfolioAfter) <=
 			Number(valueOfUsersPortfolioBefore)
@@ -3315,12 +3488,12 @@ async function depositContract(
 				value: avaxValue + "",
 			}
 		);
-		console.log("dep tx 1:" + JSON.stringify(tx, null, 2));
+		//console.log("dep tx 1:" + JSON.stringify(tx, null, 2));
 		var f = await tx.wait();
-		console.log("dep tx 2 :" + JSON.stringify(f, null, 2));
+		//console.log("dep tx 2 :" + JSON.stringify(f, null, 2));
 		var cumulativeGasUsed = f.cumulativeGasUsed;
 		gasUsed = await calculateGasEstimate(cumulativeGasUsed);
-		console.log("gasUsed:" + JSON.stringify(gasUsed, null, 2));
+		//console.log("gasUsed:" + JSON.stringify(gasUsed, null, 2));
 	} catch (exception) {
 		console.error("exception depositContract:" + exception);
 		return { success: false, error: exception };
@@ -3329,8 +3502,8 @@ async function depositContract(
 }
 
 async function calculateGasEstimate(gasEstimate, gasPriceToUse) {
-	////console.log'calculateGasEstimate')
-	//console.log("gasEstimate:"+gasEstimate)
+	//////console.log'calculateGasEstimate')
+	////console.log("gasEstimate:"+gasEstimate)
 	var estimatedGasBigNumber = BigNumber(gasEstimate + "");
 	if (gasPriceToUse != undefined) {
 		GAS_PRICE = gasPriceToUse;
@@ -3340,16 +3513,16 @@ async function calculateGasEstimate(gasEstimate, gasPriceToUse) {
 	//serverResponse = await postData("https://api.avax.network/ext/bc/C/rpc", {method:"eth_baseFee", id:1});
 	//feeHex = serverResponse.result
 	//eth_baseFee = parseInt(feeHex,16)
-	////console.log'eth_baseFee:'+eth_baseFee)
+	//////console.log'eth_baseFee:'+eth_baseFee)
 
 	//GAS_PRICE=eth_baseFee;
-	//console.log("GAS_PRICE NOW:"+GAS_PRICE)
+	////console.log("GAS_PRICE NOW:"+GAS_PRICE)
 	var estimatedGasCostWei = estimatedGasBigNumber.multipliedBy(GAS_PRICE + "");
-	console.log("Estimate calculateGasEstimate wei:" + estimatedGasCostWei);
+	//console.log("Estimate calculateGasEstimate wei:" + estimatedGasCostWei);
 	var estimatedCostInEth = ethers.utils.formatEther(estimatedGasCostWei + "");
-	//console.log("AVAX PRICE:"+avaxPrice)
+	////console.log("AVAX PRICE:"+avaxPrice)
 	var usdAmountOfGas = avaxPrice * estimatedCostInEth;
-	console.log("Estimate calculateGasEstimate eth:" + estimatedCostInEth);
+	//console.log("Estimate calculateGasEstimate eth:" + estimatedCostInEth);
 	return {
 		estimatedGasCostWei: estimatedGasCostWei,
 		estimatedCostInEth: estimatedCostInEth,
@@ -3361,7 +3534,7 @@ async function shouldApproveDepositing(
 	amounts,
 	selectedProsperoWalletAddress
 ) {
-	console.log("shouldApproveDepositing");
+	//console.log("shouldApproveDepositing");
 	var zeroBn = BigNumber("0");
 	for (var k = 0; k < tokens.length; k++) {
 		var thisTokenInstance = await new ethers.Contract(
@@ -3375,11 +3548,11 @@ async function shouldApproveDepositing(
 		);
 		var bnAllowance = BigNumber(allowance + "");
 		var bnAmountInWeiToDeposit = BigNumber(amounts[k] + "");
-		//console.log("dep:"+bnAmountInWeiToDeposit)
-		//console.log("all:"+bnAllowance)
+		////console.log("dep:"+bnAmountInWeiToDeposit)
+		////console.log("all:"+bnAllowance)
 
 		if (bnAmountInWeiToDeposit.isGreaterThan(bnAllowance)) {
-			console.log("NOT ENOUGH APPROVED");
+			//console.log("NOT ENOUGH APPROVED");
 			return true;
 		}
 	}
@@ -3391,7 +3564,7 @@ async function approveDepositing(
 	amounts,
 	selectedProsperoWalletAddress
 ) {
-	//console.log("approveDepositing")
+	////console.log("approveDepositing")
 	var zeroBn = BigNumber("0");
 	for (var k = 0; k < tokens.length; k++) {
 		var thisTokenInstance = await new ethers.Contract(
@@ -3405,23 +3578,23 @@ async function approveDepositing(
 		);
 		var bnAllowance = BigNumber(allowance + "");
 		var bnAmountInWeiToDeposit = BigNumber(amounts[k] + "");
-		//console.log("dep:"+bnAmountInWeiToDeposit)
-		//console.log("all:"+bnAllowance)
+		////console.log("dep:"+bnAmountInWeiToDeposit)
+		////console.log("all:"+bnAllowance)
 
 		if (bnAmountInWeiToDeposit.isGreaterThan(bnAllowance)) {
-			//console.log("NOT ENOUGH APPROVED")
+			////console.log("NOT ENOUGH APPROVED")
 
 			try {
 				//  var amtToApproveToReachDiff = bnAmountInWeiToDeposit.minus(bnAllowance)
 				var amtToApprove = ALOT_APPROVE; // can switch to amtToApprove
-				//console.log("need to approve this much:"+amtToApproveToReachDiff+" going to approve:"+amtToApprove);
-				//console.log("selectedProsperoWalletAddress:" + selectedProsperoWalletAddress)
+				////console.log("need to approve this much:"+amtToApproveToReachDiff+" going to approve:"+amtToApprove);
+				////console.log("selectedProsperoWalletAddress:" + selectedProsperoWalletAddress)
 				var tx = await thisTokenInstance.approve(
 					selectedProsperoWalletAddress,
 					amtToApprove + ""
 				);
 				var f = await tx.wait();
-				//console.log("transaction approve returned:"+JSON.stringify(f,null,2)+" for "+thisToken.name)
+				////console.log("transaction approve returned:"+JSON.stringify(f,null,2)+" for "+thisToken.name)
 			} catch (e) {
 				return { success: false, error: e };
 			}
@@ -3434,7 +3607,7 @@ const sleep = (waitTimeInMs) => new Promise(resolve => setTimeout(resolve, waitT
 
 
 async function getBalancesInEoa() {
-	console.log("getBalancesInEoa");
+	//console.log("getBalancesInEoa");
 
 	let thisBalancesInEoa = [];
 	var totalValue = 0;
@@ -3468,18 +3641,20 @@ async function getBalancesInEoa() {
 			isNativeToken: false,
 		};
 		*/
+		var p = Number(thisToken.price+"");
+		//console.log("p:"+thisToken.price);
 		thisToken['usdAmountEnteredByUser']=0;
 		thisToken['index']=k;
 		thisToken['icon']=thisToken.logoURI;
 		thisToken['name']=thisTokenName;
 		thisToken['available']=usdValue.toFixed(2) + "";
 		thisToken['balance']=balance + "";
-		thisToken['price'] = thisToken.price.toFixed(2);
+		thisToken['price'] = p;
 		thisToken['balanceInEth']=balanceInEth + "";
 		thisToken['EOAAddress']=EOAAddress;
 		thisToken['isNativeToken']=false;
 
-		//console.log("BAL OBJ:"+JSON.stringify(obj,null,2))
+		////console.log("BAL OBJ:"+JSON.stringify(obj,null,2))
 		thisBalancesInEoa.push(thisToken);
 	}
 	//NATIVE TOKEN, doesn't work with subnet yet
@@ -3487,13 +3662,13 @@ async function getBalancesInEoa() {
 if (!isSubnet){
   var index = tokenArray.length;
   var balanceAvaxNow = await ethersProvider.getBalance(EOAAddress);
- //console.log('v-2')
+ ////console.log('v-2')
   //var usdValueAvax = await getUSDValue_MINE(balanceAvaxNow+"", nativeTokenWrappedAddress)
   var balanceInEthAvax =  ethers.utils.formatEther(balanceAvaxNow+"")
- //console.log('avaxPrice:'+avaxPrice+' balanceInEthAvax:'+balanceInEthAvax)
+ ////console.log('avaxPrice:'+avaxPrice+' balanceInEthAvax:'+balanceInEthAvax)
   var usdValueAvax = avaxPrice * balanceInEthAvax;
- //console.log('usdValueAvax in getBalancesInEoa:'+usdValueAvax)
- //console.log("nativeTokenObj:"+JSON.stringify(nativeTokenObj,null,2))
+ ////console.log('usdValueAvax in getBalancesInEoa:'+usdValueAvax)
+ ////console.log("nativeTokenObj:"+JSON.stringify(nativeTokenObj,null,2))
   var obj = {
     usdAmountEnteredByUser:0,//TESTING - TO DO REMOVE ME....
     index:index,
@@ -3511,32 +3686,32 @@ if (!isSubnet){
   balancesInEoa.push(obj)
 }
 */
-	//console.log("balancesInEoa:"+JSON.stringify(balancesInEoa,null,2))
+	////console.log("balancesInEoa:"+JSON.stringify(balancesInEoa,null,2))
 	balancesInEoa = thisBalancesInEoa;
 	return thisBalancesInEoa;
 }
 async function updateSelectedWallet(prosperoWalletAddress) {
-	console.log("updateSelectedWallet called with:" + prosperoWalletAddress);
+	//console.log("updateSelectedWallet called with:" + prosperoWalletAddress);
 	selectedProsperoWalletAddress = prosperoWalletAddress;
 	var portfolio = getLeadersPortfolioForAddress(selectedProsperoWalletAddress);
 	var leaderAddress = portfolio.leaderEOA;
 	leaderAddress = leaderAddress.toLowerCase();
 	var myEoaAddress = EOAAddress.toLowerCase();
 	if (myEoaAddress == leaderAddress) {
-		//console.log("updateUIFieldValuesLeaderboard")
+		////console.log("updateUIFieldValuesLeaderboard")
 		//updateUIFieldValuesLeaderboard();
 	} else {
-		//console.log("updateUIFieldValuesMyPortfolioMyPortfolio")
+		////console.log("updateUIFieldValuesMyPortfolioMyPortfolio")
 		//updateUIFieldValuesMyPortfolioMyPortfolio();
 	}
 	await convertGraphDataToLeaderBoardAndMyWalletsData();
 }
 
 async function joinPortfolio() {
-	console.log(
-		"joingPortfolio called with selectedProsperoWalletAddress:" +
-			selectedProsperoWalletAddress
-	);
+	//console.log(
+	//	"joingPortfolio called with selectedProsperoWalletAddress:" +
+	//		selectedProsperoWalletAddress
+	//);
 	try {
 		var prosperoBeaconFactoryInstance = await new ethers.Contract(
 			factoryAddress,
@@ -3547,21 +3722,21 @@ async function joinPortfolio() {
 			selectedProsperoWalletAddress
 		);
 		var r = await tx.wait();
-		console.log("receipt:" + JSON.stringify(r, null, 2));
+		//console.log("receipt:" + JSON.stringify(r, null, 2));
 		return { success: true };
 	} catch (e) {
-		console.log("Exception joinPortfolio: " + e);
-		console.log("Exception joinPortfolio: " + JSON.stringify(e, null, 2));
+		//console.log("Exception joinPortfolio: " + e);
+		//console.log("Exception joinPortfolio: " + JSON.stringify(e, null, 2));
 		return { success: false, error: e };
 	}
 	return { success: false };
 }
 async function createPortfolio(walletName, fundFee) {
-	console.log(
-		"api createPortfolio walletName:" + walletName + " fundFee:" + fundFee
-	);
+	//console.log(
+	//	"api createPortfolio walletName:" + walletName + " fundFee:" + fundFee
+	//);
 	fundFee = fundFee * (USD_SCALE / 100);
-	console.log("new fund fee:" + fundFee);
+	//console.log("new fund fee:" + fundFee);
 	try {
 		var prosperoBeaconFactoryInstance = await new ethers.Contract(
 			factoryAddress,
@@ -3583,7 +3758,7 @@ async function createPortfolio(walletName, fundFee) {
 				if (finishedMethodEvent.hasOwnProperty("args")) {
 					var args = finishedMethodEvent["args"];
 					var prosperoWalletAddressCreated = args[args.length - 1];
-					//console.log("got prosperoWalletAddressCreated...")
+					////console.log("got prosperoWalletAddressCreated...")
 					return {
 						success: true,
 						prosperoWalletAddressCreated: prosperoWalletAddressCreated,
@@ -3593,29 +3768,29 @@ async function createPortfolio(walletName, fundFee) {
 		}
 		return { success: true, prosperoWalletAddressCreated: null };
 	} catch (e) {
-		console.log("Exception createPortfolio: " + e);
-		console.log("Exception createPortfolio: " + JSON.stringify(e, null, 2));
+		//console.log("Exception createPortfolio: " + e);
+		//console.log("Exception createPortfolio: " + JSON.stringify(e, null, 2));
 		return { success: false, error: e };
 	}
 	return { success: false, error: null };
 }
 
 async function getLeaderBoardDataForTable() {
-	console.log(
-		"ALL PORTFOLIOS:" + JSON.stringify(leaderBoardData, null, 2)
-	);
+	//console.log(
+	//	"ALL PORTFOLIOS:" + JSON.stringify(leaderBoardData, null, 2)
+	//);
 	return leaderBoardData;
 }
 
 async function getMyPortfoliosDataForTable() {
-	//console.log(
+	////console.log(
 	//	"MY PORTFOLIOS:" + JSON.stringify(myPortfolioDataForTable, null, 2)
 	//);
 	return myPortfolioDataForTable;
 }
 
 async function createLeaderBoardDataObject() {
-	//console.log("createLeaderBoardDataObject called");
+	////console.log("createLeaderBoardDataObject called");
 	var prosperoBeaconFactoryInstance = await new ethers.Contract(
 		factoryAddress,
 		ProsperoBeaconFactoryJson.abi,
@@ -3626,21 +3801,21 @@ async function createLeaderBoardDataObject() {
 
 	var leaderBoardDataHere = [];
 	for (var i = 0; i < allLeaderWallets.length; i++) {
-		//console.log("i:"+i)
+		////console.log("i:"+i)
 		var thisLeaderWalletAddress = allLeaderWallets[i].toLowerCase();
-		//console.log("***thisLeaderWalletAddress:"+thisLeaderWalletAddress);
+		////console.log("***thisLeaderWalletAddress:"+thisLeaderWalletAddress);
 		var leaderBoardObject = {};
 		var thisLeaderAddress = allLeaderWallets[i];
-		//console.log('thisLeaderAddress:'+thisLeaderAddress)
+		////console.log('thisLeaderAddress:'+thisLeaderAddress)
 		var walletValues = await getWalletValues(thisLeaderAddress);
-		//console.log('walletValues:'+JSON.stringify(walletValues,null,2))
+		////console.log('walletValues:'+JSON.stringify(walletValues,null,2))
 		//var leaderEOA = leaderEOA
 		var valueOfLeadersPortfolio = await getValueOfUsersPortfolio(
 			thisLeaderAddress,
 			leaderEOA
 		);
 		//async function getValueOfUsersPortfolio(prosperoWalletAddress, usersEOA){
-		//console.log('valueOfLeadersPortfolio:'+valueOfLeadersPortfolio)
+		////console.log('valueOfLeadersPortfolio:'+valueOfLeadersPortfolio)
 		var ProsperoWalletInstance = new web3.eth.Contract(
 			ProsperoWalletJson.abi,
 			thisLeaderAddress
@@ -3655,7 +3830,7 @@ async function createLeaderBoardDataObject() {
 				thisLeaderWalletAddress
 			);
 
-		//console.log("allTrailerWallets:"+allTrailerWallets)
+		////console.log("allTrailerWallets:"+allTrailerWallets)
 		var totalUsdInvestedForLeaderBN = BigNumber(
 			totalUsdInvestedForLeader + ""
 		);
@@ -3663,12 +3838,12 @@ async function createLeaderBoardDataObject() {
 		var totalUsdInvestedForLeaderNumber = Number(
 			totalUsdInvestedForLeaderBN.dividedBy(usdScaleBN) + ""
 		);
-		//console.log('valueOfLeadersPortfolio:'+valueOfLeadersPortfolio)
+		////console.log('valueOfLeadersPortfolio:'+valueOfLeadersPortfolio)
 
-		//console.log('totalUsdInvestedForLeaderNumber:'+totalUsdInvestedForLeaderNumber)
+		////console.log('totalUsdInvestedForLeaderNumber:'+totalUsdInvestedForLeaderNumber)
 		var profitLeader =
 			valueOfLeadersPortfolio - totalUsdInvestedForLeaderNumber;
-		//console.log('profitLeader:'+profitLeader)
+		////console.log('profitLeader:'+profitLeader)
 
 		var leaderBoardObject =
 			await getValueOfBalancesOfTokensInPortfolioForUser(
@@ -3710,7 +3885,7 @@ async function createLeaderBoardDataObject() {
 		if (keyA > keyB) return -1;
 		return 0;
 	});
-	//console.log("leaderBoardData:"+JSON.stringify(leaderBoardData,null,2))
+	////console.log("leaderBoardData:"+JSON.stringify(leaderBoardData,null,2))
 	leaderBoardData = leaderBoardDataHere;
 }
 async function getValueOfBalancesOfTokensInPortfolioForUser(
@@ -3718,10 +3893,10 @@ async function getValueOfBalancesOfTokensInPortfolioForUser(
 	user,
 	prosperoWalletAddress
 ) {
-	//console.log('--getValueOfBalancesOfTokensInPortfolioForUser user:'+user+' prosperoWalletAddress:'+prosperoWalletAddress+' balancesAndTokensObj:'+JSON.stringify(balancesAndTokensObj,null,2))
-	//console.log('balancesAndTokensObj:'+JSON.stringify(balancesAndTokensObj,null,2))
+	////console.log('--getValueOfBalancesOfTokensInPortfolioForUser user:'+user+' prosperoWalletAddress:'+prosperoWalletAddress+' balancesAndTokensObj:'+JSON.stringify(balancesAndTokensObj,null,2))
+	////console.log('balancesAndTokensObj:'+JSON.stringify(balancesAndTokensObj,null,2))
 	if (balancesAndTokensObj == null) {
-		//console.log('is null')
+		////console.log('is null')
 		balancesAndTokensObj =
 			await getBalanacesOfTokensInPortfolioForUserContractCall(
 				user,
@@ -3731,7 +3906,7 @@ async function getValueOfBalancesOfTokensInPortfolioForUser(
 	var balancesValue = await getValueOfBalancesOfTokensInPortfolio(
 		balancesAndTokensObj
 	);
-	//console.log('balancesValue*:'+JSON.stringify(balancesValue,null,2))
+	////console.log('balancesValue*:'+JSON.stringify(balancesValue,null,2))
 
 	var ProsperoWalletInstance = new web3.eth.Contract(
 		ProsperoWalletJson.abi,
@@ -3749,21 +3924,21 @@ async function getValueOfBalancesOfTokensInPortfolioForUser(
 	var percentageUser = await ProsperoWalletInstance.methods
 		.getPercentageOwnership(user)
 		.call({ from: user });
-	//console.log('percentageUser:'+percentageUser)
+	////console.log('percentageUser:'+percentageUser)
 	percentageUser = percentageUser / USD_SCALE;
 	//var percentageUserBn = BigNumber(percentageUser)
-	//console.log('percentageUser with USD Scale:'+percentageUser)
+	////console.log('percentageUser with USD Scale:'+percentageUser)
 	var balancesValueFinal = {};
 	balancesValueFinal["totalValue"] = valueOfUsersPortfolio;
 	balancesValueFinal["totalUsd"] = totalUsd / USD_SCALE;
 	balancesValueFinal["profit"] =
 		balancesValueFinal["totalValue"] - balancesValueFinal["totalUsd"];
 	var percentageUserBn = BigNumber(percentageUser + "");
-	//console.log('percentageUserBn:'+percentageUserBn)
+	////console.log('percentageUserBn:'+percentageUserBn)
 	var totalUsdWholeWallet = 0;
 	for (var key in balancesValue) {
 		if (balancesValue.hasOwnProperty(key)) {
-			//console.log(key + " -> " + balancesValue[key]);
+			////console.log(key + " -> " + balancesValue[key]);
 			if (key != "totalValue") {
 				var objCopy = {}; //JSON.parse(JSON.stringify(balancesValue[key]))
 				var usdBn = BigNumber(balancesValue[key]["usdValue"] + "");
@@ -3771,7 +3946,7 @@ async function getValueOfBalancesOfTokensInPortfolioForUser(
 					balancesValue[key]["balance_scaled"] + ""
 				);
 				var balBn = BigNumber(balancesValue[key]["balance"] + "");
-				//console.log('b*:'+balancesValue[key]['balance'])
+				////console.log('b*:'+balancesValue[key]['balance'])
 				var balThisUserNum = balancesValue[key]["balance"] * percentageUser;
 				balThisUserNum = parseInt(balThisUserNum);
 				var balNoSciStr;
@@ -3786,29 +3961,29 @@ async function getValueOfBalancesOfTokensInPortfolioForUser(
 				} else {
 					balNoSciStr = await toPlainString(balThisUserNum);
 				}
-				//console.log("balThisUserNum:"+balThisUserNum)
-				//console.log("balNoSciStr:"+balNoSciStr)
+				////console.log("balThisUserNum:"+balThisUserNum)
+				////console.log("balNoSciStr:"+balNoSciStr)
 
 				var balThisUser = balBn.multipliedBy(percentageUser);
 				//totalUsdWholeWallet=totalUsdWholeWallet+usdWholeWalletThisToken
-				//console.log('balThisUser:'+balThisUser)
-				//console.log('percentageUser:'+percentageUser)
-				//console.log('balBnScaled:'+balBnScaled)
+				////console.log('balThisUser:'+balThisUser)
+				////console.log('percentageUser:'+percentageUser)
+				////console.log('balBnScaled:'+balBnScaled)
 
 				var balThisUserScaled = balBnScaled.multipliedBy(percentageUser);
 				balThisUserScaled = balThisUserScaled.integerValue();
 				balThisUser = balThisUserScaled.integerValue();
-				//console.log('balThisUser:'+balThisUser)
+				////console.log('balThisUser:'+balThisUser)
 
-				//console.log('v-3')
+				////console.log('v-3')
 
 				var usdThisUserThisToken = await getUSDValue_MINE(
 					balancesValue[key]["balance"],
 					key
 				); //(usdBn.multipliedBy(percentageUserBn))+""
 				//getUSDValue_MINE: async function  (amountInWei, address)
-				//console.log('balThisUser:'+balThisUser)
-				//console.log('usdThisUserThisToken:'+usdThisUserThisToken)
+				////console.log('balThisUser:'+balThisUser)
+				////console.log('usdThisUserThisToken:'+usdThisUserThisToken)
 				objCopy["usdValue"] = Number(usdThisUserThisToken);
 				//objCopy['balance_scaled']= balBnScaled.multipliedBy(percentageUserBn)
 				//objCopy['balance_scaled']=(objCopy['balance_scaled']).integerValue()
@@ -3835,7 +4010,7 @@ async function getValueOfBalancesOfTokensInPortfolioForUser(
 		}
 	}
 
-	//console.log('balancesValueFinal:'+JSON.stringify(balancesValueFinal,null,2))
+	////console.log('balancesValueFinal:'+JSON.stringify(balancesValueFinal,null,2))
 	return balancesValueFinal;
 }
 async function getValueOfUsersPortfolio(
@@ -3843,7 +4018,7 @@ async function getValueOfUsersPortfolio(
 	usersEOA,
 	shouldKeepAsBigNumber
 ) {
-	//console.log(
+	////console.log(
 	// "getValueOfUsersPortfolio pricesLibraryAddress: "+pricesLibraryAddress+
 	//  " prosperoPricesAddress: "+prosperoPricesAddress+
 	//  " prosperoWalletAddress: "+prosperoWalletAddress
@@ -3871,17 +4046,17 @@ async function getValueOfUsersPortfolio(
 			.call({
 				from: usersEOA,
 			});
-		//console.log("usersValue:"+usersValue);
+		////console.log("usersValue:"+usersValue);
 		var bnUv = BigNumber(usersValue);
 		if (shouldKeepAsBigNumber == true) {
 			return bnUv;
 		}
 		bnUv = bnUv.dividedBy(USD_SCALE);
 		var uvNumber = Number(bnUv + "");
-		//console.log("USERS VALUE:"+uvNumber)
+		////console.log("USERS VALUE:"+uvNumber)
 		return uvNumber;
 	} catch (e) {
-		console.log("getValueOfUsersPortfolio exception:" + e);
+		//console.log("getValueOfUsersPortfolio exception:" + e);
 		return 0;
 	}
 }
@@ -3889,7 +4064,7 @@ async function getBalanacesOfTokensInPortfolioForUserContractCall(
 	user,
 	prosperoWalletAddress
 ) {
-	//console.log("getBalanacesOfTokensInPortfolioForUserContractCall")
+	////console.log("getBalanacesOfTokensInPortfolioForUserContractCall")
 	try {
 		var ProsperoWalletInstance = new web3.eth.Contract(
 			ProsperoWalletJson.abi,
@@ -3898,22 +4073,22 @@ async function getBalanacesOfTokensInPortfolioForUserContractCall(
 		var tokens = [];
 		var balances = [];
 		ProsperoWalletInstance.defaultAccount = EOAAddress;
-		//console.log("1 calling getPortfolioTokensSize")
+		////console.log("1 calling getPortfolioTokensSize")
 
 		var numberOfTokensInPortfolio = await ProsperoWalletInstance.methods
 			.getPortfolioTokensSize()
 			.call({ from: EOAAddress });
-		//console.log("numberOfTokensInPortfolio:"+numberOfTokensInPortfolio)
+		////console.log("numberOfTokensInPortfolio:"+numberOfTokensInPortfolio)
 		for (var i = 0; i < numberOfTokensInPortfolio; i++) {
-			//console.log("I:"+i)
+			////console.log("I:"+i)
 			tokens[i] = await ProsperoWalletInstance.methods
 				.portfolioTokens(i)
 				.call({ from: EOAAddress });
-			//console.log("****TOKEN:"+tokens[i] )
+			////console.log("****TOKEN:"+tokens[i] )
 			balances[i] = await ProsperoWalletInstance.methods
 				.getBalanceOfTokenInPortfolioForUser(user, tokens[i])
 				.call({ from: EOAAddress });
-			//console.log("*****BAL:"+balances[i] )
+			////console.log("*****BAL:"+balances[i] )
 		}
 	} catch (e) {
 		console.log(
@@ -3937,53 +4112,57 @@ async function initializeApi() {
 }
 
 async function initializeDataObjects() {
-	console.log("gettingGraphData");
+	//console.log("gettingGraphData");
 	var status = await getGraphData();
 	if (!status.success) {
 		console.error("error getGraphData: " + status.error);
 		return status;
 	}
 
-	//console.log('getBlockNumber');
+	////console.log('getBlockNumber');
 
 	blockNumWhenWebAppLaunched = await web3.eth.getBlockNumber();
 	//await initNewEventListener();
-	//console.log('calling updatePrices');
+	////console.log('calling updatePrices');
 
 	status = await updatePrices();
-	//console.log('got prices');
-	console.log("calling convertGraphDataToLeaderBoardAndMyWalletsData");
+	////console.log('got prices');
+	//console.log("calling convertGraphDataToLeaderBoardAndMyWalletsData");
 	await convertGraphDataToLeaderBoardAndMyWalletsData();
-	//console.log('done calling convertGraphDataToLeaderBoardAndMyWalletsData');
+	////console.log('done calling convertGraphDataToLeaderBoardAndMyWalletsData');
 	if (!status.success) {
 		console.error("error updatePrices: " + status.error);
 		return status;
 	}
 	//status = await initLeaderBoardTableObject();
-	//console.log('got leaderBoardTableObject');
+	////console.log('got leaderBoardTableObject');
 
 	//if (!status.success) {
 	//		console.error("error initLeaderBoardTableObject: " + status.error);
 	//		return status;
 	//}
 	//await createMyWalletsDataAndUIObject();
-	//console.log('called createMyWalletsDataAndUIObject ');
+	////console.log('called createMyWalletsDataAndUIObject ');
 
 	// var port = await getMyWallet(); TAKEN OUT KACHI
 
 	//await getHistoricalPricesUpdateChartsData();
-	//console.log('called getHistoricalPricesUpdateChartsData');
+	////console.log('called getHistoricalPricesUpdateChartsData');
 
 	//await getBalancesInEoa();
 	await getHistoricalPricesUpdateChartsData();
-	// await updateProfitPercentages();TAKEN OUT KACHI
+	// await updateProfitPercentages();TAKEN OUT KACHI	await calcNewProfitsForLeaders();
+	
+	//await calcNewProfitsForLeaders();
 
-	console.log("done initializeApi");
+
+	//console.log("done initializeApi");
+	await updateD7D30D909FromHistoricalPrices()
 	return { success: true };
 }
 
 async function initializeBlockchainConnection() {
-	console.log("initializeApi");
+	//console.log("initializeApi");
 	var provider = await detectEthereumProvider();
 	if (provider !== window.ethereum) {
 		// todo: handle multiple wallets
@@ -3993,7 +4172,7 @@ async function initializeBlockchainConnection() {
 			error: "Do you have multiple wallets installed?",
 		};
 	}
-	//console.log('got provider')
+	////console.log('got provider')
 	if (provider) {
 		try {
 			var accounts = await window.ethereum.request({
@@ -4064,16 +4243,16 @@ async function updatePrices() {
 			}
 		}
 		//}
-		//console.log("allA:"+allAvalancheAddresses)
+		////console.log("allA:"+allAvalancheAddresses)
 		var prices = {};
 		var pricesUrl =
 			"https://api.coingecko.com/api/v3/simple/token_price/avalanche?contract_addresses=" +
 			allAvalancheAddresses +
 			"&vs_currencies=usd&include_24hr_change=true";
-		//console.log('pricesUrl:'+pricesUrl)
+		////console.log('pricesUrl:'+pricesUrl)
 		var pricesResponse = await fetch(pricesUrl);
 		prices = await pricesResponse.json();
-		//console.log("PRICEs:"+JSON.stringify(prices,null,2))
+		////console.log("PRICEs:"+JSON.stringify(prices,null,2))
 		for (var i = 0; i < tokenArray.length; i++) {
 			var thisToken = tokenArray[i];
 			var address = "";
@@ -4082,10 +4261,10 @@ async function updatePrices() {
 			} else {
 				address = thisToken.address;
 			}
-			//console.log('address:'+address);
+			////console.log('address:'+address);
 			var anObj = hasOwnPropertyCaseInsensitive(prices, address);
 			if (anObj != false) {
-				//console.log("anObj:"+JSON.stringify(anObj,null,2))
+				////console.log("anObj:"+JSON.stringify(anObj,null,2))
 				var usd = anObj["usd"];
 				var twentyFourHour = anObj["usd_24h_change"];
 				var twentyFourHourChange = twentyFourHour / 100;
@@ -4096,7 +4275,7 @@ async function updatePrices() {
 				tokenArray[i]["twentyFourHour"] = twentyFourHourChange;
 			} else {
 				//alert('could not find price in coingecko')
-				//console.log('***** coould not find price for:'+thisToken.name+" add:"+address)
+				////console.log('***** coould not find price for:'+thisToken.name+" add:"+address)
 				tokenArray[i]["coingecko_price"] = 1;
 				tokenArray[i]["twentyFourHour"] = 1;
 				tokenArray[i]["price"] = 1;
@@ -4111,8 +4290,8 @@ async function updatePrices() {
 				address = thisToken.address;
 				allAddresses.push(address);
 			}
-			//console.log("prosperoPricesAddress:" + prosperoPricesAddress);
-			//console.log("allAddresses:" + allAddresses);
+			////console.log("prosperoPricesAddress:" + prosperoPricesAddress);
+			////console.log("allAddresses:" + allAddresses);
 
 			var prosperoPrices = new web3.eth.Contract(
 				ProsperoPricesJson.abi,
@@ -4122,9 +4301,9 @@ async function updatePrices() {
 				.getPrices(allAddresses)
 				.call({ from: EOAAddress });
 			for (var i = 0; i < prosperoPrices.length; i++) {
-				//console.log("TOKEN NAME:" + tokenArray[i]["name"]);
-				//console.log("ADD:" + tokenArray[i]["address"]);
-				//console.log("p:" + prosperoPrices[i]);
+				////console.log("TOKEN NAME:" + tokenArray[i]["name"]);
+				////console.log("ADD:" + tokenArray[i]["address"]);
+				////console.log("p:" + prosperoPrices[i]);
 
 				var prosperoPrice = BigNumber(prosperoPrices[i] + "");
 				var usdBN = BigNumber(USD_SCALE + "");
@@ -4133,16 +4312,16 @@ async function updatePrices() {
 				latestPrices[tokenArray[i]["address"]] = prosperoPrice;
 				var lowerCaseCAdd = tokenArray[i]["cChainAddress"];
 				var wavaxLowerC = WAVAX_COIN_ADDRESS.toLowerCase();
-				//console.log("lowerCaseCAdd:"+lowerCaseCAdd)
-				//console.log("wavaxLowerC  :"+wavaxLowerC)
+				////console.log("lowerCaseCAdd:"+lowerCaseCAdd)
+				////console.log("wavaxLowerC  :"+wavaxLowerC)
 
 				if (lowerCaseCAdd == wavaxLowerC) {
-					//console.log('setting avax price');
+					////console.log('setting avax price');
 					avaxPrice = prosperoPrice;
 				}
 			}
 		} catch (e) {
-			console.log("updatePricesNew exception1:" + e);
+			//console.log("updatePricesNew exception1:" + e);
 			// alert('Could not get prices from ProsperoPrices, please reload page :'+e)
 			return {
 				success: false,
@@ -4152,7 +4331,7 @@ async function updatePrices() {
 			};
 		}
 	} catch (e) {
-		////console.log("updatePricesNew exception2:"+address)
+		//////console.log("updatePricesNew exception2:"+address)
 		// alert('Could not get prices from coingecko, please reload page :'+e)
 		return {
 			success: false,
@@ -4174,7 +4353,7 @@ async function getWalletValues(prosperoWalletAddress) {
 			.call({
 				from: EOAAddress,
 			});
-		//console.log(" walletValues:"+JSON.stringify(walletValues,null,2))
+		////console.log(" walletValues:"+JSON.stringify(walletValues,null,2))
 		var walletValuesJson = {
 			ProsperoBeaconFactoryAddress: walletValues[0],
 			leaderEOA: walletValues[1],
@@ -4188,7 +4367,7 @@ async function getWalletValues(prosperoWalletAddress) {
 			prosperoPercentageFeeOfLeader: walletValues[9],
 		};
 	} catch (e) {
-		console.log("getWalletValues exception:" + e);
+		//console.log("getWalletValues exception:" + e);
 		return false;
 	}
 	return walletValuesJson;
@@ -4202,20 +4381,20 @@ function hasOwnPropertyCaseInsensitive(obj, property) {
 	return false;
 }
 async function getValueOfBalancesOfTokensInPortfolio(balancesAndTokensObj) {
-	//console.log('balancesAndTokensObj:'+JSON.stringify(balancesAndTokensObj,null,2))
+	////console.log('balancesAndTokensObj:'+JSON.stringify(balancesAndTokensObj,null,2))
 	var tokens = balancesAndTokensObj.tokens;
 	var balances = balancesAndTokensObj.balances;
-	//console.log('tokens:'+JSON.stringify(tokens,null,2))
+	////console.log('tokens:'+JSON.stringify(tokens,null,2))
 	var balanceValue = {};
 	var totalValue = 0;
 	for (var i = 0; i < tokens.length; i++) {
 		var balValueObj = {};
 		var thisToken = tokens[i];
 		thisToken = thisToken.toLowerCase();
-		//console.log('thisToken:'+thisToken)
+		////console.log('thisToken:'+thisToken)
 		//var priceOfThisToken = await getUSDValueOfAddress(thisToken)
-		//console.log('balances[i]:'+balances[i])
-		//console.log("balUpdated:"+bal)
+		////console.log('balances[i]:'+balances[i])
+		////console.log("balUpdated:"+bal)
 		var usdValue = await getUSDValue_MINE(balances[i], thisToken);
 		//var amountInWeiUpScaledForLowDecimalPoints = await updateBalanceToEighteenDecimalsIfNeeded(amountInWei, address)
 		//console
@@ -4231,7 +4410,7 @@ async function getValueOfBalancesOfTokensInPortfolio(balancesAndTokensObj) {
 		var thisToken = tokens[i];
 		thisToken = thisToken.toLowerCase();
 		var balValueObj = balanceValue[thisToken];
-		//console.log("balValueObj.usdValue:"+balValueObj.usdValue)
+		////console.log("balValueObj.usdValue:"+balValueObj.usdValue)
 		balValueObj["percentage"] = balValueObj.usdValue / totalValue;
 		balanceValue[thisToken] = balValueObj;
 	}
@@ -4239,10 +4418,10 @@ async function getValueOfBalancesOfTokensInPortfolio(balancesAndTokensObj) {
 	return balanceValue;
 }
 async function getUSDValue_MINE(amountInWei, address) {
-	//console.log("getUSDValue_MINE amountInWei:"+amountInWei+" address:"+address)
+	////console.log("getUSDValue_MINE amountInWei:"+amountInWei+" address:"+address)
 
 	amountInWei = noNotation(amountInWei);
-	//console.log("getUSDValue_MINE amountInWei:"+amountInWei+" address:"+address)
+	////console.log("getUSDValue_MINE amountInWei:"+amountInWei+" address:"+address)
 
 	var amountInWeiUpScaledForLowDecimalPoints =
 		await updateBalanceToEighteenDecimalsIfNeeded(amountInWei, address);
@@ -4250,17 +4429,17 @@ async function getUSDValue_MINE(amountInWei, address) {
 	var amountInEther = Number(
 		ethers.utils.formatEther(amountInWeiUpScaledForLowDecimalPoints + "") + ""
 	);
-	//console.log("anountInEther:"+amountInEther)
+	////console.log("anountInEther:"+amountInEther)
 
 	address = address.toLowerCase();
-	//console.log('address:'+address)
+	////console.log('address:'+address)
 
-	//console.log('amountInE:'+amountInEther)
+	////console.log('amountInE:'+amountInEther)
 	if (address == "0x1d308089a2d1ced3f1ce36b1fcaf815b07217be3") {
 		return amountInEther * nativeTokenPrice;
 	}
 	if (address == nativeTokenWrappedAddress) {
-		//console.log('isNativeToken')
+		////console.log('isNativeToken')
 		return amountInEther * nativeTokenPrice;
 		//
 	}
@@ -4268,16 +4447,16 @@ async function getUSDValue_MINE(amountInWei, address) {
 		var thisTObj = tokenArray[i];
 		var thisAdd = thisTObj["address"];
 		thisAdd = thisAdd.toLowerCase();
-		//console.log('thisTObj:'+JSON.stringify(thisTObj,null,2))
+		////console.log('thisTObj:'+JSON.stringify(thisTObj,null,2))
 		if (thisAdd == address) {
-			//console.log('found add')
+			////console.log('found add')
 			var thisValue = amountInEther * thisTObj["price"];
-			//console.log('thisValue'+thisValue)
+			////console.log('thisValue'+thisValue)
 			return thisValue;
 		}
 	}
 	alert("COULD NOT FIND PRICE IN getUSDValue_MINE address:" + address);
-	console.log("COULD NOT FIND PRICE IN getUSDValue_MINE" + address);
+	//console.log("COULD NOT FIND PRICE IN getUSDValue_MINE" + address);
 }
 
 function noNotation(x) {
@@ -4329,21 +4508,21 @@ async function getTokenObject_newMine(tokenAddress) {
 	);
 }
 async function createMyWalletsDataAndUIObject() {
-	//console.log('createMyWalletsDataObject factoryAddress:'+factoryAddress+' EOAAddress:'+EOAAddress)
+	////console.log('createMyWalletsDataObject factoryAddress:'+factoryAddress+' EOAAddress:'+EOAAddress)
 	var prosperoBeaconFactoryInstance = await new ethers.Contract(
 		factoryAddress,
 		ProsperoBeaconFactoryJson["abi"],
 		ethersSigner
 	);
-	//console.log("got p beacon..")
+	////console.log("got p beacon..")
 	var myWalletsFromContract = await prosperoBeaconFactoryInstance.getWallets(
 		EOAAddress
 	);
 	var myWalletTypes = await prosperoBeaconFactoryInstance.getWalletTypes(
 		EOAAddress
 	);
-	//console.log("myWallets***:"+JSON.stringify(myWalletsFromContract,null,2))
-	//console.log("myWalletTypes:"+myWalletTypes.length)
+	////console.log("myWallets***:"+JSON.stringify(myWalletsFromContract,null,2))
+	////console.log("myWalletTypes:"+myWalletTypes.length)
 	myWallets = {};
 	var firstWallet = "";
 	for (var i = 0; i < myWalletsFromContract.length; i++) {
@@ -4351,14 +4530,14 @@ async function createMyWalletsDataAndUIObject() {
 		if (i == 0) {
 			firstWallet = thisWalletAddress;
 		}
-		//console.log('thisWalletAddress:'+thisWalletAddress)
+		////console.log('thisWalletAddress:'+thisWalletAddress)
 		var thisWalletsObj = await getValueOfBalancesOfTokensInPortfolioForUser(
 			null,
 			EOAAddress,
 			thisWalletAddress
 		);
 		var walletValues = await getWalletValues(thisWalletAddress);
-		//console.log('walletValues:'+JSON.stringify(walletValues,null,2))
+		////console.log('walletValues:'+JSON.stringify(walletValues,null,2))
 		thisWalletsObj["walletValues"] = walletValues;
 		thisWalletsObj["wallet_type"] = "Leader";
 		//thisWalletsObj['has_inited_event_listener']=false
@@ -4368,19 +4547,19 @@ async function createMyWalletsDataAndUIObject() {
 		if (myWalletTypes[i] == 0) {
 			thisWalletsObj["wallet_type"] = "Trailer";
 		}
-		//console.log("thisWalletsObj:"+JSON.stringify(thisWalletsObj,null,2))
+		////console.log("thisWalletsObj:"+JSON.stringify(thisWalletsObj,null,2))
 		myWallets[thisWalletAddress] = thisWalletsObj;
 	}
-	console.log("myWallets:" + JSON.stringify(myWallets, null, 2));
-	console.log("setting first wallet to prosperoWalletAddress");
+	//console.log("myWallets:" + JSON.stringify(myWallets, null, 2));
+	//console.log("setting first wallet to prosperoWalletAddress");
 	//selectedProsperoWalletAddress = firstWallet;
 	//myWallets=myWallets;
 	await updateMyPortfoliosDataForTable();
 }
 
 async function updateMyPortfoliosDataForTable() {
-	console.log("updateMyPortfoliosDataForTable");
-	//console.log("myPortfoliosDataOverTime:"+JSON.stringify(myPortfoliosDataOverTime,null,2))
+	//console.log("updateMyPortfoliosDataForTable");
+	////console.log("myPortfoliosDataOverTime:"+JSON.stringify(myPortfoliosDataOverTime,null,2))
 	myPortfolioDataForTable = [];
 	var cntr = 0;
 	for (var prosperoWalletAddress in myWallets) {
@@ -4390,11 +4569,11 @@ async function updateMyPortfoliosDataForTable() {
 		var valuesOfTimeObj = await getValuesOverTimeForMyPortfolioAddress(
 			prospWalletAddressLower
 		);
-		//console.log("valuesOfTimeObj:"+JSON.stringify(valuesOfTimeObj,null,2))
-		////console.log("TP:"+JSON.stringify(thisPortfolio,null,2))
+		////console.log("valuesOfTimeObj:"+JSON.stringify(valuesOfTimeObj,null,2))
+		//////console.log("TP:"+JSON.stringify(thisPortfolio,null,2))
 		var walletValues = thisPortfolio["walletValues"];
 		var name = walletValues["walletName"];
-		//console.log("name:"+name)
+		////console.log("name:"+name)
 		var fee = walletValues.leaderPercentageFee;
 		fee = fee / USD_SCALE;
 		fee = fee * 100;
@@ -4426,7 +4605,7 @@ async function updateMyPortfoliosDataForTable() {
 		myPortfolioDataForTable.push(objForTable);
 		cntr = cntr + 1;
 	}
-	//console.log('myPortfolioDataForTable:'+JSON.stringify(myPortfolioDataForTable,null,2))
+	////console.log('myPortfolioDataForTable:'+JSON.stringify(myPortfolioDataForTable,null,2))
 	//return myPortfolioDataForTable
 }
 
@@ -4447,9 +4626,9 @@ async function updateBalanceToEighteenDecimalsIfNeeded(balance, tokenAddress) {
 				var diffPower = Math.pow(10, diff);
 				var diffPowerBn = BigNumber(diffPower + "");
 				var balBn = BigNumber(balance);
-				//console.log("diffPower:"+diffPower)
+				////console.log("diffPower:"+diffPower)
 				var balDiff = diffPowerBn.multipliedBy(balBn);
-				//console.log("balDiff:"+balDiff)
+				////console.log("balDiff:"+balDiff)
 				return balDiff;
 			}
 		}
@@ -4467,7 +4646,7 @@ async function updateBalanceFromEighteenDecimalsIfNeeded(
 	balance,
 	tokenAddress
 ) {
-	console.log("updateBalanceFromEighteenDecimalsIfNeeded");
+	//console.log("updateBalanceFromEighteenDecimalsIfNeeded");
 	for (var i = 0; i < tokenArray.length; i++) {
 		tokenAddress = tokenAddress.toLowerCase();
 		if (tokenArray[i]["address"] == tokenAddress) {
@@ -4478,9 +4657,9 @@ async function updateBalanceFromEighteenDecimalsIfNeeded(
 				var diffPower = Math.pow(10, diff);
 				var diffPowerBn = BigNumber(diffPower + "");
 				var balBn = BigNumber(balance);
-				console.log("diffPower:" + diffPower);
+				//console.log("diffPower:" + diffPower);
 				var balDiff = diffPowerBn.dividedBy(balBn);
-				console.log("balDiff:" + balDiff);
+				//console.log("balDiff:" + balDiff);
 				balDiff = balDiff.integerValue();
 				return balDiff;
 			}
@@ -4517,10 +4696,10 @@ function areTokensAndBalanacesDifferent(
 		if (tokBefore[j] != tokAfter[j]) {
 			return true;
 		}
-		//console.log("before Token:"+balancesAndTokensBefore['tokens'][j])
-		//console.log("before   bal:"+balancesAndTokensBefore['balances'][j])
-		//console.log("after  Token:"+balancesAndTokensAfter['tokens'][j])
-		//console.log("after bal:"+balancesAndTokensAfter['balances'][j])
+		////console.log("before Token:"+balancesAndTokensBefore['tokens'][j])
+		////console.log("before   bal:"+balancesAndTokensBefore['balances'][j])
+		////console.log("after  Token:"+balancesAndTokensAfter['tokens'][j])
+		////console.log("after bal:"+balancesAndTokensAfter['balances'][j])
 	}
 	return false;
 }
@@ -4540,16 +4719,16 @@ async function getBalanacesOfTokensInPortfolioForUser(
 		var numberOfTokensInPortfolio = await ProsperoWalletInstance.methods
 			.getPortfolioTokensSize()
 			.call({ from: accounts[1].address });
-		//console.log("numberOfTokensInPortfolio:"+numberOfTokensInPortfolio)
+		////console.log("numberOfTokensInPortfolio:"+numberOfTokensInPortfolio)
 		for (var i = 0; i < numberOfTokensInPortfolio; i++) {
 			tokens[i] = await ProsperoWalletInstance.methods
 				.portfolioTokens(i)
 				.call({ from: accounts[1].address });
-			//console.log("TOKEN:"+tokens[i] )
+			////console.log("TOKEN:"+tokens[i] )
 			balances[i] = await ProsperoWalletInstance.methods
 				.getBalanceOfTokenInPortfolioForUser(user, tokens[i])
 				.call({ from: accounts[1].address });
-			//console.log("****BAL:"+balances[i] )
+			////console.log("****BAL:"+balances[i] )
 		}
 	} catch (e) {
 		console.log("exception getBalanacesOfTokensInPortfolioForUser:" + e);
@@ -4563,13 +4742,13 @@ async function returnTrueIfPercentagesAreLessAndClose(
 	goalPercentages,
 	goalTokens
 ) {
-	//console.log("balancesValue:"+JSON.stringify(balancesValue,null,2))
-	//console.log('gp:'+goalPercentages)
-	//console.log('gt:'+goalTokens)
+	////console.log("balancesValue:"+JSON.stringify(balancesValue,null,2))
+	////console.log('gp:'+goalPercentages)
+	////console.log('gt:'+goalTokens)
 	for (var i = 0; i < goalTokens.length; i++) {
 		var thisToken = goalTokens[i];
 		thisToken = thisToken.toLowerCase();
-		//console.log('thisToken:'+thisToken)
+		////console.log('thisToken:'+thisToken)
 		var thisPerc = goalPercentages[i];
 		thisPerc = thisPerc / USD_SCALE;
 		if (balancesValue.hasOwnProperty(thisToken)) {
@@ -4577,10 +4756,10 @@ async function returnTrueIfPercentagesAreLessAndClose(
 			var actualPercentage = thisObj["percentage"];
 			//actualPercentage=actualPercentage/USD_SCALE
 			var diff = thisPerc - actualPercentage;
-			//console.log('thisPerc        :'+thisPerc)
-			//console.log('actualPercentage:'+actualPercentage)
+			////console.log('thisPerc        :'+thisPerc)
+			////console.log('actualPercentage:'+actualPercentage)
 			diff = Math.abs(diff);
-			//console.log('diff:'+diff)
+			////console.log('diff:'+diff)
 			if (actualPercentage < thisPerc) {
 				if (diff < 0.015) {
 					//To do - get this number from constants in contract
@@ -4615,14 +4794,14 @@ function returnTrueIfPercentagesAreDiff(
 	goalPercentages,
 	goalTokens
 ) {
-	//console.log("balancesValue:"+JSON.stringify(balancesValue,null,2))
-	//console.log('gp:'+goalPercentages)
-	//console.log('gt:'+goalTokens)
+	////console.log("balancesValue:"+JSON.stringify(balancesValue,null,2))
+	////console.log('gp:'+goalPercentages)
+	////console.log('gt:'+goalTokens)
 	var areDiff = false;
 	for (var i = 0; i < goalTokens.length; i++) {
 		var thisToken = goalTokens[i];
 		thisToken = thisToken.toLowerCase();
-		//console.log('thisToken:'+thisToken)
+		////console.log('thisToken:'+thisToken)
 		var thisPerc = goalPercentages[i];
 		thisPerc = thisPerc / 100;
 		if (balancesValue.hasOwnProperty(thisToken)) {
@@ -4631,20 +4810,20 @@ function returnTrueIfPercentagesAreDiff(
 			actualPercentage = Number(actualPercentage.toFixed(2));
 			//actualPercentage=actualPercentage/USD_SCALE
 			var diff = thisPerc - actualPercentage;
-			//console.log('thisPerc        :'+thisPerc)
-			//console.log('actualPercentage:'+actualPercentage)
+			////console.log('thisPerc        :'+thisPerc)
+			////console.log('actualPercentage:'+actualPercentage)
 			diff = Math.abs(diff);
-			//console.log('diff:'+diff)
+			////console.log('diff:'+diff)
 			if (actualPercentage != thisPerc) {
-				//console.log("diff 1")
+				////console.log("diff 1")
 				areDiff = true;
 			}
 		} else {
-			//console.log("diff 2")
+			////console.log("diff 2")
 			areDiff = true;
 		}
 	}
-	//console.log("returning: "+areDiff)
+	////console.log("returning: "+areDiff)
 
 	return areDiff;
 }

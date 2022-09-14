@@ -174,7 +174,7 @@ export const usePortfolios = defineStore("Portfolios", {
 				//this.xAxisLineChart = getAxisDataForLineChart("all portfolios", "0xe2accfbaa0840d31b552971c30e7003e69cb3f39", "x")
 				//this.yAxisLineChart = getAxisDataForLineChart("all portfolios", "0xe2accfbaa0840d31b552971c30e7003e69cb3f39", "y")
 				this.isLoading = false;
-				console.log("got all and my portfolios");
+				//console.log("got all and my portfolios");
 			} catch (error) {
 				this.isLoading = false;
 				this.isError = true;
