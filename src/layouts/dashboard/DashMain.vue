@@ -3,26 +3,38 @@
 		class="pt-[10px] border border-t-0 border-b-0 border-white w-full"
 	></div>
 	<div
-		class="border border-t-0 border-white h-[calc(100vh-210px)] overflow-y-auto"
+		class="border border-t-0 border-white h-[calc(100vh-210px)]"
 	>
-		<div class="w-full h-full grid grid-cols-12 gap-[10px]">
-			<div class="col-span-4 grid gap-y-[10px]">
+		<div class="w-full h-[calc(100%-100px)] grid grid-cols-12 gap-[10px]">
+			<div class="col-span-4">
 				<!-- Pie chart  -->
-				<PieChartContainer class="" />
+				<PieChartContainer class="h-[67%]" />
 
 				<!--Social Media  -->
-				<Socials v-bind="$attrs" class="" />
+				<Socials v-bind="$attrs" class="mt-[10px] h-[35%]" />
 			</div>
 
-			<div class="col-span-8 grid grid-rows-5 gap-[10px]">
+			<div class="col-span-8">
 				<!-- Line chart container  -->
-				<div class="bg-[#191A20] row-span-2 py-[10px] px-[20px]">
+				<div class="bg-[#191A20] h-[50%] py-[10px] px-[20px] relative">
 					<!-- Line chart  -->
+          <div class="absolute top-0 text-xs text-[#868C9D] flex justify-between w-[calc(100%-40px)] bg-[#191A20]">
+            <div class="flex ml-[20px]">
+              <button class="pt-[5px] w-[30px] mr-[5px] border-2 border-transparent  hover:border-t-[#00FF00] hover:text-[#00FF00]">1D</button>
+              <button class="pt-[5px] w-[30px] mr-[5px] border-2 border-transparent  hover:border-t-[#00FF00] hover:text-[#00FF00]">7D</button>
+              <button class="pt-[5px] w-[30px] mr-[5px] border-2 border-transparent  hover:border-t-[#00FF00] hover:text-[#00FF00]">1M</button>
+              <button class="pt-[5px] w-[30px] mr-[5px] border-2 border-transparent  hover:border-t-[#00FF00] hover:text-[#00FF00]">3M</button>
+              <button class="pt-[5px] w-[30px] mr-[5px] border-2 border-transparent  hover:border-t-[#00FF00] hover:text-[#00FF00]">1Y</button>
+              <button class="pt-[5px] w-[30px] mr-[5px] border-2 border-transparent  hover:border-t-[#00FF00] hover:text-[#00FF00]">YTB</button>
+              <button class="pt-[5px] w-[30px] mr-[5px] border-2 border-transparent  hover:border-t-[#00FF00] hover:text-[#00FF00]">ALL</button>
+            </div>
+            <span class="mr-[30px] mt-[10px]">Feb 12, 2022</span>
+          </div>
 					<LineChart :chart-data="portfolioStore.lineChartData" />
 				</div>
 
 				<!--Table  -->
-				<Table v-bind="$attrs" class="row-span-3" />
+				<Table v-bind="$attrs" class="mt-[10px] h-[60%] max-h-[250px] overflow-y-auto" />
 			</div>
 		</div>
 	</div>

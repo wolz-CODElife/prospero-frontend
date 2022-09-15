@@ -33,7 +33,7 @@ export default defineComponent({
 		},
 		height: {
 			type: Number,
-			default: 250,
+			default: 150,
 		},
 		cssClasses: {
 			default: "",
