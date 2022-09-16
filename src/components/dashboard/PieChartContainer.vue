@@ -76,7 +76,7 @@
 				v-else
 				src="https://i.postimg.cc/KjHz2Jzs/image.png"
 				alt=""
-				class="w-[250px] mx-auto"
+				class="h-[150px] object-contain mx-auto"
 			/>
 		</div>
 	</div>

@@ -1,9 +1,9 @@
 <template>
-	<div class="max-h-[190px] overflow-y-auto">
+	<div>
 		<table class="table-auto w-full my-[10px]">
 			<thead>
 				<tr
-					class="text-[#868C9D] text-left border-b border-b-[#2D3035] py-[5px] px-[30px] sticky top-0 bg-[#191A20]"
+					class="text-[#868C9D] text-left border-b border-b-[#2D3035] py-[5px] px-[30px] bg-[#191A20]"
 				>
 					<th class="pl-[20px]">NAME</th>
 					<th
@@ -285,11 +285,18 @@ function sortBy(cond) {
 			.slice(0, 4);
 		sortValue.value = "y1";
 	} else {
-		filteredPortfolios.value = props.portfolioList
+		if(cond === 'fee') {
+			filteredPortfolios.value = props.portfolioList
+			.sort((a, b) => (a.fee < b.fee ? -1 : b.fee < a.fee ? 1 : 0))
+			.slice(0, 4);
+			sortValue.value = cond;
+		} else {
+			filteredPortfolios.value = props.portfolioList
 			.sort((a, b) => (a[cond] < b[cond] ? 1 : b[cond] < a[cond] ? -1 : 0))
 			.slice(0, 4);
-		sortValue.value = cond;
-		// console.log(`sort by ${cond}:`, filteredPortfolios.value);
+			sortValue.value = cond;
+			// console.log(`sort by ${cond}:`, filteredPortfolios.value);
+		}
 	}
 }
 
@@ -299,10 +306,6 @@ watch(
 		updateShowingPortfolios(), resetCurrentPage();
 	}
 );
-
-onMounted(() => {
-	filteredPortfolios.value = props.portfolioList.slice(-4).reverse();
-});
 
 const totalLeaderboardPages = computed(() => {
 	if (props.portfolioList.length / 4 < 1) {
