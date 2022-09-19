@@ -37,6 +37,7 @@
 			<!-- copy address  -->
 			<button
 				class="util uppercase text-[#868C9D] hover:text-white text-[10px] flex gap-[4px] items-center"
+				@click="copyToClipboard(walletAddress)"
 			>
 				Copy address
 				<span
@@ -77,22 +78,25 @@ const { state } = connect();
 
 const walletAddress = ref(state.address);
 
-function copyString(str) {
-	// Create new element
-	var el = document.createElement("textarea");
-	// Set value (string to be copied)
+function copyToClipboard(str) {
+	const el = document.createElement("textarea");
 	el.value = str;
-	// Set non-editable to avoid focus and move outside of view
 	el.setAttribute("readonly", "");
-	el.style = { position: "absolute", left: "-9999px" };
+	el.style.position = "absolute";
+	el.style.left = "-9999px";
 	document.body.appendChild(el);
-	// Select text inside element
+	const selected =
+		document.getSelection().rangeCount > 0
+			? document.getSelection().getRangeAt(0)
+			: false;
 	el.select();
-	// Copy text to clipboard
 	document.execCommand("copy");
-	// Remove temporary element
 	document.body.removeChild(el);
-
+	if (selected) {
+		document.getSelection().removeAllRanges();
+		document.getSelection().addRange(selected);
+	}
+	alert("copied", walletAddress.value);
 	// this.$notify({
 	//   type: 'success',
 	//   text: 'Copied!',

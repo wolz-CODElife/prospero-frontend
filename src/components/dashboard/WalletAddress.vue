@@ -1,8 +1,8 @@
 <template>
 	<div class="relative">
 		<div
-			@click="openAccountModal"
-			class="px-[24px] py-[8px] text-white bg-[#2D3035] flex justify-between items-center"
+			@click="toggleAccountModal"
+			class="px-[24px] py-[8px] text-white bg-[#2D3035] flex justify-between items-center cursor-pointer"
 		>
 			<span class="text-[16px] tracking-wider">
 				{{ walletAddress[0] }}...{{ walletAddress[1] }}
@@ -28,10 +28,10 @@
 		<!-- Account Modal  -->
 		<AccountModal
 			v-if="open"
-			:firstView="firstView"
-			:secondView="logOutView"
-			@close="closeAccountModal"
-			@doLogout="logoutWallet"
+			:first-view="firstView"
+			:second-view="logOutView"
+			@close="toggleAccountModal"
+			@do-logout="logoutWallet"
 		/>
 
 		<!-- <div v-if="open" class="text-white">Opened Modal</div> -->
@@ -65,13 +65,8 @@ async function logoutWallet() {
 	window.location.replace("/");
 }
 
-function openAccountModal() {
-	open.value = true;
-	console.log("clicking works. open is: ", open.value);
-}
-
-function closeAccountModal() {
-	open.value = false;
+function toggleAccountModal() {
+	open.value = !open.value;
 }
 
 const walletAddress = computed(() => [
