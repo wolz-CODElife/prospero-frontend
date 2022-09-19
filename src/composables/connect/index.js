@@ -1,54 +1,60 @@
-import { reactive, computed, watch } from "vue";
+import { reactive, ref, computed, watch } from "vue";
 import connectWalletConnect from "./connectWalletConnect";
 import autoConnect from "./autoConnect";
 import disconnectWallet from "./disconnectWallet";
 
+const err = ref({
+	msg: "",
+	type: "",
+});
+
 const STATE_NAME = "userState";
 
 const defaultState = {
-  address: "",
-  chainId: "",
-  status: false,
+	address: "",
+	chainId: "",
+	status: false,
 };
 
 const getDefaultState = () => {
-  if (localStorage.getItem(STATE_NAME) !== null) {
-    return JSON.parse(localStorage.getItem(STATE_NAME));
-  }
+	if (localStorage.getItem(STATE_NAME) !== null) {
+		return JSON.parse(localStorage.getItem(STATE_NAME));
+	}
 
-  return defaultState;
+	return defaultState;
 };
 
 const state = reactive(getDefaultState());
 
 const getters = {
-  getStatus: () => {
-    return computed(() => state.status);
-  },
+	getStatus: () => {
+		return computed(() => state.status);
+	},
 };
 
 const actions = {
-  connectWalletConnect,
-  autoConnect,
-  disconnectWallet
+	connectWalletConnect,
+	autoConnect,
+	disconnectWallet,
 };
 
 watch(
-  () => state,
-  () => {
-    localStorage.setItem(STATE_NAME, JSON.stringify(state));
-  },
-  { deep: true }
+	() => state,
+	() => {
+		localStorage.setItem(STATE_NAME, JSON.stringify(state));
+	},
+	{ deep: true }
 );
 
 export default () => {
-  if (localStorage.getItem(STATE_NAME) === null) {
-    localStorage.setItem(STATE_NAME, JSON.stringify(state));
-  }
+	if (localStorage.getItem(STATE_NAME) === null) {
+		localStorage.setItem(STATE_NAME, JSON.stringify(state));
+	}
 
-  return {
-    state,
-    ...getters,
-    ...actions,
-  };
+	return {
+		state,
+		...getters,
+		...actions,
+		err,
+	};
 };
