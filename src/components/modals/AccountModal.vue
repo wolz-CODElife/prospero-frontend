@@ -5,7 +5,7 @@
 
 			<div class="flex items-center justify-between mb-[40px]">
 				<button
-					@click="changeWallet"
+					@click="toggleWalletModal"
 					class="btn btn-primary-outline w-[200px] uppercase"
 				>
 					Change wallet
@@ -21,12 +21,24 @@
 		</div>
 	</Modal>
 
+	<!-- Change Wallet Modal  -->
+	<ConnectWalletModal
+		@connectMetaMask="useConnectMetaMask"
+		@connect-wallet-connect="useWalletConnect"
+		@close-wallet-modal="toggleWalletModal"
+		:is-showing="walletModal"
+	/>
+
 	<Modal @close="$emit('close')" v-if="props.secondView"> Log out view </Modal>
 </template>
 
 <script setup>
+import { ref } from "vue";
 import Modal from "../Modal.vue";
 import AccountOverview from "../modals/AccountOverview.vue";
+import ConnectWalletModal from "./ConnectWalletModal.vue";
+import connect from "@/composables/connect/index";
+import useConnectMetaMask from "@/composables/connectMetaMask";
 
 const props = defineProps({
 	firstView: Boolean,
@@ -35,7 +47,23 @@ const props = defineProps({
 
 defineEmits(["close", "doLogout"]);
 
-function changeWallet() {
-	console.log("Change wallet works");
+const { err } = connect();
+const walletModal = ref(false);
+
+function toggleWalletModal() {
+	walletModal.value = !walletModal.value;
+}
+
+async function useWalletConnect() {
+	connectWalletConnect().then((data) => {
+		if (data.error) {
+			err.value = {
+				msg: "Coin98 Extension is not installed!",
+				type: "error",
+			};
+		} else {
+			window.location.replace("dashboard");
+		}
+	});
 }
 </script>
