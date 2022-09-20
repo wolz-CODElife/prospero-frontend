@@ -36,8 +36,8 @@ import DashHeader from "./dashboard/header/DashHeader.vue";
 import DashMain from "./dashboard/DashMain.vue";
 import JoinDepositModal from "@/components/JoinDepositModal.vue";
 import CreateDepositModal from "@/components/CreateDepositModal.vue";
-import { usePortfolios } from "@/stores/Portfolios";
 import { initializeApi, rebalance } from "@/api";
+import { usePortfolios } from "@/stores/Portfolios";
 
 const portfolioStore = usePortfolios();
 
