@@ -3,19 +3,20 @@
 		<!-- Left stats -->
 		<div class="flex-1">
 			<div class="pl-[30px]">
-				<h2 class="text-[#868C9D] text-[14px]">Name</h2>
-				<h3 class="text-white text-[16px]">
+				<h2 class="text-[#868C9D] text-[13px]">Name</h2>
+				<h3 class="text-white text-[13px]">
 					{{ slice(portfolioStore.selectedPortfolio.name) }}
 				</h3>
 			</div>
 
-			<hr class="my-[12px] border-[#2D3035]" />
+			<hr class="my-[11px] border-[#2D3035]" />
+
 			<div class="pl-[30px]">
-				<h2 class="text-[#868C9D] text-[14px]">ROI</h2>
-				<h3 class="text-white text-[16px]">
+				<h2 class="text-[#868C9D] text-[13px]">ROI</h2>
+				<h3 class="text-white text-[13px]">
 					${{ getProfit(portfolioStore.selectedPortfolio) }}
 
-					<span class="text-[14px]"
+					<span class="text-[13px]"
 						>{{ getProfitPercentage(portfolioStore.selectedPortfolio) }}
 					</span>
 				</h3>
@@ -25,16 +26,17 @@
 		<!-- Right stats -->
 		<div class="flex-1">
 			<div class="border-l border-[#2D3035] pl-[10px]">
-				<h2 class="text-[#868C9D] text-[14px]">AUM</h2>
-				<h3 class="text-white text-[16px]">
+				<h2 class="text-[#868C9D] text-[13px]">AUM</h2>
+				<h3 class="text-white text-[13px]">
 					${{ getTotalValue(portfolioStore.selectedPortfolio) }}
 				</h3>
 			</div>
 
-			<hr class="my-[12px] border-[#2D3035]" />
+			<hr class="my-[11px] border-[#2D3035]" />
+
 			<div class="border-l border-[#2D3035] pl-[10px]">
-				<h2 class="text-[#868C9D] text-[14px]">Investors</h2>
-				<h3 class="text-white text-[16px]">
+				<h2 class="text-[#868C9D] text-[13px]">Investors</h2>
+				<h3 class="text-white text-[13px]">
 					{{ getNumberOfTrailers(portfolioStore.selectedPortfolio) }}
 				</h3>
 			</div>
@@ -64,9 +66,8 @@ function getProfit(portObject) {
 	if (profit == 0) {
 		return 0;
 	}
-	if (isNaN(profit)){
-
-	}else{
+	if (isNaN(profit)) {
+	} else {
 		profit = profit.toFixed(2);
 	}
 
@@ -97,7 +98,7 @@ function getProfitPercentage(portObject) {
 
 function getTotalValue(portObject) {
 	portObject = portObject["portfolioObject"];
-	if (portObject == undefined || ((!portObject.hasOwnProperty('totalValue')))) {
+	if (portObject == undefined || !portObject.hasOwnProperty("totalValue")) {
 		return 0;
 	}
 	var totalValue = portObject.totalValue;
