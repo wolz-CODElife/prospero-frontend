@@ -10,10 +10,10 @@
 			<!-- snowtrace  -->
 			<a
 				class="util uppercase text-[#868C9D] hover:text-white text-[10px] flex gap-[4px] items-center"
-				href="#"
+				:href="`https://testnet.snowtrace.io/address/${walletAddress}`"
 				target="_blank"
 			>
-				VIEW ON THE SNOWTRACE EXPLORER
+				View on the snowtrace explorer
 				<span
 					><svg
 						width="15"
