@@ -98,7 +98,7 @@
 						portfolioStore.isError ||
 						portfolioStore.allPortfolios.length === 0
 					"
-					class="text-center text-white mt-[150px]"
+					class="absolute inset-y-1/2 left-[35%] text-white w-full"
 				>
 					An error occured loading portfolio
 				</div>
