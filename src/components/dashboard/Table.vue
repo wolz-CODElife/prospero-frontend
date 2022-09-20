@@ -1,13 +1,15 @@
 <template>
-	<div class="bg-[#191A20] py-[20px]">
+	<div class="bg-[#191A20]">
 		<!-- This is the view of the 'Table' section of Prospero when the route is on /dashboard  -->
-		<div v-if="path === 'dashboard'">
+		<div v-if="path === 'dashboard'" class="h-full">
 			<!-- Join / Deposit View -->
-			<div v-if="portfolioStore.tableView">
+			<div v-if="portfolioStore.tableView" class="relative h-full">
 				<!-- Toggle Tabs  -->
-				<div class="flex justify-between mx-[20px]">
-					<!-- All / My -->
-					<div class="p-[10px] bg-black">
+				<div
+					class="flex justify-between absolute top-[10px] inset-x-[20px]"
+				>
+					<!-- All / My Toggle -->
+					<div class="px-[10px] py-[5px] bg-black">
 						<div class="flex">
 							<button
 								v-for="tab in tabs"
@@ -16,7 +18,7 @@
 									portfolioStore.changeActivePortfolioType(),
 										(disabled = true)
 								"
-								class="py-[8px] px-[15px] text-[14px] w-[160px] uppercase cursor-pointer"
+								class="py-[5px] px-[15px] text-[12px] w-[160px] uppercase cursor-pointer"
 								:class="[
 									portfolioStore.activePortfolioType === tab
 										? 'bg-[#2D3035] text-white'
@@ -101,7 +103,7 @@
 					An error occured loading portfolio
 				</div>
 
-				<!-- All Portfolios / My Portfolios Tables -->
+				<!-- Actual Table, Search and Pagination -->
 				<TableComponent
 					v-else
 					:portfolioList="
@@ -117,13 +119,13 @@
 			<!-- Create / Withdraw View  -->
 			<div v-else>
 				<!-- Go back-->
-				<div class="px-[10px]">
+				<div class="p-[10px]">
 					<button
 						class="button text-[#00FF00] uppercase flex gap-[14px] items-center mb-[16px]"
 						@click="portfolioStore.goBack()"
 					>
 						<img src="@/assets/img/direction.svg" alt="" />
-						<span> Go Back </span>
+						<span class="text-[13px]"> Go Back </span>
 					</button>
 				</div>
 
@@ -133,7 +135,7 @@
 					<div>
 						<!-- Create new portfolio -->
 						<h4
-							class="text-[16px] text-center uppercase text-white mt-[40px] mb-[28px]"
+							class="text-[13px] text-center uppercase text-white mb-[28px]"
 						>
 							Create new portfolio
 						</h4>
@@ -152,7 +154,7 @@
 									name="p-name"
 									id="p-name"
 									v-model="portfolioName"
-									class="pt-[28px] pb-[14px] pl-[24px] w-full bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
+									class="pt-[18px] pb-[8px] pl-[24px] w-full bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
 								/>
 							</div>
 
@@ -169,7 +171,7 @@
 									name="p-fee"
 									id="p-fee"
 									v-model="fundFee"
-									class="pt-[28px] pb-[14px] pl-[24px] w-full bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
+									class="pt-[18px] pb-[8px] pl-[24px] w-full bg-black text-white text-[16px] border border-black focus:outline-none focus:border-[#00ff00]"
 								/>
 							</div>
 
@@ -180,7 +182,7 @@
 										assignName(),
 										updateNameAndFeeApi()
 								"
-								class="btn btn-primary"
+								class="btn btn-primary w-full"
 								:class="
 									disabledDepToPortfolio
 										? 'opacity-50 cursor-text '
@@ -192,9 +194,6 @@
 							</button>
 						</div>
 					</div>
-
-					<!-- Allocation view on redirect  -->
-					<!-- <ManageContainer v-else /> -->
 				</div>
 
 				<!-- Withdraw mode  -->
@@ -442,3 +441,9 @@ watch(
 	}
 );
 </script>
+
+<style lang="postcss" scoped>
+.btn {
+	@apply text-[13px];
+}
+</style>
