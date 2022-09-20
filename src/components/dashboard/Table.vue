@@ -236,9 +236,9 @@
 		</div>
 
 		<!-- This is the view of the 'Table' section of Prospero when the route is on /manage  -->
-		<div v-else-if="path === 'manage'">
+		<div v-else-if="path === 'manage'" class="h-full relative">
 			<!-- Go back-->
-			<h3 class="text-[#00FF00] uppercase mb-[16px] mx-[10px]">
+			<h3 class="text-[#00FF00] text-[13px] uppercase my-[10px] ml-[20px]">
 				Manage Portfolio
 			</h3>
 
