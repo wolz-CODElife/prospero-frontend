@@ -49,13 +49,13 @@ export default {
 		onBeforeMount(() => {
 			setTimeout(() => {
 				notloaded.value = false;
-				if (window.matchMedia("(max-width: 1024px)").matches) {
+				if (window.matchMedia("(max-width: 1400px)").matches) {
 					mobile.value = true;
 				} else {
 					mobile.value = false;
 				}
 				window.addEventListener("resize", () => {
-					if (window.matchMedia("(max-width: 1024px)").matches) {
+					if (window.matchMedia("(max-width: 1400px)").matches) {
 						mobile.value = true;
 					} else {
 						mobile.value = false;

@@ -49,8 +49,8 @@
 	<hr class="border-[#2D3035]" />
 
 	<!-- Table  -->
-	<div class="h-[150px] overflow-y-auto">
-		<table class="table-auto w-full my-[20px]">
+	<div class="h-[200px] lg:h-[300px] overflow-y-auto">
+		<table class="table-auto w-full mb-[20px]">
 			<thead>
 				<tr
 					class="text-[#868C9D] text-left border-b border-b-[#2D3035] px-[30px]"
@@ -88,7 +88,7 @@
 						/>
 					</td>
 					<td>{{ token.name }}</td>
-					<td>${{ token.price }}</td>
+					<td>${{ token.price.toFixed(2) }}</td>
 					<td class="border-r border-r-[#2D3035]">
 						${{ parseFloat(token.mc) }}M
 					</td>
@@ -134,6 +134,7 @@
 		>
 			100% - Allocation saved!
 		</button>
+		<!-- <Toast type="success" /> -->
 	</div>
 
 	<!-- saveAllocationModal -->

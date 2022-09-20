@@ -118,6 +118,8 @@ export const usePortfolios = defineStore("Portfolios", {
 			fromDate: "",
 
 			toDate: "",
+
+			copiedStatus: false,
 		};
 	},
 
@@ -259,6 +261,7 @@ export const usePortfolios = defineStore("Portfolios", {
 		},
 
 		updateActiveOverview(asset) {
+			// todo - change this function
 			this.activeOverview = this.overview.find(
 				(item) => item.asset.name === asset
 			);
