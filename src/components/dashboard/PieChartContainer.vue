@@ -66,7 +66,7 @@
 
 		<!-- Pie chart  -->
 
-		<div class="mt-[auto]">
+		<div class="mt-[40px]">
 			<PieChart
 				v-if="portfolioStore.selectedPortfolio.name"
 				:chart-data="realChartData"
