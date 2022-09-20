@@ -1,6 +1,6 @@
 <template>
 	<div>
-		<div class="grid grid-cols-12 h-[170px] text-[#868C9D] bg-black">
+		<div class="grid grid-cols-12 h-[150px] text-[#868C9D] bg-black">
 			<!-- Left side of header  -->
 			<div
 				class="col-span-8 bg-black pl-[30px] border"
@@ -43,17 +43,17 @@
 
 					<!-- Left stats -->
 					<div class="flex-1 ml-[30px]">
-						<h2 class="text-[#868C9D] text-[14px] mt-[16px]">
+						<h2 class="text-[#868C9D] text-[13px] mt-[16px]">
 							My holdings
 						</h2>
-						<h3 class="text-white text-[24px]">
+						<h3 class="text-white text-[20px]">
 							{{ portfolioStore.activeOverview?.holdings }}
 						</h3>
 						<hr class="my-[12px] border-[#2D3035]" />
-						<h2 class="text-[#868C9D] text-[14px]">ROI</h2>
-						<h3 class="text-white text-[24px]">
+						<h2 class="text-[#868C9D] text-[13px]">ROI</h2>
+						<h3 class="text-white text-[20px]">
 							{{ portfolioStore.activeOverview?.roi.value }}
-							<span class="text-[14px]"
+							<span class="text-[13px]"
 								>{{ portfolioStore.activeOverview?.roi.percent }}
 							</span>
 						</h3>
@@ -75,7 +75,7 @@
 					<!-- Right stats -->
 					<div class="flex-1">
 						<div class="border-l border-[#2D3035] pl-[10px]">
-							<h2 class="text-[#868C9D] text-[14px]">Deposits</h2>
+							<h2 class="text-[#868C9D] text-[13px]">Deposits</h2>
 							<h3 class="text-white text-[16px]">
 								{{ portfolioStore.activeOverview?.deposits }}
 							</h3>
@@ -83,7 +83,7 @@
 
 						<hr class="my-[12px] border-[#2D3035]" />
 						<div class="border-l border-[#2D3035] pl-[10px]">
-							<h2 class="text-[#868C9D] text-[14px]">Withdrawals</h2>
+							<h2 class="text-[#868C9D] text-[13px]">Withdrawals</h2>
 							<h3 class="text-white text-[16px]">
 								{{ portfolioStore.activeOverview?.withdrawals }}
 							</h3>
@@ -113,7 +113,4 @@ import RightHeader from "../header/RightHeader.vue";
 import { usePortfolios } from "@/stores/Portfolios";
 
 const portfolioStore = usePortfolios();
-
-
-
 </script>
