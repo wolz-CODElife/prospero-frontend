@@ -27,6 +27,8 @@ export const usePortfolios = defineStore("Portfolios", {
 
 			selectedPortfolio: {},
 
+			lineChartSelectedDate: "",
+
 			allocationList: [],
 
 			tokenList: [],
@@ -124,6 +126,7 @@ export const usePortfolios = defineStore("Portfolios", {
 			this.lineChartData.datasets[0].data = [
 				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
 			];
+			this.lineChartSelectedDate = "";
 		},
 
 		reset() {
