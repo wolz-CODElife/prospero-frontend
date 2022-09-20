@@ -12,6 +12,7 @@ import {
 	CategoryScale,
 	Plugin,
 } from "chart.js";
+import { usePortfolios } from "@/stores/Portfolios";
 
 ChartJS.register(
 	Title,
@@ -43,7 +44,7 @@ export default defineComponent({
 		},
 		height: {
 			type: Number,
-			default: 150,
+			default: 200,
 		},
 		cssClasses: {
 			default: "",
@@ -59,9 +60,21 @@ export default defineComponent({
 		},
 	},
 	setup(props) {
+
+		const portfolioStore = usePortfolios();
 		const chartOptions = {
 			responsive: true,
 			maintainAspectRatio: false,
+			onClick: (event, elements, chart) => {
+				if (elements[0]) {            
+				   const i = elements[0].index;
+				   let dateOptions = { month: 'short', day: 'numeric', year: 'numeric' };
+				   let newDate = new Date(chart.data.labels[i]).toLocaleDateString('en-us', dateOptions)
+				   portfolioStore.lineChartSelectedDate = newDate
+				   
+				//    console.log("Clicking Line chart",chart.data.labels[i] + ': ' + chart.data.datasets[0].data[i]);
+				}
+			},
 			plugins: {
 				legend: {
 					display: false,

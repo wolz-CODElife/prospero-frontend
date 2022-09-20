@@ -100,7 +100,7 @@
 						</div>
 						<!-- Date here  -->
 						<span class="mr-[30px] mt-[10px] uppercase"
-							>Feb 1, 2022, 19:50
+							>{{ portfolioStore.lineChartSelectedDate }}
 						</span>
 					</div>
 

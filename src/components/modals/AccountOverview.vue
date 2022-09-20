@@ -36,7 +36,8 @@
 
 			<!-- copy address  -->
 			<button
-				class="util uppercase text-[#868C9D] hover:text-white text-[10px] flex gap-[4px] items-center"
+				class="util uppercase text-[10px] flex gap-[4px] items-center"
+				:class="[copiedStatus ? 'text-green-700' : 'text-[#868C9D] hover:text-white']"
 				@click="copyToClipboard(walletAddress)"
 			>
 				Copy address
@@ -50,12 +51,12 @@
 					>
 						<g clip-path="url(#clip0_364_18870)">
 							<path
-								d="M12.2917 2.91602H4.375C4.20924 2.91602 4.05027 2.98186 3.93306 3.09907C3.81585 3.21628 3.75 3.37526 3.75 3.54102V13.541C3.75 13.7068 3.81585 13.8657 3.93306 13.983C4.05027 14.1002 4.20924 14.166 4.375 14.166H12.2917C12.4574 14.166 12.6164 14.1002 12.7336 13.983C12.8508 13.8657 12.9167 13.7068 12.9167 13.541V3.54102C12.9167 3.37526 12.8508 3.21628 12.7336 3.09907C12.6164 2.98186 12.4574 2.91602 12.2917 2.91602ZM12.0833 13.3327H4.58333V3.74935H12.0833V13.3327Z"
-								fill="#868C9D"
+								d="M12.2917 2.91602H4.375C4.20924 2.91602 4.05027 2.98186 3.93306 3.09907C3.81585 3.21628 3.75 3.37526 3.75 3.54102V13.541C3.75 13.7068 3.81585 13.8657 3.93306 13.983C4.05027 14.1002 4.20924 14.166 4.375 14.166H12.2917C12.4574 14.166 12.6164 14.1002 12.7336 13.983C12.8508 13.8657 12.9167 13.7068 12.9167 13.541V3.54102C12.9167 3.37526 12.8508 3.21628 12.7336 3.09907C12.6164 2.98186 12.4574 2.91602 12.2917 2.91602ZM12.0833 13.3327H4.58333V3.74935H12.0833V13.3327Z" 
+								:fill="[ copiedStatus ? 'rgb(21 128 61)' : '#868C9D']"
 							/>
 							<path
 								d="M10.8334 1.45898C10.8334 1.29322 10.7676 1.13425 10.6504 1.01704C10.5331 0.899832 10.3742 0.833984 10.2084 0.833984H2.29175C2.12599 0.833984 1.96702 0.899832 1.84981 1.01704C1.7326 1.13425 1.66675 1.29322 1.66675 1.45898V11.459C1.66675 11.6247 1.7326 11.7837 1.84981 11.9009C1.96702 12.0181 2.12599 12.084 2.29175 12.084H2.50008V1.66732H10.8334V1.45898Z"
-								fill="#868C9D"
+								:fill="[ copiedStatus ? 'rgb(21 128 61)' : '#868C9D']"
 							/>
 						</g>
 						<defs>
@@ -75,6 +76,7 @@ import { ref } from "vue";
 import connect from "@/composables/connect/index";
 
 const { state } = connect();
+const copiedStatus = ref(false);
 
 const walletAddress = ref(state.address);
 
@@ -96,7 +98,11 @@ function copyToClipboard(str) {
 		document.getSelection().removeAllRanges();
 		document.getSelection().addRange(selected);
 	}
-	alert("copied", walletAddress.value);
+	copiedStatus.value = true
+
+	setTimeout(() => {
+		copiedStatus.value = false
+	}, 3000)
 	// this.$notify({
 	//   type: 'success',
 	//   text: 'Copied!',
