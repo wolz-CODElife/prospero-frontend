@@ -2,7 +2,7 @@
 	<div
 		class="pt-[10px] border border-t-0 border-b-0 border-white w-full"
 	></div>
-	<div class="border border-t-0 border-white h-[calc(100vh-210px)]">
+	<div class="border border-t-0 border-white h-[calc(100vh-185px)]">
 		<div class="w-full h-[calc(100%-10px)] grid grid-cols-12 gap-x-[10px]">
 			<div class="col-span-4">
 				<!-- Pie chart  -->
@@ -107,7 +107,7 @@
 					<!-- Actual line chart  -->
 					<LineChart
 						:chart-data="portfolioStore.lineChartData"
-						class="mt-[50px] absolute bottom-[20px] inset-x-[20px]"
+						class="mt-[50px] absolute bottom-[5px] inset-x-[10px]"
 					/>
 				</div>
 
