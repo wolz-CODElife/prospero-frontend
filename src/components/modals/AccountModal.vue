@@ -24,7 +24,7 @@
 	<!-- Change Wallet Modal  -->
 	<ConnectWalletModal
 		@connectMetaMask="useChangeMetaMask"
-		@connect-wallet-connect="useWalletConnect"
+		@connectWalletConnect="useWalletConnect"
 		@close-wallet-modal="toggleWalletModal"
 		:is-showing="walletModal"
 	/>
