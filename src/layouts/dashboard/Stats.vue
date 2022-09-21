@@ -82,9 +82,6 @@ function getNumberOfTrailers(portObject) {
 }
 
 function getProfitPercentage(portObject) {
-	//console.log("pp getNumberOfTrailers portObject:"+JSON.stringify(portObject,null,2))
-
-	//console.log("portObject:"+JSON.stringify(portObject,null,2))
 	if (portObject == null) {
 		return 0;
 	}

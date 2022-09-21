@@ -125,19 +125,16 @@ export const usePortfolios = defineStore("Portfolios", {
 
 	actions: {
 		resetLineChart() {
-			this.lineChartData.datasets[0].data = [
-				0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0,
-			];
+			this.lineChartData = getLineChartData("all my holdings", "");
 			this.lineChartSelectedDate = "";
 		},
-
+		
 		reset() {
 			this.selectedPortfolio = {};
 		},
 
 		async loadData() {
 			try {
-				console.log("calling loadData");
 				await initializeApi();
 				this.isLoading = true;
 				try {
@@ -146,10 +143,8 @@ export const usePortfolios = defineStore("Portfolios", {
 				} catch (error) {
 					this.isLoading = false;
 					this.isError = true;
-					console.log("get portfolios error", error);
 				}
 			} catch (error) {
-				console.log("init error", error);
 			}
 		},
 
@@ -179,11 +174,9 @@ export const usePortfolios = defineStore("Portfolios", {
 				//this.xAxisLineChart = getAxisDataForLineChart("all portfolios", "0xe2accfbaa0840d31b552971c30e7003e69cb3f39", "x")
 				//this.yAxisLineChart = getAxisDataForLineChart("all portfolios", "0xe2accfbaa0840d31b552971c30e7003e69cb3f39", "y")
 				this.isLoading = false;
-				//console.log("got all and my portfolios");
 			} catch (error) {
 				this.isLoading = false;
 				this.isError = true;
-				console.log(error);
 			}
 		},
 
@@ -195,14 +188,10 @@ export const usePortfolios = defineStore("Portfolios", {
 			} catch (error) {
 				this.isLoading = false;
 				this.isError = true;
-				console.log(error);
 			}
 		},
 
 		async doSelectPortfolio(val) {
-			console.log(
-				"doSelectPortfolio called with val:" + JSON.stringify(val, null, 2)
-			);
 			this.selectedPortfolio = val;
 			this.activeHeader = "right";
 			await updateSelectedWallet(val.prosperoWalletAddress);
@@ -215,7 +204,6 @@ export const usePortfolios = defineStore("Portfolios", {
 		async toggleActiveHeader() {
 			if (this.activeHeader === "left") {
 				this.activeHeader = "right";
-				console.log("on left mmoving right");
 				this.reset();
 				//if (this.selectedPortfolio!=undefined){
 				//await updateSelectedWallet(this.selectedPortfolio);
@@ -225,7 +213,6 @@ export const usePortfolios = defineStore("Portfolios", {
 				//);
 				//}
 			} else {
-				console.log("on right, going left...");
 				this.activeHeader = "left";
 				this.lineChartData = getLineChartData("all my holdings", "");
 			}
@@ -281,7 +268,6 @@ export const usePortfolios = defineStore("Portfolios", {
 
 		filteredTxnList(state) {
 			if (state.activeFilter === "All") {
-				console.log("All Txns are -", state.allTxns);
 				return state.allTxns.slice().reverse();
 			} else {
 				return state.allTxns

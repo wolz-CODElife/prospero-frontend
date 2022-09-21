@@ -238,18 +238,6 @@ const totalAllocation = computed(() => {
 });
 
 async function doSaveAllocation() {
-	console.log("doSaveAllocation");
-	console.log(
-		"portfolioStore.acceptingNewInvestors:" +
-			portfolioStore.isPortfolioAcceptingNewInvestors
-	);
-	console.log(
-		"portfolioStore.portfolioFundFee:" + portfolioStore.portfolioFundFee
-	);
-	console.log(
-		"portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal:" +
-			portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal
-	);
 	var selectedProsperoWalletAddress =
 		portfolioStore.selectedPortfolio.prosperoWalletAddress;
 
@@ -257,10 +245,6 @@ async function doSaveAllocation() {
 		portfolioStore.isPortfolioAcceptingNewInvestors !=
 		portfolioStore.selectedPortfolio.acceptingNewInvestorsOriginal
 	) {
-		console.log(
-			"Waiting for acceptingNewInvestors API call to finish....possible info modal here?"
-		);
-		console.log("acceptingNewInvestors has changed - calling API");
 		var result = await updateNewInvestors(
 			selectedProsperoWalletAddress,
 			portfolioStore.isPortfolioAcceptingNewInvestors
@@ -272,18 +256,12 @@ async function doSaveAllocation() {
 			//to do - add error message here
 			return;
 		}
-		console.log("done with updateNewInvestors");
 	}
 	//if the portfolio fee is less than the original
 	if (
 		portfolioStore.portfolioFundFee <
 		portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal
 	) {
-		console.log("****");
-		console.log(
-			"Waiting for leaderPercentageFee API call to finish....possible info modal here?"
-		);
-		console.log("leaderPercentageFee has changed - calling API");
 		//updatePercentageFee(prosperoWalletAddress, newPercFee)
 		portfolioStore.portfolioFundFee = parseInt(
 			portfolioStore.portfolioFundFee
@@ -299,7 +277,6 @@ async function doSaveAllocation() {
 			//to do - add error message here
 			return;
 		}
-		console.log("done with updatePercentageFees");
 	} else if (
 		portfolioStore.portfolioFundFee >
 		portfolioStore.selectedPortfolio.leaderPercentageFeeOriginal
@@ -311,9 +288,7 @@ async function doSaveAllocation() {
 	var newTokensAlloc = portfolioStore.allocationList;
 	for (var i = 0; i < newTokensAlloc.length; i++) {
 		var token = newTokensAlloc[i];
-		//console.log("token:"+JSON.stringify(token,null,2));
 		var perc = Number(token.allocation);
-		//console.log('perc:'+perc)
 		if (perc > 0) {
 			percentages.push(Number(token.allocation));
 			tokenAddressesToRemix.push(token.address);
@@ -327,41 +302,32 @@ async function doSaveAllocation() {
 	}
 
 	try {
-		console.log("calling rebalance with:");
 		let res = await rebalance(
 			percentages,
 			tokenAddressesToRemix,
 			selectedProsperoWalletAddress
 		);
-		console.log("res here1:" + JSON.stringify(res, null, 2));
 		if (!res.success) {
-			console.log("not success");
 			loading.value = false;
 			error.value = true;
 			//errorMsg.value = res.error;
 			//alert(res.error);//to do - need an error message box here
 			errorMessage.value = res.error;
-			//console.log(errorMsg.value);
 		} else {
-			console.log("success is good");
 			error.value = false;
 			loading.value = false;
 			success.value = true;
 			//usdAmountOfGas.value = res.gasUsed.usdAmountOfGas.toFixed(2);
-			//console.log("usdAmountOfGas to show in modal:" + usdAmountOfGas.value);
 		}
 	} catch (err) {
-		console.log("err true");
 		loading.value = false;
 		error.value = true;
 		success.value = false;
 	}
 
 	saveAllocationModal.value = true;
-	console.log("done");
 
 	await loadFreshDataFromApi();
-	console.log("done loadFreshDataFromApi");
 }
 
 function closeAllocationModal() {
@@ -369,12 +335,9 @@ function closeAllocationModal() {
 }
 
 async function loadFreshDataFromApi() {
-	console.log("loadFreshDataFromApi called");
 	await portfolioStore.loadData();
-	console.log("done with loadData");
 	var selectedPortAddress =
 		portfolioStore.selectedManagePortfolio.prosperoWalletAddress;
-	console.log("selectedPortAddress:" + selectedPortAddress);
 	var port;
 	for (var i = 0; i < portfolioStore.myPortfolios.length; i++) {
 		var port = portfolioStore.myPortfolios[i];
@@ -393,14 +356,10 @@ async function loadFreshDataFromApi() {
 	//}
 
 	portfolioStore.selectedManagePortfolio = port;
-	console.log("gonna run onClickedPort");
 	await onClickedPort(port);
-	console.log("done with onClickedPort");
 }
 
 async function onClickedPort(portfolio) {
-	console.log("onClickedPort");
-	console.log("PORT:" + JSON.stringify(portfolio, null, 2));
 
 	//Do this for line chart
 	portfolioStore.activePortfolioType = "My Portfolios";
@@ -412,8 +371,6 @@ async function onClickedPort(portfolio) {
 	portfolioStore.portfolioFundFee = portfolio.leaderPercentageFee;
 	portfolioStore.isPortfolioAcceptingNewInvestors =
 		portfolio.acceptingNewInvestors;
-	//console.log("portfolio.leaderPercentageFee:"+portfolio.leaderPercentageFee);
-	//console.log("portfolio.acceptingNewInvestors:"+portfolio.acceptingNewInvestors);
 	var port = portfolio["portfolioObject"];
 	for (var tokenAddress in port) {
 		if (tokenAddress.length == 42) {
@@ -455,31 +412,17 @@ async function onClickedPort(portfolio) {
 }
 
 async function successCloseAllocationModal() {
-	console.log("do nothing");
+	// saveAllocationModal.value = false;
 	saveAllocationModal.value = false;
-
-	return;
-	console.log("closeAllocationModal called");
-	saveAllocationModal.value = false;
-	console.log(
-		"MMMMM:" + JSON.stringify(portfolioStore.selectedManagePortfolio, null, 2)
-	);
 	portfolioStore.activePortfolioType = "My Portfolios";
 
 	var selectedPortAddress =
 		portfolioStore.selectedManagePortfolio.prosperoWalletAddress;
-	console.log("selectedPortAddress:" + selectedPortAddress);
 	await portfolioStore.loadData();
-	console.log(
-		"portfolioStore.myPortfolios:" +
-			JSON.stringify(portfolioStore.myPortfolios, null, 2)
-	);
 	var port;
 	for (var i = 0; i < portfolioStore.myPortfolios.length; i++) {
 		port = portfolioStore.myPortfolios[i];
-		console.log("port:" + JSON.stringify(port, null, 2));
 		if (port.prosperoWalletAddress == selectedPortAddress) {
-			console.log("found it...");
 			portfolioStore.selectedManagePortfolio = port;
 			break;
 		}
@@ -489,7 +432,6 @@ async function successCloseAllocationModal() {
 	portfolioStore.selectedPortfolio = port;
 	portfolioStore.activePortfolioType = "My Portfolios";
 	await portfolioStore.doSelectPortfolio(port);
-	console.log("set...");
 
 	portfolioStore.allocationList = [];
 	var portfolio = portfolioStore.selectedManagePortfolio;
@@ -535,7 +477,6 @@ async function successCloseAllocationModal() {
 }
 
 function newList(amt, name) {
-	console.log("newList:" + name);
 	let newTokenList = portfolioStore.tokenList.map((token) => {
 		if (token.name === name) {
 			token = { ...token, allocation: parseFloat(amt) };
@@ -546,7 +487,6 @@ function newList(amt, name) {
 }
 
 function deleteToken(item) {
-	//console.log("delteItem item:"+JSON.stringify(item,null,2))
 	for (var i = 0; i < portfolioStore.allocationList.length; i++) {
 		if (item.address == portfolioStore.allocationList[i]["address"]) {
 			portfolioStore.allocationList.splice(i, 1);

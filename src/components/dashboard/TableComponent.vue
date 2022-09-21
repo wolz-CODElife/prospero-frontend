@@ -297,7 +297,6 @@ function sortBy(cond) {
 				)
 				.slice(0, 4);
 			sortValue.value = cond;
-			// console.log(`sort by ${cond}:`, filteredPortfolios.value);
 		}
 	}
 	updateShowingPortfolios();
@@ -343,7 +342,6 @@ function updateShowingPortfolios() {
 
 function updateSearchedPortfolios(event) {
 	const term = event.target.value;
-	console.log(term);
 	filteredPortfolios.value = props.portfolioList
 		.filter((portfolio) =>
 			portfolio.name?.toLowerCase().includes(term.toLowerCase())

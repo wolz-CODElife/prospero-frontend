@@ -23,7 +23,7 @@
 
 	<!-- Change Wallet Modal  -->
 	<ConnectWalletModal
-		@connectMetaMask="useConnectMetaMask"
+		@connectMetaMask="useChangeMetaMask"
 		@connect-wallet-connect="useWalletConnect"
 		@close-wallet-modal="toggleWalletModal"
 		:is-showing="walletModal"
@@ -38,7 +38,7 @@ import Modal from "../Modal.vue";
 import AccountOverview from "../modals/AccountOverview.vue";
 import ConnectWalletModal from "./ConnectWalletModal.vue";
 import connect from "@/composables/connect/index";
-import useConnectMetaMask from "@/composables/connectMetaMask";
+import useChangeMetaMask from "@/composables/changeMetaMask";
 
 const props = defineProps({
 	firstView: Boolean,

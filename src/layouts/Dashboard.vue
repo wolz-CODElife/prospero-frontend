@@ -49,7 +49,6 @@ onBeforeMount(async () => {
 			window.location.replace("/");
 		} else {
 			try {
-				console.log("calling initializeAPI");
 				await initializeApi();
 				portfolioStore.isLoading = true;
 				try {
@@ -58,10 +57,8 @@ onBeforeMount(async () => {
 				} catch (error) {
 					portfolioStore.isLoading = false;
 					portfolioStore.isError = true;
-					console.log("get portfolios error", error);
 				}
 			} catch (error) {
-				console.log("init error", error);
 			}
 		}
 	})();
@@ -74,19 +71,16 @@ const createView = ref(false);
 const smDisabled = computed(() => !portfolioStore.selectedPortfolio.name);
 
 function doJoin() {
-	console.log("doJoin function caing - dashboard");
 	updateUIStatus(2);
 	joinView.value = true;
 }
 
 function doJustDeposit() {
-	console.log("doJuseDeposit function caing updateUIStatus(3)");
 	updateUIStatus(3);
 	joinView.value = true;
 }
 
 function doCreate() {
-	console.log("doCreate function caing updateUIStatus(1)");
 	updateUIStatus(1);
 	createView.value = true;
 }
@@ -103,12 +97,7 @@ function goBack() {
 }
 
 async function redirect() {
-	console.log("redirect called");
 	// if (joinView.value) {
-	console.log(
-		"****this.selectedPortfolio:" +
-			JSON.stringify(portfolioStore.selectedPortfolio, null, 2)
-	);
 
 	portfolioStore.activeMode = "join";
 	portfolioStore.activePortfolioType = "My Portfolios";
@@ -124,12 +113,10 @@ async function redirect() {
 		if (
 			thisPort.prosperoWalletAddress == theProspWalletAddressSelectedBefore
 		) {
-			console.log("****found it****");
 			portfolioStore.selectedPortfolio = thisPort;
 			break;
 		}
 	}
-	console.log("thisPort:" + JSON.stringify(thisPort, null, 2));
 	await portfolioStore.doSelectPortfolio(thisPort);
 }
 </script>

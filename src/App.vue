@@ -65,7 +65,6 @@ export default {
 		});
 
 		const layout = computed(() => {
-			console.log("current route is: ", currentRoute);
 			return currentRoute.value.meta.layout;
 		});
 

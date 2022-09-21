@@ -144,6 +144,5 @@ defineEmits([
 
 onMounted(() => {
 	//portfolioStore.getTokenList();
-	console.log(portfolioStore.tokenList);
 });
 </script>

@@ -16,10 +16,7 @@ const connectWalletConnect = async () => {
     state.status = true;
     state.address = address;
     state.chainId = await provider.request({ method: "eth_chainId" });
-    console.log(state.chainId);
     provider.on("disconnect", (code, reason) => {
-      console.log(code, reason);
-      console.log("disconnected");
       state.status = false;
       state.address = "";
       localStorage.removeItem("userState");
@@ -32,7 +29,6 @@ const connectWalletConnect = async () => {
     });
 
     provider.on("chainChanged", (chainId) => {
-      console.log(chainId);
       state.chainId = chainId
     });
   } catch (error) {

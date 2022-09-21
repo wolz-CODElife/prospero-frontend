@@ -330,31 +330,23 @@ async function doWithdraw() {
 			if (gasFee.value != 0) {
 				gasFee.value = gasFee.value.toFixed(2);
 			}
-			console.log("Gas Fee to show in modal:" + gasFee.value);
 			error.value = false;
 			loading.value = false;
-			console.log("WD LOAINDG DATA...");
 			await portfolioStore.loadData();
-			console.log("done loading data");
 		} else {
 			loading.value = false;
 			error.value = true;
-			console.log(res.error);
 		}
 	} catch (error) {
 		loading.value = false;
 		error.value = true;
-		console.log(error);
 	}
 }
 
 // function getTokenListForManage() {
-// 	console.log("getTokenListForManage");
 // 	try {
 // 		tokenList.value = getTokenListForManageUI();
-// 		console.log("getTokenListForManage token list is:", tokenList.value);
 // 	} catch (error) {
-// 		console.log(error);
 // 	}
 // }
 
@@ -385,28 +377,19 @@ function toggleDisabled() {
 // });
 
 function updateNameAndFeeApi() {
-	console.log(
-		"updateNameAndFeeApi portfolioName:" +
-			portfolioName.value +
-			" fundFee:" +
-			fundFee.value
-	);
 	updateNewWalletVariables(portfolioName.value, fundFee.value);
 }
 
 function updateUIStatusAPICaller(uiType) {
-	console.log("updateUIStatusAPICaller with type:" + uiType);
 	updateUIStatus(uiType);
 }
 
 function enableSwap() {
 	withdrawMode.value = "swap";
-	console.log("works.....swap", withdrawMode.value);
 }
 
 function enableDirect() {
 	withdrawMode.value = "direct";
-	console.log("works.....direct");
 }
 
 function closeWithdrawalModal() {

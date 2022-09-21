@@ -78,7 +78,6 @@ export default defineComponent({
 					);
 					portfolioStore.lineChartSelectedDate = newDate;
 
-					//    console.log("Clicking Line chart",chart.data.labels[i] + ': ' + chart.data.datasets[0].data[i]);
 				}
 			},
 			plugins: {

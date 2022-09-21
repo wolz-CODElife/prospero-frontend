@@ -257,8 +257,7 @@ async function depositToPortfolio() {
 
 	firstView.value = false;
 	secondView.value = true;
-
-	console.log("depositToPortfolio called");
+	
 	loading.value = true;
 	var UI_CREATE_THEN_DEPOSIT = 1;
 	var UI_JOIN_THEN_DEPOSIT = 2;
@@ -267,9 +266,7 @@ async function depositToPortfolio() {
 	try {
 		var res;
 		var depositType = getDepositStatus();
-		console.log("depositType:" + depositType);
 		if (depositType == UI_CREATE_THEN_DEPOSIT) {
-			console.log("UI_CREATE_THEN_DEPOSIT");
 			portfolioStore.depositMessage =
 				"Before you deposit you have to create your wallet on the blockhain.";
 			res = await createPortfolioHelper();
@@ -277,7 +274,6 @@ async function depositToPortfolio() {
 				loading.value = false;
 				error.value = true;
 				errorMsg.value = res.error;
-				console.log(errorMsg.value);
 				return;
 			}
 
@@ -290,7 +286,6 @@ async function depositToPortfolio() {
 					loading.value = false;
 					error.value = true;
 					errorMsg.value = res.error;
-					console.log(errorMsg.value);
 					return;
 				}
 				portfolioStore.depositMessage =
@@ -301,7 +296,6 @@ async function depositToPortfolio() {
 			}
 			res = await approveAndDeposit(false);
 		} else if (depositType == UI_JOIN_THEN_DEPOSIT) {
-			console.log("UI_JOIN_THEN_DEPOSIT");
 
 			portfolioStore.depositMessage =
 				"Before you deposit you have to join the wallet on the blockhain.";
@@ -310,7 +304,6 @@ async function depositToPortfolio() {
 				loading.value = false;
 				error.value = true;
 				errorMsg.value = res.error;
-				console.log(errorMsg.value);
 				return;
 			}
 
@@ -323,7 +316,6 @@ async function depositToPortfolio() {
 					loading.value = false;
 					error.value = true;
 					errorMsg.value = res.error;
-					console.log(errorMsg.value);
 					return;
 				}
 				portfolioStore.depositMessage =
@@ -334,11 +326,9 @@ async function depositToPortfolio() {
 			}
 			res = await approveAndDeposit(false);
 		} else if (depositType == UI_DEPOSIT_MY_PORTFOLIO) {
-			console.log("UI_DEPOSIT_MY_PORTFOLIO");
 
 			var shouldShowApproveMessage = await shouldApprove();
 			if (shouldShowApproveMessage) {
-				console.log("should approve - 1");
 				portfolioStore.depositMessage =
 					"Before you deposit you have to approve the tokens to be transferred.";
 				res = await approveAndDeposit(true);
@@ -346,21 +336,18 @@ async function depositToPortfolio() {
 					loading.value = false;
 					error.value = true;
 					errorMsg.value = res.error;
-					console.log(errorMsg.value);
 					return;
 				}
 				portfolioStore.depositMessage =
 					"Tokens approved successfully!  Confirm the transaction to deposit your tokens.";
 				res = await approveAndDeposit(false);
 			} else {
-				console.log("should approve - 2");
 				portfolioStore.depositMessage =
 					" Confirm the transaction to deposit your tokens.";
 				res = await approveAndDeposit(false);
 			}
 		}
 		//let res = await handleDepositType(portfolioStore);
-		console.log(res);
 		if (res.success) {
 			usdAmountOfGas.value = res.gasUsed.usdAmountOfGas.toFixed(2);
 			error.value = false;
@@ -370,35 +357,28 @@ async function depositToPortfolio() {
 			//await initializeApi();
 			//await portfolioStore.getPortfolios();
 		} else {
-			console.log("success is false");
 			loading.value = false;
 			error.value = true;
 			errorMsg.value = res.error;
-			console.log(errorMsg.value);
 			//alert(res.error);
 		}
 	} catch (err) {
-		console.log("exception err:" + err);
 		loading.value = false;
 		error.value = true;
 		//alert(res.error);
 	}
-	console.log("done");
 }
 
 async function add(amt, name) {
 	let newTokenList = portfolioStore.tokenList.map((token) => {
 		if (token.name === name) {
 			token = { ...token, usdAmountEnteredByUser: parseFloat(amt) };
-			console.log("TOKEN:" + JSON.stringify(token, null, 2));
 		}
 		return token;
 	});
 	updateApiTokenList(newTokenList);
 
 	portfolioStore.tokenList = newTokenList;
-
-	console.log(portfolioStore.tokenList);
 }
 
 const totalAmtToDeposit = computed(() => {

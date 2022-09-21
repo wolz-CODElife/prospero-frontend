@@ -33,8 +33,6 @@ function returnNameUpdateSelectedPortfolio(portfolio){
 }
 
 async function onClickedPort(portfolio) {
-	console.log("onClickedPort");
-	console.log("PORT:"+JSON.stringify(portfolio,null,2));
 
 	//Do this for line chart
 	portfolioStore.activePortfolioType = "My Portfolios";
@@ -45,8 +43,6 @@ async function onClickedPort(portfolio) {
 	
 	portfolioStore.portfolioFundFee = portfolio.leaderPercentageFee;
 	portfolioStore.isPortfolioAcceptingNewInvestors = portfolio.acceptingNewInvestors;
-	console.log("portfolio.leaderPercentageFee:"+portfolio.leaderPercentageFee);
-	console.log("portfolio.acceptingNewInvestors:"+portfolio.acceptingNewInvestors);
 	var port = portfolio['portfolioObject'];
 	for (var tokenAddress in port) {
 		if (tokenAddress.length == 42){
@@ -65,7 +61,6 @@ async function onClickedPort(portfolio) {
 		
 		}
 	}
-	console.log("portfolioStore.allocationList:"+JSON.stringify(portfolioStore.allocationList,null,2));
 
 	var currentAllocationList = portfolioStore.allocationList;
 	
