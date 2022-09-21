@@ -21,14 +21,6 @@
 		</div>
 	</Modal>
 
-	<!-- Change Wallet Modal 
-	<ConnectWalletModal
-		@connectMetaMask="useChangeMetaMask"
-		@connectWalletConnect="useWalletConnect"
-		@close-wallet-modal="toggleWalletModal"
-		:is-showing="walletModal"
-	/> -->
-
 	<!-- Change Wallet Modal  -->
 	<ChangeWalletModal
 		@close-wallet-modal="toggleWalletModal"
@@ -42,7 +34,7 @@
 import { ref } from "vue";
 import Modal from "../Modal.vue";
 import AccountOverview from "../modals/AccountOverview.vue";
-import ConnectWalletModal from "./ConnectWalletModal.vue";
+// import ConnectWalletModal from "./ConnectWalletModal.vue";
 import connect from "@/composables/connect/index";
 import useChangeMetaMask from "@/composables/changeMetaMask";
 import ChangeWalletModal from "./ChangeWalletModal.vue";
@@ -59,18 +51,5 @@ const walletModal = ref(false);
 
 function toggleWalletModal() {
 	walletModal.value = !walletModal.value;
-}
-
-async function useWalletConnect() {
-	connectWalletConnect().then((data) => {
-		if (data.error) {
-			err.value = {
-				msg: "Coin98 Extension is not installed!",
-				type: "error",
-			};
-		} else {
-			window.location.replace("dashboard");
-		}
-	});
 }
 </script>
