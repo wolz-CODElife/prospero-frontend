@@ -69,6 +69,7 @@ var leaderBoardUITableObject;
 var myPortfolioDataForTable;
 var newWalletObject;
 var prosperoFactoryEventsInstance = null;
+const appropriateChainId = "0xa869";
 
 var DEPOSIT_THEN_REBALANCE = 0;
 var WITHDRAW_ALL = 1;
@@ -143,10 +144,8 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		msgSender = msgSender.toLowerCase();
 		var eoaALower = EOAAddress.toLowerCase();
 		var indexOfUser = -1;
-		
 
 		if (prospWalletAddressHere == selectedProsperoWalletAddress) {
-
 			var lastUsdDepositedUser = BigNumber(0 + "");
 			var totalAmountDepositedUser = BigNumber(0 + "");
 			var indexOfUserHere = getIndexIgnoreCase(eoaALower, users);
@@ -175,7 +174,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 				} else if (methodType == LEADER_STRAIGHT_DEPOSIT) {
 					rebalType = "Manager Deposit";
 				}
-				
+
 				var tx = graphItem["id"];
 				tx = tx.substring(0, tx.length - 2);
 				tx = SnowtraceDeploymentLocation + tx;
@@ -212,7 +211,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 					var tx = graphItem["id"];
 					tx = tx.substring(0, tx.length - 2);
 					tx = SnowtraceDeploymentLocation + tx;
-					
+
 					var t = formatTimeForHistory(graphItem["intVars"][4]);
 					var amt =
 						(usdDeposited - lastUsdDepositedForWithdrawDeposit) /
@@ -243,7 +242,6 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 					methodType == WITHDRAW_SWAP ||
 					methodType == WITHDRAW_ALL
 				) {
-
 					if (indexOfUser == -1) {
 						// alert("Error - index of user is -1");
 					}
@@ -287,7 +285,6 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 			}
 		}
 
-
 		//var methodType = intVars[]
 		var thisProsperoWalletAddress = graphItem["addressVars"][2];
 		thisProsperoWalletAddress = thisProsperoWalletAddress.toLowerCase();
@@ -312,7 +309,6 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		a.unixTime < b.unixTime ? -1 : 1
 	);
 
-	
 	var cntrLB = 0;
 	var cntrMyWallets = 0;
 	var firstWallet = "";
@@ -330,14 +326,13 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 
 		var intVars = thisGraphItem["intVars"];
 		var leaderFundFee = intVars[6];
-		
+
 		var prosperoFundFee = intVars[7];
 		leaderFundFee = leaderFundFee / USD_SCALE;
-		
+
 		leaderFundFee = leaderFundFee * 100;
-		
+
 		leaderFundFee = parseInt(leaderFundFee);
-		
 
 		prosperoFundFee = prosperoFundFee / USD_SCALE;
 		prosperoFundFee = prosperoFundFee * 100;
@@ -350,7 +345,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		} else {
 			acceptingNewInvestors = false;
 		}
-		
+
 		var usersInPortfolio = thisGraphItem["users"];
 		var leaderAddress = addressVars[1];
 		var indexOfLeader = getIndexOfUser(thisGraphItem["users"], leaderAddress);
@@ -391,12 +386,11 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 
 			var totalBal = tokenBalances[i];
 			var thisTokenAddress = tokens[i];
-			
+
 			var usdThisUserThisToken = await getUSDValue_MINE(
 				bal,
 				thisTokenAddress
 			);
-			
 
 			var totalUsdThisToken = await getUSDValue_MINE(
 				totalBal,
@@ -424,7 +418,7 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 					bal,
 					thisTokenAddress
 				);
-				
+
 				usersValue = usersValue + usdThisUserThisToken;
 			}
 		}
@@ -433,16 +427,15 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 
 		if (indexOfUser >= 0) {
 			for (var i = 0; i < tokens.length; i++) {
-
 				//var bal = tokenBalances[i] * userPercentage + "";
 				var bal = multipleBN(tokenBalances[i], userPercentage);
-				
+
 				var thisTokenAddress = tokens[i];
 				var usdThisUserThisToken = await getUSDValue_MINE(
 					bal,
 					thisTokenAddress
 				);
-				
+
 				//usdThisUserThisToken = usdThisUserThisToken * userPercentage;
 				myHoldingsTotal = myHoldingsTotal + usdThisUserThisToken;
 			}
@@ -620,10 +613,10 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 	leaderBoardData = leaderBoardDataFinal;
 
 	var dupesCheck = [];
-	
+
 	for (var i = 0; i < leaderBoardData.length; i++) {
 		var thisObj = leaderBoardData[i];
-		
+
 		var prospAd = thisObj.prosperoWalletAddress;
 		prospAd = prospAd.toLowerCase();
 		if (dupesCheck.indexOf(prospAd) > -1) {
@@ -632,10 +625,10 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 		dupesCheck.push(prospAd);
 	}
 	dupesCheck = [];
-	
+
 	for (var i = 0; i < myPortfolioDataForTable.length; i++) {
 		var thisObj = myPortfolioDataForTable[i];
-		
+
 		var prospAd = thisObj.prosperoWalletAddress;
 		prospAd = prospAd.toLowerCase();
 		if (dupesCheck.indexOf(prospAd) > -1) {
@@ -649,7 +642,6 @@ async function convertGraphDataToLeaderBoardAndMyWalletsData() {
 }
 
 async function calcNewProfitsForLeaders() {
-
 	for (var i = 0; i < graphData.length; i++) {
 		var thisGraphItem = graphData[i];
 		var addressVars = thisGraphItem["addressVars"];
@@ -660,7 +652,7 @@ async function calcNewProfitsForLeaders() {
 		var date = new Date(thisTime * 1000);
 		var datePart = date.toLocaleDateString("en-US");
 		datePart = datePart.replaceAll("/", "-");
-		
+
 		thisGraphItem["date"] = datePart;
 		for (var j = 0; j < tokens.length; j++) {
 			var addLowerCase = tokens[j];
@@ -689,7 +681,7 @@ async function getHistoricalPricesUpdateChartsData() {
 		day: "numeric",
 	};
 	var formatter = new Intl.DateTimeFormat([], options);
-	
+
 	var now = new Date(formatter.format(new Date()));
 	var nowFloored = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 	nowFloored = nowFloored.getTime() / 1000;
@@ -703,14 +695,14 @@ async function getHistoricalPricesUpdateChartsData() {
 			foundNullStorageForToken = true;
 		}
 	}
-	
+
 	if (nowFloored > maxDate || foundNullStorageForToken == true) {
 		//if (true){
 		//if (true){
 		for (var i = 0; i < tokenArray.length; i++) {
 			var thisToken = tokenArray[i];
 			localStorage.removeItem(thisToken.id);
-			
+
 			var hUrl =
 				"https://api.coingecko.com/api/v3/coins/" +
 				thisToken.id +
@@ -724,7 +716,7 @@ async function getHistoricalPricesUpdateChartsData() {
 
 			for (var k = 0; k < priceObjHere.length; k++) {
 				var theDate = new Date(priceObjHere[k][0]);
-				
+
 				var justDate =
 					theDate.getMonth() +
 					1 +
@@ -732,7 +724,7 @@ async function getHistoricalPricesUpdateChartsData() {
 					theDate.getDate() +
 					"-" +
 					theDate.getFullYear();
-					
+
 				priceObjHere[k].push(justDate);
 				var maxDateThisObj = priceObjHere[k][0] / 1000;
 				if (maxDateThisObj > maxDate) {
@@ -746,7 +738,7 @@ async function getHistoricalPricesUpdateChartsData() {
 			//market_caps
 			var tokenAddressLower = thisToken.address;
 			tokenAddressLower = tokenAddressLower.toLowerCase();
-			
+
 			var key = tokenAddressLower + "_market_cap";
 
 			localStorage.setItem(key, marketCaps[marketCaps.length - 1][1]);
@@ -762,21 +754,21 @@ async function getHistoricalPricesUpdateChartsData() {
 		day: "numeric",
 	};
 	var formatter = new Intl.DateTimeFormat([], options);
-	
+
 	var now = new Date(formatter.format(new Date()));
 	//var nowFloored = new Date(now.getFullYear(), now.getMonth(), now.getDate());
 	//nowFloored = nowFloored.getTime() / 1000;
-	
+
 	//While we are converting coingecko to dates mm-dd-yyyy, add it to a dates array for later
 	for (var i = 0; i < tokenArray.length; i++) {
 		dates = [];
 		var thisToken = tokenArray[i];
-		
+
 		var theStorage = localStorage.getItem(thisToken.id);
 		theStorage = JSON.parse(theStorage);
-		
+
 		//var tokenHistory = JSON.parse(theStorage);
-		
+
 		var addLowerCase = thisToken.address;
 		addLowerCase = addLowerCase.toLowerCase();
 		historicalPricesObject[addLowerCase] = {};
@@ -785,19 +777,18 @@ async function getHistoricalPricesUpdateChartsData() {
 			justDateHere = justDateHere.trim();
 			var justDateHereD = new Date(justDateHere);
 			justDateHereD = justDateHereD.getTime() / 1000;
-			
+
 			//if (justDateHereD < nowFloored){
 			if (!dates.includes(justDateHere)) {
 				dates.push(justDateHere);
 			} else {
-				
 			}
-			
+
 			//var justDateHere = (theDate.getMonth()+1) +"-"+ theDate.getDate() +"-"+ theDate.getFullYear();
-			
+
 			historicalPricesObject[addLowerCase][justDateHere] = theStorage[k][1];
 			//}else{
-				
+
 			//}
 		}
 	}
@@ -892,7 +883,7 @@ async function getHistoricalPricesUpdateChartsData() {
 		taLower = taLower + "_market_cap";
 		var mc = localStorage.getItem(taLower);
 		mc = mc / 1000000;
-		
+
 		tokenArray[i]["mc"] = mc.toFixed(2);
 		tempTokenAddressToHistoricalPrices[tokenArray[i]["address"]] =
 			tokenArray[i];
@@ -915,7 +906,7 @@ async function getHistoricalPricesUpdateChartsData() {
 				taLower = taLower + "_market_cap";
 				var mc = localStorage.getItem(taLower);
 				mc = mc / 1000000;
-				
+
 				myPortfolioDataForTable[i]["portfolioObject"][tokenAddress]["mc"] =
 					mc.toFixed(2);
 			}
@@ -927,7 +918,6 @@ async function getHistoricalPricesUpdateChartsData() {
 	//1) found in graph data.
 	//2) not found in graph data and there has never been any graph data on it, profit is 0.
 	//3) already found in graph data, not found now, use last usdInvested and lastBalanacesInPort to determine value of port with the price of the tokens on that day.
-	
 
 	var d = new Date();
 	var todaysDateFormatted =
@@ -940,7 +930,7 @@ async function getHistoricalPricesUpdateChartsData() {
 		thisProsperoWalletAddressLB = thisProsperoWalletAddressLB.toLowerCase();
 		var thisLeaderEOA = lbData[i]["leaderEOA"];
 		var walletName = lbData[i]["walletName"];
-		
+
 		var finalValueLeader = lbData[i]["portfolioObject"]["totalValue"];
 		var finalUsdInvestedLeader = lbData[i]["portfolioObject"]["totalUsd"];
 		var finalProfitLeader = lbData[i]["portfolioObject"]["profit"];
@@ -976,7 +966,7 @@ async function getHistoricalPricesUpdateChartsData() {
 					if (leadersGraphData[f]["intVars"][4] > latestTimeOfThatDay) {
 						oneToAdd = JSON.parse(JSON.stringify(leadersGraphData[f]));
 					}
-					
+
 					latestTimeOfThatDay = leadersGraphData[f]["intVars"][4];
 				}
 			}
@@ -985,7 +975,6 @@ async function getHistoricalPricesUpdateChartsData() {
 				datesWithDataSortedOBJ[dateFromDatesArray] = oneToAdd;
 			}
 		}
-		
 
 		var datesWithDataNew = [];
 		var lastBalancesNew = [];
@@ -1027,7 +1016,7 @@ async function getHistoricalPricesUpdateChartsData() {
 			profitCalc["date"] = dateFromDatesArray;
 			lineGraphCalcDataSub.push(profitCalc);
 		}
-		
+
 		lineGraphCalcData[thisProsperoWalletAddressLB] = lineGraphCalcDataSub;
 	}
 }
@@ -1122,7 +1111,7 @@ function formatPerc(f) {
 	if (f == "-") {
 		f = 0;
 	}
-	
+
 	if (f != 0) {
 		f = f.toFixed(2);
 	}
@@ -1191,7 +1180,7 @@ async function updateTokenValuesOverTime() {
 	for (var i = 0; i < tokenArray.length; i++) {
 		var addLowerCase = tokenArray[i]["address"];
 		addLowerCase = addLowerCase.toLowerCase();
-		
+
 		var price = historicalPricesObject[addLowerCase][d7];
 		tokenArray[i]["d7"] = price;
 		price = historicalPricesObject[addLowerCase][d30];
@@ -1260,7 +1249,6 @@ function calcProfitWithDate(
 		var indexOfLeader = getIndexOfUser(users, leaderAddress);
 		var objToReturn = {};
 		if (indexOfUser != -1) {
-
 			if (todaysDateFormatted == thisDate) {
 				var userPortObj = myWallets[portfolioObj.prosperoWalletAddress];
 				if (
@@ -1307,13 +1295,11 @@ function calcProfitWithDate(
 				objToReturn["profitPercUser"] = profitCalcObjUser.profitPerc;
 			}
 		} else {
-
 			objToReturn["profitUser"] = 0;
 			objToReturn["profitPercUser"] = 0;
 			objToReturn["totalValueUser"] = 0;
 		}
 		if (indexOfLeader != -1) {
-
 			/*if (todaysDateFormatted == thisDate) {
 
 				objToReturn["profitLeader"] = portfolioObj.profit;
@@ -1342,7 +1328,6 @@ function calcProfitWithDate(
 			objToReturn["profitPercLeader"] = profitCalcObj.profitPerc;
 			//}
 		} else {
-
 			objToReturn["profitLeader"] = 0;
 			objToReturn["profitPercLeader"] = 0;
 			objToReturn["totalValueLeader"] = 0;
@@ -1407,7 +1392,6 @@ function calcJustProfitObj(
 }
 
 function compare_time(a, b) {
-
 	if (a["intVars"][4] < b["intVars"][4]) {
 		return -1;
 	}
@@ -1538,19 +1522,16 @@ async function updateHistoryChartsDataObject(
 
 function getLineChartData(whichPortfolios, prosperoWalletAddressSelected) {
 	if (whichPortfolios == "all my holdings") {
-
 		var chartDataToReturnLabels = [];
 		var chartDataToReturnYAxis = [];
 		var firstOne = true;
 		for (let prospWalletAddress in lineGraphCalcData) {
-
 			var thisPort = lineGraphCalcData[prospWalletAddress];
 
 			var allPortValuBefore = -1;
 			var myPortValueBefore = -1;
-			
-			if (firstOne == true) {
 
+			if (firstOne == true) {
 				for (var i = 0; i < thisPort.length; i++) {
 					chartDataToReturnLabels.push(thisPort[i].date);
 					chartDataToReturnYAxis.push(thisPort[i].totalValueUser);
@@ -1702,14 +1683,10 @@ async function updateNewInvestors(prosperoWalletAddress, allowNewInvestors) {
 			.send({
 				from: EOAAddress,
 			})
-			.on("error", function (error, receipt) {
-			})
-			.on("transactionHash", function (transactionHash) {
-			})
-			.on("receipt", function (receipt) {
-			})
-			.on("confirmation", function (confirmationNumber, receipt) {
-			});
+			.on("error", function (error, receipt) {})
+			.on("transactionHash", function (transactionHash) {})
+			.on("receipt", function (receipt) {})
+			.on("confirmation", function (confirmationNumber, receipt) {});
 	} catch (e) {
 		return { success: false, error: e };
 	}
@@ -1730,14 +1707,10 @@ async function updatePercentageFee(prosperoWalletAddress, newPercFee) {
 			.send({
 				from: EOAAddress,
 			})
-			.on("error", function (error, receipt) {
-			})
-			.on("transactionHash", function (transactionHash) {
-			})
-			.on("receipt", function (receipt) {
-			})
-			.on("confirmation", function (confirmationNumber, receipt) {
-			});
+			.on("error", function (error, receipt) {})
+			.on("transactionHash", function (transactionHash) {})
+			.on("receipt", function (receipt) {})
+			.on("confirmation", function (confirmationNumber, receipt) {});
 	} catch (e) {
 		return { success: false, error: e };
 	}
@@ -2301,7 +2274,7 @@ async function updateUIFieldValuesMyPortfolioMyPortfolio() {
 			}
 		}
 	}
-	
+
 	if (withdraws > 0) {
 		withdraws = withdraws / USD_SCALE;
 		withdraw = withdraws.toFixed(2);
@@ -2590,12 +2563,9 @@ async function withdraw(tokenSwappingInto, amountToWithdraw) {
 			.on("error", function (error, receipt) {
 				return { success: false, error: error };
 			})
-			.on("transactionHash", function (transactionHash) {
-			})
-			.on("receipt", function (receipt) {
-			})
-			.on("confirmation", function (confirmationNumber, receipt) {
-			});
+			.on("transactionHash", function (transactionHash) {})
+			.on("receipt", function (receipt) {})
+			.on("confirmation", function (confirmationNumber, receipt) {});
 		var cumulativeGasUsed = web3Tx.cumulativeGasUsed;
 		var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
 		var valueOfUsersPortfolioAfter = await getValueOfUsersPortfolio(
@@ -2605,7 +2575,6 @@ async function withdraw(tokenSwappingInto, amountToWithdraw) {
 		);
 		await sleep(4500);
 
-		
 		var success = false;
 		if (
 			Number(valueOfUsersPortfolioAfter) >=
@@ -2702,12 +2671,9 @@ async function rebalance(
 			.on("error", function (error, receipt) {
 				return { success: false, error: error };
 			})
-			.on("transactionHash", function (transactionHash) {
-			})
-			.on("receipt", function (receipt) {
-			})
-			.on("confirmation", function (confirmationNumber, receipt) {
-			});
+			.on("transactionHash", function (transactionHash) {})
+			.on("receipt", function (receipt) {})
+			.on("confirmation", function (confirmationNumber, receipt) {});
 		var cumulativeGasUsed = web3Tx.cumulativeGasUsed;
 		var gasUsed = await calculateGasEstimate(cumulativeGasUsed);
 
@@ -2752,7 +2718,7 @@ async function shouldApprove() {
 				weiAmt,
 				thisDepositingObj.address
 			);
-			
+
 			if (thisDepositingObj.name == NativeTokenName) {
 				avaxValue = weiAmt + "";
 			} else {
@@ -3098,7 +3064,6 @@ async function approveDepositing(
 		var bnAmountInWeiToDeposit = BigNumber(amounts[k] + "");
 
 		if (bnAmountInWeiToDeposit.isGreaterThan(bnAllowance)) {
-
 			try {
 				//  var amtToApproveToReachDiff = bnAmountInWeiToDeposit.minus(bnAllowance)
 				var amtToApprove = ALOT_APPROVE; // can switch to amtToApprove
@@ -3119,7 +3084,6 @@ const sleep = (waitTimeInMs) =>
 	new Promise((resolve) => setTimeout(resolve, waitTimeInMs));
 
 async function getBalancesInEoa() {
-
 	let thisBalancesInEoa = [];
 	var totalValue = 0;
 	var nativeTokenObj;
@@ -3353,7 +3317,7 @@ async function createLeaderBoardDataObject() {
 		if (keyA > keyB) return -1;
 		return 0;
 	});
-	
+
 	leaderBoardData = leaderBoardDataHere;
 }
 async function getValueOfBalancesOfTokensInPortfolioForUser(
@@ -3427,7 +3391,7 @@ async function getValueOfBalancesOfTokensInPortfolioForUser(
 				var balThisUserScaled = balBnScaled.multipliedBy(percentageUser);
 				balThisUserScaled = balThisUserScaled.integerValue();
 				balThisUser = balThisUserScaled.integerValue();
-				
+
 				var usdThisUserThisToken = await getUSDValue_MINE(
 					balancesValue[key]["balance"],
 					key
@@ -3523,8 +3487,7 @@ async function getBalanacesOfTokensInPortfolioForUserContractCall(
 				.getBalanceOfTokenInPortfolioForUser(user, tokens[i])
 				.call({ from: EOAAddress });
 		}
-	} catch (e) {
-	}
+	} catch (e) {}
 	return { balances: balances, tokens: tokens };
 }
 async function initializeApi() {
@@ -3582,10 +3545,10 @@ async function initializeBlockchainConnection() {
 	var provider = await detectEthereumProvider();
 	if (provider !== window.ethereum) {
 		// todo: handle multiple wallets
-		console.error("Do you have multiple wallets installed?");
+		console.error("Do you have MetaMask installed?");
 		return {
 			success: false,
-			error: "Do you have multiple wallets installed?",
+			error: "Do you have MetaMask installed?",
 		};
 	}
 	if (provider) {
@@ -3627,15 +3590,21 @@ async function initializeBlockchainConnection() {
 		window.location.reload();
 	});
 	ethereum.on("disconnect", () => {
+		//reset state
 		console.error("disconnect called...");
 	});
 	ethereum.on("connect", () => {
 		console.error("connect called...");
 	});
-	ethereum.on("chainChanged", () => {
-		console.error("chain changed...");
-	});
+	ethereum.on("chainChanged", handleChainChanged);
 	return { success: true };
+}
+async function handleChainChanged() {
+	let chainId = await ethereum.request({ method: "eth_chainId" });
+	if (chainId !== appropriateChainId) {
+		alert("switch chain to fuji");
+	}
+	window.location.reload();
 }
 
 async function updatePrices() {
@@ -3673,7 +3642,7 @@ async function updatePrices() {
 			} else {
 				address = thisToken.address;
 			}
-			
+
 			var anObj = hasOwnPropertyCaseInsensitive(prices, address);
 			if (anObj != false) {
 				var usd = anObj["usd"];
@@ -3709,7 +3678,6 @@ async function updatePrices() {
 				.getPrices(allAddresses)
 				.call({ from: EOAAddress });
 			for (var i = 0; i < prosperoPrices.length; i++) {
-
 				var prosperoPrice = BigNumber(prosperoPrices[i] + "");
 				var usdBN = BigNumber(USD_SCALE + "");
 				prosperoPrice = prosperoPrice.dividedBy(usdBN);
@@ -3810,7 +3778,6 @@ async function getValueOfBalancesOfTokensInPortfolio(balancesAndTokensObj) {
 	return balanceValue;
 }
 async function getUSDValue_MINE(amountInWei, address) {
-
 	amountInWei = noNotation(amountInWei);
 
 	var amountInWeiUpScaledForLowDecimalPoints =

@@ -22,7 +22,6 @@ const changeMetaMask = async () => {
 			type: "error",
 		};
 	}
-	return err;
 };
 
 export default changeMetaMask;
